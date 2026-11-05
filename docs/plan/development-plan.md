@@ -1,6 +1,6 @@
 # Plan de développement — Fusion Leap AI Growth (proposition Jour 0, à valider)
 
-**Statut : PROPOSÉ — en attente du message « PLAN VALIDÉ ».** Aucun code n'est écrit avant. Ce plan s'appuie sur la spec v1.0 (`docs/spec/…`), les analyses (`docs/analysis/…`) et le plan fourni (`docs/plan/provided-plan.pdf`). Il le **reprend dans l'ensemble** et en liste les différences au §8.
+**Statut : VALIDÉ — « PLAN VALIDÉ » reçu de la responsable technique (gate G0, plan).** D1–D9 et les propositions par défaut E/G/ADR sont retenus en l'absence d'exception formulée ; ils seront formalisés en ADR (J1–J3), les ADR 010–012 (hors stack) étant soumis à accord explicite. Aucun code applicatif avant J4. Ce plan s'appuie sur la spec v1.0 (`docs/spec/…`), les analyses (`docs/analysis/…`) et le plan fourni (`docs/plan/provided-plan.pdf`). Il le **reprend dans l'ensemble** et en liste les différences au §8.
 
 Hypothèses de calendrier (reprises du plan fourni, **non issues de la spec**, qui ne donne aucune durée) : 1 développeur·se + 1 agent IA, 6 h productives/jour, 5 j/semaine, jours fériés exclus (18 nov, 1er jan, 11 jan, 14 jan). Vérifié par calcul : du lun 9 nov 2026 au mar 9 fév 2027 = **63 jours ouvrés = 378 h** (J0…J62).
 

@@ -13,6 +13,7 @@ Cible : 1,6 % | Réel : en cours | Statut : —
 | Prompt 0-B : development-plan.md | 1 h | proposé, en attente de « PLAN VALIDÉ » |
 | Relecture, réponses Q1–Q5, validation | 1,5 + 1,5 h | non |
 
+### Validation : message « PLAN VALIDÉ » reçu — plan et D1–D9 retenus (hors ADR 010–012 à confirmer explicitement).
 ### Tests : n/a (aucun code)
 ### Écarts à la spec : aucun
 ### Décisions : hypothèse §14 confirmée pour Q1–Q5 (CRM interne, un fournisseur e-mail, WhatsApp de test, Salla marketing, plans manuels)

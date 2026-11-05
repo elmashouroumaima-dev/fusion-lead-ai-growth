@@ -36,3 +36,25 @@ Cible : 3,2 % | Réel : à valider | Statut : —
 ### Décisions / ADR : 001–007, 014 en statut Proposed ; ADR 004 option B (AES-256-GCM applicatif) recommandée après vérification de la doc Supabase Vault (2026-11-05)
 ### Blocages : relecture sécurité ADR 004/005/014 requise
 ### Demain : J2 (fiches intégrations, ADR 008/010/011/012, data-flow)
+
+## J02 — mer 11 nov 2026 — Phase 0
+Cible : 4,8 % | Réel : à valider | Statut : —
+
+### Tâches
+| Tâche | Estimé | Livré | Validée |
+|---|---|---|---|
+| Fiche CRM | 1 h | oui (tout « À CONFIRMER », aucune info sur le CRM existant) | en attente de Q1 |
+| Fiche e-mail + ADR 008 | 1,5 h | oui | en attente de relecture |
+| Fiche WhatsApp | 1,5 h | oui (sources Meta citées) | en attente de relecture |
+| Fiche Salla | 1 h | oui (sources Salla citées) | en attente de relecture |
+| data-flow + ADR 010/011/012 | 1 h | oui | en attente de relecture |
+
+### Tests : n/a (docs)
+### Écarts à la spec : aucun
+### Constats importants
+- Postmark (candidat e-mail) n'a pas de signature HMAC sur ses webhooks (Basic Auth + IP).
+- WhatsApp : retries jusqu'à 7 jours (dédup obligatoire) ; webhooks non envoyés en mode dev de l'app ; durée de la fenêtre de service non confirmée.
+- Salla : refresh token à usage unique (verrou obligatoire) ; Easy Mode seul autorisé pour apps publiées ; `store_id` non défini, seul `merchant` est documenté.
+- Supabase : aucune région Moyen-Orient listée (Q5 à traiter).
+### Blocages : Q1, Q2 (domaine), Q5 sans réponse précise ; accès Meta à demander
+### Demain : J3 (menaces, stratégie de test, backlog, gate G0')

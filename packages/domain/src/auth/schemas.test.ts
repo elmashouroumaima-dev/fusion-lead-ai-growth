@@ -1,15 +1,33 @@
 import { describe, expect, it } from "vitest";
 import {
+  DEFAULT_LOCALE,
+  LOCALES,
   PASSWORD_MAX_LENGTH,
   PASSWORD_MIN_LENGTH,
   confirmQuerySchema,
   emailOtpTypeSchema,
+  localeSchema,
   resetRequestSchema,
   signInSchema,
   signOutSchema,
   signUpSchema,
   updatePasswordSchema,
 } from "./schemas";
+
+describe("localeSchema", () => {
+  it("accepte fr, ar, en et le défaut est fr", () => {
+    expect(LOCALES).toEqual(["fr", "ar", "en"]);
+    expect(DEFAULT_LOCALE).toBe("fr");
+    for (const l of ["fr", "ar", "en"]) expect(localeSchema.safeParse(l).success).toBe(true);
+  });
+  it.each(["FR", "fr ", " fr", "fr-FR", "es", "", null, undefined])("refuse %j", (l) => {
+    expect(localeSchema.safeParse(l).success).toBe(false);
+  });
+  it("signUp et signOut acceptent fr", () => {
+    expect(signUpSchema.safeParse({ email: "a@b.test", password: "x".repeat(10), locale: "fr" }).success).toBe(true);
+    expect(signOutSchema.safeParse({ locale: "fr" }).success).toBe(true);
+  });
+});
 
 describe("auth schemas", () => {
   it("signUp normalise l'e-mail et impose 10 caractères", () => {
@@ -19,7 +37,7 @@ describe("auth schemas", () => {
     expect(updatePasswordSchema.safeParse({ password: "x".repeat(73), locale: "en" }).success).toBe(false);
   });
   it("rejette une locale inconnue", () => {
-    expect(signInSchema.safeParse({ email: "a@b.test", password: "p", locale: "fr" }).success).toBe(false);
+    expect(signInSchema.safeParse({ email: "a@b.test", password: "p", locale: "es" }).success).toBe(false);
   });
   it("confirm n'accepte que les types OTP connus", () => {
     expect(confirmQuerySchema.safeParse({ token_hash: "abc", type: "recovery" }).success).toBe(true);
@@ -77,9 +95,9 @@ describe("auth schemas : limites et allow-lists", () => {
     }
   });
 
-  it("locale : seulement ar / en", () => {
-    expect(signOutSchema.safeParse({ locale: "ar" }).success).toBe(true);
-    for (const bad of ["fr", "AR", "", "ar-MA", undefined]) {
+  it("locale : seulement fr / ar / en", () => {
+    for (const ok of ["fr", "ar", "en"]) expect(signOutSchema.safeParse({ locale: ok }).success).toBe(true);
+    for (const bad of ["FR", "fr ", "es", "AR", "", "ar-MA", "fr-FR", undefined]) {
       expect(signOutSchema.safeParse({ locale: bad }).success, String(bad)).toBe(false);
     }
   });

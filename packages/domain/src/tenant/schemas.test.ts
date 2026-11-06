@@ -10,10 +10,10 @@ import {
 const ORG = "11111111-1111-4111-8111-111111111111";
 
 describe("createOrganizationSchema", () => {
-  it("applique les défauts (locale ar, fuseau UTC) et rogne le nom", () => {
+  it("applique les défauts (locale fr, fuseau UTC) et rogne le nom", () => {
     expect(createOrganizationSchema.parse({ name: "  Acme  " })).toEqual({
       name: "Acme",
-      locale: "ar",
+      locale: "fr",
       timezone: "UTC",
     });
   });
@@ -29,7 +29,9 @@ describe("createOrganizationSchema", () => {
     [{ name: "" }],
     [{ name: "   " }],
     [{ name: "x".repeat(121) }],
-    [{ name: "A", locale: "fr" }],
+    [{ name: "A", locale: "es" }],
+    [{ name: "A", locale: "FR" }],
+    [{ name: "A", locale: "fr " }],
     [{ name: "A", timezone: "Mars/Olympus" }],
     [{ name: "A", timezone: "" }],
     [{ name: 12 }],

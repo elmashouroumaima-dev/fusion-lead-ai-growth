@@ -11,6 +11,7 @@
   --primary-text: #ffffff;
   --danger: #b42318;
   --danger-bg: #fef3f2;
+  --danger-border: #fecdca;
   --success: #067647;
   --success-bg: #ecfdf3;
   --radius: 14px;
@@ -198,7 +199,7 @@ a {
 .notice-error {
   color: var(--danger);
   background: var(--danger-bg);
-  border: 1px solid #fecdca;
+  border: 1px solid var(--danger-border);
 }
 .notice-success {
   color: var(--success);

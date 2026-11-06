@@ -125,5 +125,91 @@
       "rate_limited": "Too many attempts. Please wait a few minutes and try again.",
       "generic": "Something went wrong. Please try again."
     }
+  },
+  "Members": {
+    "nav": {
+      "link": "Members"
+    },
+    "title": "Members",
+    "description": "Invite people, manage their roles and stay in control of who can access your organization.",
+    "list": {
+      "title": "Team members",
+      "empty": "There are no members yet.",
+      "you": "(you)",
+      "subject": "Member {id}",
+      "since": "Joined {date}"
+    },
+    "status": {
+      "invited": "Invited",
+      "active": "Active",
+      "suspended": "Suspended",
+      "removed": "Removed"
+    },
+    "fields": {
+      "role": "Role",
+      "email": "Email address"
+    },
+    "actions": {
+      "roleLabel": "Role for {subject}",
+      "saveRole": "Save role",
+      "saveRoleLabel": "Save role for {subject}",
+      "remove": "Remove",
+      "removeLabel": "Remove {subject}",
+      "removeConfirm": "Remove {subject} from the organization? They will lose access immediately.",
+      "transfer": "Transfer ownership",
+      "transferLabel": "Transfer ownership to {subject}",
+      "transferConfirm": "Transfer ownership to {subject}? You will become an administrator and this member will become the owner.",
+      "confirm": "Confirm",
+      "cancel": "Cancel"
+    },
+    "success": {
+      "roleChanged": "The role was updated.",
+      "removed": "The member was removed.",
+      "transferred": "Ownership was transferred.",
+      "revoked": "The invitation was revoked."
+    },
+    "invite": {
+      "title": "Invite someone",
+      "description": "Choose their role. You will get a one-time link to share with them. No email is sent.",
+      "submit": "Create invitation link",
+      "hints": {
+        "email": "They must sign in with this exact address to accept."
+      }
+    },
+    "inviteLink": {
+      "title": "Invitation link",
+      "label": "Invitation link",
+      "note": "Shown only once. Copy it now and send it to the invitee: it cannot be displayed again. It only works for the invited email address and expires in {days, plural, one {# day} other {# days}}.",
+      "copy": "Copy link",
+      "copied": "Link copied.",
+      "copyFailed": "Copying failed. Select the link and copy it manually."
+    },
+    "invitations": {
+      "title": "Pending invitations",
+      "empty": "There are no pending invitations.",
+      "role": "Role: {role}",
+      "expires": "Expires {date}",
+      "expired": "Expired",
+      "revoke": "Revoke",
+      "revokeLabel": "Revoke invitation for {email}"
+    },
+    "errors": {
+      "invalid_input": "Please check the highlighted fields and try again.",
+      "forbidden": "You are not allowed to do this.",
+      "already_member": "This email address already belongs to an active member of the organization.",
+      "invitation_invalid": "This invitation is not valid.",
+      "last_owner": "The last owner cannot be removed or demoted. Transfer ownership first.",
+      "generic": "Something went wrong. Please try again.",
+      "loadFailed": "The list could not be loaded. Please try again."
+    }
+  },
+  "Invite": {
+    "title": "You have been invited",
+    "description": "Sign in with the email address that received this invitation, then accept it to join the team.",
+    "accept": "Accept invitation",
+    "errors": {
+      "invitation_invalid": "This invitation is invalid, has expired, or belongs to a different account. Ask the person who invited you for a new link."
+    },
+    "hint": "Make sure you are signed in with the invited email address."
   }
 }

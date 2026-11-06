@@ -240,3 +240,9 @@ Manager + agents : A2 base de données, A3 permissions/membres/UI, A4 tests, A5 
 - Parcours complet à tester en navigateur : inviter → ouvrir le lien → accepter (nécessite deux comptes).
 - `supabase/config.toml` : modification locale (SMTP Resend) non commitée.
 ### Demain : J11 (couche service : `withService`, erreurs, Idempotency-Key, limitation de débit)
+
+## Ajout du français (locale par défaut) — branche `day-10-french-locale`
+Demande de la responsable technique : ajouter le français et en faire la locale par défaut (ADR 011, amendement).
+- **Fait** : `fr.json`, routage `fr`/`ar`/`en`, source unique des locales dans `packages/domain`, sélecteur à trois langues, formulaire d'organisation, e-mails trilingues, migration `20261111100000_locale_fr.sql` et son retour arrière (avec perte documentée).
+- **Tests** : domain 364 · permissions 394 · web 782 · worker 3 · adapters 1 · pgTAP 462 · RLS 214 ; lint, typecheck, build (env de CI) et `check:leaks` verts. Revue de sécurité : proxy fermé avec trois locales (testé en direct), cookie `NEXT_LOCALE` falsifié sans effet, `p_locale` non injectable.
+- **Reste** : relecture du français par un locuteur natif, vérification visuelle `/fr` `/ar` `/en`, Referrer-Policy sur forgot/reset (faible).

@@ -152,3 +152,32 @@ Cible : 12,7 % | Réel : à valider | Statut : —
 - Performance : les politiques appellent `private.has_role` par ligne ; mesure prévue au J15 (risque R13).
 ### Blocages : job CI `database` jamais exécuté (pas de push) ; ADR 001/002/005/006/007/014 toujours « Proposed »
 ### Demain : J8 (Auth SSR bilingue AR/EN)
+
+## J08 — ven 20 nov 2026 — Phase 1 (préparé en avance, NON commité, branche `day-08-auth-ssr-i18n`)
+Cible : 14,3 % | Réel : à valider | Statut : —
+
+### Organisation du travail
+Manager (moi) + agents : A1a/A1b chercheurs (lecture seule), A2 Auth/SSR, A3 i18n + UI, A4 tests, A5 sécurité (hostile, lecture seule), A6 qualité (lecture seule), puis F2/F3 (corrections) et A5b (re-vérification). Propriétés de fichiers disjointes par agent ; aucun commit par les agents.
+
+### Tâches
+| Tâche | Estimé | Livré | Validée |
+|---|---|---|---|
+| Clients Supabase SSR navigateur/serveur, `getClaims()`, aucun `getSession()` serveur | 2 h | oui (`apps/web/lib/supabase/*`) | oui |
+| Proxy (Next 16 : `proxy.ts`) : next-intl + refresh de session + routes protégées, échec fermé | 1,5 h | oui | oui (78 tests + attaques HTTP) |
+| Inscription / connexion / mot de passe oublié / réinitialisation AR/EN, `dir=rtl` | 2,5 h | oui | oui (navigateur : connexion, erreur, déconnexion, redirection) |
+
+### Tests : web 274 ✓ · domain 51 ✓ · worker 3 · adapters 1 · permissions 1 (total 330) · pgTAP 70 ✓ · RLS 84 ✓ · `next build` ✓ · `check:leaks --require-bundle` ✓ · lint et typecheck verts
+### Écarts à la spec / plan
+- `proxy.ts` au lieu de `middleware.ts` (renommage Next 16 ; doc Supabase : `middleware.ts` n'est jamais appelé sur 15 et avant, et `proxy.ts` est le nom sur 16).
+- ADR 011 (`next-intl 4.14.9`) validé par la responsable technique le 2026-11-06 (« OK, go J8 »).
+- Ajout : `SITE_URL` dans le schéma d'environnement (requis en staging/production, https) ; `allowBuilds: false` pour `@parcel/watcher` et `@swc/core` ; templates d'e-mail `supabase/templates/*.html` ; 4 skills projet dans `.claude/skills/`.
+### Constats de sécurité (A5/A5b)
+- HAUT corrigé : un segment de locale encodé (`/%61r/dashboard`) contournait le proxy. Le proxy décode puis échoue fermé ; 13 tests d'attaque échouent sans le correctif.
+- MOYEN corrigé : `updatePasswordAction` exige le cookie `fl_recovery` (httpOnly) et vérifie `amr` s'il est présent.
+- Corrigés : frontières du matcher, drapeau `Secure` du cookie, types OTP limités à signup/email/recovery, message `link_invalid` traduit, `SITE_URL` validé par zod.
+- Restent (faible, documentés) : les chemins contenant un point sortent du matcher (chaque page privée doit appeler `requireClaims`) ; le cookie `fl_recovery` n'est qu'une défense en profondeur (activer « secure password change » avant la production) ; `APP_ENV=development` avec `NODE_ENV=production` utiliserait un `SITE_URL` http.
+### Blocages / à faire
+- Redémarrer Supabase local après toute modification de `config.toml` (fait ce jour). Limite locale `email_sent = 2`/heure : ralentit les essais d'inscription.
+- Mailpit absent de la CI : pas de test e2e des e-mails en CI (à traiter en J57/J60).
+- Limitation de débit applicative et CAPTCHA : J57.
+### Demain : J9 (organisations et contexte actif)

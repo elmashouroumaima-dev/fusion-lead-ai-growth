@@ -361,7 +361,7 @@ describe("organization_members : delete", () => {
         `${persona} → ${orgSlug(org)}:${userKey(user)}`,
       ).toBe(true);
     }
-    const count = rowsOf(await select("service", "organization_members?select=id"));
+    const count = rowsOf(await select("service", `organization_members?select=id&organization_id=in.(${ORG.alpha},${ORG.beta})`));
     expect(count).toHaveLength(8);
   });
 });
@@ -376,7 +376,7 @@ describe("organization_members : insert", () => {
         role: "analyst",
       });
       expect(isDenied(result)).toBe(true);
-      expect(rowsOf(await select("service", "organization_members?select=id"))).toHaveLength(8);
+      expect(rowsOf(await select("service", `organization_members?select=id&organization_id=in.(${ORG.alpha},${ORG.beta})`))).toHaveLength(8);
     },
   );
 });

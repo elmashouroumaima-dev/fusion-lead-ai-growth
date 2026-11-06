@@ -107,6 +107,95 @@ function headersFor(persona: Persona): Record<string, string> {
   };
 }
 
+/**
+ * Appel avec un JWT signé pour un utilisateur ARBITRAIRE (créé à la volée par `createTestUser`),
+ * pour les tests qui ont besoin d'un vrai compte auth.users (ex. création d'organisation : FK).
+ * `extraClaims` permet de simuler un JWT « forgé » (ex. user_metadata mensonger).
+ */
+export async function apiAsUser<T = unknown>(
+  userId: string,
+  method: "GET" | "POST" | "PATCH" | "DELETE",
+  restPath: string,
+  body?: unknown,
+  extraClaims: Record<string, unknown> = {},
+): Promise<ApiResult<T>> {
+  const headers: Record<string, string> = {
+    apikey: stack.publishableKey,
+    "Content-Type": "application/json",
+    Prefer: "return=representation",
+    Authorization: `Bearer ${signJwt({ ...extraClaims, sub: userId, role: "authenticated" })}`,
+  };
+  const init: RequestInit = { method, headers };
+  if (body !== undefined) init.body = JSON.stringify(body);
+  const response = await fetch(`${stack.apiUrl}/rest/v1/${restPath}`, init);
+  const text = await response.text();
+  const parsed = text ? (JSON.parse(text) as unknown) : [];
+  const code =
+    !Array.isArray(parsed) && parsed && typeof parsed === "object" && "code" in parsed
+      ? String((parsed as { code: unknown }).code)
+      : undefined;
+  return { status: response.status, body: parsed as T, code };
+}
+
+/** Crée un compte réel via l'API admin GoTrue (service_role local). Adresse unique par appel. */
+export async function createTestUser(label: string): Promise<{ id: string; email: string }> {
+  const email = `rls-${label}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}@seed.test`;
+  const response = await fetch(`${stack.apiUrl}/auth/v1/admin/users`, {
+    method: "POST",
+    headers: {
+      apikey: stack.publishableKey,
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${signJwt({ role: "service_role" })}`,
+    },
+    // Valeur de test sans lien avec un vrai compte ; domaine réservé « .test ».
+    body: JSON.stringify({ email, password: "FusionLeap-rls-2026!", email_confirm: true }),
+  });
+  const json = (await response.json()) as { id?: string };
+  if (response.status >= 300 || !json.id) {
+    throw new Error(`création du compte de test impossible (${response.status})`);
+  }
+  return { id: json.id, email };
+}
+
+/**
+ * Nettoyage BEST-EFFORT des organisations créées par des comptes de test, puis des comptes.
+ * `protect_last_owner` interdit de supprimer le dernier owner même pour service_role : on passe donc
+ * par `docker exec ... psql` avec session_replication_role = replica sur la pile LOCALE. Si Docker
+ * n'est pas disponible (ex. CI sans accès au conteneur), le nettoyage est ignoré : les tests sont
+ * conçus pour rester corrects sans lui (noms et clés uniques, assertions bornées aux ids créés) et
+ * `pnpm db:reset` remet la base à zéro.
+ */
+export async function cleanupTestUsers(userIds: string[]): Promise<void> {
+  if (userIds.length === 0) return;
+  const ids = userIds.filter((id) => /^[0-9a-f-]{36}$/.test(id));
+  const list = ids.map((id) => `'${id}'`).join(",");
+  const sql = [
+    "set session_replication_role = replica;",
+    `create temp table victims as select id from public.organizations where created_by in (${list});`,
+    "delete from public.subscriptions where organization_id in (select id from victims);",
+    "delete from public.usage_counters where organization_id in (select id from victims);",
+    "delete from public.organization_members where organization_id in (select id from victims);",
+    "delete from public.organizations where id in (select id from victims);",
+  ].join(" ");
+  try {
+    execSync("docker exec -i supabase_db_fusion-leap psql -U postgres -d postgres -v ON_ERROR_STOP=1", {
+      input: sql,
+      stdio: ["pipe", "ignore", "ignore"],
+    });
+  } catch {
+    return; // best effort : Docker indisponible, on laisse les lignes (uniques par exécution)
+  }
+  for (const id of ids) {
+    await fetch(`${stack.apiUrl}/auth/v1/admin/users/${id}`, {
+      method: "DELETE",
+      headers: {
+        apikey: stack.publishableKey,
+        Authorization: `Bearer ${signJwt({ role: "service_role" })}`,
+      },
+    });
+  }
+}
+
 /** Appel REST `path` (ex. `organizations?select=id`) pour un persona ; ne lève jamais sur 4xx. */
 export async function api<T = unknown>(
   persona: Persona,
@@ -147,10 +236,10 @@ export interface Snapshot {
 /** Rétablit l'état du seed (via service_role) après un test qui modifie des lignes. */
 export async function snapshotFixtures(): Promise<Snapshot> {
   const organizations = rowsOf<Record<string, unknown>>(
-    await select("service", "organizations?select=*&order=slug"),
+    await select("service", `organizations?select=*&id=in.(${ORG.alpha},${ORG.beta})&order=slug`),
   );
   const members = rowsOf<Record<string, unknown>>(
-    await select("service", "organization_members?select=*&order=created_at,id"),
+    await select("service", `organization_members?select=*&organization_id=in.(${ORG.alpha},${ORG.beta})&order=created_at,id`),
   );
   return { organizations, members };
 }
@@ -164,7 +253,9 @@ export async function restoreFixtures(snapshot: Snapshot): Promise<void> {
       settings: org.settings,
     });
   }
-  const current = rowsOf<{ id: string }>(await select("service", "organization_members?select=id"));
+  const current = rowsOf<{ id: string }>(
+    await select("service", `organization_members?select=id&organization_id=in.(${ORG.alpha},${ORG.beta})`),
+  );
   const wanted = new Set(snapshot.members.map((m) => String(m.id)));
   // Réinsère d'abord les lignes supprimées, puis restaure rôle et statut des autres.
   const present = new Set(current.map((m) => m.id));

@@ -58,3 +58,7 @@ Cible : 4,8 % | Réel : à valider | Statut : —
 - Supabase : aucune région Moyen-Orient listée (Q5 à traiter).
 ### Blocages : Q1, Q2 (domaine), Q5 sans réponse précise ; accès Meta à demander
 ### Demain : J3 (menaces, stratégie de test, backlog, gate G0')
+
+### Comptes externes (suivi, sans secret)
+- 2026-11-06 : projet Supabase cloud **fusion-leap-staging** créé (organisation « Fusion Leap Dev », plan Free, région Central EU / Frankfurt `eu-central-1`, Data API activée, « expose new tables » désactivé, RLS automatique activée). Usage : **staging uniquement, aucune donnée réelle** (ADR 010, Q5 ouverte). Mot de passe base et clés : dans le gestionnaire de mots de passe, jamais dans le dépôt.
+- Meta for Developers : création de l'app commencée (cas d'usage WhatsApp) ; bloquée par « compte Facebook trop récent » pour créer le portefeuille d'entreprise — nouvelle tentative à faire.

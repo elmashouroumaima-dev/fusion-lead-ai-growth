@@ -30,3 +30,19 @@ Les **versions exactes** ne sont pas figées ici : elles sont vérifiées dans l
 ## Conséquences
 - Toute bibliothèque ajoutée hors de ce tableau nécessite un ADR (i18n : ADR 011 ; IA : ADR 012).
 - L'audit de conformité (§15 du plan) vérifie l'absence d'ORM, de file externe et de n8n.
+
+## Versions épinglées au J4 (2026-11-06)
+Vérifiées via `npm view` et les documentations officielles consultées ce jour ; lockfile `pnpm-lock.yaml` commité.
+
+| Outil | Version | Remarque |
+|---|---|---|
+| Node.js | ≥ 22.12 (`.nvmrc` 24.13.1) | **Vitest 5.1.0 exige Node `^22.12 \|\| ^24 \|\| >=26`** ; Next 16.4.5 exige Node ≥ 20.9. Node 20 n'est donc pas supporté. |
+| pnpm | 12.18.0 | via `packageManager` + corepack ; `allowBuilds` explicite (esbuild) car `strictDepBuilds` est activé par défaut. |
+| Next.js / React | 16.4.5 / 19.3.1 | Doc Next : TypeScript minimum 5.1 ; `next lint` supprimé, ESLint appelé directement. |
+| **TypeScript** | **6.0.3** (et non 7.0.2, dernière version publiée) | `typescript-eslint` 8.72.1 déclare `typescript >=4.8.4 <6.1.0` : TypeScript 7 n'est pas supporté par le linter. À réévaluer quand typescript-eslint l'acceptera. |
+| ESLint | 9.39.5 (et non 10.x) | `eslint-config-next` 16.4.5 accepte `>=9` ; 9.x choisi par prudence de compatibilité des plugins. |
+| Vitest | 5.1.0 | |
+| Turborepo | 2.11.10 | |
+| Prettier | 3.9.10 | |
+
+GitHub Actions : `actions/checkout@v7`, `actions/setup-node@v7`, `pnpm/action-setup@v6` (tags de version majeure ; dernières versions consultées le 2026-11-06).

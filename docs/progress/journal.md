@@ -79,3 +79,20 @@ Cible : 6,3 % | Réel : à valider | Statut : —
 ### Décisions / ADR : aucun ADR passé en « Accepted » (seule la responsable technique peut le faire)
 ### Blocages : acceptation des ADR 001–008, 014 ; ADR 010–012 (hors stack) ; Q1, Q2, Q5 ; accès Meta
 ### Demain : J4 après acceptation des ADR (ou démarrage en parallèle de J4–J5 qui ne dépendent pas des ADR 008/010–012)
+
+## J04 — ven 13 nov 2026 — Phase 1 (préparé en avance, NON commité, branche `day-04-monorepo-scaffolding`)
+Cible : 7,9 % | Réel : à valider | Statut : —
+
+### Tâches
+| Tâche | Estimé | Livré | Validée |
+|---|---|---|---|
+| pnpm + Turborepo, 7 dossiers §6 | 2 h | oui | oui (install, lint, typecheck, test, build verts) |
+| TS strict, ESLint (frontières de packages, no-any, no-only), Prettier, Vitest | 1,5 h | oui | oui |
+| CI GitHub Actions (lint, typecheck, test) | 1,5 h | fichier écrit | **non exécutée** (pas de remote GitHub vérifié, `gh` absent) |
+| README | 1 h | oui | oui |
+
+### Tests : 5 tests Vitest (smoke, 1 par package) ✓ · lint ✓ · typecheck 5/5 ✓ · `next build` ✓ · prettier ✓ · test négatif du lint (import interdit, `any`, `.only`) ✓
+### Écarts à la spec : aucun
+### Décisions / écarts de version : TypeScript 6.0.3 (pas 7) car typescript-eslint <6.1.0 ; Node ≥ 22.12 car Vitest 5 ; ESLint 9.39.5 — consignés dans ADR 001
+### Blocages : CI non vérifiée (pas de remote) ; ADR 001/002/006 toujours « Proposed »
+### Demain : J5 (Supabase CLI local, env zod serveur/client, `.env.example`, garde-fou NEXT_PUBLIC_*)

@@ -18,3 +18,7 @@ supabase/.branches/
 # Divers
 .DS_Store
 *.log
+
+# Généré par Next.js
+next-env.d.ts
+*.tsbuildinfo

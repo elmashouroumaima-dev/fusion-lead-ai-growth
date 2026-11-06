@@ -1,0 +1,21 @@
+{
+  "name": "@fusion-leap/worker",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Worker Node séparé : jobs, sync, envois, agent runs (spec §6, ADR 003)",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@fusion-leap/domain": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "24.19.2",
+    "tsx": "4.23.15",
+    "typescript": "6.0.3",
+    "vitest": "5.1.0"
+  }
+}

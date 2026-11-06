@@ -1,0 +1,22 @@
+{
+  "name": "@fusion-leap/adapters",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Adaptateurs CRM, e-mail, WhatsApp, Salla, IA (spec §6)",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@fusion-leap/domain": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "24.19.2",
+    "typescript": "6.0.3",
+    "vitest": "5.1.0"
+  }
+}

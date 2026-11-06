@@ -117,3 +117,19 @@ Cible : 9,5 % | Réel : à valider | Statut : —
 - Remote `origin` existe (repo GitHub) : la CI n'a toujours pas été exécutée.
 ### Blocages : ADR 001/002/006 toujours « Proposed » ; premier `supabase start` a téléchargé les images Docker (long)
 ### Demain : J6 (migrations du noyau tenant : organizations, organization_members, subscriptions, usage_counters ; schéma `private`)
+
+## J06 — mar 17 nov 2026 — Phase 1 (préparé en avance, NON commité, branche `day-06-core-tenant-migrations`)
+Cible : 11,1 % | Réel : à valider | Statut : —
+
+### Tâches
+| Tâche | Estimé | Livré | Validée |
+|---|---|---|---|
+| `organizations`, `organization_members` (5 rôles), `subscriptions`, `usage_counters` (+ `plans`) | 3 h | oui, 2 migrations + 2 scripts de retour | oui |
+| Schéma `private` + `is_member` / `has_role` (security definer, search_path vide) | 2 h | oui | oui |
+| Seed : 2 entreprises, utilisateur commun à 2 rôles, Analyst, Marketing Manager | 1 h | oui | oui (connexion Auth du compte seed : HTTP 200) |
+
+### Tests : 57 tests pgTAP ✓ (36 contraintes/verrouillage + 21 fonctions d'aide) · mutation : retrait du trigger anti-transfert + RLS désactivée + GRANT ajouté → 4 tests échouent comme attendu · rollbacks 2→1 exécutés proprement (0 table, 0 schéma private) puis base rétablie · lint, typecheck, tests TS inchangés ✓
+### Écarts à la spec / au plan fourni : `platform_admin` hors de l'enum (ADR 005 §10, validé) ; `plans` créé au J6 (validé) ; RLS activée sans politique + REVOKE dès J6 (validé) — consignés dans ADR 005 et 007
+### Constats : privilèges par défaut du rôle `supabase_admin` encore ouverts à anon/authenticated dans `public` (tables créées depuis le tableau de bord) — mitigations notées (ADR 005, J7 schema lint, J57)
+### Blocages : `test:db` n'est pas encore branché sur la CI (J7 : démarrage Supabase en CI) ; ADR 001/002/005/006/007 toujours « Proposed »
+### Demain : J7 (politiques RLS par rôle, harnais `test:rls` avec JWT, schema lint)

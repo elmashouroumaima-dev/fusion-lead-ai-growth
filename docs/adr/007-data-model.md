@@ -143,3 +143,6 @@ Les entrées marquées **[ajout ADR]** sont des tables ou colonnes absentes de l
 
 ## 6. Conséquences
 Le modèle ajoute ~14 tables à la spec §7 (toutes marquées « ajout ADR »). Chaque ajout a son origine (E/G/section). Toute table non listée ici nécessite un nouvel ADR.
+
+## Mise en œuvre J6 (2026-11-06)
+Tables créées : `plans` (catalogue global ; ligne `trial` sans limites, valeurs au J14 car la spec n'en donne pas), `organizations`, `organization_members`, `subscriptions` (une ligne par entreprise), `usage_counters` ; enums `app_role` (5 valeurs), `member_status`, `org_status`, `subscription_status`. Écarts avec l'ADR : `plans` créé au J6 (au lieu du J14) pour porter la FK de `subscriptions.plan_id` ; `private.platform_admins` reste prévu au J14. Le « schema lint » (J7) devra autoriser explicitement les tables sans `organization_id` : `organizations` (racine) et `plans` (catalogue global).

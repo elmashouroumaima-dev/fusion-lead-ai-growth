@@ -2,7 +2,7 @@
 
 Plateforme SaaS multi-tenant (CRM interne, boîte de réception e-mail + WhatsApp, campagnes avec approbation, agents IA en mode brouillon). Spécification : [`docs/spec/Fusion-Leap-AI-Growth-Technical-Spec.md`](docs/spec/Fusion-Leap-AI-Growth-Technical-Spec.md) (v1.0, en arabe).
 
-> **État :** Phase 1 (fondations), J5 — environnements et secrets. Aucune fonctionnalité métier avant J5+. Plan : [`docs/plan/development-plan.md`](docs/plan/development-plan.md) · journal : [`docs/progress/journal.md`](docs/progress/journal.md).
+> **État :** Phase 1 (fondations), J6 — noyau tenant (migrations, schéma `private`). Aucune fonctionnalité métier avant J5+. Plan : [`docs/plan/development-plan.md`](docs/plan/development-plan.md) · journal : [`docs/progress/journal.md`](docs/progress/journal.md).
 
 ## Prérequis
 
@@ -44,6 +44,7 @@ Règles de dépendance (ADR 002, imposées par ESLint) : `domain` ne dépend de 
 | `pnpm db:start` / `db:stop` | Démarre / arrête la pile Supabase locale (Docker requis) |
 | `pnpm db:reset` | Recrée la base locale à partir de `supabase/migrations` (+ `seed.sql` s'il existe) |
 | `pnpm db:migrate` | Applique les migrations en attente sur la base locale |
+| `pnpm test:db` | Tests SQL pgTAP (`supabase/tests/database`) sur la base locale démarrée et réinitialisée (`db:start`, `db:reset`) |
 | `pnpm check:leaks [--require-bundle]` | Garde-fou anti-fuite : aucun secret dans `NEXT_PUBLIC_*`, les `.env*.example` ou le bundle client (CI après `pnpm build`) |
 | `pnpm test:rls`, `test:e2e` | **Pas encore disponibles** : échouent volontairement (prévus J7 et J15) |
 
@@ -59,3 +60,7 @@ Trois modèles sans valeur réelle : `.env.development.example`, `.env.staging.e
 - Séparation : `clientEnvSchema` (variables `NEXT_PUBLIC_*` uniquement) et `serverEnvSchema` (contient la clé secrète Supabase, serveur et worker seulement).
 - `pnpm check:leaks` échoue si un secret apparaît dans une variable publique, un modèle `.env*.example` ou le bundle client.
 - Ne jamais committer de `.env*` réel. Les valeurs de staging/production vivent dans le gestionnaire de secrets (ADR 010).
+
+## Base locale et seed
+
+`pnpm db:start` puis `pnpm db:reset` appliquent `supabase/migrations/*` puis `supabase/seed.sql` (**développement local uniquement**) : deux entreprises (Alpha, Beta), un utilisateur commun `shared@seed.test` (company_owner chez Alpha, sales_agent chez Beta) et des comptes Analyst/Marketing Manager/Admin/Sales. Le mot de passe de développement des comptes de seed est défini en tête de `supabase/seed.sql` (valeur de test, sans rapport avec un vrai compte). Retour arrière d'une migration : `supabase/rollbacks/<même horodatage>_*.sql` (ADR 006).

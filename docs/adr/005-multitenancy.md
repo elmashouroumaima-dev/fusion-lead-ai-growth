@@ -29,3 +29,10 @@ L'isolation des entreprises est le critère n°1. Elle doit tenir en UI, API, RL
 
 ## Conséquences
 Coût de lecture de `organization_members` à chaque ligne : index `(user_id, organization_id)` et `(select …)` en cache ; mesure au J15 (risque R13).
+
+## Mise en œuvre J6 (2026-11-06) — constats de la base locale
+- **RLS activée sans politique dès la migration du noyau** (refus total pour `anon`/`authenticated`), avec `REVOKE ALL` sur les tables et `ALTER DEFAULT PRIVILEGES FOR ROLE postgres IN SCHEMA public REVOKE ALL … FROM anon, authenticated` : les politiques et les `GRANT` explicites arrivent au J7, table par table.
+- **Rôles** : l'enum `app_role` compte 5 valeurs ; `platform_admin` n'en fait pas partie (§10 appliqué).
+- **Limite constatée** : la base Supabase locale définit aussi des privilèges par défaut pour le rôle **`supabase_admin`** dans le schéma `public` (accès à `anon`/`authenticated`). Ils ne s'appliquent pas aux objets créés par nos migrations (rôle `postgres`), mais **une table créée depuis le tableau de bord (SQL editor, rôle `supabase_admin`) serait exposée**. Mitigations : option « Enable automatic RLS » activée sur le projet cloud, « schema lint » en CI (J7) qui exige RLS + politiques sur toute table `public`, point dédié dans la revue de la checklist de production (J57).
+- Le schéma `private` n'est pas dans `api.schemas` : `POST /rest/v1/rpc/is_member` renvoie 404 ; `authenticated` n'a que `USAGE` sur le schéma et `EXECUTE` sur `is_member`/`has_role`.
+- `organization_members` utilise `ON DELETE RESTRICT` vers `organizations` (aucun flux de suppression d'entreprise n'existe encore ; décision à prendre avec la politique de rétention, Q5).

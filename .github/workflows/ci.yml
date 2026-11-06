@@ -37,7 +37,12 @@ jobs:
       - run: pnpm test
 
       # Garde-fou anti-fuite (J5, spec §6) : build puis scan du bundle client et des variables publiques.
+      # Variables publiques factices : le build pré-rend des pages qui valident l'environnement client
+      # (J8). Aucun secret : ce sont des valeurs de placeholder, jamais utilisées pour se connecter.
       - run: pnpm build
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: http://127.0.0.1:54321
+          NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable_ci_build_placeholder
       - run: pnpm check:leaks --require-bundle
 
   database:

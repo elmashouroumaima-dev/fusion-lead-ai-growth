@@ -71,6 +71,43 @@ describe("parseServerEnv", () => {
     );
   });
 
+  describe("SITE_URL", () => {
+    it("développement/test : optionnelle, repli sur http://127.0.0.1:3000", () => {
+      expect(parseServerEnv(validServer).SITE_URL).toBe("http://127.0.0.1:3000");
+      expect(parseServerEnv({ ...validServer, APP_ENV: "test" }).SITE_URL).toBe("http://127.0.0.1:3000");
+      expect(parseServerEnv({ ...validServer, SITE_URL: "" }).SITE_URL).toBe("http://127.0.0.1:3000");
+    });
+
+    it("développement : accepte une URL http valide", () => {
+      expect(parseServerEnv({ ...validServer, SITE_URL: "http://localhost:3001" }).SITE_URL).toBe("http://localhost:3001");
+    });
+
+    it.each(["staging", "production"])("%s : SITE_URL obligatoire", (APP_ENV) => {
+      expect.assertions(2);
+      try {
+        parseServerEnv({ ...validServer, APP_ENV });
+      } catch (error) {
+        expect((error as EnvValidationError).variables).toEqual(["SITE_URL"]);
+        expect((error as Error).message).toContain("SITE_URL : manquante");
+      }
+    });
+
+    it.each(["staging", "production"])("%s : http refusé, https accepté", (APP_ENV) => {
+      expect(() => parseServerEnv({ ...validServer, APP_ENV, SITE_URL: "http://app.example.test" })).toThrow(EnvValidationError);
+      expect(parseServerEnv({ ...validServer, APP_ENV, SITE_URL: "https://app.example.test" }).SITE_URL).toBe("https://app.example.test");
+    });
+
+    it("refuse un schéma non http(s) et une valeur non URL", () => {
+      expect(() => parseServerEnv({ ...validServer, SITE_URL: "javascript:alert(1)" })).toThrow(EnvValidationError);
+      expect(() => parseServerEnv({ ...validServer, SITE_URL: "pas une url" })).toThrow(EnvValidationError);
+    });
+
+    it("jamais exposée au client : absente du schéma client", () => {
+      const parsed = parseClientEnv({ ...validClient, SITE_URL: "https://x.example.test" });
+      expect(Object.keys(parsed)).not.toContain("SITE_URL");
+    });
+  });
+
   it("traite une chaîne vide comme manquante", () => {
     expect(() => parseServerEnv({ ...validServer, SUPABASE_SECRET_KEY: "" })).toThrow(
       EnvValidationError,

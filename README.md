@@ -2,7 +2,7 @@
 
 Plateforme SaaS multi-tenant (CRM interne, boîte de réception e-mail + WhatsApp, campagnes avec approbation, agents IA en mode brouillon). Spécification : [`docs/spec/Fusion-Leap-AI-Growth-Technical-Spec.md`](docs/spec/Fusion-Leap-AI-Growth-Technical-Spec.md) (v1.0, en arabe).
 
-> **État :** Phase 1 (fondations), J6 — noyau tenant (migrations, schéma `private`). Aucune fonctionnalité métier avant J5+. Plan : [`docs/plan/development-plan.md`](docs/plan/development-plan.md) · journal : [`docs/progress/journal.md`](docs/progress/journal.md).
+> **État :** Phase 1 (fondations), J7 — politiques RLS du noyau et harnais de tests. Aucune fonctionnalité métier avant J5+. Plan : [`docs/plan/development-plan.md`](docs/plan/development-plan.md) · journal : [`docs/progress/journal.md`](docs/progress/journal.md).
 
 ## Prérequis
 
@@ -46,7 +46,8 @@ Règles de dépendance (ADR 002, imposées par ESLint) : `domain` ne dépend de 
 | `pnpm db:migrate` | Applique les migrations en attente sur la base locale |
 | `pnpm test:db` | Tests SQL pgTAP (`supabase/tests/database`) sur la base locale démarrée et réinitialisée (`db:start`, `db:reset`) |
 | `pnpm check:leaks [--require-bundle]` | Garde-fou anti-fuite : aucun secret dans `NEXT_PUBLIC_*`, les `.env*.example` ou le bundle client (CI après `pnpm build`) |
-| `pnpm test:rls`, `test:e2e` | **Pas encore disponibles** : échouent volontairement (prévus J7 et J15) |
+| `pnpm test:rls` | Matrice RLS via la Data API (Vitest, JWT signés avec le secret LOCAL) : base locale démarrée et réinitialisée requise |
+| `pnpm test:e2e` | **Pas encore disponible** : échoue volontairement (prévu J15) |
 
 ## Conventions
 

@@ -39,4 +39,28 @@ jobs:
       # Garde-fou anti-fuite (J5, spec §6) : build puis scan du bundle client et des variables publiques.
       - run: pnpm build
       - run: pnpm check:leaks --require-bundle
-      # J7 ajoutera : supabase start + pnpm db:reset + pnpm test:rls + schema lint.
+
+  database:
+    name: supabase (pgTAP, schema lint, RLS)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      # Pile minimale (base, auth, API) : suffisante pour les tests SQL et les tests RLS via PostgREST.
+      - name: Démarrer Supabase local
+        run: >
+          pnpm db:start -x
+          studio,imgproxy,edge-runtime,logflare,vector,mailpit,realtime,storage-api,postgres-meta,supavisor
+
+      - run: pnpm db:reset
+      - name: Tests SQL pgTAP (contraintes, fonctions d'aide, schema lint)
+        run: pnpm test:db
+      - name: Tests RLS via la Data API (matrice utilisateur x entreprise x opération)
+        run: pnpm test:rls

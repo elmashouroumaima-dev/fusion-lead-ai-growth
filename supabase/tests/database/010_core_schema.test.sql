@@ -2,7 +2,7 @@
 -- Exécution : pnpm test:db (base locale réinitialisée avec le seed : 2 entreprises, 1 utilisateur commun).
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(36);
+select plan(38);
 
 -- ---------------------------------------------------------------------------
 -- Structure
@@ -38,14 +38,37 @@ select ok((select relrowsecurity from pg_class where oid = 'public.usage_counter
 
 select is(
   (select count(*)::int
-     from (values ('anon'), ('authenticated')) as r (role_name)
-     cross join (values ('plans'), ('organizations'), ('organization_members'),
-                        ('subscriptions'), ('usage_counters')) as t (table_name)
+     from (values ('plans'), ('organizations'), ('organization_members'),
+                  ('subscriptions'), ('usage_counters')) as t (table_name)
     where has_table_privilege(
-            r.role_name, format('public.%I', t.table_name),
-            'select,insert,update,delete,truncate,references,trigger')),
+            'anon', format('public.%I', t.table_name),
+            'select,insert,update,delete,truncate,references,trigger')
+       or has_any_column_privilege('anon', format('public.%I', t.table_name), 'select,insert,update,references')),
   0,
-  'anon et authenticated n''ont aucun privilège sur les tables du noyau (avant J7)'
+  'anon n''a aucun privilège sur les tables du noyau'
+);
+
+-- authenticated : lecture seule, sauf mises à jour limitées à des colonnes et suppression d'adhésions (J7)
+select is(
+  (select count(*)::int
+     from (values ('plans'), ('organizations'), ('organization_members'),
+                  ('subscriptions'), ('usage_counters')) as t (table_name)
+    where has_table_privilege(
+            'authenticated', format('public.%I', t.table_name),
+            'insert,update,truncate,references,trigger')
+       or (t.table_name <> 'organization_members'
+           and has_table_privilege('authenticated', format('public.%I', t.table_name), 'delete'))),
+  0,
+  'authenticated : aucun insert/update global/truncate, delete seulement sur organization_members'
+);
+select ok(
+  has_column_privilege('authenticated', 'public.organizations', 'name', 'update')
+    and not has_column_privilege('authenticated', 'public.organizations', 'slug', 'update')
+    and not has_column_privilege('authenticated', 'public.organizations', 'status', 'update')
+    and has_column_privilege('authenticated', 'public.organization_members', 'role', 'update')
+    and not has_column_privilege('authenticated', 'public.organization_members', 'organization_id', 'update')
+    and not has_column_privilege('authenticated', 'public.organization_members', 'user_id', 'update'),
+  'GRANT par colonne : slug, status, organization_id et user_id non modifiables'
 );
 
 -- ---------------------------------------------------------------------------

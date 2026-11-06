@@ -57,3 +57,6 @@ Légende : ✔ autorisé · ✘ refusé · `own` = seulement les enregistrements
 - `packages/permissions` est généré/testé à partir de ce tableau (tests table-driven exhaustifs, J10).
 - Les cases `[P]` sont des propositions : toute modification passe par une révision de cet ADR.
 - ANA sans accès aux contacts (PII) est une lecture stricte de « données autorisées » (§2) ; à assouplir uniquement si le produit le demande.
+
+## Mise en œuvre J7 (2026-11-06)
+Cases de la matrice appliquées côté base (RLS) pour les tables du noyau : membres (lister : owner/admin, chacun voit sa propre ligne ; inviter/changer le rôle/retirer : owner, et admin hors owner), propriété (transfert : seul un owner peut promouvoir un autre owner ; dernier owner protégé), entreprise (modifier : owner/admin), plan/facturation (lire : owner/admin ; écrire : serveur). Les cases qui concernent des tables à venir (projets, CRM, campagnes…) seront appliquées avec leurs migrations. Le « changement de propriété » reste à exposer via une action serveur (J10).

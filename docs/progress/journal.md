@@ -133,3 +133,22 @@ Cible : 11,1 % | Réel : à valider | Statut : —
 ### Constats : privilèges par défaut du rôle `supabase_admin` encore ouverts à anon/authenticated dans `public` (tables créées depuis le tableau de bord) — mitigations notées (ADR 005, J7 schema lint, J57)
 ### Blocages : `test:db` n'est pas encore branché sur la CI (J7 : démarrage Supabase en CI) ; ADR 001/002/005/006/007 toujours « Proposed »
 ### Demain : J7 (politiques RLS par rôle, harnais `test:rls` avec JWT, schema lint)
+
+## J07 — jeu 19 nov 2026 — Phase 1 (préparé en avance, NON commité, branche `day-07-rls-core-and-harness`)
+Cible : 12,7 % | Réel : à valider | Statut : —
+
+### Tâches
+| Tâche | Estimé | Livré | Validée |
+|---|---|---|---|
+| Harnais `pnpm test:rls` (Vitest, Data API, JWT signés par utilisateur de seed) — écrit AVANT les politiques | 2,5 h | oui | oui |
+| Politiques select/update/delete par rôle, GRANT par colonne, trigger dernier owner | 2,5 h | oui (migration + retour arrière) | oui |
+| Revue GRANT / Data API + schema lint (11 règles, `pnpm test:db`) + job CI `database` | 1 h | oui | lint et tests oui ; **job CI non exécuté** |
+
+### Tests : RLS 84 ✓ (matrice utilisateur × entreprise × opération + dernier owner) · pgTAP 70 ✓ (38 + 21 + 11 de lint) · mutations : 16 tests RLS échouent quand on casse les politiques/GRANT/trigger, 10 règles du lint échouent sur des tables/politiques/fonctions fautives (L1–L10 couvertes) · rollbacks 3→2→1 propres · pile réduite CI (db, auth, kong, rest) validée localement · lint/typecheck/tests TS ✓
+### Écarts à la spec : aucun. Décisions validées : A harnais Vitest/PostgREST + pgTAP, B GRANT par colonne, C pas d'INSERT direct sur les adhésions, D trigger dernier owner, E job CI `db`
+### Constats
+- Bug de mon harnais corrigé en route : la restauration d'état effaçait les compteurs de fixture après chaque test ; les 4 tests concernés ont été trouvés par l'exécution, pas par la lecture.
+- Le trigger « dernier owner » s'applique aussi à `service_role` : supprimer un compte qui est le dernier owner échoue tant que la propriété n'est pas transférée.
+- Performance : les politiques appellent `private.has_role` par ligne ; mesure prévue au J15 (risque R13).
+### Blocages : job CI `database` jamais exécuté (pas de push) ; ADR 001/002/005/006/007/014 toujours « Proposed »
+### Demain : J8 (Auth SSR bilingue AR/EN)

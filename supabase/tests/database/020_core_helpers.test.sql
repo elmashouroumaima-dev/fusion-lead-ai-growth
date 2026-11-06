@@ -89,12 +89,12 @@ select throws_ok(
 reset role;
 
 -- ---------------------------------------------------------------------------
--- Aucune lecture directe des tables du noyau (avant les politiques du J7)
+-- Lecture directe sous RLS (J7) : filtrée par les politiques ; matrice complète dans test:rls
 -- ---------------------------------------------------------------------------
 select set_config('request.jwt.claims', '{"sub":"00000000-0000-4000-8000-000000000001","role":"authenticated"}', true);
 set local role authenticated;
-select throws_ok('select * from public.organization_members', '42501', null, 'authenticated : lecture directe d''organization_members refusée');
-select throws_ok('select * from public.organizations', '42501', null, 'authenticated : lecture directe d''organizations refusée');
+select is((select count(*)::int from public.organization_members), 6, 'shared : 5 adhésions Alpha (owner) + sa ligne Beta');
+select is((select count(*)::int from public.organizations), 2, 'shared voit ses deux entreprises');
 reset role;
 
 select * from finish();

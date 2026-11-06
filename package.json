@@ -13,7 +13,7 @@
     "lint": "eslint .",
     "typecheck": "turbo run typecheck",
     "test": "turbo run test",
-    "test:rls": "node scripts/not-yet.mjs test:rls J7",
+    "test:rls": "pnpm --filter @fusion-leap/rls-tests test:rls",
     "test:e2e": "node scripts/not-yet.mjs test:e2e J15",
     "db:reset": "supabase db reset",
     "db:migrate": "supabase migration up",

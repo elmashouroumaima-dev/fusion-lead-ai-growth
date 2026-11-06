@@ -228,14 +228,23 @@ describe("création, visibilité et isolation", () => {
     expect(await visibleOrgIds(other)).toHaveLength(before + 2);
   });
 
-  it("nom arabe : slug préfixé « org » et locale par défaut « ar »", async () => {
+  it("nom arabe : slug préfixé « org » et locale par défaut « fr »", async () => {
     const result = await create(newcomer, { p_name: "شركة النور", p_creation_key: key("ar") });
     expect(result.status).toBe(200);
     const rows = rowsOf<{ slug: string; locale: string; timezone: string }>(
       await apiAsUser(newcomer.id, "GET", `organizations?select=slug,locale,timezone&id=eq.${result.body}`),
     );
     expect(rows[0]?.slug).toMatch(/^org-[0-9a-f]{6}$/);
-    expect(rows[0]).toMatchObject({ locale: "ar", timezone: "UTC" });
+    expect(rows[0]).toMatchObject({ locale: "fr", timezone: "UTC" });
+  });
+
+  it("locale « fr » explicite acceptée et enregistrée", async () => {
+    const result = await create(newcomer, { p_name: `Société FR ${run}`, p_locale: "fr", p_creation_key: key("fr") });
+    expect(result.status).toBe(200);
+    const rows = rowsOf<{ locale: string }>(
+      await apiAsUser(newcomer.id, "GET", `organizations?select=locale&id=eq.${result.body}`),
+    );
+    expect(rows[0]?.locale).toBe("fr");
   });
 });
 
@@ -285,7 +294,9 @@ describe("validation et atomicité côté API", () => {
   it.each([
     ["nom blanc", { p_name: "   " }],
     ["nom trop long", { p_name: "a".repeat(121) }],
-    ["locale inconnue", { p_name: "Val", p_locale: "fr" }],
+    ["locale inconnue", { p_name: "Val", p_locale: "es" }],
+    ["locale en majuscules", { p_name: "Val", p_locale: "FR" }],
+    ["locale avec espace final", { p_name: "Val", p_locale: "fr " }],
     ["fuseau inconnu", { p_name: "Val", p_timezone: "Mars/Phobos" }],
     ["clé trop courte", { p_name: "Val", p_creation_key: "court" }],
     ["nom avec LRM invisible", { p_name: `Acme${ch(0x200e)}Co` }],

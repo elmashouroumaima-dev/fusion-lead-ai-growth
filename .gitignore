@@ -1,0 +1,20 @@
+# Secrets : jamais dans le dépôt (CLAUDE.md, ADR 004)
+.env
+.env.*
+!.env.example
+!.env.*.example
+
+# Dépendances et builds
+node_modules/
+.next/
+.turbo/
+dist/
+coverage/
+
+# Supabase local
+supabase/.temp/
+supabase/.branches/
+
+# Divers
+.DS_Store
+*.log

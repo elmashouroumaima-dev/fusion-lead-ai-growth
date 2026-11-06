@@ -62,3 +62,20 @@ Cible : 4,8 % | Réel : à valider | Statut : —
 ### Comptes externes (suivi, sans secret)
 - 2026-11-06 : projet Supabase cloud **fusion-leap-staging** créé (organisation « Fusion Leap Dev », plan Free, région Central EU / Frankfurt `eu-central-1`, Data API activée, « expose new tables » désactivé, RLS automatique activée). Usage : **staging uniquement, aucune donnée réelle** (ADR 010, Q5 ouverte). Mot de passe base et clés : dans le gestionnaire de mots de passe, jamais dans le dépôt.
 - Meta for Developers : création de l'app commencée (cas d'usage WhatsApp) ; bloquée par « compte Facebook trop récent » pour créer le portefeuille d'entreprise — nouvelle tentative à faire.
+
+## J03 — jeu 12 nov 2026 — Phase 0 (préparé en avance, NON commité)
+Cible : 6,3 % | Réel : à valider | Statut : —
+
+### Tâches
+| Tâche | Estimé | Livré | Validée |
+|---|---|---|---|
+| Threat model STRIDE (`docs/security/threat-model.md`) | 2 h | oui (≈50 menaces : contrôle + test + jour) | en attente de relecture |
+| Stratégie de test (`docs/testing/strategy.md`) | 1,5 h | oui | en attente |
+| Backlog J4–J62 (`docs/backlog/`, 59 fiches + README) | 1,5 h | oui (généré depuis le plan validé) | en attente |
+| Checkpoint C0 (`docs/checkpoints/C0.md`) | 1 h | oui — **NO-GO provisoire** : ADR toujours « Proposed » | en attente |
+
+### Tests : n/a (docs)
+### Écarts à la spec : aucun
+### Décisions / ADR : aucun ADR passé en « Accepted » (seule la responsable technique peut le faire)
+### Blocages : acceptation des ADR 001–008, 014 ; ADR 010–012 (hors stack) ; Q1, Q2, Q5 ; accès Meta
+### Demain : J4 après acceptation des ADR (ou démarrage en parallèle de J4–J5 qui ne dépendent pas des ADR 008/010–012)

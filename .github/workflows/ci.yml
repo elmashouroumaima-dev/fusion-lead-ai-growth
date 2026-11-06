@@ -35,5 +35,8 @@ jobs:
       - run: pnpm lint
       - run: pnpm typecheck
       - run: pnpm test
-      # J5 ajoutera : garde-fou anti-fuite NEXT_PUBLIC_*, supabase db reset.
-      # J7 ajoutera : pnpm test:rls + schema lint.
+
+      # Garde-fou anti-fuite (J5, spec §6) : build puis scan du bundle client et des variables publiques.
+      - run: pnpm build
+      - run: pnpm check:leaks --require-bundle
+      # J7 ajoutera : supabase start + pnpm db:reset + pnpm test:rls + schema lint.

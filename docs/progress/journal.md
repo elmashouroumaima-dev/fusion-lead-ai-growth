@@ -96,3 +96,24 @@ Cible : 7,9 % | Réel : à valider | Statut : —
 ### Décisions / écarts de version : TypeScript 6.0.3 (pas 7) car typescript-eslint <6.1.0 ; Node ≥ 22.12 car Vitest 5 ; ESLint 9.39.5 — consignés dans ADR 001
 ### Blocages : CI non vérifiée (pas de remote) ; ADR 001/002/006 toujours « Proposed »
 ### Demain : J5 (Supabase CLI local, env zod serveur/client, `.env.example`, garde-fou NEXT_PUBLIC_*)
+
+## J05 — lun 16 nov 2026 — Phase 1 (préparé en avance, NON commité, branche `day-05-environments-secrets`)
+Cible : 9,5 % | Réel : à valider | Statut : —
+
+### Tâches
+| Tâche | Estimé | Livré | Validée |
+|---|---|---|---|
+| Supabase CLI 3.0.0 + projet local (`supabase/config.toml`), scripts `db:start/stop/reset/migrate` | 1,5 h | oui | oui (`pnpm db:reset` exit 0 sur la pile locale Docker) |
+| Validation zod de l'env, séparation serveur/client (`packages/domain/src/env`, `apps/web/lib/env`, worker) | 2 h | oui | oui (le serveur Next.js et le worker sortent en code 1 si une variable manque ; démarrage OK avec un env valide) |
+| `.env.{development,staging,production}.example` (sans valeur réelle) | 1 h | oui | oui |
+| Garde-fou CI anti-fuite (`pnpm check:leaks`) + test par fuite volontaire | 1,5 h | oui | oui (échoue sur variable publique au nom de secret et sur secret dans le bundle ; repasse au vert après retrait) |
+
+### Tests : 31 tests Vitest ✓ (domain 22, web 4, worker 3, permissions 1, adapters 1) · lint ✓ · typecheck 5/5 ✓ · build ✓ · prettier ✓ · `check:leaks --require-bundle` ✓
+### Écarts à la spec : aucun
+### Constats / décisions
+- Next.js journalise une erreur levée dans `instrumentation.ts` **sans arrêter le processus** (constaté : le serveur restait en vie) ; ajout de `process.exit(1)` dans un module Node-only (`lib/env/startup-check.ts`).
+- Clés Supabase locales : le CLI 3.0 fournit `PUBLISHABLE_KEY` / `SECRET_KEY` (formats `sb_publishable_…` / `sb_secret_…`) ; variables retenues : `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_SECRET_KEY`.
+- pnpm signale que ESLint 9.39.5 est « deprecated » (10.14.0 disponible) : à réévaluer (typescript-eslint accepte ESLint 10 ; reste à vérifier eslint-config-next).
+- Remote `origin` existe (repo GitHub) : la CI n'a toujours pas été exécutée.
+### Blocages : ADR 001/002/006 toujours « Proposed » ; premier `supabase start` a téléchargé les images Docker (long)
+### Demain : J6 (migrations du noyau tenant : organizations, organization_members, subscriptions, usage_counters ; schéma `private`)

@@ -5,7 +5,7 @@
   "description": "Worker Node séparé : jobs, sync, envois, agent runs (spec §6, ADR 003)",
   "type": "module",
   "scripts": {
-    "dev": "tsx watch src/index.ts",
+    "dev": "tsx watch --env-file-if-exists=../../.env --env-file-if-exists=../../.env.local src/index.ts",
     "typecheck": "tsc --noEmit",
     "test": "vitest run"
   },

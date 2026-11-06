@@ -1,0 +1,22 @@
+{
+  "name": "@fusion-leap/domain",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Types, validation zod, règles métier pures (spec §6)",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "zod": "4.6.7"
+  },
+  "devDependencies": {
+    "@types/node": "24.19.2",
+    "typescript": "6.0.3",
+    "vitest": "5.1.0"
+  }
+}

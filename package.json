@@ -1,0 +1,41 @@
+{
+  "name": "fusion-leap-ai-growth",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Fusion Leap AI Growth — plateforme SaaS multi-tenant (monorepo pnpm + Turborepo)",
+  "packageManager": "pnpm@12.18.0",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "dev": "pnpm --filter @fusion-leap/web dev",
+    "build": "turbo run build",
+    "lint": "eslint .",
+    "typecheck": "turbo run typecheck",
+    "test": "turbo run test",
+    "test:rls": "pnpm --filter @fusion-leap/rls-tests test:rls",
+    "test:e2e": "node scripts/not-yet.mjs test:e2e J15",
+    "db:reset": "supabase db reset",
+    "db:migrate": "supabase migration up",
+    "worker:dev": "pnpm --filter @fusion-leap/worker dev",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "db:start": "supabase start",
+    "db:stop": "supabase stop",
+    "check:leaks": "tsx scripts/check-client-leaks.ts",
+    "test:db": "supabase test db"
+  },
+  "devDependencies": {
+    "@eslint/js": "9.39.5",
+    "@types/node": "24.19.2",
+    "eslint": "9.39.5",
+    "eslint-config-next": "16.4.5",
+    "globals": "17.14.0",
+    "prettier": "3.9.10",
+    "supabase": "3.0.0",
+    "tsx": "4.23.15",
+    "turbo": "2.11.10",
+    "typescript": "6.0.3",
+    "typescript-eslint": "8.72.1"
+  }
+}

@@ -1,0 +1,9 @@
+packages:
+  - "apps/*"
+  - "packages/*"
+  - "supabase/tests/rls"
+
+# Scripts de build de dépendances : liste blanche explicite (pnpm : strictDepBuilds = true par défaut).
+# esbuild (utilisé par vitest et tsx) télécharge/valide son binaire natif au postinstall.
+allowBuilds:
+  esbuild: true

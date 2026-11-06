@@ -1,0 +1,11 @@
+node_modules
+.next
+.turbo
+dist
+coverage
+pnpm-lock.yaml
+docs/plan/provided-plan.*
+docs/spec
+docs
+CLAUDE.md
+*.md

@@ -181,3 +181,32 @@ Manager (moi) + agents : A1a/A1b chercheurs (lecture seule), A2 Auth/SSR, A3 i18
 - Mailpit absent de la CI : pas de test e2e des e-mails en CI (à traiter en J57/J60).
 - Limitation de débit applicative et CAPTCHA : J57.
 ### Demain : J9 (organisations et contexte actif)
+
+## J09 — lun 23 nov 2026 — Phase 1 (préparé en avance, NON commité, branche `day-09-orgs-tenant-context`)
+Cible : 15,9 % | Réel : à valider | Statut : —
+
+### Organisation du travail
+Manager + agents : A2 base de données, A3 application et UI, A4 tests, A5 sécurité (hostile, lecture seule), A6 qualité (lecture seule), puis F2/F3 (corrections) et A5b (re-vérification). Périmètres de fichiers disjoints ; aucun commit par les agents.
+
+### Tâches
+| Tâche | Estimé | Livré | Validée |
+|---|---|---|---|
+| `create_organization()` transactionnelle (security definer) + enveloppe invoker + retour arrière | 2 h | oui | oui (pgTAP 225, RLS 133) |
+| `getTenantContext()` relu en base à chaque requête + cookie `fl_active_org` | 2 h | oui | oui |
+| `POST /api/orgs` (Idempotency-Key, erreurs normalisées), pages onboarding / sélecteur AR/EN | 1,5 h | oui | oui (navigateur : nouvel utilisateur → onboarding → tableau de bord Owner ; utilisateur à deux organisations → sélecteur) |
+| Tests | 0,5 h | oui | oui |
+
+### Tests : web 533 ✓ · domain 239 ✓ · worker 3 · adapters 1 · permissions 1 · pgTAP 225 ✓ · RLS 133 ✓ · lint, typecheck, `next build`, `check:leaks --require-bundle` verts
+### Écarts à la spec / plan
+- Colonnes `created_by` et `creation_key` sur `organizations` (idempotence de création) : validées par la responsable technique, ADR 005 addendum.
+- Pas de pipeline par défaut (J19) ; fonction étendue alors.
+- Migration modifiée sur place avant tout commit (voir ADR 005 addendum).
+### Constats de sécurité (A5/A5b)
+- Moyen corrigé : noms avec caractères bidi/invisibles/contrôle (spoofing) → règles communes zod + SQL, avec tests.
+- Moyen corrigé : fuseaux horaires divergents entre Node et Postgres.
+- Faibles corrigés : limite de corps appliquée après lecture, rejeu après retrait de l'adhésion (500), champs inconnus ignorés, accessibilité, requêtes dupliquées, code mort.
+- Restent (faible, documentés) : pas de plafond ni de limitation de débit (J57) ; liste noire de caractères invisibles incomplète (U+3164, U+00AD…) ; `creation_key` lisible par les membres ; règle lettre/chiffre légèrement plus large côté zod pour quelques chiffres symboliques.
+### Blocages / à faire
+- Plafond d'organisations par utilisateur : décision de la responsable technique (aucun plafond posé).
+- `supabase/config.toml` : modification locale non commitée (SMTP Resend) à trancher.
+### Demain : J10 (invitations et RBAC applicatif)

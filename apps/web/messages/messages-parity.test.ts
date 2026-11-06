@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import ar from "./ar.json";
 import en from "./en.json";
+import fr from "./fr.json";
 
 type Json = string | { [k: string]: Json };
 
@@ -57,24 +58,31 @@ function placeholders(msg: string): string[] {
 
 const arFlat = flatten(ar as Json);
 const enFlat = flatten(en as Json);
+const frFlat = flatten(fr as Json);
 
-describe("messages ar/en", () => {
+describe("messages fr/ar/en", () => {
   it("contiennent des clés (garde contre un fichier vide)", () => {
     expect(arFlat.size).toBeGreaterThan(20);
     expect(enFlat.size).toBeGreaterThan(20);
+    expect(frFlat.size).toBeGreaterThan(20);
   });
 
   it("ont exactement les mêmes clés aplaties", () => {
     const a = [...arFlat.keys()].sort();
     const e = [...enFlat.keys()].sort();
+    const f = [...frFlat.keys()].sort();
     expect(a.filter((k) => !enFlat.has(k))).toEqual([]);
     expect(e.filter((k) => !arFlat.has(k))).toEqual([]);
+    expect(f.filter((k) => !enFlat.has(k))).toEqual([]);
+    expect(e.filter((k) => !frFlat.has(k))).toEqual([]);
     expect(a).toEqual(e);
+    expect(f).toEqual(e);
   });
 
   it.each([
     ["ar", arFlat],
     ["en", enFlat],
+    ["fr", frFlat],
   ] as const)("%s : aucune valeur vide", (_l, flat) => {
     const empty = [...flat].filter(([, v]) => v.trim() === "").map(([k]) => k);
     expect(empty).toEqual([]);
@@ -83,8 +91,9 @@ describe("messages ar/en", () => {
   it("ont les mêmes placeholders ICU par clé", () => {
     const diffs: string[] = [];
     for (const [key, value] of arFlat) {
-      const other = enFlat.get(key);
-      if (other !== undefined && placeholders(value).join(",") !== placeholders(other).join(",")) diffs.push(key);
+      for (const other of [enFlat.get(key), frFlat.get(key)]) {
+        if (other !== undefined && placeholders(value).join(",") !== placeholders(other).join(",")) diffs.push(key);
+      }
     }
     expect(diffs).toEqual([]);
   });
@@ -100,6 +109,7 @@ describe("messages ar/en", () => {
     for (const c of codes) {
       expect(arFlat.has(`Auth.errors.${c}`), `ar ${c}`).toBe(true);
       expect(enFlat.has(`Auth.errors.${c}`), `en ${c}`).toBe(true);
+      expect(frFlat.has(`Auth.errors.${c}`), `fr ${c}`).toBe(true);
     }
   });
 
@@ -107,11 +117,31 @@ describe("messages ar/en", () => {
     // Le callback redirige vers /login?error=link_invalid : la page doit pouvoir l'afficher.
     expect(enFlat.has("Auth.errors.link_invalid")).toBe(true);
     expect(arFlat.has("Auth.errors.link_invalid")).toBe(true);
+    expect(frFlat.has("Auth.errors.link_invalid")).toBe(true);
   });
 
   it("l'arabe n'est pas une copie de l'anglais", () => {
     const allowed = new Set(["Meta.title", "Common.appName", "Home.title"]);
     const same = [...arFlat].filter(([k, v]) => !allowed.has(k) && enFlat.get(k) === v && /[A-Za-z]{4,}/.test(v));
     expect(same.map(([k]) => k)).toEqual([]);
+  });
+
+  it("le français n'est pas une copie de l'anglais et ne contient pas d'arabe", () => {
+    const allowed = new Set(["Meta.title", "Common.appName", "Home.title"]);
+    const same = [...frFlat].filter(([k, v]) => !allowed.has(k) && enFlat.get(k) === v && /[A-Za-z]{4,}/.test(v));
+    expect(same.map(([k]) => k)).toEqual([]);
+    expect([...frFlat].filter(([, v]) => /[؀-ۿ]/.test(v)).map(([k]) => k)).toEqual([]);
+  });
+
+  it("typographie française : espace insécable avant ? ! : ; (jamais d'espace ordinaire ni d'absence)", () => {
+    const bad = [...frFlat]
+      .filter(([, v]) => / [?!;:]/.test(v) || /[^\s\xa0\u202f][?!;]/.test(v) || /[^\s\xa0\u202f0-9]:(?=\s)/.test(v))
+      .map(([k]) => k);
+    expect(bad).toEqual([]);
+  });
+
+  it("le français emploie le vouvoiement (jamais tu / ton / ta / tes / toi)", () => {
+    const tu = [...frFlat].filter(([, v]) => /(?<![\p{L}\u2019])(tu|ton|ta|tes|toi)(?![\p{L}])/iu.test(v)).map(([k]) => k);
+    expect(tu).toEqual([]);
   });
 });

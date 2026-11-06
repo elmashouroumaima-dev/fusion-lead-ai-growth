@@ -357,16 +357,23 @@ describe("POST /api/orgs : succès et rejeu", () => {
     expect(body.role).toBe("company_owner");
   });
 
-  it("applique les défauts (locale ar, fuseau UTC) et rogne le nom avant le RPC", async () => {
+  it("applique les défauts (locale fr, fuseau UTC) et rogne le nom avant le RPC", async () => {
     membershipReads.push([], [orgRow]);
     rpc.mockResolvedValue({ data: ORG, error: null });
     await POST(req({ name: "  Acme  " }));
     expect(rpc).toHaveBeenCalledWith("create_organization", {
       p_name: "Acme",
-      p_locale: "ar",
+      p_locale: "fr",
       p_timezone: "UTC",
       p_creation_key: KEY,
     });
+  });
+
+  it.each(["fr", "ar", "en"])("transmet la locale %s au RPC", async (locale) => {
+    membershipReads.push([], [orgRow]);
+    rpc.mockResolvedValue({ data: ORG, error: null });
+    await POST(req({ name: "Acme", locale }));
+    expect(rpc).toHaveBeenCalledWith("create_organization", expect.objectContaining({ p_locale: locale }));
   });
 
   it("le RPC est appelé avec le client de l'utilisateur et aucun identifiant utilisateur en paramètre", async () => {

@@ -12,7 +12,7 @@ export type TenantActionErrorCode =
 
 /**
  * État renvoyé aux formulaires (useActionState). Les actions ne produisent JAMAIS de message
- * lisible : seulement un code ; l'interface le traduit (ar/en).
+ * lisible : seulement un code ; l'interface le traduit (fr/ar/en).
  */
 export type TenantActionState = {
   status: "idle" | "error" | "success";

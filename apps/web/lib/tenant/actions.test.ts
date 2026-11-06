@@ -90,7 +90,8 @@ describe("createOrganizationAction", () => {
   it.each([
     ["nom vide", { name: " " }, "name"],
     ["fuseau inconnu", { timezone: "Mars/Olympus" }, "timezone"],
-    ["locale inconnue", { locale: "fr" }, "locale"],
+    ["locale inconnue", { locale: "es" }, "locale"],
+    ["locale en majuscules", { locale: "FR" }, "locale"],
     ["clé de création invalide", { creation_key: "x" }, "creation_key"],
   ])("invalid_input : %s (noms de champs seulement)", async (_l, patch, fieldName) => {
     const result = await outcome(createOrganizationAction(IDLE, form({ ...valid, ...patch })));
@@ -153,6 +154,6 @@ describe("switchOrganizationAction", () => {
       code: "invalid_input",
     });
     getClaims.mockResolvedValue({ data: null, error: null });
-    await expect(outcome(switchOrganizationAction(IDLE, form({ organization_id: ORG })))).resolves.toBe("/ar/login");
+    await expect(outcome(switchOrganizationAction(IDLE, form({ organization_id: ORG })))).resolves.toBe("/fr/login");
   });
 });

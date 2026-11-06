@@ -1,9 +1,10 @@
-import { LOCALES, type AuthLocale } from "@fusion-leap/domain";
+import { DEFAULT_LOCALE, LOCALES, type AuthLocale } from "@fusion-leap/domain";
 
 /** Cookie court posé par /auth/confirm (type recovery) : autorise l'écran reset-password. */
 export const RECOVERY_COOKIE = "fl_recovery";
 
-export const DEFAULT_LOCALE: AuthLocale = "ar";
+/** Repli de locale : réexport de la source unique (domain). */
+export { DEFAULT_LOCALE };
 
 /** Pages publiques (sans le préfixe de locale). */
 const PUBLIC_PATHS = new Set(["", "/", "/login", "/signup", "/forgot-password", "/reset-password"]);

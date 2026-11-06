@@ -1,4 +1,4 @@
-import { localeSchema, type TenantRole } from "@fusion-leap/domain";
+import { localeSchema, type AuthLocale, type TenantRole } from "@fusion-leap/domain";
 import { redirect } from "next/navigation";
 import { DEFAULT_LOCALE } from "../auth/routes";
 import { readActiveOrgCookie } from "./active-org-cookie";
@@ -13,7 +13,7 @@ export type TenantContext = {
   userId: string;
   organizationId: string;
   role: TenantRole;
-  organization: { id: string; name: string; slug: string; locale: "ar" | "en"; timezone: string };
+  organization: { id: string; name: string; slug: string; locale: AuthLocale; timezone: string };
 };
 
 /**

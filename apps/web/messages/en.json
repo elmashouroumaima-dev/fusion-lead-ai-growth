@@ -9,8 +9,7 @@
     "submitting": "Please wait…"
   },
   "LanguageSwitcher": {
-    "label": "Language",
-    "switchTo": "العربية"
+    "label": "Language"
   },
   "Home": {
     "title": "Fusion Leap AI Growth",
@@ -96,6 +95,7 @@
         "locale": "The default language used for your organization."
       },
       "locales": {
+        "fr": "French",
         "ar": "Arabic",
         "en": "English"
       },

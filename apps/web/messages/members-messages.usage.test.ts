@@ -4,6 +4,7 @@ import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import ar from "./ar.json";
 import en from "./en.json";
+import fr from "./fr.json";
 
 /**
  * Parité et usage des messages Members.* / Invite.* (J10, agent A4) : chaque clé réellement
@@ -24,6 +25,7 @@ function flatten(obj: Json, prefix = ""): Map<string, string> {
 }
 const AR = flatten(ar as Json);
 const EN = flatten(en as Json);
+const FR = flatten(fr as Json);
 
 function sources(): string[] {
   const dirs = [path.join(WEB, "components/members"), path.join(WEB, "app/[locale]/(app)/members"), path.join(WEB, "app/[locale]/invite")];
@@ -87,6 +89,7 @@ describe("messages Members.* / Invite.* : usage réel", () => {
     for (const key of AR.keys()) {
       if (!isMembersKey(key)) continue;
       expect(vars(AR.get(key) ?? ""), key).toEqual(vars(EN.get(key) ?? ""));
+      expect(vars(FR.get(key) ?? ""), key).toEqual(vars(EN.get(key) ?? ""));
     }
   });
 

@@ -10,11 +10,20 @@ Page : `/{locale}/settings/appearance` (owner et admin d'organisation ; les autr
 
 Réponse : `{ status: "idle" | "error" | "success", code? }` avec `code` ∈ `invalid_input`, `forbidden`, `rate_limited`, `duplicate_request`, `idempotency_in_progress`, `idempotency_conflict`, `service_unavailable`, `generic`. Débit : `mutation`. Aucune organisation : `organization_id` est refusé. Idempotence sans objet (upsert naturellement idempotent).
 
+## Logo
+| Action | Champs | Effet |
+|---|---|---|
+| `saveLogoAction` | `logo` (JSON `{ mime, data }` base64), `uiLocale` | enregistre `appearance.logo` |
+| `resetLogoAction` | `uiLocale` | supprime le logo (retour au logo par défaut) |
+
+PNG / JPEG / WebP, ≤ 128 Ko décodés, type reconnu par les octets (SVG refusé). Affichage : `GET /api/brand/logo` (public, 404 sans logo). Mêmes droits et mêmes codes d'erreur que la palette.
+
 ## Fonctions SQL
 - `set_platform_config(p_key text, p_value jsonb)` — `authenticated` ; `42501 forbidden` si l'appelant n'est pas owner/admin actif d'une organisation ; `22023 validation_failed` si clé hors liste blanche ou forme invalide.
 - `reset_platform_config(p_key text)` — idem.
 - `can_manage_platform_config()` — `authenticated` ; `true` si `auth.uid()` est owner/admin actif d'une organisation.
-- `get_platform_config(p_key text)` — **`service_role` seulement** (lecture serveur) ; `null` si absente ou clé hors liste blanche.
+- `get_platform_config(p_key text)` — **`service_role` seulement** (lecture serveur) ; `null` si absente ou clé hors liste blanche (`appearance.palette`, `appearance.logo`).
+- `get_platform_config_updated_at(p_key text)` — **`service_role` seulement** ; date de dernière modification (version de l'URL du logo).
 - Aucun accès direct à la table `platform_config`.
 
 ## Forme de la palette

@@ -1,12 +1,18 @@
 "use client";
 
 import type { TenantRole } from "@fusion-leap/domain";
+import { CrownIcon, MoreHorizontalIcon, ShieldIcon, UserMinusIcon } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
-import { useActionState, useEffect, useId, useRef, useState } from "react";
+import { useActionState, useId, useState } from "react";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { changeMemberRoleAction, removeMemberAction, transferOwnershipAction } from "../../lib/members/actions";
 import type { MembersActionState } from "../../lib/members/types";
 import { ActionFeedback } from "./action-feedback";
-import styles from "./members.module.css";
 import { useAnnounce } from "./page-feedback";
 
 type Props = {
@@ -24,12 +30,14 @@ type Props = {
 
 const initialState: MembersActionState = { status: "idle" };
 
-type Confirming = "remove" | "transfer" | null;
+type OpenDialog = "role" | "remove" | "transfer" | null;
+type Outcome = "roleChanged" | "transferred";
 
 /**
- * Actions d'une ligne de membre. Les booléens `can*` ne servent qu'à l'affichage : chaque action
- * serveur revérifie le contexte, `can()`/`canManageMember()` puis la RLS. La confirmation se fait
- * dans la page (aucun window.confirm).
+ * Actions d'une ligne de membre : un menu (modifier le rôle, transférer la propriété, retirer) dont
+ * chaque choix ouvre une fenêtre de confirmation dans la page (aucun window.confirm). Les booléens
+ * `can*` ne servent qu'à l'affichage : chaque action serveur revérifie le contexte, `can()` /
+ * `canManageMember()` puis la RLS.
  */
 export function MemberActions({ organizationId, memberId, shortId, role, roleOptions, canChangeRole, canRemove, canTransfer }: Props) {
   const t = useTranslations("Members");
@@ -38,27 +46,35 @@ export function MemberActions({ organizationId, memberId, shortId, role, roleOpt
   const uid = useId();
   const subject = t("list.subject", { id: shortId });
 
-  const [roleState, roleAction, rolePending] = useActionState(changeMemberRoleAction, initialState);
   const announce = useAnnounce();
+  // Un seul canal par message : les ERREURS sont annoncées par la région live de la ligne (ActionFeedback), jamais
+  // en notification ; seul le succès du rôle / transfert passe par une notification (toast).
+  const notify = (result: MembersActionState, success?: Outcome) => {
+    if (result.status === "success" && success) toast.success(t(`success.${success}`));
+  };
+  const [roleState, roleAction, rolePending] = useActionState(async (prev: MembersActionState, formData: FormData) => {
+    const result = await changeMemberRoleAction(prev, formData);
+    notify(result, "roleChanged");
+    return result;
+  }, initialState);
   const [removeState, removeAction, removePending] = useActionState(async (prev: MembersActionState, formData: FormData) => {
     const result = await removeMemberAction(prev, formData);
+    notify(result);
     // La ligne disparaît après le retrait : le succès est annoncé au niveau de la page.
     if (result.status === "success") announce("removed", "members-title");
     return result;
   }, initialState);
-  const [transferState, transferAction, transferPending] = useActionState(transferOwnershipAction, initialState);
-  const [confirming, setConfirming] = useState<Confirming>(null);
+  const [transferState, transferAction, transferPending] = useActionState(async (prev: MembersActionState, formData: FormData) => {
+    const result = await transferOwnershipAction(prev, formData);
+    notify(result, "transferred");
+    return result;
+  }, initialState);
+  const [dialog, setDialog] = useState<OpenDialog>(null);
   // Clé d'idempotence du transfert : créée à l'ouverture de la confirmation (événement client, donc sans écart d'hydratation).
   const [transferKey, setTransferKey] = useState("");
-  const cancelRef = useRef<HTMLButtonElement>(null);
-
-  // Le focus passe au bouton « Annuler » à l'ouverture de la confirmation (action sûre par défaut).
-  useEffect(() => {
-    if (confirming) cancelRef.current?.focus();
-  }, [confirming]);
 
   const roleId = `${uid}-role`;
-  const roleInvalid = roleState.status === "error";
+  const busy = rolePending || removePending || transferPending;
   const common = (
     <>
       <input type="hidden" name="uiLocale" value={uiLocale} />
@@ -68,76 +84,137 @@ export function MemberActions({ organizationId, memberId, shortId, role, roleOpt
   );
 
   return (
-    <div className={styles.rowActions}>
-      {canChangeRole ? (
-        <form action={roleAction} className={styles.inlineForm}>
-          {common}
-          <label className={styles.srOnly} htmlFor={roleId}>
-            {t("actions.roleLabel", { subject })}
-          </label>
-          <select id={roleId} name="role" className={styles.select} defaultValue={role} aria-invalid={roleInvalid}>
-            {roleOptions.map((option) => (
-              <option key={option} value={option}>
-                {to(`roles.${option}`)}
-              </option>
-            ))}
-          </select>
-          <button className="btn btn-secondary" type="submit" disabled={rolePending} aria-label={t("actions.saveRoleLabel", { subject })}>
-            {t("actions.saveRole")}
-          </button>
-        </form>
-      ) : null}
+    <div className="flex flex-col items-end gap-1">
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button type="button" variant="ghost" size="icon-sm" disabled={busy} aria-label={t("actions.menu", { subject })}>
+            <MoreHorizontalIcon aria-hidden="true" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          {canChangeRole ? (
+            <DropdownMenuItem onSelect={() => setDialog("role")}>
+              <ShieldIcon aria-hidden="true" />
+              {t("actions.changeRole")}
+            </DropdownMenuItem>
+          ) : null}
+          {canTransfer ? (
+            <DropdownMenuItem
+              aria-label={t("actions.transferLabel", { subject })}
+              onSelect={() => {
+                setTransferKey(crypto.randomUUID());
+                setDialog("transfer");
+              }}
+            >
+              <CrownIcon aria-hidden="true" />
+              {t("actions.transfer")}
+            </DropdownMenuItem>
+          ) : null}
+          {canRemove ? (
+            <>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem variant="destructive" aria-label={t("actions.removeLabel", { subject })} onSelect={() => setDialog("remove")}>
+                <UserMinusIcon aria-hidden="true" />
+                {t("actions.remove")}
+              </DropdownMenuItem>
+            </>
+          ) : null}
+        </DropdownMenuContent>
+      </DropdownMenu>
 
-      {canTransfer ? (
-        <button
-          className="btn btn-secondary"
-          type="button"
-          aria-label={t("actions.transferLabel", { subject })}
-          aria-expanded={confirming === "transfer"}
-          onClick={() => {
-            setTransferKey(crypto.randomUUID());
-            setConfirming("transfer");
-          }}
-        >
-          {t("actions.transfer")}
-        </button>
-      ) : null}
+      <Dialog open={dialog === "role"} onOpenChange={(next) => setDialog(next ? "role" : null)}>
+        <DialogContent closeLabel={t("dialog.close")}>
+          <DialogHeader>
+            <DialogTitle>{t("actions.changeRoleTitle")}</DialogTitle>
+            <DialogDescription>{t("actions.changeRoleDescription", { subject })}</DialogDescription>
+          </DialogHeader>
+          <form
+            className="grid gap-4"
+            action={(formData) => {
+              setDialog(null);
+              roleAction(formData);
+            }}
+          >
+            {common}
+            <div className="grid gap-2">
+              <Label htmlFor={roleId}>{t("actions.roleLabel", { subject })}</Label>
+              <Select name="role" defaultValue={role} required>
+                <SelectTrigger id={roleId} className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {roleOptions.map((option) => (
+                    <SelectItem key={option} value={option}>
+                      {to(`roles.${option}`)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => setDialog(null)}>
+                {t("actions.cancel")}
+              </Button>
+              <Button type="submit" disabled={rolePending} aria-label={t("actions.saveRoleLabel", { subject })}>
+                {t("actions.saveRole")}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
 
-      {canRemove ? (
-        <button
-          className="btn btn-secondary"
-          type="button"
-          aria-label={t("actions.removeLabel", { subject })}
-          aria-expanded={confirming === "remove"}
-          onClick={() => setConfirming("remove")}
-        >
-          {t("actions.remove")}
-        </button>
-      ) : null}
+      <Dialog open={dialog === "transfer"} onOpenChange={(next) => setDialog(next ? "transfer" : null)}>
+        <DialogContent closeLabel={t("dialog.close")}>
+          <DialogHeader>
+            <DialogTitle>{t("actions.transferTitle")}</DialogTitle>
+            <DialogDescription>{t("actions.transferConfirm", { subject })}</DialogDescription>
+          </DialogHeader>
+          <form
+            action={(formData) => {
+              setDialog(null);
+              transferAction(formData);
+            }}
+          >
+            {common}
+            <input type="hidden" name="idempotency_key" value={transferKey} />
+            <DialogFooter>
+              <Button type="button" variant="outline" autoFocus onClick={() => setDialog(null)}>
+                {t("actions.cancel")}
+              </Button>
+              <Button type="submit" disabled={transferPending}>
+                {t("actions.confirm")}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
 
-      {confirming ? (
-        <form
-          className={`${styles.confirm} ${styles.fullWidth}`}
-          action={(formData) => {
-            setConfirming(null);
-            (confirming === "remove" ? removeAction : transferAction)(formData);
-          }}
-        >
-          {common}
-          {confirming === "transfer" ? <input type="hidden" name="idempotency_key" value={transferKey} /> : null}
-          <p>{confirming === "remove" ? t("actions.removeConfirm", { subject }) : t("actions.transferConfirm", { subject })}</p>
-          <div className="actions">
-            <button className={`btn ${styles.btnDanger}`} type="submit" disabled={removePending || transferPending}>
-              {t("actions.confirm")}
-            </button>
-            <button ref={cancelRef} className="btn btn-secondary" type="button" onClick={() => setConfirming(null)}>
-              {t("actions.cancel")}
-            </button>
-          </div>
-        </form>
-      ) : null}
+      <Dialog open={dialog === "remove"} onOpenChange={(next) => setDialog(next ? "remove" : null)}>
+        <DialogContent closeLabel={t("dialog.close")}>
+          <DialogHeader>
+            <DialogTitle>{t("actions.removeTitle")}</DialogTitle>
+            <DialogDescription>{t("actions.removeConfirm", { subject })}</DialogDescription>
+          </DialogHeader>
+          <form
+            action={(formData) => {
+              setDialog(null);
+              removeAction(formData);
+            }}
+          >
+            {common}
+            <DialogFooter>
+              <Button type="button" variant="outline" autoFocus onClick={() => setDialog(null)}>
+                {t("actions.cancel")}
+              </Button>
+              <Button type="submit" variant="destructive" disabled={removePending}>
+                {t("actions.confirm")}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
 
-      <div className={styles.fullWidth}>
+      <div className="text-end">
         <ActionFeedback state={roleState} successKey="roleChanged" />
         <ActionFeedback state={removeState} />
         <ActionFeedback state={transferState} successKey="transferred" />

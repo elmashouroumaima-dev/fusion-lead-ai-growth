@@ -6,10 +6,43 @@
   "Common": {
     "appName": "Fusion Leap AI Growth",
     "skipToContent": "Skip to content",
-    "submitting": "Please wait…"
+    "submitting": "Please wait…",
+    "notifications": "Notifications"
   },
   "LanguageSwitcher": {
     "label": "Language"
+  },
+  "Shell": {
+    "nav": {
+      "label": "Main navigation",
+      "dashboard": "Dashboard",
+      "members": "Members"
+    },
+    "sidebar": {
+      "toggle": "Show or hide the side menu",
+      "mobileTitle": "Navigation menu",
+      "mobileDescription": "Browse the sections of the application.",
+      "close": "Close"
+    },
+    "breadcrumb": {
+      "label": "Breadcrumb"
+    },
+    "pages": {
+      "onboarding": "Organization setup",
+      "selectOrganization": "Choose an organization"
+    },
+    "theme": {
+      "label": "Theme",
+      "light": "Light",
+      "dark": "Dark",
+      "system": "System"
+    },
+    "profile": {
+      "menu": "Account menu",
+      "signedInAs": "Signed in as",
+      "unknownUser": "Unknown user",
+      "signOut": "Sign out"
+    }
   },
   "Home": {
     "title": "Fusion Leap AI Growth",
@@ -21,7 +54,9 @@
     "fields": {
       "email": "Email address",
       "password": "Password",
-      "newPassword": "New password"
+      "newPassword": "New password",
+      "showPassword": "Show password",
+      "hidePassword": "Hide password"
     },
     "hints": {
       "passwordMin": "At least 10 characters."
@@ -66,14 +101,47 @@
       "signUp": "If this address can be used, a confirmation email is on its way. Open the link in it to finish.",
       "requestReset": "If an account exists for this address, a reset link is on its way.",
       "updatePassword": "Your password has been updated."
+    },
+    "brand": {
+      "featuresLabel": "Key strengths",
+      "features": {
+        "secure": "Secure",
+        "fast": "Fast",
+        "governed": "Governed"
+      }
     }
   },
   "Dashboard": {
     "title": "Dashboard",
     "signedInAs": "Signed in as",
     "unknownUser": "Unknown user",
-    "placeholder": "Your workspace will appear here.",
-    "signOut": "Sign out"
+    "subtitle": "An overview of your organization and your access.",
+    "organization": {
+      "title": "Organization",
+      "name": "Name",
+      "slug": "Identifier"
+    },
+    "role": {
+      "title": "Your role",
+      "description": "This role determines what you can do in this organization."
+    },
+    "preferences": {
+      "title": "Language and time zone",
+      "language": "Language",
+      "timezone": "Time zone",
+      "languages": {
+        "fr": "French",
+        "ar": "Arabic",
+        "en": "English"
+      }
+    },
+    "start": {
+      "title": "Getting started",
+      "description": "Here are the next steps to set up your team.",
+      "members": "Manage members",
+      "membersHint": "Invite people and give them a role.",
+      "noMembers": "Member management is reserved for owners and administrators."
+    }
   },
   "Org": {
     "roles": {
@@ -108,14 +176,14 @@
       "openNamed": "Open {name}",
       "current": "Current",
       "inactive": "Unavailable",
-      "createNew": "Create another organization"
+      "createNew": "Create another organization",
+      "listLabel": "Your organizations"
     },
     "switcher": {
       "label": "Organization",
       "submit": "Switch"
     },
     "dashboard": {
-      "organization": "Organization",
       "role": "Your role"
     },
     "errors": {
@@ -130,17 +198,13 @@
     }
   },
   "Members": {
-    "nav": {
-      "link": "Members"
-    },
     "title": "Members",
     "description": "Invite people, manage their roles and stay in control of who can access your organization.",
     "list": {
       "title": "Team members",
       "empty": "There are no members yet.",
       "you": "(you)",
-      "subject": "Member {id}",
-      "since": "Joined {date}"
+      "subject": "Member {id}"
     },
     "status": {
       "invited": "Invited",
@@ -163,7 +227,13 @@
       "transferLabel": "Transfer ownership to {subject}",
       "transferConfirm": "Transfer ownership to {subject}? You will become an administrator and this member will become the owner.",
       "confirm": "Confirm",
-      "cancel": "Cancel"
+      "cancel": "Cancel",
+      "menu": "Actions for {subject}",
+      "changeRole": "Change role",
+      "changeRoleTitle": "Change role",
+      "changeRoleDescription": "Choose the new role for {subject}.",
+      "removeTitle": "Remove this member",
+      "transferTitle": "Transfer ownership"
     },
     "success": {
       "roleChanged": "The role was updated.",
@@ -177,7 +247,9 @@
       "submit": "Create invitation link",
       "hints": {
         "email": "They must sign in with this exact address to accept."
-      }
+      },
+      "open": "Invite a member",
+      "created": "The invitation link has been created."
     },
     "inviteLink": {
       "title": "Invitation link",
@@ -209,6 +281,18 @@
       "service_unavailable": "The service is temporarily unavailable. Please try again in a moment.",
       "generic": "Something went wrong. Please try again.",
       "loadFailed": "The list could not be loaded. Please try again."
+    },
+    "dialog": {
+      "close": "Close"
+    },
+    "table": {
+      "member": "Member",
+      "role": "Role",
+      "status": "Status",
+      "joined": "Joined",
+      "email": "Email address",
+      "expires": "Expires",
+      "actions": "Actions"
     }
   },
   "Invite": {

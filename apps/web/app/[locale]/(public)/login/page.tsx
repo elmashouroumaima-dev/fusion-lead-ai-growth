@@ -1,6 +1,14 @@
 import { getTranslations } from "next-intl/server";
 import { AuthForm } from "../../../../components/auth/auth-form";
 import { parseInitialError } from "../../../../components/auth/initial-error";
+import {
+  PageCard,
+  PageCardContent,
+  PageCardDescription,
+  PageCardFooter,
+  PageCardHeader,
+  PageCardTitle,
+} from "../../../../components/public/page-card";
 import { Link } from "../../../../i18n/navigation";
 import { requireLocale } from "../../../../i18n/require-locale";
 import { signInAction } from "../../../../lib/auth/actions";
@@ -21,25 +29,36 @@ export default async function LoginPage({ params, searchParams }: PageProps) {
   const initialErrorCode = parseInitialError(error);
 
   return (
-    <section className="card">
-      <h1>{t("login.title")}</h1>
-      <p className="lead">{t("login.description")}</p>
-      <AuthForm
-        action={signInAction}
-        submitLabel={t("login.submit")}
-        next={nextValue}
-        initialErrorCode={initialErrorCode}
-        fields={[
-          { name: "email", label: "email", type: "email", autoComplete: "email" },
-          { name: "password", label: "password", type: "password", autoComplete: "current-password" },
-        ]}
-      />
-      <div className="links">
-        <Link href="/forgot-password">{t("login.forgot")}</Link>
-        <span>
-          {t("login.noAccount")} <Link href="/signup">{t("login.toSignup")}</Link>
-        </span>
-      </div>
-    </section>
+    <PageCard>
+      <PageCardHeader>
+        <PageCardTitle>{t("login.title")}</PageCardTitle>
+        <PageCardDescription>{t("login.description")}</PageCardDescription>
+      </PageCardHeader>
+      <PageCardContent>
+        <AuthForm
+          action={signInAction}
+          submitLabel={t("login.submit")}
+          next={nextValue}
+          initialErrorCode={initialErrorCode}
+          passwordAction={
+            <Link href="/forgot-password" className="text-primary-text text-sm font-medium underline-offset-4 hover:underline">
+              {t("login.forgot")}
+            </Link>
+          }
+          fields={[
+            { name: "email", label: "email", type: "email", autoComplete: "email" },
+            { name: "password", label: "password", type: "password", autoComplete: "current-password" },
+          ]}
+        />
+      </PageCardContent>
+      <PageCardFooter>
+        <p className="text-muted-foreground">
+          {t("login.noAccount")}{" "}
+          <Link href="/signup" className="text-primary-text font-medium underline-offset-4 hover:underline">
+            {t("login.toSignup")}
+          </Link>
+        </p>
+      </PageCardFooter>
+    </PageCard>
   );
 }

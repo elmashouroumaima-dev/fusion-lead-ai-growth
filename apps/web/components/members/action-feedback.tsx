@@ -2,7 +2,6 @@
 
 import { useTranslations } from "next-intl";
 import type { MembersActionState } from "../../lib/members/types";
-import styles from "./members.module.css";
 
 type Props = {
   state: MembersActionState;
@@ -17,9 +16,9 @@ type Props = {
 export function ActionFeedback({ state, successKey }: Props) {
   const t = useTranslations("Members");
   return (
-    <div className={styles.feedback} role="status" aria-live="polite">
-      {state.status === "error" ? <p className="notice notice-error">{t(`errors.${state.code ?? "generic"}`)}</p> : null}
-      {state.status === "success" && successKey ? <p className="notice notice-success">{t(`success.${successKey}`)}</p> : null}
+    <div role="status" aria-live="polite" className="empty:hidden">
+      {state.status === "error" ? <p className="text-destructive-text text-sm">{t(`errors.${state.code ?? "generic"}`)}</p> : null}
+      {state.status === "success" && successKey ? <p className="text-primary-text text-sm">{t(`success.${successKey}`)}</p> : null}
     </div>
   );
 }

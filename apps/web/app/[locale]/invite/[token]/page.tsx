@@ -1,7 +1,16 @@
 import { invitationTokenSchema } from "@fusion-leap/domain";
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
+import { CircleAlertIcon } from "lucide-react";
 import { AcceptInvitationForm } from "../../../../components/members/accept-invitation-form";
+import {
+  PageCard,
+  PageCardContent,
+  PageCardDescription,
+  PageCardHeader,
+  PageCardTitle,
+} from "../../../../components/public/page-card";
+import { Alert, AlertDescription } from "../../../../components/ui/alert";
 import { requireLocale } from "../../../../i18n/require-locale";
 import { requireClaims } from "../../../../lib/auth/require-claims";
 
@@ -32,19 +41,24 @@ export default async function InvitePage({ params }: Props) {
   const parsed = invitationTokenSchema.safeParse(token);
 
   return (
-    <section className="card">
-      <h1>{t("title")}</h1>
-      {parsed.success ? (
-        <>
-          <p className="lead">{t("description")}</p>
-          <AcceptInvitationForm token={parsed.data} />
-          <p className="hint">{t("hint")}</p>
-        </>
-      ) : (
-        <p role="alert" className="notice notice-error">
-          {t("errors.invitation_invalid")}
-        </p>
-      )}
-    </section>
+    <PageCard>
+      <PageCardHeader>
+        <PageCardTitle>{t("title")}</PageCardTitle>
+        {parsed.success ? <PageCardDescription>{t("description")}</PageCardDescription> : null}
+      </PageCardHeader>
+      <PageCardContent>
+        {parsed.success ? (
+          <>
+            <AcceptInvitationForm token={parsed.data} />
+            <p className="text-muted-foreground text-sm">{t("hint")}</p>
+          </>
+        ) : (
+          <Alert role="alert" variant="destructive">
+            <CircleAlertIcon aria-hidden="true" />
+            <AlertDescription>{t("errors.invitation_invalid")}</AlertDescription>
+          </Alert>
+        )}
+      </PageCardContent>
+    </PageCard>
   );
 }

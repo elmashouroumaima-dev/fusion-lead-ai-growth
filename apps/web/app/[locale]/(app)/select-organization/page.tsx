@@ -1,5 +1,13 @@
 import { getTranslations } from "next-intl/server";
 import { OrganizationList } from "../../../../components/org/organization-list";
+import {
+  PageCard,
+  PageCardContent,
+  PageCardDescription,
+  PageCardFooter,
+  PageCardHeader,
+  PageCardTitle,
+} from "../../../../components/public/page-card";
 import { Link } from "../../../../i18n/navigation";
 import { requireLocale } from "../../../../i18n/require-locale";
 import { readActiveOrgCookie } from "../../../../lib/tenant/active-org-cookie";
@@ -30,21 +38,27 @@ export default async function SelectOrganizationPage({ params }: { params: Promi
   const currentId = memberships.find((m) => m.organizationId === hint)?.organizationId;
 
   return (
-    <section className="card">
-      <h1>{t("select.title")}</h1>
-      <p className="lead">{t("select.description")}</p>
-      <OrganizationList
-        currentId={currentId}
-        items={memberships.map((m) => ({
-          id: m.organizationId,
-          name: m.organization.name,
-          role: m.role,
-          status: m.organization.status,
-        }))}
-      />
-      <div className="links">
-        <Link href="/onboarding">{t("select.createNew")}</Link>
-      </div>
-    </section>
+    <PageCard className="max-w-lg">
+      <PageCardHeader>
+        <PageCardTitle>{t("select.title")}</PageCardTitle>
+        <PageCardDescription>{t("select.description")}</PageCardDescription>
+      </PageCardHeader>
+      <PageCardContent>
+        <OrganizationList
+          currentId={currentId}
+          items={memberships.map((m) => ({
+            id: m.organizationId,
+            name: m.organization.name,
+            role: m.role,
+            status: m.organization.status,
+          }))}
+        />
+      </PageCardContent>
+      <PageCardFooter>
+        <Link href="/onboarding" className="text-primary-text font-medium underline-offset-4 hover:underline">
+          {t("select.createNew")}
+        </Link>
+      </PageCardFooter>
+    </PageCard>
   );
 }

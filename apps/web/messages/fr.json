@@ -6,10 +6,43 @@
   "Common": {
     "appName": "Fusion Leap AI Growth",
     "skipToContent": "Aller au contenu",
-    "submitting": "Veuillez patienter…"
+    "submitting": "Veuillez patienter…",
+    "notifications": "Notifications de l'application"
   },
   "LanguageSwitcher": {
     "label": "Langue"
+  },
+  "Shell": {
+    "nav": {
+      "label": "Navigation principale",
+      "dashboard": "Tableau de bord",
+      "members": "Membres"
+    },
+    "sidebar": {
+      "toggle": "Afficher ou masquer le menu latéral",
+      "mobileTitle": "Menu de navigation",
+      "mobileDescription": "Parcourez les sections de l’application.",
+      "close": "Fermer"
+    },
+    "breadcrumb": {
+      "label": "Fil d’Ariane"
+    },
+    "pages": {
+      "onboarding": "Création de l’organisation",
+      "selectOrganization": "Choix de l’organisation"
+    },
+    "theme": {
+      "label": "Thème",
+      "light": "Clair",
+      "dark": "Sombre",
+      "system": "Système"
+    },
+    "profile": {
+      "menu": "Menu du compte",
+      "signedInAs": "Connecté en tant que",
+      "unknownUser": "Utilisateur inconnu",
+      "signOut": "Se déconnecter"
+    }
   },
   "Home": {
     "title": "Fusion Leap AI Growth",
@@ -21,7 +54,9 @@
     "fields": {
       "email": "Adresse e-mail",
       "password": "Mot de passe",
-      "newPassword": "Nouveau mot de passe"
+      "newPassword": "Nouveau mot de passe",
+      "showPassword": "Afficher le mot de passe",
+      "hidePassword": "Masquer le mot de passe"
     },
     "hints": {
       "passwordMin": "10 caractères au minimum."
@@ -66,14 +101,47 @@
       "signUp": "Si cette adresse peut être utilisée, un e-mail de confirmation vous a été envoyé. Ouvrez le lien qu’il contient pour terminer.",
       "requestReset": "Si un compte existe pour cette adresse, un lien de réinitialisation vous a été envoyé.",
       "updatePassword": "Votre mot de passe a été mis à jour."
+    },
+    "brand": {
+      "featuresLabel": "Points forts",
+      "features": {
+        "secure": "Sécurisé",
+        "fast": "Rapide",
+        "governed": "Sous contrôle"
+      }
     }
   },
   "Dashboard": {
     "title": "Tableau de bord",
     "signedInAs": "Connecté en tant que",
     "unknownUser": "Utilisateur inconnu",
-    "placeholder": "Votre espace de travail apparaîtra ici.",
-    "signOut": "Se déconnecter"
+    "subtitle": "Vue d’ensemble de votre organisation et de votre accès.",
+    "organization": {
+      "title": "Organisation",
+      "name": "Nom",
+      "slug": "Identifiant"
+    },
+    "role": {
+      "title": "Votre rôle",
+      "description": "Ce rôle détermine ce que vous pouvez faire dans cette organisation."
+    },
+    "preferences": {
+      "title": "Langue et fuseau horaire",
+      "language": "Langue",
+      "timezone": "Fuseau horaire",
+      "languages": {
+        "fr": "Français",
+        "ar": "Arabe",
+        "en": "Anglais"
+      }
+    },
+    "start": {
+      "title": "Pour commencer",
+      "description": "Voici les prochaines étapes pour mettre votre équipe en place.",
+      "members": "Gérer les membres",
+      "membersHint": "Invitez des personnes et attribuez-leur un rôle.",
+      "noMembers": "La gestion des membres est réservée aux propriétaires et aux administrateurs."
+    }
   },
   "Org": {
     "roles": {
@@ -108,14 +176,14 @@
       "openNamed": "Ouvrir {name}",
       "current": "Actuelle",
       "inactive": "Indisponible",
-      "createNew": "Créer une autre organisation"
+      "createNew": "Créer une autre organisation",
+      "listLabel": "Vos organisations"
     },
     "switcher": {
       "label": "Organisation",
       "submit": "Changer"
     },
     "dashboard": {
-      "organization": "Organisation",
       "role": "Votre rôle"
     },
     "errors": {
@@ -130,17 +198,13 @@
     }
   },
   "Members": {
-    "nav": {
-      "link": "Membres"
-    },
     "title": "Membres",
     "description": "Invitez des personnes, gérez leurs rôles et gardez le contrôle des accès à votre organisation.",
     "list": {
       "title": "Membres de l’équipe",
       "empty": "Il n’y a pas encore de membre.",
       "you": "(vous)",
-      "subject": "Membre {id}",
-      "since": "Membre depuis le {date}"
+      "subject": "Membre {id}"
     },
     "status": {
       "invited": "Invité",
@@ -163,7 +227,13 @@
       "transferLabel": "Transférer la propriété à {subject}",
       "transferConfirm": "Transférer la propriété à {subject} ? Vous deviendrez administrateur et ce membre deviendra propriétaire.",
       "confirm": "Confirmer",
-      "cancel": "Annuler"
+      "cancel": "Annuler",
+      "menu": "Actions pour {subject}",
+      "changeRole": "Modifier le rôle",
+      "changeRoleTitle": "Modifier le rôle",
+      "changeRoleDescription": "Choisissez le nouveau rôle de {subject}.",
+      "removeTitle": "Retirer ce membre",
+      "transferTitle": "Transférer la propriété"
     },
     "success": {
       "roleChanged": "Le rôle a été mis à jour.",
@@ -177,7 +247,9 @@
       "submit": "Créer le lien d’invitation",
       "hints": {
         "email": "Cette personne doit se connecter avec cette adresse exacte pour accepter."
-      }
+      },
+      "open": "Inviter un membre",
+      "created": "Le lien d’invitation a été créé."
     },
     "inviteLink": {
       "title": "Lien d’invitation",
@@ -209,6 +281,18 @@
       "service_unavailable": "Le service est momentanément indisponible. Veuillez réessayer dans un instant.",
       "generic": "Une erreur est survenue. Veuillez réessayer.",
       "loadFailed": "La liste n’a pas pu être chargée. Veuillez réessayer."
+    },
+    "dialog": {
+      "close": "Fermer"
+    },
+    "table": {
+      "member": "Membre",
+      "role": "Rôle",
+      "status": "Statut",
+      "joined": "Depuis le",
+      "email": "Adresse e-mail",
+      "expires": "Expiration",
+      "actions": "Gestion"
     }
   },
   "Invite": {

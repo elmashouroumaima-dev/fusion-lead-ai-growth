@@ -5,7 +5,7 @@
   "tests": [
     {
       "label": "Web (application)",
-      "value": 2116
+      "value": 2124
     },
     {
       "label": "Base de données (pgTAP)",

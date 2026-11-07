@@ -3,12 +3,30 @@
   "intro": "Fusion Leap AI Growth : plateforme SaaS multi-tenant de croissance (CRM, canaux, campagnes, agents IA). Les fondations (sécurité, multi-tenant, authentification, membres, couche service, audit, worker, plans et quotas) sont en place ; les modules produit commencent après le jalon G1.",
   "summary": "Phase 1 : il reste le jalon d'isolation G1 (J15) avant d'attaquer le CRM. S'y ajoutent, hors plan, le français par défaut, une refonte UI complète et un module « Paramétrage » (palette et logo).",
   "tests": [
-    { "label": "Web (application)", "value": 2071 },
-    { "label": "Base de données (pgTAP)", "value": 1249 },
-    { "label": "Permissions (RBAC)", "value": 394 },
-    { "label": "Domaine (règles métier)", "value": 400 },
-    { "label": "RLS via l'API réelle", "value": 300 },
-    { "label": "Worker et adaptateurs", "value": 34 }
+    {
+      "label": "Web (application)",
+      "value": 2071
+    },
+    {
+      "label": "Base de données (pgTAP)",
+      "value": 1249
+    },
+    {
+      "label": "Permissions (RBAC)",
+      "value": 394
+    },
+    {
+      "label": "Domaine (règles métier)",
+      "value": 400
+    },
+    {
+      "label": "RLS via l'API réelle",
+      "value": 300
+    },
+    {
+      "label": "Worker et adaptateurs",
+      "value": 34
+    }
   ],
   "adrCount": 14,
   "adrAccepted": 1,
@@ -334,6 +352,12 @@
       "progress": 100,
       "status": "review",
       "note": "Généré à chaque commit : pnpm report:progress."
+    },
+    {
+      "name": "Guide de démarrage pour un nouveau développeur",
+      "progress": 100,
+      "status": "review",
+      "note": "start-fusion-lead-ai-growth.md : prérequis, installation, comptes de test, tests."
     }
   ],
   "controls": "Lint, typecheck, build de production avec l'environnement de la CI, recherche de fuites de secrets dans le bundle navigateur : tous verts. La CI GitHub (2 jobs) exécute le tout à chaque PR.",

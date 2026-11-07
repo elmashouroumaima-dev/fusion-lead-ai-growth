@@ -47,10 +47,11 @@ export function MemberActions({ organizationId, memberId, shortId, role, roleOpt
   const subject = t("list.subject", { id: shortId });
 
   const announce = useAnnounce();
-  // Un seul canal par message : les ERREURS sont annoncées par la région live de la ligne (ActionFeedback), jamais
-  // en notification ; seul le succès du rôle / transfert passe par une notification (toast).
+  // Le résultat est annoncé par la région live de la ligne (ActionFeedback) ET affiché en notification :
+  // verte pour le succès du rôle / transfert, rouge pour toute erreur.
   const notify = (result: MembersActionState, success?: Outcome) => {
     if (result.status === "success" && success) toast.success(t(`success.${success}`));
+    if (result.status === "error") toast.error(t(`errors.${result.code ?? "generic"}`));
   };
   const [roleState, roleAction, rolePending] = useActionState(async (prev: MembersActionState, formData: FormData) => {
     const result = await changeMemberRoleAction(prev, formData);

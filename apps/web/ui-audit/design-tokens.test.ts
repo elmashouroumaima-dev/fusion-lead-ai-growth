@@ -296,3 +296,29 @@ describe("contraste des composants non textuels (WCAG 1.4.11, 3:1)", () => {
     }
   });
 });
+
+describe("notifications : succes vert, erreur rouge, en haut", () => {
+  const pairs: [string, string][] = [
+    ["--success", "--success-foreground"],
+    ["--destructive", "--destructive-foreground"],
+  ];
+
+  it.each(pairs)("%s / %s : contraste AA (4.5:1) en clair et en sombre", (bg, fg) => {
+    expect(contrast(root.get(bg) as string, root.get(fg) as string), `clair ${bg}`).toBeGreaterThanOrEqual(4.5);
+    expect(contrast(effectiveDark.get(bg) as string, effectiveDark.get(fg) as string), `sombre ${bg}`).toBeGreaterThanOrEqual(4.5);
+  });
+
+  it("le vert du succes est un jeton propre, defini en clair et en sombre, expose a Tailwind", () => {
+    expect(root.has("--success")).toBe(true);
+    expect(dark.has("--success")).toBe(true);
+    expect(theme.get("--color-success")).toBe("var(--success)");
+  });
+
+  it("le composant Toaster se place en haut, colore succes et erreur par les jetons", () => {
+    const src = readFileSync(path.join(WEB_ROOT, "components", "ui", "sonner.tsx"), "utf8");
+    expect(src).toContain('position="top-center"');
+    expect(src).toContain("richColors");
+    expect(src).toContain('"--success-bg": "var(--success)"');
+    expect(src).toContain('"--error-bg": "var(--destructive)"');
+  });
+});

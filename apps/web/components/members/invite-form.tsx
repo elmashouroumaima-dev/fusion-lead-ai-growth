@@ -56,6 +56,8 @@ export function InviteForm({ organizationId, idempotencyKey, roleOptions }: Prop
       formRef.current?.reset();
       toast.success(t("invite.created"));
     }
+    // Les erreurs de champ restent sous le champ ; seule une erreur générale devient une notification.
+    if (state.status === "error" && !state.fieldErrors) toast.error(t(`errors.${state.code ?? "generic"}`));
   }, [state, t]);
 
   const emailInvalid = Boolean(state.fieldErrors?.email?.length);

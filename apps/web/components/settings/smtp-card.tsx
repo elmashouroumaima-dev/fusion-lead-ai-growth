@@ -41,13 +41,16 @@ export function SmtpCard({ initial, secretsAvailable }: Props) {
 
   useEffect(() => {
     if (saveState.status === "success") toast.success(t("saved"));
-  }, [saveState, t]);
+    if (saveState.status === "error") toast.error(te(saveState.code ?? "generic"));
+  }, [saveState, t, te]);
   useEffect(() => {
     if (resetState.status === "success") toast.success(t("resetDone"));
-  }, [resetState, t]);
+    if (resetState.status === "error") toast.error(te(resetState.code ?? "generic"));
+  }, [resetState, t, te]);
   useEffect(() => {
     if (testState.status === "success") toast.success(t("testSent"));
-  }, [testState, t]);
+    if (testState.status === "error") toast.error(te(testState.code ?? "generic"));
+  }, [testState, t, te]);
 
   const applyMailtrap = () => {
     setHost(MAILTRAP_PRESET.host);

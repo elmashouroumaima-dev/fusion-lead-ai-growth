@@ -3,6 +3,12 @@
 Format : Keep a Changelog. Une entrée par jour de travail.
 
 ## [Non publié]
+### Menu Paramétrage : libellés
+- Modifié : dans le menu latéral, « Palette de couleurs » devient « Thème » et « Logotype » devient « Profil » (en : Theme, Profile ; ar : المظهر، الملف التعريفي), avec l'icône profil ; les pages et leurs adresses ne changent pas.
+
+### Logo officiel sur les pages publiques
+- Modifié : connexion, inscription, mot de passe oublié, invitation et accueil affichent le logo officiel « FUSION LEAP » (blanc, `public/brand/logo-white.png`, composant `OfficialLogo`). Il est **fixe** : il ne change pas avec le logo personnalisé du Paramétrage, réservé à l'application connectée.
+
 ### Gabarits d'e-mail : logo et « Tous droits réservés »
 - Ajout : gabarit HTML des e-mails de la plateforme (`packages/adapters/src/email`) : grand en-tête avec logo, titre, bouton, signature en gras, barre de pied « © Fusion Leap AI Growth. Tous droits réservés. » ; compatible Gmail, Outlook et Mailtrap (tableaux, styles en ligne). **Une seule langue par message** (fr, ar en RTL ou en).
 - Modifié : les e-mails Supabase Auth (confirmation, réinitialisation) et leurs objets sont générés depuis cette source (`pnpm email:templates`, test de concordance) et suivent `user_metadata.locale` (enregistrée à l'inscription et à la connexion, français par défaut) ; le message de test SMTP devient un e-mail HTML de la marque dans la langue de l'interface de l'administrateur (logo joint en `cid:`, version texte, date et année).

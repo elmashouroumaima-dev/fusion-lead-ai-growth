@@ -19,8 +19,8 @@
       "members": "Membres",
       "settings": "Paramétrage",
       "admin": "Administration",
-      "settingsPalette": "Palette de couleurs",
-      "settingsLogo": "Logotype",
+      "settingsPalette": "Thème",
+      "settingsLogo": "Profil",
       "settingsSmtp": "Serveur SMTP"
     },
     "sidebar": {

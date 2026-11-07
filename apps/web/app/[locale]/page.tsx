@@ -1,6 +1,6 @@
 import { ArrowRightIcon } from "lucide-react";
 import { getTranslations } from "next-intl/server";
-import { LogoMark } from "@/components/brand/logo";
+import { OfficialLogo } from "@/components/brand/official-logo";
 import { FeatureChips } from "@/components/public/brand-panel";
 import { PublicFrame } from "@/components/public/public-frame";
 import { Button } from "@/components/ui/button";
@@ -10,11 +10,12 @@ import { requireLocale } from "../../i18n/require-locale";
 export default async function HomePage({ params }: { params: Promise<{ locale: string }> }) {
   const locale = await requireLocale(params);
   const t = await getTranslations({ locale, namespace: "Home" });
+  const tc = await getTranslations({ locale, namespace: "Common" });
 
   return (
     <PublicFrame>
       <section className="grid max-w-2xl justify-items-center gap-6 text-center text-white">
-        <LogoMark className="size-16 lg:size-20" />
+        <OfficialLogo alt={tc("appName")} priority className="w-64 lg:w-96" />
         <h1 className="text-3xl leading-tight font-bold tracking-tight sm:text-5xl">{t("title")}</h1>
         <p className="text-base leading-relaxed text-white/95 sm:text-xl">{t("tagline")}</p>
         <FeatureChips className="justify-center" />

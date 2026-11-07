@@ -19,8 +19,8 @@
       "members": "الأعضاء",
       "settings": "الإعدادات",
       "admin": "الإدارة",
-      "settingsPalette": "لوحة الألوان",
-      "settingsLogo": "الشعار",
+      "settingsPalette": "المظهر",
+      "settingsLogo": "الملف التعريفي",
       "settingsSmtp": "خادم SMTP"
     },
     "sidebar": {

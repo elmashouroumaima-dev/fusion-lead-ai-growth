@@ -3,6 +3,11 @@
 Format : Keep a Changelog. Une entrée par jour de travail.
 
 ## [Non publié]
+### Gabarits d'e-mail : logo et « Tous droits réservés »
+- Ajout : gabarit HTML des e-mails de la plateforme (`packages/adapters/src/email`) : grand en-tête avec logo, titre, bouton, signature en gras, barre de pied « © Fusion Leap AI Growth. Tous droits réservés. » ; compatible Gmail, Outlook et Mailtrap (tableaux, styles en ligne). **Une seule langue par message** (fr, ar en RTL ou en).
+- Modifié : les e-mails Supabase Auth (confirmation, réinitialisation) et leurs objets sont générés depuis cette source (`pnpm email:templates`, test de concordance) et suivent `user_metadata.locale` (enregistrée à l'inscription et à la connexion, français par défaut) ; le message de test SMTP devient un e-mail HTML de la marque dans la langue de l'interface de l'administrateur (logo joint en `cid:`, version texte, date et année).
+- Ajout : logo officiel « FUSION LEAP » (blanc, fond transparent) `apps/web/public/brand/email-logo.png` en tête des e-mails.
+
 ### Notifications : en haut, vertes (succès) et rouges (erreur)
 - Modifié : les notifications s'affichent en haut au centre, avec bouton de fermeture, coins arrondis et ombre ; succès en vert (nouveau jeton `--success`), erreur en rouge (`--destructive`), contraste AA du texte blanc en clair et en sombre ; les erreurs restent 6 s.
 - Ajout : toute erreur d'action (abonnement, invitation, membres, logo, palette, SMTP) est aussi une notification rouge ; le message reste écrit dans la page. Le test d'accessibilité « un seul canal pour les erreurs » est remplacé par « notification rouge ET message dans la page ».

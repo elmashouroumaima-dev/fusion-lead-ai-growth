@@ -9,6 +9,7 @@ export type MembersActionErrorCode =
   | "already_member"
   | "invitation_invalid"
   | "last_owner"
+  | "quota_exceeded"
   | "rate_limited"
   | "duplicate_request"
   | "idempotency_in_progress"

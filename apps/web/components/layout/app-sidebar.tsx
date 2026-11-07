@@ -1,6 +1,6 @@
 "use client";
 
-import { LayoutDashboardIcon, PaletteIcon, UsersIcon } from "lucide-react";
+import { LayoutDashboardIcon, PaletteIcon, ShieldIcon, UsersIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Brand } from "@/components/brand/logo";
 import {
@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/sidebar";
 import { Link, usePathname } from "../../i18n/navigation";
 
-type NavItem = { href: "/dashboard" | "/members" | "/settings/appearance"; labelKey: "dashboard" | "members" | "settings"; icon: typeof UsersIcon };
+type NavItem = { href: "/dashboard" | "/members" | "/settings/appearance" | "/admin/organizations"; labelKey: "dashboard" | "members" | "settings" | "admin"; icon: typeof UsersIcon };
 
 const isCurrent = (pathname: string, href: string): boolean => pathname === href || pathname.startsWith(`${href}/`);
 
@@ -25,7 +25,7 @@ const isCurrent = (pathname: string, href: string): boolean => pathname === href
  * elle suit la direction du document (à droite en arabe). « Membres » n'apparaît que si le layout
  * (serveur) a établi que le rôle actif peut les lister ; la page et les actions revérifient tout.
  */
-export function AppSidebar({ showMembers, showSettings = false }: { showMembers: boolean; showSettings?: boolean }) {
+export function AppSidebar({ showMembers, showSettings = false, showAdmin = false }: { showMembers: boolean; showSettings?: boolean; showAdmin?: boolean }) {
   const t = useTranslations("Shell");
   const pathname = usePathname();
 
@@ -33,6 +33,7 @@ export function AppSidebar({ showMembers, showSettings = false }: { showMembers:
     { href: "/dashboard", labelKey: "dashboard", icon: LayoutDashboardIcon },
     ...(showMembers ? [{ href: "/members", labelKey: "members", icon: UsersIcon } satisfies NavItem] : []),
     ...(showSettings ? [{ href: "/settings/appearance", labelKey: "settings", icon: PaletteIcon } satisfies NavItem] : []),
+    ...(showAdmin ? [{ href: "/admin/organizations", labelKey: "admin", icon: ShieldIcon } satisfies NavItem] : []),
   ];
 
   return (

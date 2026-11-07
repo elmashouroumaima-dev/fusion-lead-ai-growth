@@ -17,7 +17,8 @@
       "label": "Navigation principale",
       "dashboard": "Tableau de bord",
       "members": "Membres",
-      "settings": "Paramétrage"
+      "settings": "Paramétrage",
+      "admin": "Administration"
     },
     "sidebar": {
       "toggle": "Afficher ou masquer le menu latéral",
@@ -142,6 +143,20 @@
       "members": "Gérer les membres",
       "membersHint": "Invitez des personnes et attribuez-leur un rôle.",
       "noMembers": "La gestion des membres est réservée aux propriétaires et aux administrateurs."
+    },
+    "usage": {
+      "title": "Utilisation du plan",
+      "description": "Consommation de votre organisation par rapport aux limites de son plan.",
+      "nearLimit": "Vous approchez d’une limite de votre plan. Contactez l’administrateur de la plateforme pour l’augmenter.",
+      "blocked": "Une limite de votre plan est atteinte : l’action concernée est bloquée. Contactez l’administrateur de la plateforme.",
+      "metrics": {
+        "users": "Utilisateurs (membres et invitations)",
+        "projects": "Projets",
+        "contacts": "Fiches de contact",
+        "messages_per_month": "Messages ce mois-ci",
+        "ai_runs": "Exécutions IA ce mois-ci",
+        "integrations": "Intégrations"
+      }
     }
   },
   "Org": {
@@ -281,7 +296,8 @@
       "idempotency_conflict": "Cette demande a déjà été envoyée avec des informations différentes. Rechargez la page, puis réessayez.",
       "service_unavailable": "Le service est momentanément indisponible. Veuillez réessayer dans un instant.",
       "generic": "Une erreur est survenue. Veuillez réessayer.",
-      "loadFailed": "La liste n’a pas pu être chargée. Veuillez réessayer."
+      "loadFailed": "La liste n’a pas pu être chargée. Veuillez réessayer.",
+      "quota_exceeded": "La limite d’utilisateurs de votre plan est atteinte. Contactez l’administrateur de la plateforme."
     },
     "dialog": {
       "close": "Fermer"
@@ -386,6 +402,56 @@
         "size": "Image trop lourde : 128 Ko maximum.",
         "read": "Impossible de lire ce fichier."
       }
+    }
+  },
+  "Admin": {
+    "title": "Administration de la plateforme",
+    "description": "Plans, abonnements et limites des organisations. Réservé aux administrateurs de la plateforme ; chaque changement est enregistré dans le journal d’audit de l’organisation.",
+    "empty": "Aucune organisation.",
+    "noPlan": "Aucun abonnement",
+    "members": "{count, plural, one {# membre actif} other {# membres actifs}}",
+    "plans": {
+      "trial": "Essai",
+      "starter": "Démarrage",
+      "growth": "Croissance"
+    },
+    "status": {
+      "trial": "Essai",
+      "active": "Actif",
+      "past_due": "Paiement en retard",
+      "suspended": "Suspendu",
+      "cancelled": "Résilié"
+    },
+    "metrics": {
+      "users": "Utilisateurs",
+      "projects": "Projets",
+      "contacts": "Fiches de contact",
+      "messages_per_month": "Messages par mois",
+      "ai_runs": "Exécutions IA par mois",
+      "integrations": "Intégrations"
+    },
+    "form": {
+      "plan": "Formule",
+      "status": "Statut",
+      "overrides": "Limites spécifiques (facultatif)",
+      "overridesHint": "Laissez vide pour appliquer la limite du plan. 0 bloque la métrique.",
+      "periodEnd": "Fin de période",
+      "reason": "Motif de la décision",
+      "save": "Enregistrer l’abonnement",
+      "saving": "Enregistrement…",
+      "saved": "Abonnement enregistré.",
+      "reasonHint": "Pas de secret ni de donnée personnelle : ce motif est consigné dans le journal d’audit (200 caractères au plus)."
+    },
+    "errors": {
+      "loadFailed": "Impossible de charger les organisations.",
+      "invalid_input": "Données invalides : vérifiez le plan, les limites et le motif.",
+      "forbidden": "Vous n’avez pas le droit de modifier les abonnements.",
+      "rate_limited": "Trop de tentatives. Réessayez dans un instant.",
+      "duplicate_request": "Demande déjà traitée.",
+      "idempotency_in_progress": "Demande en cours de traitement.",
+      "idempotency_conflict": "Conflit de requête. Rechargez la page.",
+      "service_unavailable": "Service momentanément indisponible.",
+      "generic": "Une erreur est survenue. Veuillez réessayer."
     }
   }
 }

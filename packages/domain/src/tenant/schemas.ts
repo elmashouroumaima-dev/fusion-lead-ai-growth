@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { localeSchema } from "../auth/schemas";
+import { DEFAULT_LOCALE, localeSchema } from "../auth/schemas";
 
 /**
  * Schémas du contexte tenant et de la création d'organisation (J9, ADR 005 §7 et §11).
@@ -116,7 +116,7 @@ export const organizationNameSchema = z
 
 const createOrganizationShape = {
   name: organizationNameSchema,
-  locale: localeSchema.default("ar"),
+  locale: localeSchema.default(DEFAULT_LOCALE),
   timezone: timezoneSchema.default("UTC"),
 };
 

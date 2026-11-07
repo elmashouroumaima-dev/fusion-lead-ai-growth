@@ -1,5 +1,6 @@
 "use client";
 
+import { DEFAULT_LOCALE, LOCALES, localeSchema } from "@fusion-leap/domain";
 import { useLocale, useTranslations } from "next-intl";
 import { useActionState, useEffect, useId, useRef } from "react";
 import { createOrganizationAction } from "../../lib/tenant/actions";
@@ -19,6 +20,7 @@ export function CreateOrganizationForm({ creationKey, timeZones }: Props) {
   const t = useTranslations("Org");
   const tc = useTranslations("Common");
   const uiLocale = useLocale();
+  const defaultLocale = localeSchema.safeParse(uiLocale).data ?? DEFAULT_LOCALE;
   const uid = useId();
   const [state, formAction, pending] = useActionState(createOrganizationAction, initialState);
   const zoneRef = useRef<HTMLSelectElement>(null);
@@ -98,11 +100,14 @@ export function CreateOrganizationForm({ creationKey, timeZones }: Props) {
           id={localeId}
           name="locale"
           className={`${styles.select} ${styles.fieldSelect}`}
-          defaultValue={uiLocale === "en" ? "en" : "ar"}
+          defaultValue={defaultLocale}
           aria-describedby={localeHintId}
         >
-          <option value="ar">{t("onboarding.locales.ar")}</option>
-          <option value="en">{t("onboarding.locales.en")}</option>
+          {LOCALES.map((l) => (
+            <option key={l} value={l}>
+              {t(`onboarding.locales.${l}`)}
+            </option>
+          ))}
         </select>
         <span id={localeHintId} className="hint">
           {t("onboarding.hints.locale")}

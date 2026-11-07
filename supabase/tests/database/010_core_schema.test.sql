@@ -2,7 +2,7 @@
 -- Exécution : pnpm test:db (base locale réinitialisée avec le seed : 2 entreprises, 1 utilisateur commun).
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(38);
+select plan(44);
 
 -- ---------------------------------------------------------------------------
 -- Structure
@@ -113,8 +113,33 @@ select throws_ok(
   '23514', null, 'format du slug (minuscules, chiffres, tirets)'
 );
 select throws_ok(
-  $$insert into public.organizations (name, slug, locale) values ('Locale', 'locale-fr', 'fr')$$,
-  '23514', null, 'locale limitée à ar/en'
+  $$insert into public.organizations (name, slug, locale) values ('Locale', 'locale-es', 'es')$$,
+  '23514', null, 'locale limitée à ar/en/fr (es refusée)'
+);
+select lives_ok(
+  $$insert into public.organizations (name, slug, locale) values ('Locale FR', 'locale-fr-ok', 'fr')$$,
+  'locale fr acceptée'
+);
+select throws_ok(
+  $$insert into public.organizations (name, slug, locale) values ('Locale', 'locale-maj', 'FR')$$,
+  '23514', null, 'locale FR (majuscules) refusée'
+);
+select throws_ok(
+  $$insert into public.organizations (name, slug, locale) values ('Locale', 'locale-esp', 'fr ')$$,
+  '23514', null, 'locale « fr » avec espace final refusée'
+);
+select throws_ok(
+  $$insert into public.organizations (name, slug, locale) values ('Locale', 'locale-nul', null)$$,
+  '23502', null, 'locale null refusée'
+);
+select is(
+  (select locale from public.organizations where slug = 'locale-fr-ok'),
+  'fr', 'locale fr enregistrée'
+);
+select is(
+  (select pg_get_expr(d.adbin, d.adrelid) from pg_attrdef d join pg_attribute a on a.attrelid = d.adrelid and a.attnum = d.adnum
+    where d.adrelid = 'public.organizations'::regclass and a.attname = 'locale'),
+  '''fr''::text', 'organizations.locale : défaut fr'
 );
 select throws_ok(
   $$insert into public.organization_members (organization_id, user_id, role)

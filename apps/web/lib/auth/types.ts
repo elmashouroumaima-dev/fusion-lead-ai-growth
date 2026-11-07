@@ -13,7 +13,7 @@ export type AuthErrorCode =
 
 /**
  * État renvoyé aux formulaires (useActionState). Les actions ne produisent JAMAIS de message
- * lisible : seulement un code ; l'interface le traduit (ar/en). Aucun code ne révèle si un
+ * lisible : seulement un code ; l'interface le traduit (fr/ar/en). Aucun code ne révèle si un
  * compte existe.
  */
 export type AuthActionState = {

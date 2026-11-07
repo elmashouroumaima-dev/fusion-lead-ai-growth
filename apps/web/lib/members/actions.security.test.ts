@@ -408,7 +408,7 @@ describe("lien d'invitation : affiché une seule fois, la base ne reçoit que l'
     results.set("rpc.create_invitation", { data: INVITATION });
     for (const uiLocale of ["//evil.example", "https://evil.example", "../x", "EN", ""]) {
       const state = await inviteMemberAction(idle, form({ ...base, uiLocale }));
-      expect(state.invitePath, uiLocale).toMatch(/^\/(ar|en)\/invite\/[A-Za-z0-9_-]{43}$/);
+      expect(state.invitePath, uiLocale).toMatch(/^\/fr\/invite\/[A-Za-z0-9_-]{43}$/);
     }
   });
 });
@@ -482,7 +482,7 @@ describe("acceptInvitationAction", () => {
     const err = await accept({ uiLocale: "//evil.example" }).catch((e: unknown) => e);
     expect(err).toBeInstanceOf(RedirectSignal);
     const url = (err as RedirectSignal).url;
-    expect(url).toMatch(/^\/(ar|en)\/dashboard$/);
+    expect(url).toMatch(/^\/fr\/dashboard$/);
     expect(url).not.toContain(token);
     expect(url).not.toContain("evil");
   });

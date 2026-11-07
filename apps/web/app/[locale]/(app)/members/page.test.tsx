@@ -82,7 +82,8 @@ describe("page Membres : contrôle d'accès", () => {
 
   it("locale invalide : refusée avant toute lecture", async () => {
     requireTenantContext.mockResolvedValue(ctxFor("company_owner"));
-    await expect(render("fr")).rejects.toThrow();
+    await expect(render("es")).rejects.toThrow();
+    await expect(render("FR")).rejects.toThrow();
     expect(listOrganizationMembers).not.toHaveBeenCalled();
   });
 

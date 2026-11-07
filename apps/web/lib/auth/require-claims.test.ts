@@ -41,6 +41,11 @@ describe("requireClaims", () => {
 
   it("locale inconnue/hostile -> repli sur la locale par défaut, jamais reflétée", async () => {
     getClaims.mockResolvedValue({ data: null, error: new Error("x") });
-    await expect(requireClaims("//evil.com")).rejects.toMatchObject({ url: "/ar/login" });
+    await expect(requireClaims("//evil.com")).rejects.toMatchObject({ url: "/fr/login" });
+    await expect(requireClaims("FR")).rejects.toMatchObject({ url: "/fr/login" });
+  });
+  it.each(["fr", "ar", "en"])("locale valide %s -> conservée dans la redirection", async (locale) => {
+    getClaims.mockResolvedValue({ data: null, error: new Error("x") });
+    await expect(requireClaims(locale)).rejects.toMatchObject({ url: `/${locale}/login` });
   });
 });

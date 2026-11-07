@@ -58,7 +58,7 @@ describe("next.config headers() : /:locale/invite/:path*", () => {
   it("login et signup (le jeton peut voyager dans next=) envoient Referrer-Policy: no-referrer", async () => {
     const all = await rules();
     for (const page of ["login", "signup"]) {
-      for (const locale of ["ar", "en"]) {
+      for (const locale of ["fr", "ar", "en"]) {
         const url = `/${locale}/${page}`;
         const matching = all.filter((r) => toRegExp(r.source).test(url));
         expect(matching.length, url).toBeGreaterThan(0);

@@ -9,9 +9,12 @@ export const PASSWORD_MIN_LENGTH = 10;
 /** bcrypt (GoTrue) tronque/refuse au-delà de 72 octets : on borne côté entrée. */
 export const PASSWORD_MAX_LENGTH = 72;
 
-export const LOCALES = ["ar", "en"] as const;
+/** Locales de l'interface (ADR 011, amendé) : fr (défaut, ltr), ar (rtl), en (ltr). Source unique. */
+export const LOCALES = ["fr", "ar", "en"] as const;
 export const localeSchema = z.enum(LOCALES);
 export type AuthLocale = z.infer<typeof localeSchema>;
+/** Locale par défaut : routage, repli des redirections et défaut des organisations. */
+export const DEFAULT_LOCALE: AuthLocale = "fr";
 
 const emailSchema = z.string().trim().toLowerCase().max(254).pipe(z.email());
 const newPasswordSchema = z.string().min(PASSWORD_MIN_LENGTH).max(PASSWORD_MAX_LENGTH);

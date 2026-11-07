@@ -1,0 +1,215 @@
+{
+  "Meta": {
+    "title": "Fusion Leap AI Growth",
+    "description": "Une plateforme multi-organisations pour développer votre activité grâce à l’IA."
+  },
+  "Common": {
+    "appName": "Fusion Leap AI Growth",
+    "skipToContent": "Aller au contenu",
+    "submitting": "Veuillez patienter…"
+  },
+  "LanguageSwitcher": {
+    "label": "Langue"
+  },
+  "Home": {
+    "title": "Fusion Leap AI Growth",
+    "tagline": "Développez votre activité grâce à l’IA, avec toujours l’humain aux commandes.",
+    "login": "Se connecter",
+    "signup": "Créer un compte"
+  },
+  "Auth": {
+    "fields": {
+      "email": "Adresse e-mail",
+      "password": "Mot de passe",
+      "newPassword": "Nouveau mot de passe"
+    },
+    "hints": {
+      "passwordMin": "10 caractères au minimum."
+    },
+    "login": {
+      "title": "Connexion",
+      "description": "Bon retour parmi nous. Connectez-vous à votre compte.",
+      "submit": "Se connecter",
+      "forgot": "Mot de passe oublié ?",
+      "noAccount": "Nouveau ici ?",
+      "toSignup": "Créer un compte"
+    },
+    "signup": {
+      "title": "Créer un compte",
+      "description": "Commencez avec votre adresse e-mail et un mot de passe robuste.",
+      "submit": "Créer le compte",
+      "haveAccount": "Vous avez déjà un compte ?",
+      "toLogin": "Se connecter"
+    },
+    "forgotPassword": {
+      "title": "Réinitialiser votre mot de passe",
+      "description": "Saisissez votre adresse e-mail : si un compte existe, nous vous enverrons un lien de réinitialisation.",
+      "submit": "Envoyer le lien",
+      "backToLogin": "Retour à la connexion"
+    },
+    "resetPassword": {
+      "title": "Choisir un nouveau mot de passe",
+      "description": "Saisissez un nouveau mot de passe pour votre compte.",
+      "submit": "Mettre à jour le mot de passe",
+      "toLogin": "Aller à la connexion"
+    },
+    "errors": {
+      "invalid_input": "Veuillez vérifier les champs signalés, puis réessayer.",
+      "invalid_credentials": "Adresse e-mail ou mot de passe incorrect.",
+      "email_not_confirmed": "Veuillez d’abord confirmer votre adresse e-mail. Consultez votre boîte de réception.",
+      "weak_password": "Ce mot de passe est trop faible. Utilisez au moins 10 caractères.",
+      "rate_limited": "Trop de tentatives. Veuillez patienter quelques minutes, puis réessayer.",
+      "generic": "Une erreur est survenue. Veuillez réessayer.",
+      "link_invalid": "Ce lien est invalide ou a expiré. Veuillez en demander un nouveau."
+    },
+    "success": {
+      "signUp": "Si cette adresse peut être utilisée, un e-mail de confirmation vous a été envoyé. Ouvrez le lien qu’il contient pour terminer.",
+      "requestReset": "Si un compte existe pour cette adresse, un lien de réinitialisation vous a été envoyé.",
+      "updatePassword": "Votre mot de passe a été mis à jour."
+    }
+  },
+  "Dashboard": {
+    "title": "Tableau de bord",
+    "signedInAs": "Connecté en tant que",
+    "unknownUser": "Utilisateur inconnu",
+    "placeholder": "Votre espace de travail apparaîtra ici.",
+    "signOut": "Se déconnecter"
+  },
+  "Org": {
+    "roles": {
+      "company_owner": "Propriétaire",
+      "company_admin": "Administrateur",
+      "marketing_manager": "Responsable marketing",
+      "sales_agent": "Commercial",
+      "analyst": "Analyste"
+    },
+    "onboarding": {
+      "title": "Créer votre organisation",
+      "description": "Configurez l’espace de travail de votre entreprise. Vous en serez le propriétaire et pourrez inviter votre équipe plus tard.",
+      "fields": {
+        "name": "Nom de l’organisation",
+        "timezone": "Fuseau horaire",
+        "locale": "Langue par défaut"
+      },
+      "hints": {
+        "locale": "La langue par défaut utilisée pour votre organisation."
+      },
+      "locales": {
+        "fr": "Français",
+        "ar": "Arabe",
+        "en": "Anglais"
+      },
+      "submit": "Créer l’organisation"
+    },
+    "select": {
+      "title": "Choisir une organisation",
+      "description": "Vous appartenez à plusieurs organisations. Choisissez celle dans laquelle vous souhaitez travailler.",
+      "open": "Ouvrir",
+      "openNamed": "Ouvrir {name}",
+      "current": "Actuelle",
+      "inactive": "Indisponible",
+      "createNew": "Créer une autre organisation"
+    },
+    "switcher": {
+      "label": "Organisation",
+      "submit": "Changer"
+    },
+    "dashboard": {
+      "organization": "Organisation",
+      "role": "Votre rôle"
+    },
+    "errors": {
+      "invalid_input": "Veuillez vérifier les champs signalés, puis réessayer.",
+      "forbidden": "Vous n’avez pas accès à cette organisation.",
+      "idempotency_conflict": "Cette demande a déjà été envoyée avec des informations différentes. Rechargez la page, puis réessayez.",
+      "rate_limited": "Trop de tentatives. Veuillez patienter quelques minutes, puis réessayer.",
+      "generic": "Une erreur est survenue. Veuillez réessayer."
+    }
+  },
+  "Members": {
+    "nav": {
+      "link": "Membres"
+    },
+    "title": "Membres",
+    "description": "Invitez des personnes, gérez leurs rôles et gardez le contrôle des accès à votre organisation.",
+    "list": {
+      "title": "Membres de l’équipe",
+      "empty": "Il n’y a pas encore de membre.",
+      "you": "(vous)",
+      "subject": "Membre {id}",
+      "since": "Membre depuis le {date}"
+    },
+    "status": {
+      "invited": "Invité",
+      "active": "Actif",
+      "suspended": "Suspendu",
+      "removed": "Retiré"
+    },
+    "fields": {
+      "role": "Rôle",
+      "email": "Adresse e-mail"
+    },
+    "actions": {
+      "roleLabel": "Rôle de {subject}",
+      "saveRole": "Enregistrer le rôle",
+      "saveRoleLabel": "Enregistrer le rôle de {subject}",
+      "remove": "Retirer",
+      "removeLabel": "Retirer {subject}",
+      "removeConfirm": "Retirer {subject} de l’organisation ? Cette personne perdra immédiatement son accès.",
+      "transfer": "Transférer la propriété",
+      "transferLabel": "Transférer la propriété à {subject}",
+      "transferConfirm": "Transférer la propriété à {subject} ? Vous deviendrez administrateur et ce membre deviendra propriétaire.",
+      "confirm": "Confirmer",
+      "cancel": "Annuler"
+    },
+    "success": {
+      "roleChanged": "Le rôle a été mis à jour.",
+      "removed": "Le membre a été retiré.",
+      "transferred": "La propriété a été transférée.",
+      "revoked": "L’invitation a été révoquée."
+    },
+    "invite": {
+      "title": "Inviter une personne",
+      "description": "Choisissez son rôle. Vous obtiendrez un lien à usage unique à lui transmettre. Aucun e-mail n’est envoyé.",
+      "submit": "Créer le lien d’invitation",
+      "hints": {
+        "email": "Cette personne doit se connecter avec cette adresse exacte pour accepter."
+      }
+    },
+    "inviteLink": {
+      "title": "Lien d’invitation",
+      "label": "Lien d’invitation",
+      "note": "Affiché une seule fois. Copiez-le maintenant et transmettez-le à la personne invitée : il ne pourra plus être affiché. Il ne fonctionne que pour l’adresse e-mail invitée et expire dans {days, plural, one {# jour} other {# jours}}.",
+      "copy": "Copier le lien",
+      "copied": "Lien copié.",
+      "copyFailed": "La copie a échoué. Sélectionnez le lien et copiez-le manuellement."
+    },
+    "invitations": {
+      "title": "Invitations en attente",
+      "empty": "Aucune invitation en attente.",
+      "role": "Rôle : {role}",
+      "expires": "Expire le {date}",
+      "expired": "Expirée",
+      "revoke": "Révoquer",
+      "revokeLabel": "Révoquer l’invitation de {email}"
+    },
+    "errors": {
+      "invalid_input": "Veuillez vérifier les champs signalés, puis réessayer.",
+      "forbidden": "Vous n’êtes pas autorisé à effectuer cette action.",
+      "already_member": "Cette adresse e-mail appartient déjà à un membre actif de l’organisation.",
+      "invitation_invalid": "Cette invitation n’est pas valide.",
+      "last_owner": "Le dernier propriétaire ne peut être ni retiré ni rétrogradé. Transférez d’abord la propriété.",
+      "generic": "Une erreur est survenue. Veuillez réessayer.",
+      "loadFailed": "La liste n’a pas pu être chargée. Veuillez réessayer."
+    }
+  },
+  "Invite": {
+    "title": "Vous avez été invité",
+    "description": "Connectez-vous avec l’adresse e-mail qui a reçu cette invitation, puis acceptez-la pour rejoindre l’équipe.",
+    "accept": "Accepter l’invitation",
+    "errors": {
+      "invitation_invalid": "Cette invitation est invalide, a expiré ou est associée à un autre compte. Demandez un nouveau lien à la personne qui vous a invité."
+    },
+    "hint": "Assurez-vous d’être connecté avec l’adresse e-mail invitée."
+  }
+}

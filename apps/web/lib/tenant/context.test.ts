@@ -122,10 +122,12 @@ describe("requireTenantContext", () => {
     setRows([row(A, "analyst", "closed")]);
     await expect(requireTenantContext("en")).rejects.toMatchObject({ url: "/en/select-organization" });
   });
-  it("non authentifié -> /ar/login ; locale invalide -> locale par défaut", async () => {
+  it("non authentifié -> /{locale}/login ; locale invalide -> locale par défaut (fr)", async () => {
     getClaims.mockResolvedValue({ data: null, error: null });
     await expect(requireTenantContext("ar")).rejects.toMatchObject({ url: "/ar/login" });
-    await expect(requireTenantContext("xx")).rejects.toMatchObject({ url: "/ar/login" });
+    await expect(requireTenantContext("fr")).rejects.toMatchObject({ url: "/fr/login" });
+    await expect(requireTenantContext("en")).rejects.toMatchObject({ url: "/en/login" });
+    await expect(requireTenantContext("xx")).rejects.toMatchObject({ url: "/fr/login" });
   });
   it("retourne le contexte quand tout est valide", async () => {
     setRows([row(A, "marketing_manager")]);

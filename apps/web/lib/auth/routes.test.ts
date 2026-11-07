@@ -1,8 +1,20 @@
 import { describe, expect, it } from "vitest";
-import { isGuestOnlyPath, isPublicPath, normalizePathname, parseLocalePath } from "./routes";
+import { DEFAULT_LOCALE as DOMAIN_DEFAULT, LOCALES } from "@fusion-leap/domain";
+import { DEFAULT_LOCALE, isGuestOnlyPath, isPublicPath, normalizePathname, parseLocalePath } from "./routes";
+
+describe("locales : source unique", () => {
+  it("fr est la locale par défaut, suivie de ar et en", () => {
+    expect(LOCALES).toEqual(["fr", "ar", "en"]);
+    expect(DOMAIN_DEFAULT).toBe("fr");
+    expect(DEFAULT_LOCALE).toBe("fr");
+  });
+});
 
 describe("parseLocalePath", () => {
   it.each([
+    ["/fr", { locale: "fr", rest: "" }],
+    ["/fr/login", { locale: "fr", rest: "/login" }],
+    ["/fr/dashboard///", { locale: "fr", rest: "/dashboard" }],
     ["/ar", { locale: "ar", rest: "" }],
     ["/ar/", { locale: "ar", rest: "" }],
     ["/en/login", { locale: "en", rest: "/login" }],
@@ -13,7 +25,7 @@ describe("parseLocalePath", () => {
     expect(parseLocalePath(path)).toEqual(expected);
   });
 
-  it.each(["/", "", "/arx/login", "/a/login", "//ar/login", "/AR/login", "/Ar", "/fr/login", "ar/login", "/ar./x"])(
+  it.each(["/", "", "/arx/login", "/a/login", "//ar/login", "/AR/login", "/Ar", "/FR/login", "/Fr", "/fra/login", "/frx", "/f", "/es/login", "fr/login", "//fr/login", "/ar./x", "/fr./x"])(
     "%s -> null (locale non reconnue)",
     (path) => {
       expect(parseLocalePath(path)).toBeNull();
@@ -30,6 +42,7 @@ describe("parseLocalePath", () => {
 describe("normalizePathname", () => {
   it("décode un segment encodé (même vue que le routeur Next.js)", () => {
     expect(normalizePathname("/%61r/dashboard")).toBe("/ar/dashboard");
+    expect(normalizePathname("/%66r/dashboard")).toBe("/fr/dashboard");
     expect(normalizePathname("/%41R/dashboard")).toBe("/AR/dashboard");
     expect(normalizePathname("/ar/leads/a%20b")).toBe("/ar/leads/a b");
   });

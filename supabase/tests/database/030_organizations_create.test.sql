@@ -5,7 +5,7 @@
 -- Tout est annulé en fin de test (rollback) : aucune donnée ne subsiste.
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(155);
+select plan(163);
 
 -- Utilisateurs de test (auth.users minimal) : u1..u4 existent, u9 n'existe pas.
 insert into auth.users (id, instance_id, aud, role, email) values
@@ -217,7 +217,10 @@ select throws_ok($$select public.create_organization('   ', 'ar', 'UTC', 'val-ke
 select throws_ok($$select public.create_organization(E' \t\n ', 'ar', 'UTC', 'val-key-001')$$, '22023', 'validation_failed', 'nom blanc (tabulation / retour ligne) refusé');
 select throws_ok($$select public.create_organization(null, 'ar', 'UTC', 'val-key-001')$$, '22023', 'validation_failed', 'nom null refusé');
 select throws_ok($$select public.create_organization(repeat('a', 121), 'ar', 'UTC', 'val-key-001')$$, '22023', 'validation_failed', 'nom de 121 caractères refusé');
-select throws_ok($$select public.create_organization('Val Co', 'fr', 'UTC', 'val-key-001')$$, '22023', 'validation_failed', 'locale hors (ar, en) refusée');
+select throws_ok($$select public.create_organization('Val Co', 'es', 'UTC', 'val-key-001')$$, '22023', 'validation_failed', 'locale hors (ar, en, fr) refusée');
+select throws_ok($$select public.create_organization('Val Co', 'FR', 'UTC', 'val-key-001')$$, '22023', 'validation_failed', 'locale FR (majuscules) refusée');
+select throws_ok($$select public.create_organization('Val Co', 'fr ', 'UTC', 'val-key-001')$$, '22023', 'validation_failed', 'locale « fr » avec espace final refusée');
+select throws_ok($$select public.create_organization('Val Co', '', 'UTC', 'val-key-001')$$, '22023', 'validation_failed', 'locale vide refusée');
 select throws_ok($$select public.create_organization('Val Co', null, 'UTC', 'val-key-001')$$, '22023', 'validation_failed', 'locale null refusée');
 select throws_ok($$select public.create_organization('Val Co', 'ar', 'Mars/Phobos', 'val-key-001')$$, '22023', 'validation_failed', 'fuseau inconnu refusé');
 select throws_ok($$select public.create_organization('Val Co', 'ar', null, 'val-key-001')$$, '22023', 'validation_failed', 'fuseau null refusé');
@@ -269,7 +272,8 @@ set local role authenticated;
 select lives_ok($$select public.create_organization(repeat('a', 120), 'ar', 'UTC', repeat('k', 128))$$, 'nom de 120 caractères et clé de 128 caractères acceptés');
 select lives_ok($$select public.create_organization('Bornes', 'ar', 'UTC', 'keylen-08')$$, 'clé de 9 caractères acceptée');
 select lives_ok($$select public.create_organization('Bornes 8', 'ar', 'UTC', '12345678')$$, 'clé de 8 caractères acceptée');
-select lives_ok($$select public.create_organization('Défaut')$$, 'wrapper : valeurs par défaut (ar, UTC, sans clé)');
+select lives_ok($$select public.create_organization('Défaut')$$, 'wrapper : valeurs par défaut (fr, UTC, sans clé)');
+select lives_ok($$select public.create_organization('Val Fr', 'fr', 'UTC', 'ok-fr-0001')$$, 'locale fr acceptée');
 select lives_ok($$select public.create_organization('Éclair Ñandú', 'en', 'UTC', 'ok-name-01')$$, 'nom latin accentué accepté');
 select lives_ok($$select public.create_organization('Привет', 'en', 'UTC', 'ok-name-02')$$, 'nom cyrillique accepté');
 select lives_ok($$select public.create_organization('شركة النور', 'ar', 'UTC', 'ok-name-03')$$, 'nom arabe accepté');
@@ -282,7 +286,21 @@ select lives_ok($$select public.create_organization('Acme', 'en', 'America/Argen
 select lives_ok($$select public.create_organization('Acme', 'en', 'Etc/GMT+5', 'ok-tz-0004')$$, 'fuseau Etc/GMT+5 accepté');
 select lives_ok($$select public.create_organization('Acme', 'en', 'UTC', 'ok-tz-0005')$$, 'fuseau UTC accepté');
 reset role;
-select is((select locale || '/' || timezone from public.organizations where name = 'Défaut'), 'ar/UTC', 'valeurs par défaut : ar / UTC');
+select is((select locale || '/' || timezone from public.organizations where name = 'Défaut'), 'fr/UTC', 'valeurs par défaut : fr / UTC');
+select is((select locale from public.organizations where name = 'Val Fr'), 'fr', 'locale fr enregistrée par la fonction');
+select is(
+  (select pg_get_expr(d.adbin, d.adrelid) from pg_attrdef d join pg_attribute a on a.attrelid = d.adrelid and a.attnum = d.adnum
+    where d.adrelid = 'public.organizations'::regclass and a.attname = 'locale'),
+  '''fr''::text', 'organizations.locale : défaut fr'
+);
+select is(
+  (select pg_get_expr(pr.proargdefaults, 0) from pg_proc pr where pr.oid = 'public.create_organization(text,text,text,text)'::regprocedure),
+  '''fr''::text, ''UTC''::text, NULL::text', 'wrapper : défauts fr / UTC / null'
+);
+select is(
+  (select count(*)::int from public.organizations where slug in ('alpha', 'beta') and locale = (case slug when 'alpha' then 'en' else 'ar' end)),
+  2, 'entreprises du seed inchangées (alpha = en, beta = ar)'
+);
 select ok((select length(slug) <= 63 from public.organizations where name = repeat('a', 120)), 'nom de 120 caractères : slug dans la limite de 63');
 
 -- ---------------------------------------------------------------------------

@@ -112,7 +112,7 @@ describe("proxy : routes protégées", () => {
     expect(locationOf(response)).toBeNull();
   });
 
-  it.each(["/ar", "/en", "/ar/login", "/en/signup", "/ar/forgot-password", "/en/login/"])(
+  it.each(["/fr", "/ar", "/en", "/fr/login", "/ar/login", "/en/signup", "/fr/signup", "/fr/forgot-password", "/ar/forgot-password", "/en/login/", "/fr/login/"])(
     "chemin public %s accessible sans session",
     async (path) => {
       mockSupabase({ claims: null });
@@ -130,6 +130,20 @@ describe("proxy : routes protégées", () => {
     expect(locationOf(response)!.pathname).toBe("/ar/dashboard");
   });
 
+  it("anonyme sur /fr/dashboard -> /fr/login?next=/fr/dashboard (locale par défaut)", async () => {
+    mockSupabase({ claims: null });
+    const { response } = await run("/fr/dashboard");
+    const loc = locationOf(response)!;
+    expect(loc.pathname).toBe("/fr/login");
+    expect(loc.searchParams.get("next")).toBe("/fr/dashboard");
+  });
+
+  it("utilisateur connecté sur /fr/login -> /fr/dashboard", async () => {
+    mockSupabase({ claims: { sub: "u1" } });
+    const { response } = await run("/fr/login");
+    expect(locationOf(response)!.pathname).toBe("/fr/dashboard");
+  });
+
   it("utilisateur connecté sur /en/signup -> /en/dashboard", async () => {
     mockSupabase({ claims: { sub: "u1" } });
     const { response } = await run("/en/signup");
@@ -140,7 +154,7 @@ describe("proxy : routes protégées", () => {
     mockSupabase({ claims: null });
     const { response } = await run("/dashboard");
     const loc = locationOf(response)!;
-    expect(loc.pathname).toBe("/ar/dashboard");
+    expect(loc.pathname).toBe("/fr/dashboard"); // fr est la locale par défaut
     expect(loc.searchParams.has("next")).toBe(false);
   });
 });
@@ -151,7 +165,7 @@ describe("proxy : fail closed (contournements de chemin)", () => {
     mockSupabase({ claims: null });
     const { response } = await run(path);
     const loc = locationOf(response);
-    const protectedRedirect = loc?.pathname === "/ar/login" || loc?.pathname === "/en/login";
+    const protectedRedirect = ["/fr/login", "/ar/login", "/en/login"].includes(loc?.pathname ?? "");
     const intlRedirect = loc !== null && response.status >= 300 && response.status < 400;
     const refused = response.status === 404;
     expect(protectedRedirect || intlRedirect || refused).toBe(true);
@@ -192,6 +206,56 @@ describe("proxy : fail closed (contournements de chemin)", () => {
     const { response } = await run(path);
     expect(response.status).toBe(404);
     expect(locationOf(response)).toBeNull();
+  });
+
+  // Même grille d'attaques sur la nouvelle locale fr (et sur la casse / les préfixes proches).
+  it.each([
+    "/%66r/dashboard",
+    "/%46r/dashboard",
+    "/%46R/dashboard",
+    "/FR/dashboard",
+    "/Fr/dashboard",
+    "/fr./dashboard",
+    "/fr/dashboard.",
+    "/fr/dashboard/",
+    "/fr/dashboard//",
+    "/fr/%2e%2e/dashboard",
+    "/fra/dashboard",
+    "/frx/dashboard",
+    "/f/dashboard",
+  ])("%s ne passe pas sans session", async (path) => {
+    await noBypass(path);
+  });
+
+  it.each([
+    "/fr//dashboard",
+    "//fr/dashboard",
+    "/fr%2Fdashboard",
+    "/fr%2fdashboard",
+    "/fr%5Cdashboard",
+    "/%2566r/dashboard",
+    "/fr%00/dashboard",
+  ])("%s est refusé (404) avant toute logique (fr)", async (path) => {
+    mockSupabase({ claims: { sub: "u1" } });
+    const { response } = await run(path);
+    expect(response.status).toBe(404);
+    expect(locationOf(response)).toBeNull();
+  });
+
+  it("/%66r/dashboard anonyme -> /fr/login?next=/fr/dashboard ; avec session -> passe", async () => {
+    const { loc } = await noBypass("/%66r/dashboard");
+    expect(loc?.pathname).toBe("/fr/login");
+    expect(loc?.searchParams.get("next")).toBe("/fr/dashboard");
+    mockSupabase({ claims: { sub: "u1" } });
+    expect((await run("/%66r/dashboard")).response.status).toBe(200);
+  });
+
+  it("/FR/dashboard n'est jamais servi tel quel : redirigé vers une locale canonique ou 404", async () => {
+    mockSupabase({ claims: { sub: "u1" } });
+    const { response } = await run("/FR/dashboard");
+    expect(response.status).not.toBe(200);
+    const loc = locationOf(response);
+    if (loc) expect(["/fr/dashboard", "/fr/FR/dashboard"].some((p) => loc.pathname === p) || /^\/(fr|ar|en)\//.test(loc.pathname)).toBe(true);
   });
 
   it("locale encodée %61r + anonyme -> login protégé (pas de 200)", async () => {

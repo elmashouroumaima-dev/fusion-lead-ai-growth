@@ -158,7 +158,7 @@ describe("switchOrganizationAction : vérification AVANT le cookie", () => {
     const url = await outcome(
       switchOrganizationAction(IDLE, form({ organization_id: ORG, uiLocale: "//evil.example.com" })),
     );
-    expect(url).toBe("/ar/dashboard");
+    expect(url).toBe("/fr/dashboard");
   });
 
   it("les erreurs ne contiennent jamais de message lisible : code seulement", async () => {

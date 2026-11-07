@@ -236,23 +236,25 @@ otp_length = 6
 otp_expiry = 3600
 
 [auth.email.template.confirmation]
-subject = "Confirm your email · تأكيد البريد الإلكتروني"
+subject = "Confirmez votre e-mail · تأكيد البريد الإلكتروني · Confirm your email"
 content_path = "./supabase/templates/confirmation.html"
 
 [auth.email.template.recovery]
-subject = "Reset your password · إعادة تعيين كلمة المرور"
+subject = "Réinitialisez votre mot de passe · إعادة تعيين كلمة المرور · Reset your password"
 content_path = "./supabase/templates/recovery.html"
 
 # Use a production-ready SMTP server
-# SMTP réel en développement (Resend). Sans domaine vérifié, Resend ne livre qu'à l'adresse du
-# propriétaire du compte Resend (expéditeur onboarding@resend.dev). Clé lue depuis l'environnement.
+# SMTP de développement : boîte de test Mailtrap (Email Testing, « sandbox »). Mailtrap capture tous
+# les e-mails, quel que soit le destinataire, sans rien livrer à de vraies boîtes. Les identifiants
+# SMTP de la boîte sont lus depuis l'environnement (MAILTRAP_SMTP_USER / MAILTRAP_SMTP_PASS), jamais
+# écrits ici. Voir docs/runbooks/local-email.md. Resend reste le candidat de production (ADR 008).
 [auth.email.smtp]
 enabled = true
-host = "smtp.resend.com"
-port = 465
-user = "resend"
-pass = "env(RESEND_API_KEY)"
-admin_email = "onboarding@resend.dev"
+host = "sandbox.smtp.mailtrap.io"
+port = 2525
+user = "env(MAILTRAP_SMTP_USER)"
+pass = "env(MAILTRAP_SMTP_PASS)"
+admin_email = "no-reply@fusion-leap.test"
 sender_name = "Fusion Leap (dev)"
 
 # Uncomment to customize email template

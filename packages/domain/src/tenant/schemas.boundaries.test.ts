@@ -119,7 +119,7 @@ describe("createOrganizationApiSchema : strict", () => {
     expect(createOrganizationApiSchema.safeParse({ name: "A", [field]: "v" }).success).toBe(false);
   });
   it("accepte les trois champs connus, avec défauts", () => {
-    expect(createOrganizationApiSchema.parse({ name: " A " })).toEqual({ name: "A", locale: "ar", timezone: "UTC" });
+    expect(createOrganizationApiSchema.parse({ name: " A " })).toEqual({ name: "A", locale: "fr", timezone: "UTC" });
   });
   it("le schéma tolérant (Server Action) ignore toujours les extras", () => {
     expect(createOrganizationSchema.safeParse({ name: "A", uiLocale: "en", creation_key: "k" }).success).toBe(true);
@@ -127,14 +127,14 @@ describe("createOrganizationApiSchema : strict", () => {
 });
 
 describe("createOrganizationSchema : locale", () => {
-  it.each(["ar", "en"])("accepte %s", (locale) => {
+  it.each(["fr", "ar", "en"])("accepte %s", (locale) => {
     expect(createOrganizationSchema.parse({ name: "A", locale }).locale).toBe(locale);
   });
-  it.each(["fr", "AR", "En", "ar-MA", " ar", "", null])("refuse %j", (locale) => {
+  it.each(["FR", "Fr", "fr ", " fr", "fr-FR", "es", "AR", "En", "ar-MA", " ar", "", null])("refuse %j", (locale) => {
     expect(ok({ name: "A", locale })).toBe(false);
   });
-  it("défaut ar quand la locale est absente", () => {
-    expect(createOrganizationSchema.parse({ name: "A" }).locale).toBe("ar");
+  it("défaut fr quand la locale est absente", () => {
+    expect(createOrganizationSchema.parse({ name: "A" }).locale).toBe("fr");
   });
 });
 

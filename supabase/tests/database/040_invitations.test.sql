@@ -35,6 +35,10 @@ insert into public.organizations (id, name, slug) values
   ('20000000-0000-4000-8000-000000000001', 'Inv Alpha', 'inv-alpha-test'),
   ('20000000-0000-4000-8000-000000000002', 'Inv Beta', 'inv-beta-test'),
   ('20000000-0000-4000-8000-000000000003', 'Inv Gamma', 'inv-gamma-test');
+-- Abonnement de test : limite d'utilisateurs très haute (ces tests ne portent pas sur les quotas, voir 090).
+insert into public.subscriptions (organization_id, plan_id, limits_override)
+  select o.id, (select id from public.plans where code = 'growth'), '{"users": 100000}'::jsonb from public.organizations o
+   where not exists (select 1 from public.subscriptions s where s.organization_id = o.id);
 
 insert into public.organization_members (organization_id, user_id, role, status) values
   ('20000000-0000-4000-8000-000000000001', '10000000-0000-4000-8000-000000000001', 'company_owner', 'active'),
@@ -925,6 +929,10 @@ select '13000000-0000-4000-8000-000000000001'::uuid, '00000000-0000-0000-0000-00
 
 insert into public.organizations (id, name, slug) values
   ('20000000-0000-4000-8000-000000000004', 'Inv Delta', 'inv-delta-test');
+-- Abonnement de test : limite d'utilisateurs très haute (ces tests ne portent pas sur les quotas, voir 090).
+insert into public.subscriptions (organization_id, plan_id, limits_override)
+  select o.id, (select id from public.plans where code = 'growth'), '{"users": 100000}'::jsonb from public.organizations o
+   where not exists (select 1 from public.subscriptions s where s.organization_id = o.id);
 
 insert into public.organization_members (organization_id, user_id, role, status)
 select '20000000-0000-4000-8000-000000000004'::uuid, ('11000000-0000-4000-8000-' || lpad(to_hex(n), 12, '0'))::uuid,

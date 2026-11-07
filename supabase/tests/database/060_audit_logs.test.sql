@@ -95,6 +95,10 @@ insert into public.organizations (id, name, slug) values
   (pg_temp.o(1), 'Aud Alpha', 'aud-alpha-test'),
   (pg_temp.o(2), 'Aud Beta', 'aud-beta-test'),
   (pg_temp.o(3), 'Aud Gamma', 'aud-gamma-test');
+-- Abonnement de test : limite d'utilisateurs très haute (ces tests ne portent pas sur les quotas, voir 090).
+insert into public.subscriptions (organization_id, plan_id, limits_override)
+  select o.id, (select id from public.plans where code = 'growth'), '{"users": 100000}'::jsonb from public.organizations o
+   where not exists (select 1 from public.subscriptions s where s.organization_id = o.id);
 
 insert into public.organization_members (organization_id, user_id, role, status) values
   (pg_temp.o(1), pg_temp.u(1), 'company_owner', 'active'),
@@ -641,7 +645,7 @@ select is(
 select is(
   (select count(*)::int from pg_proc pr join pg_namespace n on n.oid = pr.pronamespace
     where n.nspname = 'private' and (pr.proname like 'audit\_%' or pr.proname = 'mask_email')),
-  8, 'huit fonctions d''audit dans le schéma private'
+  9, 'neuf fonctions d''audit dans le schéma private (dont audit_subscriptions, J14)'
 );
 select is(
   (select pr.prosecdef and pr.proconfig = array['search_path=""']::text[]
@@ -750,6 +754,10 @@ select set_config('request.jwt.claims', json_build_object('sub', pg_temp.u(1), '
 select pg_temp.step();
 insert into public.organizations (id, name, slug, timezone, locale)
 values (pg_temp.o(4), 'Aud Delta', 'aud-delta-test', 'Africa/Casablanca', 'en');
+-- Abonnement de test : limite d'utilisateurs très haute (ces tests ne portent pas sur les quotas, voir 090).
+insert into public.subscriptions (organization_id, plan_id, limits_override)
+  select o.id, (select id from public.plans where code = 'growth'), '{"users": 100000}'::jsonb from public.organizations o
+   where not exists (select 1 from public.subscriptions s where s.organization_id = o.id);
 select is(pg_temp.fc(), 1, 'insertion d''organisation : une ligne d''audit');
 select is(
   pg_temp.fa('organization.created'),
@@ -1193,6 +1201,10 @@ select set_config('request.jwt.claims', '', true);
 select pg_temp.step();
 set local session_replication_role = replica;
 insert into public.organizations (id, name, slug) values (pg_temp.o(5), 'Aud Replica', 'aud-replica-test');
+-- Abonnement de test : limite d'utilisateurs très haute (ces tests ne portent pas sur les quotas, voir 090).
+insert into public.subscriptions (organization_id, plan_id, limits_override)
+  select o.id, (select id from public.plans where code = 'growth'), '{"users": 100000}'::jsonb from public.organizations o
+   where not exists (select 1 from public.subscriptions s where s.organization_id = o.id);
 insert into public.organization_members (organization_id, user_id, role, status)
 values (pg_temp.o(5), pg_temp.u(9), 'sales_agent', 'active');
 insert into public.invitations (id, organization_id, email_normalized, role, token_hash, expires_at, invited_by)

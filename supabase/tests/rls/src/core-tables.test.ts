@@ -136,7 +136,8 @@ describe("select : ce que chaque utilisateur voit", () => {
       (r) => r.code,
     );
     // Tout utilisateur authentifié lit le catalogue ; aucune ligne tenant n'y figure.
-    expect(codes).toEqual(["trial"]);
+    // Catalogue J14 : trial, starter, growth (valeurs provisoires).
+    expect([...codes].sort()).toEqual(["growth", "starter", "trial"]);
   });
 
   it("anon : refus sur toutes les tables du noyau", async () => {

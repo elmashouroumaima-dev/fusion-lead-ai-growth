@@ -6,6 +6,7 @@ import {
   cleanupTestUsers,
   createTestUser,
   isDenied,
+  psql,
   rowsOf,
   select,
 } from "./harness";
@@ -43,6 +44,8 @@ async function newOrg(owner: Account, label: string): Promise<string> {
     p_creation_key: `inv-${label}-${run}`,
   });
   expect(result.status).toBe(200);
+  // Ces tests portent sur les invitations, pas sur les quotas (voir quotas.test.ts) : limite d'utilisateurs très haute.
+  psql(`update public.subscriptions set limits_override = '{"users": 100000}' where organization_id = '${result.body}'`);
   return result.body;
 }
 

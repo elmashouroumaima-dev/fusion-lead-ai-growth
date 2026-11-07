@@ -28,7 +28,7 @@ Mot de passe de développement (le même pour tous) : constante `dev_password` a
 | Adresse | Rôle | Entreprise(s) | Administration de la plateforme |
 |---|---|---|---|
 | `shared@seed.test` | Propriétaire (Alpha) et Commercial (Beta) | Alpha, Beta | **oui** |
-| `alpha-admin@seed.test` | Administrateur | Alpha | **oui** |
+| `alpha-admin@seed.test` | Administrateur | Alpha | non |
 | `alpha-marketing@seed.test` | Responsable marketing | Alpha | non |
 | `alpha-sales@seed.test` | Commercial | Alpha | non |
 | `alpha-analyst@seed.test` | Analyste | Alpha | non |
@@ -69,7 +69,7 @@ Pour chaque compte, se connecter puis noter ce que le **menu latéral** propose 
 | ID | Compte | Menu attendu | Adresse tapée à la main | Résultat attendu |
 |---|---|---|---|---|
 | C1 | `shared@seed.test` (Alpha) | Tableau de bord, Membres, Paramétrage, **Administration** | `/fr/members` | Page Membres affichée |
-| C2 | `alpha-admin@seed.test` | Tableau de bord, Membres, Paramétrage, **Administration** | `/fr/admin/organizations` | Page d'administration affichée |
+| C2 | `alpha-admin@seed.test` | Tableau de bord, Membres, Paramétrage ; **pas d'Administration** | `/fr/admin/organizations` | Retour au tableau de bord |
 | C3 | `alpha-marketing@seed.test` | **Ni Membres ni Paramétrage ni Administration** | `/fr/members` | Retour au tableau de bord |
 | C4 | `alpha-sales@seed.test` | Idem C3 | `/fr/settings/smtp` | Retour au tableau de bord |
 | C5 | `alpha-analyst@seed.test` | Idem C3 | `/fr/admin/organizations` | Retour au tableau de bord, aucune donnée d'administration |
@@ -97,7 +97,7 @@ Se connecter avec `alpha-admin@seed.test` (ou `shared@seed.test` dans Alpha), pa
 | ID | Étapes | Résultat attendu |
 |---|---|---|
 | E1 | Tableau de bord d'Alpha (propriétaire ou administrateur) : carte **Utilisation du plan**. | Compteurs par métrique (Utilisateurs, Projets, Fiches de contact, Messages, Exécutions IA, Intégrations) avec la limite du plan. Alpha est au plan **Croissance** (15 utilisateurs). |
-| E2 | `shared@seed.test` → **Administration** (liste des organisations). | Alpha et Beta, plan, statut, nombre de membres actifs. |
+| E2 | `shared@seed.test` → **Administration** (liste des organisations ; seul ce compte y a accès). | Alpha et Beta, plan, statut, nombre de membres actifs. |
 | E3 | Ouvrir Alpha, choisir la formule **Essai** (3 utilisateurs), saisir un **Motif de la décision** (≤ 200 caractères), **Enregistrer l'abonnement**. | Notification verte « Abonnement enregistré. » |
 | E4 | Revenir dans Alpha (propriétaire) et tenter d'inviter une personne. | Refus : « La limite d'utilisateurs de votre plan est atteinte. Contactez l'administrateur de la plateforme. » (Alpha a déjà 5 membres actifs pour une limite de 3.) |
 | E5 | Rétablir la formule **Croissance** dans Administration. Réessayer d'inviter. | L'invitation est de nouveau possible. |
@@ -129,7 +129,7 @@ Menu **Paramétrage → Profil**.
 
 ## H. Paramétrage — Serveur SMTP (administrateurs de la plateforme)
 
-Avec `shared@seed.test` ou `alpha-admin@seed.test`, menu **Paramétrage → Serveur SMTP**.
+Avec `shared@seed.test` (seul administrateur de la plateforme du jeu de test), menu **Paramétrage → Serveur SMTP**.
 
 | ID | Étapes | Résultat attendu |
 |---|---|---|

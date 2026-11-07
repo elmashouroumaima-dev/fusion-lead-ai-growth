@@ -22,6 +22,11 @@ export function contrastRatio(a: string, b: string): number {
   return (hi + 0.05) / (lo + 0.05);
 }
 
+/** Texte clair ou foncé neutre, selon celui qui se lit le mieux sur `background` (sert à proposer le texte d'un fond). */
+export function readableTextOn(background: string): "#ffffff" | "#09090b" {
+  return contrastRatio("#ffffff", background) >= contrastRatio("#09090b", background) ? "#ffffff" : "#09090b";
+}
+
 export type ContrastIssue = { mode: PaletteMode; text: PaletteToken; background: PaletteToken; ratio: number };
 
 /** Paires sous le seuil AA (4.5:1). Liste vide = palette acceptable. */

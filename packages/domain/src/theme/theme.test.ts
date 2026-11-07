@@ -7,6 +7,7 @@ import {
   contrastRatio,
   luminance,
   paletteContrastIssues,
+  readableTextOn,
   paletteSchema,
   paletteToCss,
   readablePaletteSchema,
@@ -28,6 +29,18 @@ describe("contraste WCAG", () => {
   it("refuse une couleur invalide", () => {
     expect(() => luminance("red")).toThrow();
     expect(() => luminance("#FFFFFF")).toThrow();
+  });
+});
+
+describe("readableTextOn", () => {
+  it("blanc sur fond foncé, quasi noir sur fond clair, toujours AA sur les couleurs vives courantes", () => {
+    expect(readableTextOn("#09090b")).toBe("#ffffff");
+    expect(readableTextOn("#006a4e")).toBe("#ffffff");
+    expect(readableTextOn("#ffffff")).toBe("#09090b");
+    expect(readableTextOn("#fb923c")).toBe("#09090b");
+    for (const bg of ["#1d4ed8", "#facc15", "#34d399", "#dc2626"]) {
+      expect(contrastRatio(readableTextOn(bg), bg)).toBeGreaterThanOrEqual(4.5);
+    }
   });
 });
 

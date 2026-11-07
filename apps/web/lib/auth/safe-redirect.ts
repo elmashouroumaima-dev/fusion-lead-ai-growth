@@ -3,7 +3,7 @@
  * Règles : une seule `/` initiale (pas `//`), pas de `\`, pas de schéma, pas de caractère de
  * contrôle. La vérification est refaite APRÈS décodage (les navigateurs décodent `%2f`, `%5c`).
  */
-// eslint-disable-next-line no-control-regex
+// no-control-regex : désactivée pour ce fichier dans eslint.config.mjs (noInlineConfig dans apps/web).
 const CONTROL_CHARS = /[\u0000-\u001f\u007f]/;
 
 function isInternalPath(path: string): boolean {

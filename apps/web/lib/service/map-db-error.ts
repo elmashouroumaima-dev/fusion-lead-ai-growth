@@ -1,4 +1,4 @@
-import type { ApiErrorCode } from "./errors";
+import type { ServiceErrorCode } from "./errors";
 
 /** Forme minimale d'une erreur PostgREST / supabase-js (seuls `code` et `message` sont lus). */
 export type DbErrorLike = { code?: string | null | undefined; message?: string | null | undefined };
@@ -11,15 +11,17 @@ export type DbErrorLike = { code?: string | null | undefined; message?: string |
  *  - 'unauthenticated'      (SQLSTATE 28000)
  *  - 'validation_failed'    (SQLSTATE 22023, ainsi que 22P05 et 22021 : texte non encodable)
  *  - 'idempotency_conflict' (SQLSTATE P0001)
+ *  - 'quota_exceeded'       (SQLSTATE P0001, quota de clés d'idempotence par acteur)
  *  - 42501 insufficient_privilege (GRANT/RLS)  -> forbidden
  *  - PGRST301 / PGRST303 (JWT invalide ou expiré) -> unauthenticated
  */
-export function mapDbError(error: DbErrorLike | null | undefined): ApiErrorCode {
+export function mapDbError(error: DbErrorLike | null | undefined): ServiceErrorCode {
   if (!error) return "internal_error";
   const message = (error.message ?? "").trim();
   const code = error.code ?? "";
 
   if (message === "idempotency_conflict" && code === "P0001") return "idempotency_conflict";
+  if (message === "quota_exceeded" && code === "P0001") return "quota_exceeded";
   if (message === "validation_failed" && (code === "22023" || code === "")) return "validation_failed";
   if (message === "unauthenticated" && (code === "28000" || code === "")) return "unauthenticated";
 

@@ -123,6 +123,9 @@
       "forbidden": "Vous n’avez pas accès à cette organisation.",
       "idempotency_conflict": "Cette demande a déjà été envoyée avec des informations différentes. Rechargez la page, puis réessayez.",
       "rate_limited": "Trop de tentatives. Veuillez patienter quelques minutes, puis réessayer.",
+      "duplicate_request": "Cette demande a déjà été traitée. Actualisez la page pour vérifier le résultat.",
+      "idempotency_in_progress": "Cette demande est encore en cours de traitement. Patientez quelques secondes, puis actualisez la page pour vérifier le résultat.",
+      "service_unavailable": "Le service est momentanément indisponible. Veuillez réessayer dans un instant.",
       "generic": "Une erreur est survenue. Veuillez réessayer."
     }
   },
@@ -199,6 +202,11 @@
       "already_member": "Cette adresse e-mail appartient déjà à un membre actif de l’organisation.",
       "invitation_invalid": "Cette invitation n’est pas valide.",
       "last_owner": "Le dernier propriétaire ne peut être ni retiré ni rétrogradé. Transférez d’abord la propriété.",
+      "rate_limited": "Trop de demandes en peu de temps. Veuillez patienter un instant, puis réessayer.",
+      "duplicate_request": "Cette demande a déjà été traitée. Actualisez la page pour vérifier le résultat.",
+      "idempotency_in_progress": "Cette demande est encore en cours de traitement. Patientez quelques secondes, puis actualisez la page pour vérifier le résultat.",
+      "idempotency_conflict": "Cette demande a déjà été envoyée avec des informations différentes. Rechargez la page, puis réessayez.",
+      "service_unavailable": "Le service est momentanément indisponible. Veuillez réessayer dans un instant.",
       "generic": "Une erreur est survenue. Veuillez réessayer.",
       "loadFailed": "La liste n’a pas pu être chargée. Veuillez réessayer."
     }

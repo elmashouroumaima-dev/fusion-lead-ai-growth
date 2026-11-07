@@ -146,3 +146,8 @@ Le modèle ajoute ~14 tables à la spec §7 (toutes marquées « ajout ADR »). 
 
 ## Mise en œuvre J6 (2026-11-06)
 Tables créées : `plans` (catalogue global ; ligne `trial` sans limites, valeurs au J14 car la spec n'en donne pas), `organizations`, `organization_members`, `subscriptions` (une ligne par entreprise), `usage_counters` ; enums `app_role` (5 valeurs), `member_status`, `org_status`, `subscription_status`. Écarts avec l'ADR : `plans` créé au J6 (au lieu du J14) pour porter la FK de `subscriptions.plan_id` ; `private.platform_admins` reste prévu au J14. Le « schema lint » (J7) devra autoriser explicitement les tables sans `organization_id` : `organizations` (racine) et `plans` (catalogue global).
+
+## Mise en œuvre J11 (2026-11-06)
+- `idempotency_keys` : ajouts `actor_id`, `state` (`in_progress` | `completed`), `attempt_id` ; aucune politique RLS et aucun GRANT : accès uniquement par fonctions `security definer`. Unicité `(organization_id, key)`.
+- `rate_limit_buckets` : `organization_id` reste nullable (ADR 007 G-D9) avec `check (organization_id is not null or provider is not null)` ; exemption justifiée dans le schema lint (règle L1). Écriture réservée à `service_role`. Deux seaux par appel : (organisation, utilisateur) et global par utilisateur (organisation NULL, fournisseur `user_scope`).
+- Purge : `idempotency_purge` et `rate_limit_purge` (service_role) ; planification avec le worker (J13).

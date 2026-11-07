@@ -29,6 +29,12 @@ vi.mock("../supabase/server", () => ({
   }),
 }));
 vi.mock("next/headers", () => ({ cookies: async () => ({ set: cookieSet, get: vi.fn() }) }));
+
+// La limitation de débit passe par service_role (J11) : son backend est simulé, jamais appelé ici.
+vi.mock("../service/rate-limit", () => ({
+  LIMITS: {},
+  takeToken: async () => ({ allowed: true, retryAfterSeconds: 0 }),
+}));
 class RedirectSignal extends Error {
   constructor(public readonly url: string) {
     super("NEXT_REDIRECT");

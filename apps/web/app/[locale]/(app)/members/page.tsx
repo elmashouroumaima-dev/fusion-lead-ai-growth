@@ -46,7 +46,7 @@ export default async function MembersPage({ params }: { params: Promise<{ locale
           <section className={`card ${styles.section}`} aria-labelledby="invite-title">
             <h2 id="invite-title">{t("invite.title")}</h2>
             <p className="lead">{t("invite.description")}</p>
-            <InviteForm organizationId={ctx.organizationId} roleOptions={assignableRoles(ctx.role)} />
+            <InviteForm organizationId={ctx.organizationId} idempotencyKey={crypto.randomUUID()} roleOptions={assignableRoles(ctx.role)} />
           </section>
 
           <section className={`card ${styles.section}`} aria-labelledby="pending-title">

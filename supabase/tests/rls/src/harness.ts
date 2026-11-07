@@ -176,6 +176,8 @@ export async function cleanupTestUsers(userIds: string[]): Promise<void> {
     "set session_replication_role = replica;",
     `create temp table victims as select id from public.organizations where created_by in (${list});`,
     "delete from public.invitations where organization_id in (select id from victims);",
+    "delete from public.idempotency_keys where organization_id in (select id from victims);",
+    "delete from public.rate_limit_buckets where organization_id in (select id from victims);",
     "delete from public.subscriptions where organization_id in (select id from victims);",
     "delete from public.usage_counters where organization_id in (select id from victims);",
     "delete from public.organization_members where organization_id in (select id from victims);",
@@ -197,6 +199,23 @@ export async function cleanupTestUsers(userIds: string[]): Promise<void> {
         Authorization: `Bearer ${signJwt({ role: "service_role" })}`,
       },
     });
+  }
+}
+
+/**
+ * Nettoyage BEST-EFFORT (J11) des clés d'idempotence créées par un test sur les entreprises du seed :
+ * service_role n'a AUCUN droit sur public.idempotency_keys (par conception), donc passage par psql sur la
+ * pile LOCALE. `prefix` doit être le préfixe unique de l'exécution ([A-Za-z0-9_-] seulement).
+ */
+export function purgeIdempotencyKeys(prefix: string): void {
+  if (!/^[A-Za-z0-9_-]{4,64}$/.test(prefix)) return;
+  try {
+    execSync("docker exec -i supabase_db_fusion-leap psql -U postgres -d postgres -v ON_ERROR_STOP=1", {
+      input: `delete from public.idempotency_keys where key like '${prefix}%';`,
+      stdio: ["pipe", "ignore", "ignore"],
+    });
+  } catch {
+    return; // Docker indisponible : les clés sont uniques par exécution et expirent après 24 h
   }
 }
 
@@ -282,4 +301,17 @@ export async function restoreFixtures(snapshot: Snapshot): Promise<void> {
   ]);
   if (created.status !== 201)
     throw new Error(`restauration des compteurs impossible (${created.status})`);
+}
+
+/**
+ * Exécute du SQL sur la pile LOCALE (psql dans le conteneur) et retourne la sortie (sans en-têtes).
+ * Contrairement aux nettoyages best-effort, LÈVE en cas d'échec : à réserver aux tests qui ne peuvent pas
+ * fonctionner sans (ex. simuler le temps qui passe en reculant created_at, que service_role ne peut pas écrire).
+ */
+export function psql(sql: string): string {
+  return execSync("docker exec -i supabase_db_fusion-leap psql -U postgres -d postgres -v ON_ERROR_STOP=1 -tA", {
+    input: sql,
+    encoding: "utf8",
+    stdio: ["pipe", "pipe", "pipe"],
+  }).trim();
 }

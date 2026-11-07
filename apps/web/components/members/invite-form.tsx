@@ -4,11 +4,18 @@ import { INVITATION_EXPIRY_DAYS, type TenantRole } from "@fusion-leap/domain";
 import { useLocale, useTranslations } from "next-intl";
 import { useActionState, useEffect, useId, useRef, useState, useSyncExternalStore } from "react";
 import { inviteMemberAction } from "../../lib/members/actions";
+import { shouldRenewIdempotencyKey } from "../../lib/members/idempotency-key";
 import type { MembersActionState } from "../../lib/members/types";
 import styles from "./members.module.css";
 
 type Props = {
   organizationId: string;
+  /**
+   * Clé d'idempotence générée côté serveur (crypto.randomUUID()) à chaque rendu de la page : un envoi
+   * rejoué (double clic, nouvel essai réseau) ne crée pas de seconde invitation. Renouvelée après chaque
+   * réponse définitive pour que l'invitation suivante soit une nouvelle intention.
+   */
+  idempotencyKey: string;
   /** Rôles attribuables par l'utilisateur courant (assignableRoles) : une commodité, la base revérifie. */
   roleOptions: readonly TenantRole[];
 };
@@ -16,14 +23,22 @@ type Props = {
 const initialState: MembersActionState = { status: "idle" };
 const noopSubscribe = () => () => {};
 
-export function InviteForm({ organizationId, roleOptions }: Props) {
+export function InviteForm({ organizationId, idempotencyKey, roleOptions }: Props) {
   const t = useTranslations("Members");
   const tc = useTranslations("Common");
   const to = useTranslations("Org");
   const uiLocale = useLocale();
   const uid = useId();
   const formRef = useRef<HTMLFormElement>(null);
-  const [state, formAction, pending] = useActionState(inviteMemberAction, initialState);
+  const [key, setKey] = useState(idempotencyKey);
+  const [state, formAction, pending] = useActionState(async (prev: MembersActionState, formData: FormData) => {
+    const result = await inviteMemberAction(prev, formData);
+    // Nouvelle clé seulement après un succès ou un conflit ; jamais pendant `idempotency_in_progress` (voir la règle).
+    if (shouldRenewIdempotencyKey(result)) {
+      setKey(crypto.randomUUID());
+    }
+    return result;
+  }, initialState);
 
   // Après un succès, le champ e-mail est vidé : le lien affiché ne dépend pas du formulaire.
   useEffect(() => {
@@ -44,6 +59,7 @@ export function InviteForm({ organizationId, roleOptions }: Props) {
       <form ref={formRef} action={formAction} className="form">
         <input type="hidden" name="uiLocale" value={uiLocale} />
         <input type="hidden" name="organization_id" value={organizationId} />
+        <input type="hidden" name="idempotency_key" value={key} />
 
         <div className="field">
           <label htmlFor={emailId}>{t("fields.email")}</label>

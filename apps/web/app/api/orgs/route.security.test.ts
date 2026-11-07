@@ -16,6 +16,12 @@ vi.mock("../../../lib/supabase/server", () => ({
 }));
 vi.mock("next/headers", () => ({ cookies: async () => ({ set: cookieSet, get: vi.fn() }) }));
 
+// La limitation de débit passe par service_role (J11) : son backend est simulé, jamais appelé ici.
+vi.mock("../../../lib/service/rate-limit", () => ({
+  LIMITS: {},
+  takeToken: async () => ({ allowed: true, retryAfterSeconds: 0 }),
+}));
+
 import { POST } from "./route";
 
 const orgRow = {
@@ -100,10 +106,27 @@ describe("POST /api/orgs : en-tête Idempotency-Key", () => {
     expect(rpc.mock.calls[0]?.[1]).toMatchObject({ p_creation_key: value });
   });
 
-  it("l'authentification est vérifiée avant la clé : sans session ET sans clé -> 401", async () => {
+  it("ordre du contrat : la clé et le corps sont validés (étape zod) AVANT l'authentification : sans session ET sans clé -> 400, aucun appel d'auth", async () => {
     getClaims.mockResolvedValue({ data: null, error: null });
     const res = await POST(req({ name: "A" }, { "idempotency-key": null }));
+    expect(res.status).toBe(400);
+    expect((await res.json()).code).toBe("validation_failed");
+    expect(getClaims).not.toHaveBeenCalled();
+    expect(rpc).not.toHaveBeenCalled();
+  });
+
+  it("sans session avec une clé et un corps valides -> 401 (l'authentification suit la validation)", async () => {
+    getClaims.mockResolvedValue({ data: null, error: null });
+    const res = await POST(req({ name: "A" }));
     expect(res.status).toBe(401);
+    expect(rpc).not.toHaveBeenCalled();
+  });
+
+  it("organization_id est refusé (403) avant même l'authentification et avant la clé", async () => {
+    getClaims.mockResolvedValue({ data: null, error: null });
+    const res = await POST(req({ name: "A", organization_id: ORG }, { "idempotency-key": null }));
+    expect(res.status).toBe(403);
+    expect(getClaims).not.toHaveBeenCalled();
   });
 });
 
@@ -157,10 +180,28 @@ describe("POST /api/orgs : erreurs normalisées et request_id", () => {
     expect(Object.keys(body).sort()).toEqual(["code", "message", "request_id"]);
   });
 
-  it("reprend un x-request-id sûr du client", async () => {
+  it("un x-request-id sûr du client n'est JAMAIS repris comme request_id : uuid frais, et client_request_id dans le journal", async () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
     const res = await POST(req({ name: "" }, { "x-request-id": "trace-abc-12345" }));
-    expect((await res.json()).request_id).toBe("trace-abc-12345");
-    expect(res.headers.get("x-request-id")).toBe("trace-abc-12345");
+    const body = await res.json();
+    expect(body.request_id).toMatch(UUID_RE);
+    expect(body.request_id).not.toBe("trace-abc-12345");
+    expect(res.headers.get("x-request-id")).toBe(body.request_id);
+    const line = JSON.parse(String(warn.mock.calls[0]?.[0])) as Record<string, unknown>;
+    expect(line).toEqual({
+      event: "service_failure",
+      code: "validation_failed",
+      request_id: body.request_id,
+      client_request_id: "trace-abc-12345",
+      name: "orgs.create",
+    });
+  });
+
+  it("sans x-request-id valide : pas de client_request_id dans le journal", async () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    await POST(req({ name: "" }, { "x-request-id": "bad id" }));
+    const line = JSON.parse(String(warn.mock.calls[0]?.[0])) as Record<string, unknown>;
+    expect(line).not.toHaveProperty("client_request_id");
   });
 
   it("remplace un x-request-id dangereux (espaces, trop court)", async () => {
@@ -168,14 +209,20 @@ describe("POST /api/orgs : erreurs normalisées et request_id", () => {
     expect((await res.json()).request_id).toMatch(UUID_RE);
   });
 
-  it("le même request_id circule dans les erreurs 401, 403 et 500", async () => {
+  it("le request_id (uuid serveur, jamais celui du client) est identique en-tête / corps dans les erreurs 401, 403 et 500", async () => {
     const id = "trace-fixed-0001";
+    const check = async (res: Response) => {
+      const body = await res.json();
+      expect(body.request_id).toMatch(UUID_RE);
+      expect(body.request_id).not.toBe(id);
+      expect(res.headers.get("x-request-id")).toBe(body.request_id);
+    };
     getClaims.mockResolvedValue({ data: null, error: null });
-    expect((await (await POST(req({ name: "A" }, { "x-request-id": id }))).json()).request_id).toBe(id);
+    await check(await POST(req({ name: "A" }, { "x-request-id": id })));
     getClaims.mockResolvedValue({ data: { claims: { sub: USER } }, error: null });
-    expect((await (await POST(req({ name: "A", organization_id: ORG }, { "x-request-id": id }))).json()).request_id).toBe(id);
+    await check(await POST(req({ name: "A", organization_id: ORG }, { "x-request-id": id })));
     createClient.mockRejectedValue(new Error("boom"));
-    expect((await (await POST(req({ name: "A" }, { "x-request-id": id }))).json()).request_id).toBe(id);
+    await check(await POST(req({ name: "A" }, { "x-request-id": id })));
   });
 
   it("réponses d'erreur en no-store", async () => {
@@ -188,7 +235,7 @@ describe("POST /api/orgs : erreurs normalisées et request_id", () => {
     const textSpy = vi.spyOn(r, "text");
     const res = await POST(r);
     expect(res.status).toBe(413);
-    expect(await res.json()).toEqual({ code: "payload_too_large", message: expect.any(String), request_id: "trace-big-00001" });
+    expect(await res.json()).toEqual({ code: "payload_too_large", message: expect.any(String), request_id: expect.stringMatching(UUID_RE) });
     expect(textSpy).not.toHaveBeenCalled();
     expect(rpc).not.toHaveBeenCalled();
   });

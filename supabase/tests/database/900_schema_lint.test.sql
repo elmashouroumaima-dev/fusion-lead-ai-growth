@@ -12,9 +12,10 @@ select plan(11);
 -- organization_id NULLABLE par conception (seaux globaux par fournisseur ; CHECK organization_id OU
 -- provider non nul), n'est écrit que par service_role et n'a ni politique ni droit pour authenticated
 -- (vérifié par 050_service_layer.test.sql). Toute autre exception doit être ajoutée ici AVEC une
--- justification en revue.
+-- justification en revue. `platform_config` (J12b, ADR 016) est une donnée GLOBALE : aucun droit pour anon /
+-- authenticated / service_role, RLS sans politique, accès par fonctions (vérifié par 070_platform_config.test.sql).
 create temporary table lint_exempt (table_name text primary key) on commit drop;
-insert into lint_exempt values ('organizations'), ('plans'), ('rate_limit_buckets');
+insert into lint_exempt values ('organizations'), ('plans'), ('rate_limit_buckets'), ('platform_config');
 
 create temporary table lint_tables on commit drop as
 select c.oid as relid, c.relname::text as table_name

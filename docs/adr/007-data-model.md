@@ -151,3 +151,9 @@ Tables créées : `plans` (catalogue global ; ligne `trial` sans limites, valeur
 - `idempotency_keys` : ajouts `actor_id`, `state` (`in_progress` | `completed`), `attempt_id` ; aucune politique RLS et aucun GRANT : accès uniquement par fonctions `security definer`. Unicité `(organization_id, key)`.
 - `rate_limit_buckets` : `organization_id` reste nullable (ADR 007 G-D9) avec `check (organization_id is not null or provider is not null)` ; exemption justifiée dans le schema lint (règle L1). Écriture réservée à `service_role`. Deux seaux par appel : (organisation, utilisateur) et global par utilisateur (organisation NULL, fournisseur `user_scope`).
 - Purge : `idempotency_purge` et `rate_limit_purge` (service_role) ; planification avec le worker (J13).
+
+## Mise en œuvre J12 (2026-11-07) — `audit_logs`
+- Écriture **dans la base** par déclencheurs `after row` (`security definer`, `ENABLE ALWAYS`) sur `organizations`, `organization_members` et `invitations` : atomique avec la modification, non contournable par l'application, sans `service_role`. Une insertion d'audit en échec fait échouer la modification (échec fermé).
+- Colonnes : `actor_id` sans clé étrangère (supprimer un compte ne doit ni être bloqué ni réécrire l'historique), `actor_kind` (`user` | `system` | `support`), `action` et `entity_type` contraints, `before`/`after` ≤ 16 Ko, `request_id` lu dans l'en-tête `x-request-id`. `ip` reste NULL jusqu'au choix de l'hébergeur et d'un proxy de confiance.
+- Immuabilité : `REVOKE` des droits d'écriture (y compris `service_role`) et déclencheurs refusant `UPDATE`/`DELETE`/`TRUNCATE`, `ENABLE ALWAYS`. Limite assumée : le propriétaire de la table et les super-utilisateurs ; procédures dans `docs/runbooks/audit-logs.md`.
+- Écart au plan : migration `20261113100000_audit_logs.sql` modifiée sur place après revue (jamais commitée ni appliquée ailleurs).

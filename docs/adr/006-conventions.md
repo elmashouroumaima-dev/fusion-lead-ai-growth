@@ -32,3 +32,9 @@ Ces conventions sont appliquées par ESLint/CI (frontières de packages, interdi
 - Couche service `apps/web/lib/service/` : voir `docs/api/service-layer.md`. Les erreurs `{ code, message, request_id }` sont produites par un seul module (`errors.ts`) ; `lib/api/` a été supprimé.
 - **Idempotence** : durée 24 h, reprise d'une requête bloquée après 5 minutes, `attempt_id` par tentative, quota de 200 lignes vivantes par (organisation, acteur), réponse stockée limitée à 16 Ko. Les réponses contenant un secret ne sont jamais stockées (`storeResponse: false`).
 - **Écarts au plan** : la migration `20261112100000_service_layer.sql` a été modifiée sur place après revue de sécurité (jamais commitée ni appliquée ailleurs). `acceptInvitationAction` passe par la couche service ; les actions d'authentification (J8) et `/auth/confirm` restent hors couche (à migrer avec J12).
+
+## Mise en œuvre J12 (2026-11-07) — logs
+- Logger JSON **maison** (`apps/web/lib/service/logger.ts`), sans dépendance : une ligne JSON par appel, `request_id` / `organization_id` / `actor_id` pris dans le contexte de requête (`AsyncLocalStorage`) et non modifiables par l'appelant, silencieux sous test. Écart à cet ADR (qui citait `pino`) : décision de la responsable technique, pour éviter une dépendance et les problèmes de bundling avec Next.
+- Caviardage : clés sensibles (même liste que `private.audit_redact`, test de parité) et valeurs (JWT, `Bearer` / `Basic`, clés `sb_secret_` / `sb_publishable_`, e-mails, secrets dans les URL et chaînes de connexion, jetons d'invitation) ; une `Error` n'est journalisée que par son nom et son code, jamais son message.
+- Le client Supabase serveur envoie l'en-tête `x-request-id` (identifiant généré côté serveur) pour que l'audit porte le même `request_id`.
+- Reste : migrer les actions d'authentification (J8) et `/auth/confirm` sur la couche service ; le message de démarrage (`startup-check`) utilise encore `console`.

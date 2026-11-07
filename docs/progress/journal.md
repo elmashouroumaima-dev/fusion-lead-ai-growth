@@ -283,3 +283,29 @@ Demande : reprendre le rendu du tableau de bord ONMD (`C:\Projects\HamzaDev\fron
 - **Tests** : web 1821 · domain 364 · permissions 394 · worker 3 · adapters 1 ; lint, typecheck, build (env de CI) et `check:leaks` verts. Vérifié en navigateur : `/fr/login`, `/ar/login`, connexion, sélecteur d'organisation, tableau de bord, membres.
 - **Revues** : sécurité (A5) : audit des dépendances sans vulnérabilité, aucun script d'installation, licences MIT/ISC/Apache, J8–J11 intacts ; ajout d'en-têtes anti-clickjacking ; contrastes AA corrigés ; polices converties en WOFF2.
 - **Reste / à valider** : couleur primaire (vert ONMD `#006a4e`) et rôles affichés en rouge (couleur secondaire ONMD) à confirmer ; vérification visuelle du mode sombre et de la page d'invitation ; ADR 015 ; succès des actions membres annoncé à la fois par toast et zone aria-live.
+
+## J12 — jeu 26 nov 2026 — Phase 1 (préparé en avance, NON commité, branche `day-12-audit-logs`)
+Cible : 20,6 % | Réel : à valider | Statut : —
+
+### Organisation du travail
+Manager + agents : A2 base de données, A3 logger et contexte de requête, A5 sécurité et A6 qualité (lecture seule), F2/F3/F4 corrections, A5b re-vérification.
+
+### Tâches
+| Tâche | Estimé | Livré | Validée |
+|---|---|---|---|
+| `audit_logs` append-only (REVOKE + déclencheurs `ENABLE ALWAYS`, G-D10) | 2 h | oui (migration + retour arrière) | oui |
+| Audit par déclencheurs (organisations, membres, invitations), caviardage et masquage d'e-mail | 1,5 h | oui | oui |
+| Logger JSON (`request_id`, caviardage) et contexte de requête | 1,5 h | oui | oui |
+| Branchement membres/invitations | 1 h | oui (déclencheurs : aucun oubli possible) | oui |
+
+### Tests : domain 364 ✓ · permissions 394 ✓ · web 2018 ✓ · worker 3 · adapters 1 · pgTAP 1049 ✓ · RLS 274 ✓ · lint, typecheck, `next build` (env de CI) et `check:leaks --require-bundle` verts
+### Écarts à la spec / plan
+- Audit **dans la base** (déclencheurs) plutôt que dans le code applicatif ; logger maison au lieu de `pino` (ADR 006) ; migration modifiée sur place avant tout commit.
+- `ip` NULL (pas de proxy de confiance) ; pas d'écran « Journal d'activité » (hors périmètre).
+### Constats de sécurité (A5/A5b)
+- Corrigés : parité des listes de clés SQL/TS, déclencheurs d'audit en `ENABLE ALWAYS`, masquage d'e-mail court, contexte de requête prioritaire sur les champs de l'appelant, masquage des secrets dans les valeurs (URL, `Basic`, chaînes de connexion, jetons d'invitation), noms de clés et erreurs non `Error`, séparateurs U+2028/2029.
+- A5b : append-only non contournable (même avec `session_replication_role = replica`, `service_role`, falsification de JWT), isolation entre organisations, aucun secret dans l'audit, ReDoS écarté (20 entrées adverses de 1 Mo), 200 requêtes concurrentes sans fuite de contexte.
+- Restent (faible, documentés) : croissance non bornée du journal (rétention J13/J57) ; `request_id` = indice (contrôlable par un client appelant l'API directement) ; super-utilisateur et propriétaire de table peuvent désactiver les déclencheurs ; actions d'authentification (J8) sans `request_id` ; lignes d'audit orphelines après les tests RLS.
+### Blocages / à faire
+- Politique de rétention de l'audit ; écran de consultation éventuel ; valider ADR 015 (UI) et ADR 014.
+### Demain : J13 (jobs et worker)

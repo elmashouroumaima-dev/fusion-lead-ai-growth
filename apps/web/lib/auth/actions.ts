@@ -10,6 +10,7 @@ import {
 } from "@fusion-leap/domain";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import { field, toFieldErrors } from "../service/form";
 import { createClient } from "../supabase/server";
 import { mapAuthError } from "./map-error";
 import { RECOVERY_COOKIE } from "./routes";
@@ -19,22 +20,6 @@ import type { AuthActionState, AuthErrorCode } from "./types";
 
 const fail = (code: AuthErrorCode, fieldErrors?: Record<string, string[]>): AuthActionState =>
   fieldErrors ? { status: "error", code, fieldErrors } : { status: "error", code };
-
-/** Lit uniquement les champs attendus (pas de `Object.fromEntries` : évite les clés inattendues). */
-function field(formData: FormData, name: string): string | undefined {
-  const value = formData.get(name);
-  return typeof value === "string" ? value : undefined;
-}
-
-/** Erreurs de champ : noms de champs et codes zod uniquement, jamais les valeurs saisies. */
-function toFieldErrors(error: { issues: ReadonlyArray<{ code: string; path: PropertyKey[] }> }): Record<string, string[]> {
-  const out: Record<string, string[]> = {};
-  for (const issue of error.issues) {
-    const key = String(issue.path[0] ?? "form");
-    (out[key] ??= []).push(issue.code);
-  }
-  return out;
-}
 
 /** `amr` absent : on s'en remet au cookie ; présent : il doit contenir une méthode otp/recovery. */
 function isRecoverySession(claims: { amr?: unknown }): boolean {

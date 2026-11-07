@@ -123,6 +123,9 @@
       "forbidden": "You do not have access to this organization.",
       "idempotency_conflict": "This request was already submitted with different details. Reload the page and try again.",
       "rate_limited": "Too many attempts. Please wait a few minutes and try again.",
+      "duplicate_request": "This request has already been processed. Refresh the page to check the result.",
+      "idempotency_in_progress": "This request is still being processed. Wait a few seconds, then refresh the page to check the result.",
+      "service_unavailable": "The service is temporarily unavailable. Please try again in a moment.",
       "generic": "Something went wrong. Please try again."
     }
   },
@@ -199,6 +202,11 @@
       "already_member": "This email address already belongs to an active member of the organization.",
       "invitation_invalid": "This invitation is not valid.",
       "last_owner": "The last owner cannot be removed or demoted. Transfer ownership first.",
+      "rate_limited": "Too many requests in a short time. Please wait a moment and try again.",
+      "duplicate_request": "This request has already been processed. Refresh the page to check the result.",
+      "idempotency_in_progress": "This request is still being processed. Wait a few seconds, then refresh the page to check the result.",
+      "idempotency_conflict": "This request was already submitted with different details. Reload the page and try again.",
+      "service_unavailable": "The service is temporarily unavailable. Please try again in a moment.",
       "generic": "Something went wrong. Please try again.",
       "loadFailed": "The list could not be loaded. Please try again."
     }

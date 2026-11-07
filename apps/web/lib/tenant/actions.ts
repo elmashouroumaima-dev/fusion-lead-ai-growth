@@ -1,59 +1,60 @@
 "use server";
 
-import {
-  createOrganizationSchema,
-  idempotencyKeySchema,
-  localeSchema,
-  uuidSchema,
-  type AuthLocale,
-} from "@fusion-leap/domain";
-import { redirect } from "next/navigation";
-import type { ApiErrorCode } from "../api/errors";
-import { DEFAULT_LOCALE } from "../auth/routes";
-import { createClient } from "../supabase/server";
+import { createOrganizationSchema, idempotencyKeySchema, uuidSchema, type CreateOrganizationInput } from "@fusion-leap/domain";
+import { ServiceError } from "../service/errors";
+import { serviceCodeToFormCode, uiLocaleOf } from "../service/form";
+import { redirectTo, withAction, type ActionFailure, type ServiceSchema } from "../service/with-service";
 import { setActiveOrgCookie } from "./active-org-cookie";
 import { createOrganizationForUser } from "./create-organization";
-import { getAuthenticatedUserId } from "./identity";
 import { fetchActiveMemberships } from "./memberships";
 import type { TenantActionErrorCode, TenantActionState } from "./types";
 
 const fail = (code: TenantActionErrorCode, fieldErrors?: Record<string, string[]>): TenantActionState =>
   fieldErrors ? { status: "error", code, fieldErrors } : { status: "error", code };
 
-/** Lit uniquement les champs attendus ; une valeur absente ou non textuelle donne `undefined`. */
-function field(formData: FormData, name: string): string | undefined {
-  const value = formData.get(name);
-  return typeof value === "string" ? value : undefined;
-}
+const loginPath = (formData: FormData): string => `/${uiLocaleOf(formData)}/login`;
 
-/** Erreurs de champ : noms de champs et codes zod uniquement, jamais les valeurs saisies. */
-function toFieldErrors(error: { issues: ReadonlyArray<{ code: string; path: PropertyKey[] }> }): Record<string, string[]> {
-  const out: Record<string, string[]> = {};
-  for (const issue of error.issues) {
-    const key = String(issue.path[0] ?? "form");
-    (out[key] ??= []).push(issue.code);
-  }
-  return out;
-}
+const failure = ({ code, fieldErrors }: ActionFailure): TenantActionState => fail(serviceCodeToFormCode(code), fieldErrors);
 
-/** Locale de l'interface (redirections) : valeur validée, repli sur la locale par défaut. */
-function uiLocaleOf(formData: FormData): AuthLocale {
-  const parsed = localeSchema.safeParse(field(formData, "uiLocale"));
-  return parsed.success ? parsed.data : DEFAULT_LOCALE;
-}
+type CreateOrganizationFormInput = { organization: CreateOrganizationInput; creationKey: string };
 
-function toActionCode(code: ApiErrorCode): TenantActionErrorCode {
-  switch (code) {
-    case "validation_failed":
-      return "invalid_input";
-    case "forbidden":
-      return "forbidden";
-    case "idempotency_conflict":
-      return "idempotency_conflict";
-    default:
-      return "generic";
-  }
-}
+/** Nom, locale, fuseau (domain) + clé de création (champ caché généré au rendu), validés ensemble avant l'authentification. */
+const createOrganizationFormSchema: ServiceSchema<CreateOrganizationFormInput> = {
+  safeParse(raw) {
+    const record = (raw ?? {}) as Record<string, unknown>;
+    const input = createOrganizationSchema.safeParse({
+      name: record.name,
+      locale: record.locale,
+      timezone: record.timezone,
+    });
+    const key = idempotencyKeySchema.safeParse(record.creation_key);
+    if (!input.success) return { success: false, error: { issues: input.error.issues } };
+    if (!key.success) {
+      return { success: false, error: { issues: key.error.issues.map((issue) => ({ code: issue.code, path: ["creation_key"] })) } };
+    }
+    return { success: true, data: { organization: input.data, creationKey: key.data } };
+  },
+};
+
+const createOrganization = withAction(
+  {
+    name: "orgs.create",
+    auth: "user",
+    rateLimit: "sensitive",
+    idempotency: "none", // la clé de création du RPC (creation_key) assure déjà l'idempotence
+    schema: createOrganizationFormSchema,
+    fields: ["name", "locale", "timezone", "creation_key"],
+    failure,
+    loginPath,
+  },
+  async (ctx, { organization, creationKey }): Promise<TenantActionState | ReturnType<typeof redirectTo>> => {
+    const result = await createOrganizationForUser(ctx.supabase, ctx.userId, organization, creationKey, ctx.requestId);
+    if (!result.ok) throw new ServiceError(result.code);
+
+    await setActiveOrgCookie(result.organization.id);
+    return redirectTo(`/${uiLocaleOf(ctx.formData)}/dashboard`);
+  },
+);
 
 /**
  * Création d'organisation depuis l'onboarding. L'identifiant d'organisation n'est JAMAIS lu du
@@ -61,62 +62,45 @@ function toActionCode(code: ApiErrorCode): TenantActionErrorCode {
  * (champ caché généré au rendu) rend l'envoi rejouable sans doublon. Succès : cookie d'organisation
  * active posé, puis redirection vers le tableau de bord.
  */
-export async function createOrganizationAction(
-  _prev: TenantActionState,
-  formData: FormData,
-): Promise<TenantActionState> {
-  const uiLocale = uiLocaleOf(formData);
-
-  const input = createOrganizationSchema.safeParse({
-    name: field(formData, "name"),
-    locale: field(formData, "locale"),
-    timezone: field(formData, "timezone"),
-  });
-  const key = idempotencyKeySchema.safeParse(field(formData, "creation_key"));
-  if (!input.success) return fail("invalid_input", toFieldErrors(input.error));
-  if (!key.success) return fail("invalid_input", { creation_key: key.error.issues.map((issue) => issue.code) });
-
-  const supabase = await createClient();
-  const userId = await getAuthenticatedUserId(supabase);
-  if (!userId) redirect(`/${uiLocale}/login`);
-
-  const result = await createOrganizationForUser(supabase, userId, input.data, key.data);
-  if (!result.ok) {
-    if (result.code === "unauthenticated") redirect(`/${uiLocale}/login`);
-    return fail(toActionCode(result.code));
-  }
-
-  await setActiveOrgCookie(result.organization.id);
-  // redirect() lève NEXT_REDIRECT : surtout pas dans un try/catch.
-  redirect(`/${uiLocale}/dashboard`);
+export async function createOrganizationAction(prev: TenantActionState, formData: FormData): Promise<TenantActionState> {
+  return createOrganization(prev, formData);
 }
+
+const switchOrganization = withAction(
+  {
+    name: "orgs.switch",
+    auth: "user",
+    rateLimit: "mutation",
+    idempotency: "none",
+    schema: {
+      safeParse(raw) {
+        const requested = uuidSchema.safeParse((raw as Record<string, unknown>).organization_id);
+        return requested.success ? { success: true, data: requested.data } : { success: false, error: { issues: requested.error.issues } };
+      },
+    } satisfies ServiceSchema<string>,
+    fields: ["organization_id"],
+    failure,
+    loginPath,
+  },
+  async (ctx, requested): Promise<TenantActionState | ReturnType<typeof redirectTo>> => {
+    let allowed: boolean;
+    try {
+      const memberships = await fetchActiveMemberships(ctx.supabase, ctx.userId);
+      allowed = memberships.some((m) => m.organizationId === requested && m.organization.status === "active");
+    } catch {
+      return fail("generic");
+    }
+    if (!allowed) return fail("forbidden");
+
+    await setActiveOrgCookie(requested);
+    return redirectTo(`/${uiLocaleOf(ctx.formData)}/dashboard`);
+  },
+);
 
 /**
  * Changement d'organisation active. Le cookie n'est posé qu'APRÈS avoir relu en base une adhésion
  * active de l'utilisateur dans une organisation active : l'identifiant reçu n'est qu'une demande.
  */
-export async function switchOrganizationAction(
-  _prev: TenantActionState,
-  formData: FormData,
-): Promise<TenantActionState> {
-  const uiLocale = uiLocaleOf(formData);
-
-  const requested = uuidSchema.safeParse(field(formData, "organization_id"));
-  if (!requested.success) return fail("invalid_input", toFieldErrors(requested.error));
-
-  const supabase = await createClient();
-  const userId = await getAuthenticatedUserId(supabase);
-  if (!userId) redirect(`/${uiLocale}/login`);
-
-  let allowed: boolean;
-  try {
-    const memberships = await fetchActiveMemberships(supabase, userId);
-    allowed = memberships.some((m) => m.organizationId === requested.data && m.organization.status === "active");
-  } catch {
-    return fail("generic");
-  }
-  if (!allowed) return fail("forbidden");
-
-  await setActiveOrgCookie(requested.data);
-  redirect(`/${uiLocale}/dashboard`);
+export async function switchOrganizationAction(prev: TenantActionState, formData: FormData): Promise<TenantActionState> {
+  return switchOrganization(prev, formData);
 }

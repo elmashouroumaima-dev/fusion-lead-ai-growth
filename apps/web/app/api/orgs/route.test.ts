@@ -31,6 +31,12 @@ vi.mock("../../../lib/supabase/server", () => ({
 }));
 vi.mock("next/headers", () => ({ cookies: async () => ({ set: cookieSet, get: vi.fn() }) }));
 
+// La limitation de débit passe par service_role (J11) : son backend est simulé, jamais appelé ici.
+vi.mock("../../../lib/service/rate-limit", () => ({
+  LIMITS: {},
+  takeToken: async () => ({ allowed: true, retryAfterSeconds: 0 }),
+}));
+
 import { POST } from "./route";
 
 const orgRow = {
@@ -60,7 +66,9 @@ describe("POST /api/orgs", () => {
     rpc.mockResolvedValue({ data: ORG, error: null });
     const res = await POST(req({ name: "  Acme  ", locale: "en", timezone: "Africa/Casablanca" }, { "x-request-id": "req-12345678" }));
     expect(res.status).toBe(201);
-    expect(res.headers.get("x-request-id")).toBe("req-12345678");
+    // request_id toujours généré par le serveur : le x-request-id du client n'est jamais repris tel quel.
+    expect(res.headers.get("x-request-id")).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/);
+    expect(res.headers.get("x-request-id")).not.toBe("req-12345678");
     expect(await res.json()).toEqual({
       organization: { id: ORG, name: "Acme", slug: "acme-x1", locale: "ar", timezone: "UTC" },
       role: "company_owner",

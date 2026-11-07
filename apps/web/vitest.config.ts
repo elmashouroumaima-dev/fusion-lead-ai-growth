@@ -4,6 +4,7 @@ export default defineConfig({
   test: {
     environment: "node",
     include: ["**/*.test.{ts,tsx}"],
+    setupFiles: ["./vitest.setup.ts"],
     exclude: ["node_modules/**", ".next/**"],
     server: {
       deps: {

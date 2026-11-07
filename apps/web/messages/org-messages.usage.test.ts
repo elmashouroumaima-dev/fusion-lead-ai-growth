@@ -52,14 +52,23 @@ describe("Org.* : parité ar / en", () => {
   });
 
   it("un message pour chaque code d'erreur d'action (types.ts), sans clé en trop", () => {
-    const codes = ["forbidden", "generic", "idempotency_conflict", "invalid_input", "rate_limited"];
+    const codes = ["duplicate_request", "forbidden", "generic", "idempotency_conflict", "idempotency_in_progress", "invalid_input", "rate_limited", "service_unavailable"];
     for (const org of [ar.Org, en.Org, fr.Org]) expect(Object.keys(org.errors).sort()).toEqual(codes);
   });
 
   it("types.ts et ce test listent les mêmes codes d'erreur", () => {
     const src = read("lib/tenant/types.ts");
     const declared = [...src.matchAll(/\|\s*"([a-z_]+)"/g)].map((m) => m[1]).filter((c) => c !== "idle" && c !== "success" && c !== "error");
-    expect(declared.sort()).toEqual(["forbidden", "generic", "idempotency_conflict", "invalid_input", "rate_limited"]);
+    expect(declared.sort()).toEqual([
+      "duplicate_request",
+      "forbidden",
+      "generic",
+      "idempotency_conflict",
+      "idempotency_in_progress",
+      "invalid_input",
+      "rate_limited",
+      "service_unavailable",
+    ]);
   });
 });
 

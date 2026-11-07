@@ -1,5 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+const ATTEMPT = "11111111-2222-4333-8444-555555555555";
+
 const ORG = "11111111-1111-4111-8111-111111111111";
 const ME = "22222222-2222-4222-8222-222222222222";
 const OTHER = "33333333-3333-4333-8333-333333333333";
@@ -39,6 +41,18 @@ vi.mock("../supabase/server", () => ({
   createClient: async () => ({ from: (t: string) => builder(t), rpc, auth: { getClaims } }),
 }));
 vi.mock("next/headers", () => ({ cookies: async () => ({ get: vi.fn(), set: setCookie }) }));
+
+// La limitation de débit passe par service_role (J11) : son backend est simulé, jamais appelé ici.
+vi.mock("../service/rate-limit", () => ({
+  LIMITS: {},
+  takeToken: async () => ({ allowed: true, retryAfterSeconds: 0 }),
+}));
+vi.mock("../service/idempotency", async (importOriginal) => ({
+  ...(await importOriginal<Record<string, unknown>>()),
+  idempotencyBegin: async () => ({ state: "new", attemptId: ATTEMPT }),
+  idempotencyComplete: async () => undefined,
+  idempotencyAbandon: async () => undefined,
+}));
 vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }));
 class RedirectSignal extends Error {
   constructor(public readonly url: string) {
@@ -68,6 +82,7 @@ import { hashInvitationToken } from "./token";
 const idle = { status: "idle" } as const;
 const form = (fields: Record<string, string>) => {
   const fd = new FormData();
+  fd.set("idempotency_key", "idem-key-0123456789");
   for (const [k, v] of Object.entries(fields)) fd.set(k, v);
   return fd;
 };

@@ -25,7 +25,7 @@ export function parseLocalePath(pathname: string): ParsedPath {
   return { locale, rest };
 }
 
-// eslint-disable-next-line no-control-regex
+// no-control-regex : désactivée pour ce fichier dans eslint.config.mjs (noInlineConfig dans apps/web).
 const FORBIDDEN_CHARS = /[\u0000-\u001f\u007f\\]/;
 
 /**

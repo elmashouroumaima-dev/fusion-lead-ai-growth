@@ -8,6 +8,9 @@ export type TenantActionErrorCode =
   | "forbidden"
   | "idempotency_conflict"
   | "rate_limited"
+  | "duplicate_request"
+  | "idempotency_in_progress"
+  | "service_unavailable"
   | "generic";
 
 /**

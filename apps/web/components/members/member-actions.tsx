@@ -48,6 +48,8 @@ export function MemberActions({ organizationId, memberId, shortId, role, roleOpt
   }, initialState);
   const [transferState, transferAction, transferPending] = useActionState(transferOwnershipAction, initialState);
   const [confirming, setConfirming] = useState<Confirming>(null);
+  // Clé d'idempotence du transfert : créée à l'ouverture de la confirmation (événement client, donc sans écart d'hydratation).
+  const [transferKey, setTransferKey] = useState("");
   const cancelRef = useRef<HTMLButtonElement>(null);
 
   // Le focus passe au bouton « Annuler » à l'ouverture de la confirmation (action sûre par défaut).
@@ -92,7 +94,10 @@ export function MemberActions({ organizationId, memberId, shortId, role, roleOpt
           type="button"
           aria-label={t("actions.transferLabel", { subject })}
           aria-expanded={confirming === "transfer"}
-          onClick={() => setConfirming("transfer")}
+          onClick={() => {
+            setTransferKey(crypto.randomUUID());
+            setConfirming("transfer");
+          }}
         >
           {t("actions.transfer")}
         </button>
@@ -119,6 +124,7 @@ export function MemberActions({ organizationId, memberId, shortId, role, roleOpt
           }}
         >
           {common}
+          {confirming === "transfer" ? <input type="hidden" name="idempotency_key" value={transferKey} /> : null}
           <p>{confirming === "remove" ? t("actions.removeConfirm", { subject }) : t("actions.transferConfirm", { subject })}</p>
           <div className="actions">
             <button className={`btn ${styles.btnDanger}`} type="submit" disabled={removePending || transferPending}>

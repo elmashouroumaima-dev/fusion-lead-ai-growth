@@ -1,12 +1,16 @@
 import { describe, expect, it } from "vitest";
-import { apiErrorStatus, type ApiErrorCode } from "./errors";
+import { serviceErrorStatus, type ServiceErrorCode } from "./errors";
 import { mapDbError, type DbErrorLike } from "./map-db-error";
 
-type Row = [label: string, error: DbErrorLike | null | undefined, expected: ApiErrorCode];
+type Row = [label: string, error: DbErrorLike | null | undefined, expected: ServiceErrorCode];
 
 const table: Row[] = [
   ["conflit d'idempotence (contrat A2)", { code: "P0001", message: "idempotency_conflict" }, "idempotency_conflict"],
   ["conflit avec espaces autour du message", { code: "P0001", message: "  idempotency_conflict \n" }, "idempotency_conflict"],
+  ["quota de clés d'idempotence par acteur", { code: "P0001", message: "quota_exceeded" }, "quota_exceeded"],
+  ["quota avec espaces autour du message", { code: "P0001", message: " quota_exceeded\n" }, "quota_exceeded"],
+  ["quota sans le bon SQLSTATE", { code: "XX000", message: "quota_exceeded" }, "internal_error"],
+  ["tentative périmée (invalid_state)", { code: "P0001", message: "invalid_state" }, "internal_error"],
   ["validation (contrat A2)", { code: "22023", message: "validation_failed" }, "validation_failed"],
   ["validation sans SQLSTATE", { message: "validation_failed" }, "validation_failed"],
   ["validation, autre message mais 22023", { code: "22023", message: "invalid_parameter_value" }, "validation_failed"],
@@ -46,25 +50,26 @@ describe("mapDbError (table)", () => {
 
   it("le résultat appartient toujours au jeu de codes de l'API (statut HTTP défini)", () => {
     for (const [, error] of table) {
-      const status = apiErrorStatus(mapDbError(error));
-      expect([400, 401, 403, 404, 422, 500]).toContain(status);
+      const status = serviceErrorStatus(mapDbError(error));
+      expect([400, 401, 403, 404, 422, 429, 500]).toContain(status);
     }
   });
 
   it("jamais de fuite : le message SQL brut n'est pas le code retourné", () => {
     for (const [, error] of table) {
       const out = mapDbError(error);
-      if (error?.message && !["idempotency_conflict", "validation_failed", "unauthenticated"].includes(error.message.trim())) {
+      if (error?.message && !["idempotency_conflict", "validation_failed", "unauthenticated", "quota_exceeded"].includes(error.message.trim())) {
         expect(out).not.toBe(error.message);
       }
     }
   });
 
   it("correspondance statut HTTP par code", () => {
-    expect(apiErrorStatus(mapDbError({ code: "P0001", message: "idempotency_conflict" }))).toBe(422);
-    expect(apiErrorStatus(mapDbError({ code: "22023", message: "validation_failed" }))).toBe(400);
-    expect(apiErrorStatus(mapDbError({ code: "28000", message: "unauthenticated" }))).toBe(401);
-    expect(apiErrorStatus(mapDbError({ code: "42501" }))).toBe(403);
-    expect(apiErrorStatus(mapDbError({ code: "99999", message: "x" }))).toBe(500);
+    expect(serviceErrorStatus(mapDbError({ code: "P0001", message: "idempotency_conflict" }))).toBe(422);
+    expect(serviceErrorStatus(mapDbError({ code: "22023", message: "validation_failed" }))).toBe(400);
+    expect(serviceErrorStatus(mapDbError({ code: "28000", message: "unauthenticated" }))).toBe(401);
+    expect(serviceErrorStatus(mapDbError({ code: "P0001", message: "quota_exceeded" }))).toBe(429);
+    expect(serviceErrorStatus(mapDbError({ code: "42501" }))).toBe(403);
+    expect(serviceErrorStatus(mapDbError({ code: "99999", message: "x" }))).toBe(500);
   });
 });

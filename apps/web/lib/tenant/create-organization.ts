@@ -4,14 +4,14 @@ import {
   type OrganizationSummary,
   type TenantRole,
 } from "@fusion-leap/domain";
-import type { ApiErrorCode } from "../api/errors";
-import { mapDbError } from "../api/map-db-error";
+import type { ServiceErrorCode } from "../service/errors";
+import { mapDbError } from "../service/map-db-error";
 import type { ServerSupabase } from "./identity";
 import { fetchActiveMemberships } from "./memberships";
 
 export type CreateOrganizationResult =
   | { ok: true; created: boolean; organization: OrganizationSummary; role: TenantRole }
-  | { ok: false; code: ApiErrorCode };
+  | { ok: false; code: ServiceErrorCode };
 
 /**
  * Crée une organisation via la fonction SQL transactionnelle `public.create_organization`

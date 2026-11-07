@@ -509,5 +509,8 @@
       "service_unavailable": "الخدمة غير متاحة مؤقتًا.",
       "generic": "حدث خطأ. يرجى المحاولة مرة أخرى."
     }
+  },
+  "Footer": {
+    "copyright": "© {year} {appName}. جميع الحقوق محفوظة."
   }
 }

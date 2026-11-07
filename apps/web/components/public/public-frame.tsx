@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { AppFooter } from "@/components/layout/app-footer";
 import { LanguageSwitcher } from "@/components/layout/language-switcher";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { cn } from "@/lib/utils";
@@ -37,6 +38,7 @@ export function PublicFrame({ children, brand, className }: Props) {
         {brand ? <div className="w-full justify-self-start">{brand}</div> : null}
         <div className={cn("flex w-full justify-center", brand && "lg:justify-end")}>{children}</div>
       </main>
+      <AppFooter tone="brand" />
     </div>
   );
 }

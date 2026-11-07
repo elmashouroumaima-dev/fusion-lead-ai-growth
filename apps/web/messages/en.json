@@ -369,6 +369,23 @@
       "blue": "Blue",
       "violet": "Violet",
       "orange": "Orange"
+    },
+    "logo": {
+      "title": "Logo",
+      "description": "The logo is shown across the platform (login, menu). It is shared by every user.",
+      "choose": "Choose an image",
+      "hint": "PNG, JPEG or WebP, 128 KB maximum. SVG is not accepted.",
+      "default": "Default logo",
+      "previewAlt": "Logo preview",
+      "save": "Save logo",
+      "saved": "Logo saved.",
+      "reset": "Restore default logo",
+      "resetDone": "Default logo restored.",
+      "errors": {
+        "type": "Unsupported format: choose a PNG, JPEG or WebP.",
+        "size": "Image too large: 128 KB maximum.",
+        "read": "This file could not be read."
+      }
     }
   }
 }

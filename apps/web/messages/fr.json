@@ -369,6 +369,23 @@
       "blue": "Bleu",
       "violet": "Mauve",
       "orange": "Orangé"
+    },
+    "logo": {
+      "title": "Logo de la plateforme",
+      "description": "Le logo s’affiche sur toute la plateforme (connexion, menu). Il est partagé par tous les utilisateurs.",
+      "choose": "Choisir une image",
+      "hint": "PNG, JPEG ou WebP, 128 Ko maximum. Le SVG n’est pas accepté.",
+      "default": "Logo par défaut",
+      "previewAlt": "Aperçu du logo",
+      "save": "Enregistrer le logo",
+      "saved": "Logo enregistré.",
+      "reset": "Rétablir le logo par défaut",
+      "resetDone": "Logo par défaut rétabli.",
+      "errors": {
+        "type": "Format non accepté : choisissez un PNG, un JPEG ou un WebP.",
+        "size": "Image trop lourde : 128 Ko maximum.",
+        "read": "Impossible de lire ce fichier."
+      }
     }
   }
 }

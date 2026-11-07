@@ -8,6 +8,7 @@ import {
   PRESET_IDS,
   TOKEN_CSS_VARIABLES,
   paletteContrastIssues,
+  readableTextOn,
   type ModePalette,
   type Palette,
   type PaletteMode,
@@ -56,8 +57,23 @@ export function PaletteEditor({ initial }: Props) {
     if (resetState.status === "success") toast.success(t("resetDone"));
   }, [resetState, t]);
 
+  // Fond -> texte associé : quand on change un fond, son texte devient automatiquement le plus lisible
+  // (clair ou foncé). Il reste modifiable à la main ensuite.
+  const TEXT_OF: Partial<Record<PaletteToken, PaletteToken>> = {
+    primary: "primary_foreground",
+    secondary: "secondary_foreground",
+    accent: "accent_foreground",
+    destructive: "destructive_foreground",
+    background: "foreground",
+  };
   const setColor = (mode: PaletteMode, token: PaletteToken, value: string) =>
-    setPalette((p) => ({ ...p, [mode]: { ...p[mode], [token]: value.toLowerCase() } }));
+    setPalette((p) => {
+      const hex = value.toLowerCase();
+      const next = { ...p[mode], [token]: hex };
+      const textToken = TEXT_OF[token];
+      if (textToken) next[textToken] = readableTextOn(hex);
+      return { ...p, [mode]: next };
+    });
 
   const error = saveState.status === "error" ? saveState.code : resetState.status === "error" ? resetState.code : undefined;
 

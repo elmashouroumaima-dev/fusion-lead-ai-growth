@@ -5,10 +5,11 @@ import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
+import { BrandLogoProvider } from "@/components/brand/logo";
 import { ThemeProvider } from "@/components/theme/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
 import { cn } from "@/lib/utils";
-import { getPlatformPalette } from "../../lib/service/platform-config";
+import { getPlatformLogoVersion, getPlatformPalette } from "../../lib/service/platform-config";
 import { getDirection } from "../../i18n/direction";
 import { routing } from "../../i18n/routing";
 import { poppins } from "../fonts/fonts";
@@ -41,10 +42,16 @@ export default async function LocaleLayout({ children, params }: LayoutProps) {
   const t = await getTranslations({ locale, namespace: "Common" });
   const dir = getDirection(locale);
   // Cairo n'est chargé (et préchargé) que pour l'arabe ; fr / en n'en téléchargent rien.
-  const cairoVariable = locale === "ar" ? (await import("../fonts/cairo")).cairo.variable : undefined;
+  const cairoVariable =
+    locale === "ar" ? (await import("../fonts/cairo")).cairo.variable : undefined;
 
   // Palette GLOBALE de la plateforme (valeurs #rrggbb re-validées), sur toutes les pages, connexion comprise.
-  const palette = await getPlatformPalette();
+  const [palette, logoVersion] = await Promise.all([
+    getPlatformPalette(),
+    getPlatformLogoVersion(),
+  ]);
+  // Logo personnalisé éventuel : URL versionnée de notre route (jamais une URL libre).
+  const logoSrc = logoVersion === null ? null : `/api/brand/logo?v=${logoVersion}`;
 
   return (
     <html lang={locale} dir={dir} suppressHydrationWarning className={cn(poppins.variable, cairoVariable)}>
@@ -53,14 +60,16 @@ export default async function LocaleLayout({ children, params }: LayoutProps) {
         <ThemeProvider>
           <DirectionProvider dir={dir}>
             <NextIntlClientProvider>
-              <a
-                href="#main"
-                className="bg-primary text-primary-foreground focus-visible:ring-ring absolute start-4 top-4 z-50 -translate-y-24 rounded-md px-4 py-2 text-sm font-medium transition-transform focus:translate-y-0 focus-visible:ring-2"
-              >
-                {t("skipToContent")}
-              </a>
-              {children}
-              <Toaster dir={dir} containerAriaLabel={t("notifications")} />
+              <BrandLogoProvider src={logoSrc}>
+                <a
+                  href="#main"
+                  className="bg-primary text-primary-foreground focus-visible:ring-ring absolute start-4 top-4 z-50 -translate-y-24 rounded-md px-4 py-2 text-sm font-medium transition-transform focus:translate-y-0 focus-visible:ring-2"
+                >
+                  {t("skipToContent")}
+                </a>
+                {children}
+                <Toaster dir={dir} containerAriaLabel={t("notifications")} />
+              </BrandLogoProvider>
             </NextIntlClientProvider>
           </DirectionProvider>
         </ThemeProvider>

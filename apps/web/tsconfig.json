@@ -5,6 +5,7 @@
     "jsx": "react-jsx",
     "types": ["node"],
     "incremental": true,
+    "paths": { "@/*": ["./*"] },
     "plugins": [{ "name": "next" }]
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],

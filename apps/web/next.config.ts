@@ -15,6 +15,19 @@ const nextConfig: NextConfig = {
   async headers() {
     return [
       {
+        // En-têtes globaux. DOIT rester la première règle : pour une même clé, la dernière règle qui correspond
+        // l'emporte (les règles invite / login / signup ci-dessous durcissent Referrer-Policy à `no-referrer`).
+        // CSP volontairement réduite à `frame-ancestors 'none'` : une CSP complète (script-src) casserait le script
+        // inline de next-themes ; voir docs/adr/015-ui-kit.md.
+        source: "/:path*",
+        headers: [
+          { key: "X-Frame-Options", value: "DENY" },
+          { key: "Content-Security-Policy", value: "frame-ancestors 'none'" },
+          { key: "X-Content-Type-Options", value: "nosniff" },
+          { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+        ],
+      },
+      {
         // Le jeton d'invitation est dans l'URL : jamais de Referer sortant, jamais de cache, jamais indexé.
         source: "/:locale/invite/:path*",
         headers: [

@@ -1,6 +1,7 @@
 import "server-only";
 import { createClient } from "@supabase/supabase-js";
 import { getServerEnv } from "../env/server";
+import { requestIdHeaders } from "../service/request-context";
 
 /**
  * Client Supabase « service_role » (clé secrète, contourne la RLS). SEUL module de apps/web autorisé
@@ -16,5 +17,6 @@ export function createAdminClient() {
   const env = getServerEnv();
   return createClient(env.SUPABASE_URL, env.SUPABASE_SECRET_KEY, {
     auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
+    global: { headers: requestIdHeaders() },
   });
 }

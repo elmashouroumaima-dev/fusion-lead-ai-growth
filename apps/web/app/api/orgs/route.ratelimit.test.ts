@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const ORG = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
 const USER = "cccccccc-cccc-4ccc-8ccc-cccccccccccc";
@@ -30,6 +30,7 @@ vi.mock("next/headers", () => ({ cookies: async () => ({ set: cookieSet, get: vi
 vi.mock("../../../lib/service/rate-limit", () => ({ LIMITS: {}, takeToken: (...a: unknown[]) => takeToken(...a) }));
 
 import { ServiceError } from "../../../lib/service/errors";
+import { captureLogs } from "../../../lib/service/log-capture.testkit";
 import { POST } from "./route";
 
 const req = () =>
@@ -39,13 +40,15 @@ const req = () =>
     body: JSON.stringify({ name: "Acme" }),
   });
 
+let cap: ReturnType<typeof captureLogs>;
+
 beforeEach(() => {
   vi.clearAllMocks();
   reads.length = 0;
   takeToken.mockResolvedValue({ allowed: true, retryAfterSeconds: 0 });
-  vi.spyOn(console, "warn").mockImplementation(() => undefined);
-  vi.spyOn(console, "error").mockImplementation(() => undefined);
+  cap = captureLogs();
 });
+afterEach(() => cap.stop());
 
 describe("POST /api/orgs : limitation de débit « sensible »", () => {
   it("prend un jeton sensible pour l'utilisateur, sans organisation (seau par portée utilisateur)", async () => {

@@ -1,6 +1,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { getClientEnv } from "../env/client";
+import { requestIdHeaders } from "../service/request-context";
 
 /**
  * Client serveur (Server Components, Server Actions, Route Handlers) avec la clé publishable :
@@ -12,6 +13,8 @@ export async function createClient() {
   const env = getClientEnv();
   const cookieStore = await cookies();
   return createServerClient(env.NEXT_PUBLIC_SUPABASE_URL, env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY, {
+    // x-request-id (identifiant serveur) sur chaque requête : les lignes d'audit en base portent le même request_id.
+    global: { headers: requestIdHeaders() },
     cookies: {
       getAll: () => cookieStore.getAll(),
       setAll: (cookiesToSet) => {

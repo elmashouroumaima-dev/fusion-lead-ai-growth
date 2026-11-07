@@ -1,12 +1,7 @@
-import { beforeEach, vi } from "vitest";
-
 /*
- * Les lignes de journal structurées attendues (service_failure, org_create_failed...) polluent la sortie
- * des tests. On les neutralise AVANT chaque test (un `vi.restoreAllMocks()` d'un test ne laisse donc pas
- * la console réelle pour les suivants). Un test qui veut vérifier la forme d'une ligne installe son propre
- * espion (`vi.spyOn(console, "warn")`) : il remplace celui-ci et reste libre de ses assertions.
+ * Fichier d'amorçage Vitest (référencé par vitest.config.ts). Volontairement vide de simulacres :
+ * le journal JSON (lib/service/logger.ts) est silencieux sous NODE_ENV=test, il n'y a donc plus de
+ * console.warn / console.error à neutraliser globalement. Un test qui veut lire les lignes de journal
+ * installe un récepteur (`captureLogs()` de lib/service/log-capture.testkit.ts).
  */
-beforeEach(() => {
-  vi.spyOn(console, "warn").mockImplementation(() => undefined);
-  vi.spyOn(console, "error").mockImplementation(() => undefined);
-});
+export {};

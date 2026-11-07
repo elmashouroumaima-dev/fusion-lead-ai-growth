@@ -48,7 +48,7 @@ const createOrganization = withAction(
     loginPath,
   },
   async (ctx, { organization, creationKey }): Promise<TenantActionState | ReturnType<typeof redirectTo>> => {
-    const result = await createOrganizationForUser(ctx.supabase, ctx.userId, organization, creationKey, ctx.requestId);
+    const result = await createOrganizationForUser(ctx.supabase, ctx.userId, organization, creationKey);
     if (!result.ok) throw new ServiceError(result.code);
 
     await setActiveOrgCookie(result.organization.id);

@@ -49,7 +49,7 @@ export const POST = withRoute(
     schema: createOrganizationRouteSchema,
   },
   async (ctx, { organization, creationKey }) => {
-    const result = await createOrganizationForUser(ctx.supabase, ctx.userId, organization, creationKey, ctx.requestId);
+    const result = await createOrganizationForUser(ctx.supabase, ctx.userId, organization, creationKey);
     if (!result.ok) throw new ServiceError(result.code);
 
     // Organisation désormais vérifiée comme appartenant à l'utilisateur : le cookie reste un indice.

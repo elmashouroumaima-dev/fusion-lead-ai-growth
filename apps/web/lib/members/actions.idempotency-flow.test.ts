@@ -111,8 +111,6 @@ beforeEach(() => {
   failCall = null;
   denyCall = null;
   businessError = null;
-  vi.spyOn(console, "warn").mockImplementation(() => undefined);
-  vi.spyOn(console, "error").mockImplementation(() => undefined);
 });
 
 describe("inviteMemberAction : double soumission avec la même clé", () => {

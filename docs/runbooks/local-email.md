@@ -18,3 +18,7 @@ La CI n'utilise pas ces identifiants : la pile CI exclut l'e-mail (pas de test d
 
 ## Production
 Fournisseur d'e-mail de production : candidat Resend (ADR 008, à valider) ; domaine d'envoi (SPF/DKIM) à décider (question Q2).
+
+## Paramètres SMTP de l'application
+Le Paramétrage de l'application (carte « Paramètres SMTP », administrateurs de la plateforme) enregistre un SMTP **de l'application** (test d'envoi, futur adaptateur e-mail) ; il est distinct du SMTP de Supabase Auth décrit ci-dessus. Voir `docs/runbooks/smtp-settings.md`.
+

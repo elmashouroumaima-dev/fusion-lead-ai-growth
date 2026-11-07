@@ -28,3 +28,7 @@ Gmail (B) : hors MVP — l'envoi seul serait possible, mais recevoir exige un sc
 - Si le fournisseur retenu n'a pas de signature HMAC : Basic Auth par canal + jeton dans l'URL + liste d'IP + dédup, avec accord explicite de la responsable technique (signalé dans la fiche).
 - Tenant résolu via `provider_message_id` dans nos tables et l'adresse de réponse par canal (jamais un champ libre).
 - Décision finale et ouverture du compte sandbox avant le **J31**.
+
+## Note (2026-11-07) — Paramètres SMTP de la plateforme
+Une configuration SMTP générique (option C) est désormais saisissable dans Paramétrage par les administrateurs de la plateforme (boîte de test Mailtrap comprise) : elle sert aux e-mails de la plateforme et aux tests, mais **ne remplace pas** la décision de cet ADR pour l'envoi de campagnes (option A : API avec événements, réception, webhooks). Voir `docs/runbooks/smtp-settings.md`.
+

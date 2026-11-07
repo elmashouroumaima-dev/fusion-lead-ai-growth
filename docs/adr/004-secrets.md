@@ -30,3 +30,11 @@ Option A reste l'alternative documentée si vous préférez déléguer la crypto
 
 ## Conséquences
 Runbook `secret-rotation` et `restore` (J58–J59) ; test J28 : lecture via Data API impossible, rotation vérifiée ; test de non-rejeu inter-tenant par l'AAD.
+
+## Mise en œuvre « Paramètres SMTP » (2026-11-07)
+Première utilisation de l'option B (chiffrement applicatif), avant le J28 :
+- `packages/adapters/src/secrets` : AES-256-GCM (nonce 96 bits unique, étiquette 128 bits), AAD `platform:<usage>:<id du secret>` (variante `org:<organization_id>:<id>` prête pour les secrets d'organisation), trousseau de clés versionné (`createKeyRing`), erreur unique sans détail. Clé maître : `SECRETS_MASTER_KEY` (base64, 32 octets) et `SECRETS_KEY_VERSION`, validées par le schéma d'environnement serveur, optionnelles (sans clé, aucun secret ne peut être enregistré).
+- `private.secrets` (migration `20261117100000`) : `id` (généré par l'application, car il fait partie de l'AAD), `purpose`, `organization_id` (NULL = secret de la plateforme), `ciphertext`, `nonce`, `key_version`, `created_at`, `rotated_at` ; **aucun droit** pour anon / authenticated / service_role ; accès par fonctions `SECURITY DEFINER` uniquement. Écart à l'ADR : `organization_id` est nullable (secrets de la plateforme).
+- Le mot de passe n'est jamais lisible par l'API : l'administrateur ne reçoit que `has_password` ; le chiffré n'est lu que par `service_role` (`get_smtp_delivery`) et déchiffré dans le serveur Next.js.
+- Reste : module `get / rotate / delete` générique pour les intégrations (J28), re-chiffrement lors d'une rotation de clé maître (tâche worker), runbooks `secret-rotation` et `restore`. L'ADR reste « Proposed » : à relire par la responsable technique.
+

@@ -5,7 +5,7 @@
   "tests": [
     {
       "label": "Web (application)",
-      "value": 2124
+      "value": 2128
     },
     {
       "label": "Base de données (pgTAP)",
@@ -25,7 +25,7 @@
     },
     {
       "label": "Worker et adaptateurs",
-      "value": 43
+      "value": 57
     },
     {
       "label": "Acceptation (T1, T5)",

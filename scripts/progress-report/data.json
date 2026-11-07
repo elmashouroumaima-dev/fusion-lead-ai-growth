@@ -1,0 +1,367 @@
+{
+  "title": "Avancement par module",
+  "intro": "Fusion Leap AI Growth : plateforme SaaS multi-tenant de croissance (CRM, canaux, campagnes, agents IA). Les fondations (sécurité, multi-tenant, authentification, membres, couche service, audit, worker, plans et quotas) sont en place ; les modules produit commencent après le jalon G1.",
+  "summary": "Phase 1 : il reste le jalon d'isolation G1 (J15) avant d'attaquer le CRM. S'y ajoutent, hors plan, le français par défaut, une refonte UI complète et un module « Paramétrage » (palette et logo).",
+  "tests": [
+    { "label": "Web (application)", "value": 2071 },
+    { "label": "Base de données (pgTAP)", "value": 1249 },
+    { "label": "Permissions (RBAC)", "value": 394 },
+    { "label": "Domaine (règles métier)", "value": 400 },
+    { "label": "RLS via l'API réelle", "value": 300 },
+    { "label": "Worker et adaptateurs", "value": 34 }
+  ],
+  "adrCount": 14,
+  "adrAccepted": 1,
+  "phases": [
+    {
+      "id": "p0",
+      "title": "Phase 0 — Découverte technique",
+      "modules": [
+        {
+          "day": "J0",
+          "days": 1,
+          "name": "Analyse de la spec",
+          "progress": 100,
+          "status": "done",
+          "note": "Lacunes, questions, plan validé."
+        },
+        {
+          "day": "J1",
+          "days": 1,
+          "name": "ADR et modèle de données",
+          "progress": 100,
+          "status": "part",
+          "note": "14 ADR ; seul le 011 est accepté."
+        },
+        {
+          "day": "J2",
+          "days": 1,
+          "name": "Intégrations et flux",
+          "progress": 100,
+          "status": "done",
+          "note": "WhatsApp, Salla, e-mail, CRM."
+        },
+        {
+          "day": "J3",
+          "days": 1,
+          "name": "Menaces, tests, backlog",
+          "progress": 100,
+          "status": "part",
+          "note": "53 menaces STRIDE ; C0 NO-GO provisoire."
+        }
+      ]
+    },
+    {
+      "id": "p1",
+      "title": "Phase 1 — Fondations",
+      "modules": [
+        {
+          "day": "J4",
+          "days": 1,
+          "name": "Monorepo et CI",
+          "progress": 100,
+          "status": "done",
+          "note": "pnpm + Turborepo, CI GitHub (2 jobs)."
+        },
+        {
+          "day": "J5",
+          "days": 1,
+          "name": "Environnements et secrets",
+          "progress": 100,
+          "status": "done",
+          "note": "Validation zod, garde-fou anti-fuite."
+        },
+        {
+          "day": "J6",
+          "days": 1,
+          "name": "Noyau multi-tenant (base)",
+          "progress": 100,
+          "status": "done",
+          "note": "Organisations, membres, plans, abonnements."
+        },
+        {
+          "day": "J7",
+          "days": 1,
+          "name": "RLS et harnais de test",
+          "progress": 100,
+          "status": "done",
+          "note": "Politiques par opération, tests via l'API."
+        },
+        {
+          "day": "J8",
+          "days": 1,
+          "name": "Authentification bilingue",
+          "progress": 100,
+          "status": "done",
+          "note": "Supabase SSR, sessions, redirections sûres."
+        },
+        {
+          "day": "J9",
+          "days": 1,
+          "name": "Organisations et contexte actif",
+          "progress": 100,
+          "status": "done",
+          "note": "Création atomique, sélecteur d'organisation."
+        },
+        {
+          "day": "J10",
+          "days": 1,
+          "name": "Membres, invitations, RBAC",
+          "progress": 100,
+          "status": "done",
+          "note": "Matrice ADR 014, jetons hachés."
+        },
+        {
+          "day": "J11",
+          "days": 1,
+          "name": "Couche service",
+          "progress": 100,
+          "status": "done",
+          "note": "Idempotence, limitation de débit, erreurs."
+        },
+        {
+          "day": "J12",
+          "days": 1,
+          "name": "Audit et journaux",
+          "progress": 100,
+          "status": "review",
+          "note": "Audit en lecture seule, logger JSON (PR n°8)."
+        },
+        {
+          "day": "J13",
+          "days": 1,
+          "name": "Jobs et worker",
+          "progress": 100,
+          "status": "review",
+          "note": "File Postgres, claim, bail, dead letter (PR n°10)."
+        },
+        {
+          "day": "J14",
+          "days": 1,
+          "name": "Plans et quotas",
+          "progress": 100,
+          "status": "review",
+          "note": "Quotas atomiques, Platform Admin, écran d'administration."
+        },
+        {
+          "day": "J15",
+          "days": 1,
+          "name": "Jalon G1 : isolation",
+          "progress": 0,
+          "status": "todo",
+          "note": "Deux entreprises : UI, API, RLS, worker."
+        }
+      ]
+    },
+    {
+      "id": "p2",
+      "title": "Phase 2 — Ventes et CRM",
+      "modules": [
+        {
+          "day": "J16–J17",
+          "days": 2,
+          "name": "Projets et produits",
+          "progress": 0,
+          "status": "todo",
+          "note": ""
+        },
+        {
+          "day": "J18–J20",
+          "days": 3,
+          "name": "Contacts, consentement, désabonnement",
+          "progress": 0,
+          "status": "todo",
+          "note": ""
+        },
+        {
+          "day": "J21–J23",
+          "days": 3,
+          "name": "Leads, deals, pipelines",
+          "progress": 0,
+          "status": "todo",
+          "note": ""
+        },
+        {
+          "day": "J24–J26",
+          "days": 3,
+          "name": "Capture publique, assignation, import CSV",
+          "progress": 0,
+          "status": "todo",
+          "note": ""
+        },
+        {
+          "day": "J27",
+          "days": 1,
+          "name": "Adaptateur CRM · Gate G2",
+          "progress": 0,
+          "status": "todo",
+          "note": "Lead → deal gagné, historique"
+        }
+      ]
+    },
+    {
+      "id": "p3",
+      "title": "Phase 3 — Canaux",
+      "modules": [
+        {
+          "day": "J28–J30",
+          "days": 3,
+          "name": "Intégrations et secrets",
+          "progress": 0,
+          "status": "todo",
+          "note": ""
+        },
+        {
+          "day": "J31–J33",
+          "days": 3,
+          "name": "Webhooks et e-mail",
+          "progress": 0,
+          "status": "todo",
+          "note": ""
+        },
+        {
+          "day": "J34–J37",
+          "days": 4,
+          "name": "WhatsApp Cloud API",
+          "progress": 0,
+          "status": "todo",
+          "note": "Compte Meta bloquant"
+        },
+        {
+          "day": "J38–J41",
+          "days": 4,
+          "name": "Inbox unifiée · Gate G3",
+          "progress": 0,
+          "status": "todo",
+          "note": "Envoi, réception, arrêt sûrs"
+        }
+      ]
+    },
+    {
+      "id": "p4",
+      "title": "Phase 4 — Croissance",
+      "modules": [
+        {
+          "day": "J42–J46",
+          "days": 5,
+          "name": "Campagnes, segments, approbation, UTM",
+          "progress": 0,
+          "status": "todo",
+          "note": ""
+        },
+        {
+          "day": "J47–J50",
+          "days": 4,
+          "name": "Agents IA (brouillons validés par un humain)",
+          "progress": 0,
+          "status": "todo",
+          "note": ""
+        },
+        {
+          "day": "J51–J53",
+          "days": 3,
+          "name": "Tableau de bord · Gate G4",
+          "progress": 0,
+          "status": "todo",
+          "note": "Campagne auditable"
+        }
+      ]
+    },
+    {
+      "id": "p5",
+      "title": "Phase 5 — Pilote SaaS",
+      "modules": [
+        {
+          "day": "J54–J55",
+          "days": 2,
+          "name": "Onboarding, Salla (mode marketing)",
+          "progress": 0,
+          "status": "todo",
+          "note": ""
+        },
+        {
+          "day": "J56–J59",
+          "days": 4,
+          "name": "Console admin, durcissement, staging",
+          "progress": 0,
+          "status": "todo",
+          "note": ""
+        },
+        {
+          "day": "J60–J62",
+          "days": 3,
+          "name": "Recette · Gate G5",
+          "progress": 0,
+          "status": "todo",
+          "note": "10 critères d'acceptation"
+        }
+      ]
+    }
+  ],
+  "extras": [
+    {
+      "name": "Français par défaut (fr / ar / en)",
+      "progress": 100,
+      "status": "done",
+      "note": "Locale française par défaut, arabe (RTL) et anglais ; PR n°5."
+    },
+    {
+      "name": "Refonte UI (Tailwind + shadcn)",
+      "progress": 100,
+      "status": "done",
+      "note": "Coque d'application, thème clair/sombre, accessibilité ; PR n°7."
+    },
+    {
+      "name": "E-mails locaux (Mailtrap)",
+      "progress": 100,
+      "status": "done",
+      "note": "Bac à sable SMTP ; mot de passe à saisir dans supabase/.env."
+    },
+    {
+      "name": "Paramétrage : palette de couleurs",
+      "progress": 100,
+      "status": "review",
+      "note": "Couleurs claires et sombres, aperçu, contraste AA ; PR n°9."
+    },
+    {
+      "name": "Paramétrage : logo",
+      "progress": 100,
+      "status": "review",
+      "note": "PNG, JPEG, WebP ≤ 128 Ko, SVG refusé ; PR n°9."
+    },
+    {
+      "name": "Rapport d'avancement automatisé",
+      "progress": 100,
+      "status": "review",
+      "note": "Généré à chaque commit : pnpm report:progress."
+    }
+  ],
+  "controls": "Lint, typecheck, build de production avec l'environnement de la CI, recherche de fuites de secrets dans le bundle navigateur : tous verts. La CI GitHub (2 jobs) exécute le tout à chaque PR.",
+  "security": "Chaque jour passe une revue adverse (attaques réelles contre la base locale) puis une re-vérification : isolation entre organisations, journal d'audit non modifiable, quotas atomiques, aucun secret dans les logs. Aucune faille exploitable ouverte.",
+  "openPoints": [
+    "Fusionner dans l'ordre les PR n°8 (J12), n°9 (Paramétrage) et n°10 (J13), puis ouvrir la PR de J14.",
+    "Accepter les ADR encore « Proposed » (dont 014 : droits, 015 : kit UI, 016 : palette et logo). C0 reste NO-GO provisoire tant que c'est en attente.",
+    "Valider les valeurs des plans (trial, starter, growth) : elles sont provisoires, la spec n'en donne aucune.",
+    "Paramétrage global : un owner ou admin de n'importe quelle organisation change les couleurs et le logo de toute la plateforme. À remplacer par le Platform Admin avant de vrais clients.",
+    "Abonnement past_due ou fin d'essai dépassée : toujours utilisable (pas d'expiration automatique).",
+    "Questions Q1 (CRM), Q2 (domaine e-mail), Q5 (marché / région) toujours sans réponse.",
+    "Compte développeur Meta bloqué (« compte trop récent ») : WhatsApp est critique pour J34.",
+    "Choisir l'hébergeur (ADR 010) avant J58 et le fournisseur IA (ADR 012) avant J47.",
+    "Rétention du journal d'audit et des jobs terminés (J57) : sinon croissance sans limite.",
+    "Saisir le mot de passe Mailtrap dans supabase/.env pour recevoir les e-mails d'inscription en local."
+  ],
+  "nextSteps": [
+    {
+      "when": "Maintenant",
+      "action": "Relecture et fusion des PR ; arbitrage sur les ADR 014 à 016 et sur les valeurs des plans."
+    },
+    {
+      "when": "J15",
+      "action": "Jalon G1 : test d'isolation de deux entreprises sur l'ensemble de la pile (UI, API, RLS, worker)."
+    },
+    {
+      "when": "J16 à J27",
+      "action": "Ventes et CRM : projets, contacts et consentement, leads et deals, import CSV."
+    }
+  ]
+}

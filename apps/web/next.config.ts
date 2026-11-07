@@ -6,12 +6,17 @@ import createNextIntlPlugin from "next-intl/plugin";
 
 // Monorepo : les fichiers `.env*` vivent à la racine du dépôt (jamais commités, voir .gitignore).
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
-loadEnvConfig(root, process.env.NODE_ENV !== "production");
+// forceReload : Next a déjà chargé les `.env*` du dossier courant (apps/web) ; sans ce paramètre l'appel
+// suivant renvoie le cache et les fichiers de la racine du dépôt ne sont jamais lus.
+loadEnvConfig(root, process.env.NODE_ENV !== "production", console, true);
 
 const nextConfig: NextConfig = {
   // Les packages du monorepo sont consommés en TypeScript source.
   transpilePackages: ["@fusion-leap/domain", "@fusion-leap/permissions"],
   poweredByHeader: false,
+  // Développement uniquement : autorise l'accès par 127.0.0.1 (les liens d'e-mail et SITE_URL l'utilisent).
+  // Sans cela, Next 16 bloque les ressources de développement et les Server Actions échouent.
+  allowedDevOrigins: ["127.0.0.1", "localhost"],
   async headers() {
     return [
       {

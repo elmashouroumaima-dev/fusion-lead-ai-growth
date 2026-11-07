@@ -38,11 +38,13 @@
 ## 5. Scénarios d'acceptation (spec §13)
 | ID | Scénario | Jour |
 |---|---|---|
-| T1 | 2 entreprises, utilisateur à 2 rôles, 2 projets par entreprise : aucune fuite (UI, API, RLS, worker) | J15, J59 |
+| T1 | 2 entreprises, utilisateur à 2 rôles, 2 projets par entreprise : aucune fuite (UI, API, RLS, worker) | J15 (fait : `tests/acceptance`), J59 |
 | T2 | 100 leads importés avec doublons et formats de téléphone variés, puis assignation et rapports | J26 |
 | T3 | Série d'e-mails vers liste consentante, désabonnement en cours | J40 |
 | T4 | WhatsApp client + template, webhook dupliqué, panne 503 | J40 |
-| T5 | Changement d'entreprise en session, puis lien profond de l'ancienne entreprise | J15, J59 |
+| T5 | Changement d'entreprise en session, puis lien profond de l'ancienne entreprise | J15 (fait : `tests/acceptance`), J59 |
+
+Exécution locale des scénarios T1 et T5 : `pnpm db:start`, `pnpm db:reset`, `pnpm dev`, puis `pnpm test:e2e` (adresse de l'application : `E2E_BASE_URL`, défaut `http://localhost:3000`). Les comptes sont ceux du seed local, le mot de passe est lu dans `supabase/seed.sql`.
 
 ## 6. Exécution en CI
 À chaque PR : `pnpm lint && pnpm typecheck && pnpm test && pnpm test:rls` (+ schema lint, garde-fous). E2E sur un environnement local (Supabase Docker) à chaque PR touchant l'UI ; suite complète sur staging pour la recette. Une PR rouge ne se fusionne pas.

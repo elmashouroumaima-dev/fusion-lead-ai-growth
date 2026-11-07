@@ -3,6 +3,10 @@
 Format : Keep a Changelog. Une entrée par jour de travail.
 
 ## [Non publié]
+### Notifications : en haut, vertes (succès) et rouges (erreur)
+- Modifié : les notifications s'affichent en haut au centre, avec bouton de fermeture, coins arrondis et ombre ; succès en vert (nouveau jeton `--success`), erreur en rouge (`--destructive`), contraste AA du texte blanc en clair et en sombre ; les erreurs restent 6 s.
+- Ajout : toute erreur d'action (abonnement, invitation, membres, logo, palette, SMTP) est aussi une notification rouge ; le message reste écrit dans la page. Le test d'accessibilité « un seul canal pour les erreurs » est remplacé par « notification rouge ET message dans la page ».
+
 ### Pied de page sur toutes les pages
 - Ajout : composant `AppFooter` (© année, nom de l'application, droits réservés ; fr / ar / en, sans lien) affiché par la coquille de l'application (pages normales et réduites) et par le cadre public (accueil, connexion, inscription, mot de passe oublié, invitation).
 

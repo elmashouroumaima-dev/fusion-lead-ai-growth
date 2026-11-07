@@ -4,3 +4,4 @@ export const PACKAGE_NAME = "@fusion-leap/domain" as const;
 export * from "./env";
 export * from "./auth";
 export * from "./tenant";
+export * from "./members";

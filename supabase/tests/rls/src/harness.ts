@@ -138,7 +138,10 @@ export async function apiAsUser<T = unknown>(
 }
 
 /** Crée un compte réel via l'API admin GoTrue (service_role local). Adresse unique par appel. */
-export async function createTestUser(label: string): Promise<{ id: string; email: string }> {
+export async function createTestUser(
+  label: string,
+  options: { confirmed?: boolean } = {},
+): Promise<{ id: string; email: string }> {
   const email = `rls-${label}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}@seed.test`;
   const response = await fetch(`${stack.apiUrl}/auth/v1/admin/users`, {
     method: "POST",
@@ -148,7 +151,7 @@ export async function createTestUser(label: string): Promise<{ id: string; email
       Authorization: `Bearer ${signJwt({ role: "service_role" })}`,
     },
     // Valeur de test sans lien avec un vrai compte ; domaine réservé « .test ».
-    body: JSON.stringify({ email, password: "FusionLeap-rls-2026!", email_confirm: true }),
+    body: JSON.stringify({ email, password: "FusionLeap-rls-2026!", email_confirm: options.confirmed ?? true }),
   });
   const json = (await response.json()) as { id?: string };
   if (response.status >= 300 || !json.id) {
@@ -172,6 +175,7 @@ export async function cleanupTestUsers(userIds: string[]): Promise<void> {
   const sql = [
     "set session_replication_role = replica;",
     `create temp table victims as select id from public.organizations where created_by in (${list});`,
+    "delete from public.invitations where organization_id in (select id from victims);",
     "delete from public.subscriptions where organization_id in (select id from victims);",
     "delete from public.usage_counters where organization_id in (select id from victims);",
     "delete from public.organization_members where organization_id in (select id from victims);",

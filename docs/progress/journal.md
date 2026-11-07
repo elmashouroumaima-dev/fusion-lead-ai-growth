@@ -210,3 +210,33 @@ Manager + agents : A2 base de données, A3 application et UI, A4 tests, A5 sécu
 - Plafond d'organisations par utilisateur : décision de la responsable technique (aucun plafond posé).
 - `supabase/config.toml` : modification locale non commitée (SMTP Resend) à trancher.
 ### Demain : J10 (invitations et RBAC applicatif)
+
+## J10 — mar 24 nov 2026 — Phase 1 (préparé en avance, NON commité, branche `day-10-members-invitations-rbac`)
+Cible : 17,5 % | Réel : à valider | Statut : —
+
+### Organisation du travail
+Manager + agents : A2 base de données, A3 permissions/membres/UI, A4 tests, A5 sécurité et A6 qualité (lecture seule), F2/F3 corrections (interrompus par une erreur réseau, code vérifié ensuite par A5b et par moi), F2b tests de régression, A5b re-vérification.
+
+### Tâches
+| Tâche | Estimé | Livré | Validée |
+|---|---|---|---|
+| `packages/permissions` : matrice ADR 014 (31 lignes), `can`, `canManageMember`, `assignableRoles` | 2 h | oui | oui (lecture de l'ADR + oracle indépendant) |
+| Table `invitations` + `create/revoke/accept_invitation` + `transfer_ownership`, jeton haché, expiration 7 jours | 2 h | oui (migration + retour arrière) | oui (pgTAP 448, RLS 211) |
+| Page Membres (inviter, rôle, retirer, révoquer, transférer) et page d'acceptation AR/EN | 2 h | oui | tests, lint, build ; **pas de vérification visuelle en navigateur** |
+
+### Tests : permissions 394 ✓ · domain 346 ✓ · web 713 ✓ · worker 3 · adapters 1 · pgTAP 448 ✓ · RLS 211 ✓ · lint, typecheck, `next build` (env de CI), `check:leaks --require-bundle` verts
+### Écarts à la spec / plan
+- ADR 014 implémenté tel quel ; 4 interprétations à valider (voir l'ADR, « Mise en œuvre J10»).
+- Pas d'e-mail d'invitation (lien affiché une fois) ; liste des membres sans e-mails.
+- Migration modifiée sur place après revue (jamais commitée ni appliquée hors base locale) ; `@fusion-leap/permissions` déclaré dans `apps/web`.
+### Constats de sécurité (A5/A5b)
+- Moyen corrigé : une invitation restait acceptable après retrait de l'inviteur → re-vérification de l'inviteur à l'acceptation.
+- Faibles corrigés : ordre des verrous de `transfer_ownership` (deadlock possible), e-mails non ASCII/bidi, lecture base avant `can()`, `Referrer-Policy` sur login/signup, accessibilité du retour d'action.
+- A5b : 0 faille exploitable après 150 tours concurrents (2100+ opérations : 0 deadlock, 0 erreur 5xx, jamais 0 owner) ; double acceptation : un seul gagnant.
+- Restent (faible, documentés) : `already_member` révèle l'appartenance à owner/admin de leur propre organisation ; pas de plafond d'invitations ni de limitation de débit (J57) ; `service_role` garde les privilèges par défaut sur `invitations`.
+### Blocages / à faire
+- Validation par la responsable technique de l'ADR 014 (cases [P] et 4 interprétations).
+- Décision sur un profil affichable (e-mail/nom des membres).
+- Parcours complet à tester en navigateur : inviter → ouvrir le lien → accepter (nécessite deux comptes).
+- `supabase/config.toml` : modification locale (SMTP Resend) non commitée.
+### Demain : J11 (couche service : `withService`, erreurs, Idempotency-Key, limitation de débit)

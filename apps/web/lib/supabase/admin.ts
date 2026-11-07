@@ -10,8 +10,9 @@ import { requestIdHeaders } from "../service/request-context";
  *    `no-restricted-imports` + test de confinement) ;
  *  - `import "server-only"` : toute inclusion dans un bundle client échoue à la compilation ;
  *  - la clé vient de l'environnement serveur validé (jamais NEXT_PUBLIC_*), aucune session persistée.
- * Usage actuel : limitation de débit (`rate_limit_take`, table `rate_limit_buckets`). Ne jamais
- * s'en servir pour lire ou écrire des données métier d'une organisation.
+ * Usages actuels : limitation de débit (`rate_limit_take`, table `rate_limit_buckets`) et lecture de la
+ * palette GLOBALE de la plateforme (`get_platform_config`, J12b, ADR 016 : donnée non tenant, non sensible).
+ * Ne jamais s'en servir pour lire ou écrire des données métier d'une organisation.
  */
 export function createAdminClient() {
   const env = getServerEnv();

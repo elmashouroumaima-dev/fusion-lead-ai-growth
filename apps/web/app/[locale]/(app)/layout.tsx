@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import { AppShell } from "@/components/layout/app-shell";
 import { requireLocale } from "../../../i18n/require-locale";
 import { requireClaims } from "../../../lib/auth/require-claims";
+import { canManagePlatformConfig } from "../../../lib/settings/queries";
 import { readActiveOrgCookie } from "../../../lib/tenant/active-org-cookie";
 import { listMyMemberships, type ActiveMembership } from "../../../lib/tenant/memberships";
 import { resolveActiveMembership } from "../../../lib/tenant/resolve";
@@ -36,6 +37,8 @@ export default async function AppLayout({ children, params }: Props) {
   // Lien « Membres » : seulement si le rôle de l'organisation active (relu en base) peut lister les membres.
   // Simple commodité d'affichage : la page et les actions revérifient tout. Échec de résolution = pas de lien.
   let showMembers = false;
+  // Paramétrage (palette globale) : owner / admin d'organisation seulement ; commodité d'affichage.
+  const showSettings = await canManagePlatformConfig();
   let activeOrganizationName: string | undefined;
   try {
     const active = resolveActiveMembership(switchable, await readActiveOrgCookie());
@@ -51,6 +54,7 @@ export default async function AppLayout({ children, params }: Props) {
     <AppShell
       email={email}
       showMembers={showMembers}
+      showSettings={showSettings}
       organizations={switchable.map((m) => ({ id: m.organizationId, name: m.organization.name }))}
       selectedOrganizationId={selectedId}
       activeOrganizationName={activeOrganizationName}

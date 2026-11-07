@@ -1,3 +1,4 @@
+import { paletteToCss } from "@fusion-leap/domain";
 import { DirectionProvider } from "@radix-ui/react-direction";
 import type { Metadata } from "next";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
@@ -7,6 +8,7 @@ import type { ReactNode } from "react";
 import { ThemeProvider } from "@/components/theme/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
 import { cn } from "@/lib/utils";
+import { getPlatformPalette } from "../../lib/service/platform-config";
 import { getDirection } from "../../i18n/direction";
 import { routing } from "../../i18n/routing";
 import { poppins } from "../fonts/fonts";
@@ -41,9 +43,13 @@ export default async function LocaleLayout({ children, params }: LayoutProps) {
   // Cairo n'est chargé (et préchargé) que pour l'arabe ; fr / en n'en téléchargent rien.
   const cairoVariable = locale === "ar" ? (await import("../fonts/cairo")).cairo.variable : undefined;
 
+  // Palette GLOBALE de la plateforme (valeurs #rrggbb re-validées), sur toutes les pages, connexion comprise.
+  const palette = await getPlatformPalette();
+
   return (
     <html lang={locale} dir={dir} suppressHydrationWarning className={cn(poppins.variable, cairoVariable)}>
       <body>
+        {palette ? <style dangerouslySetInnerHTML={{ __html: paletteToCss(palette) }} /> : null}
         <ThemeProvider>
           <DirectionProvider dir={dir}>
             <NextIntlClientProvider>

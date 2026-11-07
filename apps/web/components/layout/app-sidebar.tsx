@@ -1,6 +1,6 @@
 "use client";
 
-import { LayoutDashboardIcon, UsersIcon } from "lucide-react";
+import { LayoutDashboardIcon, PaletteIcon, UsersIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Brand } from "@/components/brand/logo";
 import {
@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/sidebar";
 import { Link, usePathname } from "../../i18n/navigation";
 
-type NavItem = { href: "/dashboard" | "/members"; labelKey: "dashboard" | "members"; icon: typeof UsersIcon };
+type NavItem = { href: "/dashboard" | "/members" | "/settings/appearance"; labelKey: "dashboard" | "members" | "settings"; icon: typeof UsersIcon };
 
 const isCurrent = (pathname: string, href: string): boolean => pathname === href || pathname.startsWith(`${href}/`);
 
@@ -25,13 +25,14 @@ const isCurrent = (pathname: string, href: string): boolean => pathname === href
  * elle suit la direction du document (à droite en arabe). « Membres » n'apparaît que si le layout
  * (serveur) a établi que le rôle actif peut les lister ; la page et les actions revérifient tout.
  */
-export function AppSidebar({ showMembers }: { showMembers: boolean }) {
+export function AppSidebar({ showMembers, showSettings = false }: { showMembers: boolean; showSettings?: boolean }) {
   const t = useTranslations("Shell");
   const pathname = usePathname();
 
   const items: NavItem[] = [
     { href: "/dashboard", labelKey: "dashboard", icon: LayoutDashboardIcon },
     ...(showMembers ? [{ href: "/members", labelKey: "members", icon: UsersIcon } satisfies NavItem] : []),
+    ...(showSettings ? [{ href: "/settings/appearance", labelKey: "settings", icon: PaletteIcon } satisfies NavItem] : []),
   ];
 
   return (

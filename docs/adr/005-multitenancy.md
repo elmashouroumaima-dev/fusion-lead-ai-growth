@@ -53,3 +53,7 @@ Coût de lecture de `organization_members` à chaque ligne : index `(user_id, or
 - **Contexte actif** : cookie `fl_active_org` (httpOnly, sameSite=lax, secure en production) = simple indice ; `getTenantContext()` relit l'adhésion active en base à chaque requête, déduit le rôle de `organization_members`, et refuse (403) tout `organization_id` du client différent du contexte.
 - **Écart au plan** : la migration `20261106140000_organizations_create.sql` a été modifiée sur place après revue de sécurité, avant tout commit ou application hors base locale (exception assumée à « ne pas modifier une migration appliquée »).
 - **Risques acceptés (faible)** : pas de plafond d'organisations ni de limitation de débit avant J57 ; liste noire de caractères invisibles incomplète (ex. U+3164) ; `btrim` SQL ne retire que les espaces ASCII (le chemin applicatif rogne d'abord).
+
+## Mise en œuvre J14 — Platform Admin (§10)
+`private.platform_admins (user_id)` existe (migration `20261116100000`). Géré par SQL uniquement. Il autorise uniquement la gestion des plans et abonnements (`admin_list_organizations`, `admin_set_subscription`) ; **aucun accès aux données tenant** : les sessions de support (`support_sessions`, `has_active_support_session`) restent à construire.
+

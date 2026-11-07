@@ -336,3 +336,32 @@ Démonstration locale : worker lancé sur la base locale, job `noop` → `succee
 - Branche empilée sur `feat-settings-colors` (PR n°9) elle-même sur `day-12-audit-logs` (PR n°8) : fusionner dans l'ordre.
 ### Demain : J14 (plans et quotas, rôle Platform Admin)
 
+## J14 — lun 30 nov 2026 — Phase 1 (préparé en avance, NON commité, branche `day-14-plans-quotas`)
+Cible : 23,8 % | Réel : à valider | Statut : —
+
+### Organisation du travail
+Manager + A5 (revue sécurité adverse, attaques réelles sur la base locale). Migration, domaine, application, tests et documentation par le manager.
+
+### Tâches
+| Tâche | Estimé | Livré | Validée |
+|---|---|---|---|
+| Définitions des plans et limites (trial / starter / growth, valeurs **provisoires**) | 1,5 h | oui | oui (valeurs à valider) |
+| `assert_within_limit` + incrément atomique `usage_counters` (flux) et contrôle de stock | 2 h | oui (UPDATE conditionnel, verrou consultatif) | oui |
+| Alerte avant seuil et blocage (`near_limit` à 80 %, `quota_exceeded`) | 1 h | oui (carte sur le tableau de bord, limite `users` sur les invitations) | oui |
+| Écran Platform Admin d'activation | 1,5 h | oui (`/admin/organizations`, `private.platform_admins`) | oui |
+
+### Tests : domain 400 ✓ · permissions 394 ✓ · web 2071 ✓ · worker 33 ✓ · adapters 1 · pgTAP 1249 ✓ (090_plans_quotas : 75) · RLS 300 ✓ (quotas : 9, dont 60 consommations simultanées pour une limite de 25 : exactement 25 réussissent) · lint, typecheck, `next build` (env de CI), `check:leaks --require-bundle` verts
+### Écarts à la spec / plan
+- Table `notifications` non créée : l'alerte est le drapeau `near_limit` affiché sur le tableau de bord (persistance avec le centre d'exploitation, J39).
+- `private.platform_admins` n'ouvre aucun accès aux données d'une organisation (sessions de support non construites).
+- Plans et abonnements sans droit d'écriture direct, même pour `service_role` ; les tests existants (040, 060, RLS invitations) reçoivent des abonnements à limite d'utilisateurs très haute ; les organisations du seed passent au plan growth (5 et 3 membres actifs).
+- Palette et logo : toujours modifiables par tout owner/admin d'organisation (décision J14 : inchangé).
+### Constats de sécurité (A5)
+- Aucune escalade (JWT forgés, `user_metadata`, anon, service_role), aucune fuite d'administration, concurrence tenue (40 sessions parallèles pour une limite de 10 : exactement 10 ; 12 invitations simultanées pour 1 place : 1).
+- **Moyenne, corrigée** : le quota `users` était contournable par réactivation directe d'un membre (UPDATE `status`) : déclencheur `enforce_member_quota` (la place déjà réservée par une invitation en attente n'est pas recomptée). Test pgTAP ajouté.
+- **Faibles, corrigés** : motif d'abonnement limité à 200 caractères, sans caractère de contrôle ni bidi (SQL et zod) avec avertissement dans l'interface ; audit de tout changement (motif, décideur, début de période) ; droits d'écriture directe de `service_role` sur plans et abonnements retirés.
+- Restent (documentés) : un abonnement dont `period_end` est dépassé ou `past_due` reste utilisable (pas d'expiration automatique) ; liste d'administration limitée aux 100 premières organisations ; texte libre du motif non filtré contre les secrets (avertissement seulement) ; valeurs de plans provisoires.
+### Blocages / à faire
+- Valider les valeurs des plans ; décider du comportement `past_due` / fin d'essai ; piles de PR : #8 → #9 → #10 → J14.
+### Demain : J15 (jalon C1 / gate G1 : isolation de deux entreprises)
+

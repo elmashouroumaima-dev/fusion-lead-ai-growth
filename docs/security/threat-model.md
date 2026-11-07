@@ -36,7 +36,7 @@ Frontières : navigateur ↔ Next.js ; navigateur ↔ Data API (RLS) ; fournisse
 | B5 | S | Session volée / fixation / CSRF sur mutations par cookie | Cookies `httpOnly`/`secure`/`sameSite`, CSRF sur mutations par cookie, rafraîchissement SSR | Tests CSRF et sessions (J8, J57) |
 | B6 | E | Invitation rejouée ou jeton deviné | Jeton aléatoire haché en base, expiration, usage unique | Tests d'invitation expirée/rejouée (J10) |
 | B7 | E | Platform Admin lit les données client hors session | `support_sessions` active obligatoire dans les politiques ; accès audité ; expiration | Tests d'expiration et d'accès refusé (J56) |
-| B8 | S | Contournement de la limite de débit (brute force login, spam d'API) | Rate limit IP + organisation (J11) ; protections d'authentification Supabase | Test de dépassement (J11) |
+| B8 | S | Contournement de la limite de débit (brute force login, spam d'API) | Rate limit par (organisation, utilisateur) + seau global par utilisateur (J11) ; limite par IP pour les routes publiques (J21) ; protections d'authentification Supabase | Test de dépassement (J11). Risque résiduel : aucune limite par IP avant J21 |
 
 ### C. Webhooks et fournisseurs (critères §13-5, §13-6)
 | ID | STRIDE | Menace | Contrôle | Test (jour) |

@@ -27,3 +27,8 @@
 
 ## Conséquences
 Ces conventions sont appliquées par ESLint/CI (frontières de packages, interdiction de `any` non justifié, schema lint SQL).
+
+## Mise en œuvre J11 (2026-11-06)
+- Couche service `apps/web/lib/service/` : voir `docs/api/service-layer.md`. Les erreurs `{ code, message, request_id }` sont produites par un seul module (`errors.ts`) ; `lib/api/` a été supprimé.
+- **Idempotence** : durée 24 h, reprise d'une requête bloquée après 5 minutes, `attempt_id` par tentative, quota de 200 lignes vivantes par (organisation, acteur), réponse stockée limitée à 16 Ko. Les réponses contenant un secret ne sont jamais stockées (`storeResponse: false`).
+- **Écarts au plan** : la migration `20261112100000_service_layer.sql` a été modifiée sur place après revue de sécurité (jamais commitée ni appliquée ailleurs). `acceptInvitationAction` passe par la couche service ; les actions d'authentification (J8) et `/auth/confirm` restent hors couche (à migrer avec J12).

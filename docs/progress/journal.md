@@ -246,3 +246,33 @@ Demande de la responsable technique : ajouter le français et en faire la locale
 - **Fait** : `fr.json`, routage `fr`/`ar`/`en`, source unique des locales dans `packages/domain`, sélecteur à trois langues, formulaire d'organisation, e-mails trilingues, migration `20261111100000_locale_fr.sql` et son retour arrière (avec perte documentée).
 - **Tests** : domain 364 · permissions 394 · web 782 · worker 3 · adapters 1 · pgTAP 462 · RLS 214 ; lint, typecheck, build (env de CI) et `check:leaks` verts. Revue de sécurité : proxy fermé avec trois locales (testé en direct), cookie `NEXT_LOCALE` falsifié sans effet, `p_locale` non injectable.
 - **Reste** : relecture du français par un locuteur natif, vérification visuelle `/fr` `/ar` `/en`, Referrer-Policy sur forgot/reset (faible).
+
+## J11 — mer 25 nov 2026 — Phase 1 (préparé en avance, NON commité, branche `day-11-service-layer`)
+Cible : 19,0 % | Réel : à valider | Statut : —
+
+### Organisation du travail
+Manager + agents : A2 base de données, A3 couche service, A4 tests (écrits avec le code), A5 sécurité et A6 qualité (lecture seule), F2/F3/F4 corrections, A5b re-vérification. Le premier lancement a été interrompu sur demande puis repris : l'état du dépôt a été revérifié avant de continuer.
+
+### Tâches
+| Tâche | Estimé | Livré | Validée |
+|---|---|---|---|
+| `withRoute` / `withAction` (pipeline fixe) | 2 h | oui | oui |
+| Erreurs normalisées `{ code, message, request_id }` (module unique) | 1 h | oui | oui |
+| `Idempotency-Key` : table, fonctions begin/complete/abandon, rejeu, conflit, `attempt_id`, quota | 1,5 h | oui (migration + retour arrière) | oui |
+| Limitation de débit : seaux en base, `service_role` confiné à `lib/supabase/admin.ts`, 429 et 503 | 1,5 h | oui | oui |
+
+### Tests : domain 364 ✓ · permissions 394 ✓ · web 1266 ✓ · worker 3 · adapters 1 · pgTAP 722 ✓ · RLS 243 ✓ · lint, typecheck, `next build` (env de CI) et `check:leaks --require-bundle` verts
+### Écarts à la spec / plan
+- Migration `20261112100000_service_layer.sql` modifiée sur place après revue (jamais commitée ni appliquée ailleurs).
+- Deux seaux par appel (organisation + utilisateur, et global par utilisateur) : extension du plan pour empêcher la multiplication par les organisations.
+- ESLint pour `apps/web` : `noInlineConfig: true` (plus d'`eslint-disable` en ligne) afin de rendre le confinement de `service_role` incontournable. **Décision à valider** : cela change la convention « `any` justifié par un commentaire ».
+- Actions d'authentification (J8) et `/auth/confirm` restent hors couche service.
+### Constats de sécurité (A5/A5b)
+- Moyen corrigé : `idempotency_keys` sans purge ni quota (un membre au rôle le plus bas pouvait la gonfler) → purge (`service_role`), quota de 200 lignes vivantes par (organisation, acteur), réponse limitée à 16 Ko.
+- Faibles corrigés : `attempt_id` (tentative tardive), seau global par utilisateur, confinement ESLint, `x-request-id` du client jamais repris, quota sans course (verrou consultatif).
+- Vérifié en direct : 40 `begin` parallèles → 1 seul `new` ; 100 prises sur un seau de 10 → 10 exactement ; privilèges `anon`/`authenticated`/`service_role` conformes ; aucun secret dans le bundle client.
+- Restent (faible, documentés) : pas de limite par IP avant J21 ; purge manuelle jusqu'à J13 ; nombre d'organisations par acteur non plafonné (J57).
+### Blocages / à faire
+- Valider le changement de convention ESLint (`noInlineConfig`).
+- Planifier la purge avec le worker (J13).
+### Demain : J12 (audit et logs)

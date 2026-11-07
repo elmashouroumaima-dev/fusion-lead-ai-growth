@@ -2,9 +2,11 @@
 
 import { useLocale, useTranslations } from "next-intl";
 import { useActionState, useId } from "react";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { switchOrganizationAction } from "../../lib/tenant/actions";
 import type { TenantActionState } from "../../lib/tenant/types";
-import styles from "./organization.module.css";
 
 type Props = {
   options: readonly { id: string; name: string }[];
@@ -21,30 +23,37 @@ export function OrganizationSwitcher({ options, selectedId }: Props) {
   const uid = useId();
   const [state, formAction, pending] = useActionState(switchOrganizationAction, initialState);
   const errorText = state.status === "error" ? t(`errors.${state.code ?? "generic"}`) : "";
+  const errorId = `${uid}-error`;
 
   return (
-    <form action={formAction} className={styles.switcherForm}>
+    <form action={formAction} className="flex items-center gap-2">
       <input type="hidden" name="uiLocale" value={uiLocale} />
-      <label className={styles.switcherLabel} htmlFor={`${uid}-org`}>
+      <Label htmlFor={`${uid}-org`} className="sr-only">
         {t("switcher.label")}
-      </label>
-      <select
-        id={`${uid}-org`}
-        name="organization_id"
-        className={styles.select}
-        defaultValue={selectedId ?? options[0]?.id}
-      >
-        {options.map((option) => (
-          <option key={option.id} value={option.id}>
-            {option.name}
-          </option>
-        ))}
-      </select>
-      <button className="btn btn-secondary" type="submit" disabled={pending}>
+      </Label>
+      <Select name="organization_id" defaultValue={selectedId ?? options[0]?.id}>
+        <SelectTrigger
+          id={`${uid}-org`}
+          size="sm"
+          className="max-w-40 sm:max-w-56"
+          aria-describedby={errorText ? errorId : undefined}
+          aria-invalid={errorText ? true : undefined}
+        >
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          {options.map((option) => (
+            <SelectItem key={option.id} value={option.id}>
+              <bdi>{option.name}</bdi>
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+      <Button type="submit" variant="outline" size="sm" disabled={pending}>
         {t("switcher.submit")}
-      </button>
-      <span aria-live="polite" role="status">
-        {errorText ? <span className="notice notice-error">{errorText}</span> : null}
+      </Button>
+      <span aria-live="polite" role="status" id={errorId} className={errorText ? "text-destructive-text max-w-48 text-xs" : "sr-only"}>
+        {errorText}
       </span>
     </form>
   );

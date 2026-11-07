@@ -1,7 +1,13 @@
 "use client";
 
+import { CircleAlertIcon, CircleCheckIcon, EyeIcon, EyeOffIcon, LoaderCircleIcon } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
-import { useActionState, useId } from "react";
+import { useActionState, useId, useState, type ReactNode } from "react";
+import { alertVariants } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { cn } from "@/lib/utils";
 import type { AuthActionState, AuthErrorCode } from "../../lib/auth/types";
 import type { InitialErrorCode } from "./initial-error";
 
@@ -26,11 +32,57 @@ type Props = {
   next?: string | undefined;
   /** Erreur affichée avant toute soumission (ex. lien de confirmation invalide). */
   initialErrorCode?: InitialErrorCode | undefined;
+  /** Lien affiché sur la ligne du libellé du mot de passe (ex. « Mot de passe oublié ? »). */
+  passwordAction?: ReactNode;
 };
 
 const initialState: AuthActionState = { status: "idle" };
 
-export function AuthForm({ action, fields, submitLabel, successMessage, next, initialErrorCode }: Props) {
+function PasswordInput({
+  id,
+  name,
+  autoComplete,
+  invalid,
+  describedBy,
+}: {
+  id: string;
+  name: string;
+  autoComplete: AuthField["autoComplete"];
+  invalid: boolean;
+  describedBy: string | undefined;
+}) {
+  const t = useTranslations("Auth.fields");
+  const [visible, setVisible] = useState(false);
+  return (
+    <div className="relative">
+      <Input
+        id={id}
+        name={name}
+        type={visible ? "text" : "password"}
+        autoComplete={autoComplete}
+        required
+        error={invalid}
+        aria-describedby={describedBy}
+        dir="ltr"
+        className="h-10 pe-11 text-start"
+      />
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon-sm"
+        className="absolute end-1 top-1/2 -translate-y-1/2"
+        aria-label={visible ? t("hidePassword") : t("showPassword")}
+        aria-pressed={visible}
+        aria-controls={id}
+        onClick={() => setVisible((v) => !v)}
+      >
+        {visible ? <EyeOffIcon aria-hidden="true" /> : <EyeIcon aria-hidden="true" />}
+      </Button>
+    </div>
+  );
+}
+
+export function AuthForm({ action, fields, submitLabel, successMessage, next, initialErrorCode, passwordAction }: Props) {
   const t = useTranslations("Auth");
   const tc = useTranslations("Common");
   const locale = useLocale();
@@ -43,48 +95,86 @@ export function AuthForm({ action, fields, submitLabel, successMessage, next, in
   const successText = state.status === "success" ? (successMessage ?? "") : "";
 
   return (
-    <form action={formAction} className="form">
+    <form action={formAction} className="grid gap-4" aria-busy={pending}>
       <input type="hidden" name="locale" value={locale} />
       {next ? <input type="hidden" name="next" value={next} /> : null}
 
       {fields.map((field) => {
         const id = `${uid}-${field.name}`;
         const hintId = `${id}-hint`;
+        const errorId = `${id}-error`;
         const invalid = Boolean(state.fieldErrors?.[field.name]?.length);
+        const describedBy =
+          [field.showPasswordHint ? hintId : null, invalid ? errorId : null].filter(Boolean).join(" ") || undefined;
         return (
-          <div className="field" key={field.name}>
-            <label htmlFor={id}>{t(`fields.${field.label}`)}</label>
-            <input
-              id={id}
-              name={field.name}
-              type={field.type}
-              autoComplete={field.autoComplete}
-              required
-              aria-invalid={invalid}
-              aria-describedby={field.showPasswordHint ? hintId : undefined}
-              {...(field.type === "email" ? { inputMode: "email" as const, dir: "ltr" as const } : {})}
-            />
+          <div className="grid gap-2" key={field.name}>
+            <div className="flex items-center justify-between gap-2">
+              <Label htmlFor={id}>{t(`fields.${field.label}`)}</Label>
+              {field.name === "password" ? passwordAction : null}
+            </div>
+            {field.type === "password" ? (
+              <PasswordInput
+                id={id}
+                name={field.name}
+                autoComplete={field.autoComplete}
+                invalid={invalid}
+                describedBy={describedBy}
+              />
+            ) : (
+              <Input
+                id={id}
+                name={field.name}
+                type={field.type}
+                autoComplete={field.autoComplete}
+                required
+                error={invalid}
+                aria-describedby={describedBy}
+                inputMode={field.type === "email" ? "email" : undefined}
+                dir={field.type === "email" ? "ltr" : undefined}
+                className="h-10 text-start"
+              />
+            )}
             {field.showPasswordHint ? (
-              <span className="hint" id={hintId}>
+              <p className="text-muted-foreground text-sm" id={hintId}>
                 {t("hints.passwordMin")}
-              </span>
+              </p>
+            ) : null}
+            {invalid ? (
+              <p id={errorId} className="text-destructive-text text-sm font-medium">
+                {t("errors.invalid_input")}
+              </p>
             ) : null}
           </div>
         );
       })}
 
-      <div aria-live="polite" role="status">
-        <p className="notice notice-error" hidden={!errorText}>
-          {errorText}
-        </p>
-        <p className="notice notice-success" hidden={!successText}>
-          {successText}
-        </p>
+      {/* Régions toujours montées (même vides) pour que les lecteurs d'écran annoncent le texte à son apparition. */}
+      <div role="alert" aria-atomic="true" className={cn(errorText ? alertVariants({ variant: "destructive" }) : "sr-only")}>
+        {errorText ? (
+          <>
+            <CircleAlertIcon aria-hidden="true" />
+            <span className="col-start-2">{errorText}</span>
+          </>
+        ) : null}
+      </div>
+      <div role="status" aria-live="polite" className={cn(successText ? alertVariants({ variant: "success" }) : "sr-only")}>
+        {successText ? (
+          <>
+            <CircleCheckIcon aria-hidden="true" />
+            <span className="col-start-2">{successText}</span>
+          </>
+        ) : null}
       </div>
 
-      <button className="btn" type="submit" disabled={pending}>
+      <Button
+        type="submit"
+        size="lg"
+        disabled={pending}
+        className="h-11 w-full bg-linear-to-r from-primary to-secondary font-semibold text-white shadow-md hover:opacity-90 rtl:bg-linear-to-l"
+      >
+        {pending ? <LoaderCircleIcon className="animate-spin" aria-hidden="true" /> : null}
         {pending ? tc("submitting") : submitLabel}
-      </button>
+      </Button>
     </form>
   );
 }

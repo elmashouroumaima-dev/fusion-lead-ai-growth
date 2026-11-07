@@ -2,10 +2,12 @@ import { localeSchema, type InvitationRow, type MemberRow } from "@fusion-leap/d
 import { assignableRoles, can } from "@fusion-leap/permissions";
 import { getTranslations } from "next-intl/server";
 import { redirect } from "next/navigation";
+import type { ReactNode } from "react";
+import { Alert } from "@/components/ui/alert";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { InvitationList } from "../../../../components/members/invitation-list";
 import { InviteForm } from "../../../../components/members/invite-form";
 import { MemberList } from "../../../../components/members/member-list";
-import styles from "../../../../components/members/members.module.css";
 import { MembersPageFeedback } from "../../../../components/members/page-feedback";
 import { requireLocale } from "../../../../i18n/require-locale";
 import { requireClaims } from "../../../../lib/auth/require-claims";
@@ -15,6 +17,20 @@ import { requireTenantContext } from "../../../../lib/tenant/context";
 export const dynamic = "force-dynamic";
 
 type LoadResult = { ok: true; members: MemberRow[]; invitations: InvitationRow[] } | { ok: false };
+
+const sectionTitleClass = "text-lg leading-none font-semibold outline-none focus-visible:ring-ring/50 focus-visible:ring-[3px] rounded-sm";
+
+function PageHeader({ title, description, children }: { title: string; description: string; children?: ReactNode }) {
+  return (
+    <header className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+      <div className="grid gap-1">
+        <h1 className="text-2xl font-semibold tracking-tight">{title}</h1>
+        <p className="text-muted-foreground max-w-prose text-sm">{description}</p>
+      </div>
+      {children}
+    </header>
+  );
+}
 
 export default async function MembersPage({ params }: { params: Promise<{ locale: string }> }) {
   const locale = localeSchema.parse(await requireLocale(params));
@@ -34,23 +50,31 @@ export default async function MembersPage({ params }: { params: Promise<{ locale
     loaded = { ok: false };
   }
 
+  if (!loaded.ok) {
+    return (
+      <div className="mx-auto grid w-full max-w-5xl gap-6">
+        <PageHeader title={t("title")} description={t("description")} />
+        <Alert variant="destructive" role="alert">
+          {t("errors.loadFailed")}
+        </Alert>
+      </div>
+    );
+  }
+
   return (
-    <div className={styles.page}>
-      <section className="card">
-        <h1>{t("title")}</h1>
-        <p className="lead">{t("description")}</p>
-      </section>
+    <div className="mx-auto grid w-full max-w-5xl gap-6">
+      <MembersPageFeedback>
+        <PageHeader title={t("title")} description={t("description")}>
+          <InviteForm organizationId={ctx.organizationId} idempotencyKey={crypto.randomUUID()} roleOptions={assignableRoles(ctx.role)} />
+        </PageHeader>
 
-      {loaded.ok ? (
-        <MembersPageFeedback>
-          <section className={`card ${styles.section}`} aria-labelledby="invite-title">
-            <h2 id="invite-title">{t("invite.title")}</h2>
-            <p className="lead">{t("invite.description")}</p>
-            <InviteForm organizationId={ctx.organizationId} idempotencyKey={crypto.randomUUID()} roleOptions={assignableRoles(ctx.role)} />
-          </section>
-
-          <section className={`card ${styles.section}`} aria-labelledby="pending-title">
-            <h2 id="pending-title" tabIndex={-1}>{t("invitations.title")}</h2>
+        <Card role="region" aria-labelledby="pending-title">
+          <CardHeader>
+            <h2 id="pending-title" tabIndex={-1} className={sectionTitleClass}>
+              {t("invitations.title")}
+            </h2>
+          </CardHeader>
+          <CardContent>
             <InvitationList
               locale={locale}
               organizationId={ctx.organizationId}
@@ -58,10 +82,16 @@ export default async function MembersPage({ params }: { params: Promise<{ locale
               invitations={loaded.invitations}
               now={new Date()}
             />
-          </section>
+          </CardContent>
+        </Card>
 
-          <section className={`card ${styles.section}`} aria-labelledby="members-title">
-            <h2 id="members-title" tabIndex={-1}>{t("list.title")}</h2>
+        <Card role="region" aria-labelledby="members-title">
+          <CardHeader>
+            <h2 id="members-title" tabIndex={-1} className={sectionTitleClass}>
+              {t("list.title")}
+            </h2>
+          </CardHeader>
+          <CardContent>
             <MemberList
               locale={locale}
               organizationId={ctx.organizationId}
@@ -69,13 +99,9 @@ export default async function MembersPage({ params }: { params: Promise<{ locale
               currentRole={ctx.role}
               members={loaded.members}
             />
-          </section>
-        </MembersPageFeedback>
-      ) : (
-        <p role="alert" className="notice notice-error">
-          {t("errors.loadFailed")}
-        </p>
-      )}
+          </CardContent>
+        </Card>
+      </MembersPageFeedback>
     </div>
   );
 }

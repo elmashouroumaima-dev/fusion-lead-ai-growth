@@ -2,6 +2,7 @@ import { readdirSync, readFileSync, statSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
+import { isPhysicalClassToken, physicalClassOffences } from "../ui-audit/class-tokens";
 import ar from "./ar.json";
 import en from "./en.json";
 import fr from "./fr.json";
@@ -133,9 +134,39 @@ describe("pas de texte en dur dans le JSX des composants Membres / Invitation", 
     expect(offenders).toEqual([]);
   });
 
-  it("styles : propriétés logiques uniquement (aucun margin-left/right, padding-left/right, text-align left/right, float, left/right)", () => {
-    const css = readFileSync(path.join(WEB, "components/members/members.module.css"), "utf8");
-    const bad = [...css.matchAll(/^\s*((?:margin|padding|border)-(?:left|right)[\w-]*|text-align\s*:\s*(?:left|right)|float\s*:|left\s*:|right\s*:)/gm)].map((m) => m[1]);
+  it("styles : plus de module CSS, et aucune classe Tailwind physique (ml-/mr-/pl-/pr-/left-/right-/text-left/text-right/float)", () => {
+    const dir = path.join(WEB, "components/members");
+    expect(readdirSync(dir).filter((name) => name.endsWith(".css"))).toEqual([]);
+    // Balayage de TOUS les littéraux de chaîne du fichier (AST), pas seulement des lignes `className=` / `cn(`.
+    const bad = sources().flatMap((file) =>
+      physicalClassOffences(file, readFileSync(file, "utf8")).map(({ token, line }) => `${path.relative(WEB, file)}:${line} : ${token}`),
+    );
     expect(bad).toEqual([]);
+  });
+
+  it("le détecteur AST voit une classe physique dans un gabarit multi-ligne et dans une constante isolée (fixtures)", () => {
+    const fixture = [
+      'const base = "ps-2 ml-3";',
+      "const multi = `",
+      "  flex items-center",
+      "  ${cond ? 'ms-1' : 'mr-1'}",
+      "  text-left",
+      "`;",
+      'export const X = () => <div className={cn("p-2", multi)} />;',
+    ].join("\n");
+    const found = physicalClassOffences("fixture.tsx", fixture).map((o) => o.token);
+    expect(found).toEqual(expect.arrayContaining(["ml-3", "mr-1", "text-left"]));
+    expect(found).not.toContain("ps-2");
+    expect(found).not.toContain("ms-1");
+    // numéro de ligne dans le gabarit multi-ligne
+    expect(physicalClassOffences("fixture.tsx", fixture).find((o) => o.token === "text-left")?.line).toBe(5);
+    // variantes, négatif, important
+    for (const bad of ["sm:pr-4", "-ml-1", "!left-0", "[&>svg]:mr-2", "rounded-l-md", "border-r", "float-right"]) {
+      expect(isPhysicalClassToken(bad), bad).toBe(true);
+    }
+    for (const ok of ["ms-2", "pe-4", "start-0", "text-start", "rounded-s-md", "border-e", "slide-in-from-left-2", "rtl:rotate-180", "leftover"]) {
+      expect(isPhysicalClassToken(ok), ok).toBe(false);
+    }
+    expect(physicalClassOffences("clean.tsx", 'const a = "ms-2 pe-4"; const b = `text-start`;')).toEqual([]);
   });
 });

@@ -51,9 +51,17 @@ describe("LanguageSwitcher", () => {
     expect(fromAr).toEqual({ fr: "Français", en: "English" });
   });
 
-  it("la navigation est étiquetée (nom accessible)", () => {
-    const tree = LanguageSwitcher() as unknown as El;
-    expect(tree.type).toBe("nav");
-    expect(tree.props?.["aria-label"]).toBe("T:label");
+  it("le déclencheur du menu est étiqueté et aucun repère <nav> supplémentaire n'est créé", () => {
+    const all: El[] = [];
+    const collect = (node: unknown): void => {
+      if (Array.isArray(node)) node.forEach(collect);
+      else if (node && typeof node === "object" && "props" in node) {
+        all.push(node as El);
+        collect((node as El).props?.children);
+      }
+    };
+    collect(LanguageSwitcher());
+    expect(all.some((e) => e.type === "nav")).toBe(false);
+    expect(all.some((e) => e.props?.["aria-label"] === "T:label")).toBe(true);
   });
 });

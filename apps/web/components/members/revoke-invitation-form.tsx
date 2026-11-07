@@ -2,11 +2,11 @@
 
 import { useLocale, useTranslations } from "next-intl";
 import { useActionState } from "react";
+import { Button } from "@/components/ui/button";
 import { revokeInvitationAction } from "../../lib/members/actions";
 import type { MembersActionState } from "../../lib/members/types";
 import { ActionFeedback } from "./action-feedback";
 import { useAnnounce } from "./page-feedback";
-import styles from "./members.module.css";
 
 type Props = {
   organizationId: string;
@@ -23,20 +23,21 @@ export function RevokeInvitationForm({ organizationId, invitationId, subject }: 
   const announce = useAnnounce();
   const [state, formAction, pending] = useActionState(async (prev: MembersActionState, formData: FormData) => {
     const result = await revokeInvitationAction(prev, formData);
-    // La ligne disparaît après la révocation : le succès est annoncé au niveau de la page.
+    // Erreur : annoncée uniquement par la région live d'ActionFeedback (un seul canal, pas de toast d'erreur).
+    // La ligne disparaît après la révocation : le succès (toast + région live) est annoncé au niveau de la page.
     if (result.status === "success") announce("revoked", "pending-title");
     return result;
   }, initialState);
 
   return (
-    <div className={styles.fullWidth}>
-      <form action={formAction} className={styles.inlineForm}>
+    <div className="flex flex-col items-end gap-1">
+      <form action={formAction}>
         <input type="hidden" name="uiLocale" value={uiLocale} />
         <input type="hidden" name="organization_id" value={organizationId} />
         <input type="hidden" name="invitation_id" value={invitationId} />
-        <button className="btn btn-secondary" type="submit" disabled={pending} aria-label={t("invitations.revokeLabel", { email: subject })}>
+        <Button type="submit" variant="outline" size="sm" disabled={pending} aria-label={t("invitations.revokeLabel", { email: subject })}>
           {t("invitations.revoke")}
-        </button>
+        </Button>
       </form>
       <ActionFeedback state={state} />
     </div>

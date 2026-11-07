@@ -75,5 +75,55 @@
     "unknownUser": "Unknown user",
     "placeholder": "Your workspace will appear here.",
     "signOut": "Sign out"
+  },
+  "Org": {
+    "roles": {
+      "company_owner": "Owner",
+      "company_admin": "Administrator",
+      "marketing_manager": "Marketing manager",
+      "sales_agent": "Sales agent",
+      "analyst": "Analyst"
+    },
+    "onboarding": {
+      "title": "Create your organization",
+      "description": "Set up the workspace for your company. You will be its owner and can invite your team later.",
+      "fields": {
+        "name": "Organization name",
+        "timezone": "Time zone",
+        "locale": "Default language"
+      },
+      "hints": {
+        "locale": "The default language used for your organization."
+      },
+      "locales": {
+        "ar": "Arabic",
+        "en": "English"
+      },
+      "submit": "Create organization"
+    },
+    "select": {
+      "title": "Choose an organization",
+      "description": "You belong to several organizations. Choose the one you want to work in.",
+      "open": "Open",
+      "openNamed": "Open {name}",
+      "current": "Current",
+      "inactive": "Unavailable",
+      "createNew": "Create another organization"
+    },
+    "switcher": {
+      "label": "Organization",
+      "submit": "Switch"
+    },
+    "dashboard": {
+      "organization": "Organization",
+      "role": "Your role"
+    },
+    "errors": {
+      "invalid_input": "Please check the highlighted fields and try again.",
+      "forbidden": "You do not have access to this organization.",
+      "idempotency_conflict": "This request was already submitted with different details. Reload the page and try again.",
+      "rate_limited": "Too many attempts. Please wait a few minutes and try again.",
+      "generic": "Something went wrong. Please try again."
+    }
   }
 }

@@ -1,7 +1,7 @@
 {
   "title": "Avancement par module",
   "intro": "Fusion Leap AI Growth : plateforme SaaS multi-tenant de croissance (CRM, canaux, campagnes, agents IA). Les fondations (sécurité, multi-tenant, authentification, membres, couche service, audit, worker, plans et quotas) sont en place ; les modules produit commencent après le jalon G1.",
-  "summary": "Phase 1 : il reste le jalon d'isolation G1 (J15) avant d'attaquer le CRM. S'y ajoutent, hors plan, le français par défaut, une refonte UI complète et un module « Paramétrage » (palette et logo).",
+  "summary": "Phase 1 terminée : l'isolation de deux entreprises est démontrée (jalon G1, GO à valider par la responsable technique) ; le CRM démarre ensuite. S'y ajoutent, hors plan, le français par défaut, une refonte UI complète et un module « Paramétrage » (palette et logo).",
   "tests": [
     {
       "label": "Web (application)",
@@ -26,6 +26,10 @@
     {
       "label": "Worker et adaptateurs",
       "value": 43
+    },
+    {
+      "label": "Acceptation (T1, T5)",
+      "value": 35
     }
   ],
   "adrCount": 14,
@@ -165,9 +169,9 @@
           "day": "J15",
           "days": 1,
           "name": "Jalon G1 : isolation",
-          "progress": 0,
-          "status": "todo",
-          "note": "Deux entreprises : UI, API, RLS, worker."
+          "progress": 100,
+          "status": "review",
+          "note": "T1 et T5 automatisés (35 tests), audit C1 : GO avec réserves à valider."
         }
       ]
     },
@@ -386,8 +390,8 @@
       "action": "Relecture et fusion des PR ; arbitrage sur les ADR 014 à 016 et sur les valeurs des plans."
     },
     {
-      "when": "J15",
-      "action": "Jalon G1 : test d'isolation de deux entreprises sur l'ensemble de la pile (UI, API, RLS, worker)."
+      "when": "Après le GO du C1",
+      "action": "Décision GO / NO-GO du C1, puis J16 : projets et produits."
     },
     {
       "when": "J16 à J27",

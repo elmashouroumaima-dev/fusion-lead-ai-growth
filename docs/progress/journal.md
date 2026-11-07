@@ -276,3 +276,10 @@ Manager + agents : A2 base de données, A3 couche service, A4 tests (écrits ave
 - Valider le changement de convention ESLint (`noInlineConfig`).
 - Planifier la purge avec le worker (J13).
 ### Demain : J12 (audit et logs)
+
+## Refonte de l'interface (Tailwind v4 + shadcn/ui) — branche `day-11-ui-shadcn`
+Demande : reprendre le rendu du tableau de bord ONMD (`C:\Projects\HamzaDev\frontend`, lecture seule). Décision d'architecture : ADR 015 (Proposed).
+- **Fait** : design system (jetons clair/sombre, Poppins + Cairo), composants shadcn, coquille d'application (barre latérale repliable, en-tête, sélecteur d'organisation, langue, thème, profil), pages de connexion/inscription/réinitialisation (mise en page scindée sur dégradé), onboarding, sélecteur d'organisation, tableau de bord (données réelles seulement), membres (tables et dialogues), invitation. RTL : barre latérale à droite en arabe, classes logiques uniquement.
+- **Tests** : web 1821 · domain 364 · permissions 394 · worker 3 · adapters 1 ; lint, typecheck, build (env de CI) et `check:leaks` verts. Vérifié en navigateur : `/fr/login`, `/ar/login`, connexion, sélecteur d'organisation, tableau de bord, membres.
+- **Revues** : sécurité (A5) : audit des dépendances sans vulnérabilité, aucun script d'installation, licences MIT/ISC/Apache, J8–J11 intacts ; ajout d'en-têtes anti-clickjacking ; contrastes AA corrigés ; polices converties en WOFF2.
+- **Reste / à valider** : couleur primaire (vert ONMD `#006a4e`) et rôles affichés en rouge (couleur secondaire ONMD) à confirmer ; vérification visuelle du mode sombre et de la page d'invitation ; ADR 015 ; succès des actions membres annoncé à la fois par toast et zone aria-live.

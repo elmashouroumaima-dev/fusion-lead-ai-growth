@@ -45,7 +45,13 @@ for (const file of readdirSync(root)) {
 
 // 3. Bundle client
 const SERVER_SECRET_NAMES = /(secret|token|password|api[_-]?key|service[_-]?role|master[_-]?key)/i;
-const knownSecretValues = Object.entries(process.env)
+// Valeurs des fichiers .env locaux (jamais commités) : Next les charge sans qu'elles figurent dans le shell.
+const localEnv: Record<string, string | undefined> = {};
+for (const file of [".env", ".env.local"]) {
+  const full = path.join(root, file);
+  if (existsSync(full)) Object.assign(localEnv, parseDotenv(readFileSync(full, "utf8")));
+}
+const knownSecretValues = Object.entries({ ...localEnv, ...process.env })
   .filter(
     ([name, value]) =>
       !name.startsWith("NEXT_PUBLIC_") &&

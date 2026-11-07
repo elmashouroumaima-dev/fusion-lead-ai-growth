@@ -41,6 +41,24 @@ export const serverEnvSchema = z
   SUPABASE_SECRET_KEY: z.string().min(20),
   /** Fournisseur e-mail (ADR 008, encore « Proposed ») : requis seulement à partir de J31. */
   RESEND_API_KEY: z.string().startsWith("re_").optional(),
+  /**
+   * Clé maître (base64, exactement 32 octets) du chiffrement applicatif des secrets (ADR 004, AES-256-GCM).
+   * Serveur uniquement, jamais NEXT_PUBLIC_*, jamais dans la base ni dans le dépôt. Optionnelle : sans elle, les
+   * fonctions qui stockent un secret (mot de passe SMTP) sont désactivées. Chaîne vide = absente.
+   */
+  SECRETS_MASTER_KEY: z.preprocess(
+    (value) => (value === "" ? undefined : value),
+    z
+      .string()
+      .refine((v) => /^[A-Za-z0-9+/]+={0,2}$/.test(v) && Buffer.from(v, "base64").length === 32, {
+        message: "base64 de 32 octets requis",
+      })
+      // Refuse les clés triviales (32 octets identiques, séquence courte...) : au moins 16 valeurs d'octet distinctes.
+      .refine((v) => new Set(Buffer.from(v, "base64")).size >= 16, { message: "clé trop prévisible" })
+      .optional(),
+  ),
+  /** Version de la clé maître courante (rotation, ADR 004). */
+  SECRETS_KEY_VERSION: z.coerce.number().int().min(1).max(1000).default(1),
   /** ADR 012 : données réelles interdites aux modèles externes tant que non activé. */
   AI_ALLOW_REAL_DATA: z.stringbool().default(false),
   })

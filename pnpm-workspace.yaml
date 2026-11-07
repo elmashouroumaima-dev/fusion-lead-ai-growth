@@ -7,3 +7,7 @@ packages:
 # esbuild (utilisé par vitest et tsx) télécharge/valide son binaire natif au postinstall.
 allowBuilds:
   esbuild: true
+  # next-intl (J8) : dépendances optionnelles de l'extraction de messages, non utilisées ici.
+  # Scripts de build refusés explicitement (réduit la surface supply-chain).
+  "@parcel/watcher": false
+  "@swc/core": false

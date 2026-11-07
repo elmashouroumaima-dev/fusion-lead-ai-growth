@@ -2,6 +2,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { loadEnvConfig } from "@next/env";
 import type { NextConfig } from "next";
+import createNextIntlPlugin from "next-intl/plugin";
 
 // Monorepo : les fichiers `.env*` vivent à la racine du dépôt (jamais commités, voir .gitignore).
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
@@ -13,4 +14,6 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
 };
 
-export default nextConfig;
+const withNextIntl = createNextIntlPlugin("./i18n/request.ts");
+
+export default withNextIntl(nextConfig);

@@ -1,0 +1,79 @@
+{
+  "Meta": {
+    "title": "Fusion Leap AI Growth",
+    "description": "A multi-tenant platform to grow your business with AI."
+  },
+  "Common": {
+    "appName": "Fusion Leap AI Growth",
+    "skipToContent": "Skip to content",
+    "submitting": "Please wait…"
+  },
+  "LanguageSwitcher": {
+    "label": "Language",
+    "switchTo": "العربية"
+  },
+  "Home": {
+    "title": "Fusion Leap AI Growth",
+    "tagline": "Grow your business with AI, with people always in control.",
+    "login": "Sign in",
+    "signup": "Create an account"
+  },
+  "Auth": {
+    "fields": {
+      "email": "Email address",
+      "password": "Password",
+      "newPassword": "New password"
+    },
+    "hints": {
+      "passwordMin": "At least 10 characters."
+    },
+    "login": {
+      "title": "Sign in",
+      "description": "Welcome back. Sign in to your account.",
+      "submit": "Sign in",
+      "forgot": "Forgot your password?",
+      "noAccount": "New here?",
+      "toSignup": "Create an account"
+    },
+    "signup": {
+      "title": "Create an account",
+      "description": "Start with your email address and a strong password.",
+      "submit": "Create account",
+      "haveAccount": "Already have an account?",
+      "toLogin": "Sign in"
+    },
+    "forgotPassword": {
+      "title": "Reset your password",
+      "description": "Enter your email address and we will send you a reset link if an account exists.",
+      "submit": "Send reset link",
+      "backToLogin": "Back to sign in"
+    },
+    "resetPassword": {
+      "title": "Choose a new password",
+      "description": "Enter a new password for your account.",
+      "submit": "Update password",
+      "toLogin": "Go to sign in"
+    },
+    "errors": {
+      "invalid_input": "Please check the highlighted fields and try again.",
+      "invalid_credentials": "Incorrect email or password.",
+      "email_not_confirmed": "Please confirm your email address first. Check your inbox.",
+      "weak_password": "This password is too weak. Use at least 10 characters.",
+      "rate_limited": "Too many attempts. Please wait a few minutes and try again.",
+      "generic": "Something went wrong. Please try again.",
+      "link_invalid": "This link is invalid or has expired. Please request a new one."
+    },
+    "success": {
+      "signUp": "If this address can be used, a confirmation email is on its way. Open the link in it to finish.",
+      "requestReset": "If an account exists for this address, a reset link is on its way.",
+      "updatePassword": "Your password has been updated."
+    }
+  },
+  "Dashboard": {
+    "title": "Dashboard",
+    "signedInAs": "Signed in as",
+    "unknownUser": "Unknown user",
+    "placeholder": "Your workspace will appear here.",
+    "signOut": "Sign out"
+  }
+}

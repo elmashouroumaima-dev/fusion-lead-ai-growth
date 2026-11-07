@@ -22,3 +22,6 @@ supabase/.branches/
 # Généré par Next.js
 next-env.d.ts
 *.tsbuildinfo
+
+# Scaffold Next.js (non maintenu par nous)
+apps/web/AGENTS.md

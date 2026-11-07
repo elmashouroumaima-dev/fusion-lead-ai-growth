@@ -120,3 +120,31 @@ describe("lecture serveur (get_platform_config)", () => {
     expect((await api<unknown>("service", "POST", "rpc/get_platform_config", { p_key: "other.key" })).body).toBeNull();
   });
 });
+
+describe("logo (appearance.logo)", () => {
+  const PNG = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR4nGP4z8DwHwAFAAH/q842iQAAAABJRU5ErkJggg==";
+  const LOGO_KEY = "appearance.logo";
+
+  it("l'owner enregistre un PNG ; le serveur le relit ; la version est disponible", async () => {
+    expect((await rpc(owner, "set_platform_config", { p_key: LOGO_KEY, p_value: { mime: "image/png", data: PNG } })).status).toBeLessThan(300);
+    const read = await api<{ mime: string }>("service", "POST", "rpc/get_platform_config", { p_key: LOGO_KEY });
+    expect(read.body.mime).toBe("image/png");
+    const ver = await api<string>("service", "POST", "rpc/get_platform_config_updated_at", { p_key: LOGO_KEY });
+    expect(ver.status).toBe(200);
+    expect(Number.isFinite(Date.parse(ver.body))).toBe(true);
+  });
+
+  it("refus : sales, SVG déguisé, SVG annoncé ; anon et authenticated ne lisent pas", async () => {
+    const svg = Buffer.from("<svg><script>1</script></svg>").toString("base64");
+    expect((await rpc(sales, "set_platform_config", { p_key: LOGO_KEY, p_value: { mime: "image/png", data: PNG } })).status).toBeGreaterThanOrEqual(400);
+    expect((await rpc(owner, "set_platform_config", { p_key: LOGO_KEY, p_value: { mime: "image/png", data: svg } })).status).toBeGreaterThanOrEqual(400);
+    expect((await rpc(owner, "set_platform_config", { p_key: LOGO_KEY, p_value: { mime: "image/svg+xml", data: PNG } })).status).toBeGreaterThanOrEqual(400);
+    expect(isDenied(await api("anon", "POST", "rpc/get_platform_config_updated_at", { p_key: LOGO_KEY }))).toBe(true);
+    expect((await rpc(sales, "get_platform_config_updated_at", { p_key: LOGO_KEY })).status).toBeGreaterThanOrEqual(400);
+  });
+
+  it("l'owner réinitialise le logo", async () => {
+    expect((await rpc(owner, "reset_platform_config", { p_key: LOGO_KEY })).status).toBeLessThan(300);
+    expect((await api<unknown>("service", "POST", "rpc/get_platform_config", { p_key: LOGO_KEY })).body).toBeNull();
+  });
+});

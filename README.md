@@ -4,6 +4,8 @@ Plateforme SaaS multi-tenant (CRM interne, boîte de réception e-mail + WhatsAp
 
 > **État :** Phase 1 (fondations), J7 — politiques RLS du noyau et harnais de tests. Aucune fonctionnalité métier avant J5+. Plan : [`docs/plan/development-plan.md`](docs/plan/development-plan.md) · journal : [`docs/progress/journal.md`](docs/progress/journal.md).
 
+> **Installer et lancer le projet pas à pas** (prérequis, base locale, comptes de test, tests, dépannage) : voir [`start-fusion-lead-ai-growth.md`](start-fusion-lead-ai-growth.md).
+
 ## Prérequis
 
 - **Node.js ≥ 22.12** (`.nvmrc` : 24.13.1). Vitest 5 exige Node 22.12+ ; Node 20 n'est pas supporté.

@@ -8,10 +8,13 @@ create extension if not exists pgtap with schema extensions;
 select plan(11);
 
 -- Tables légitimement SANS organization_id : `organizations` est la racine du tenant ;
--- `plans` est un catalogue global (ADR 007). Toute autre exception doit être ajoutée ici AVEC une
+-- `plans` est un catalogue global (ADR 007) ; `rate_limit_buckets` (J11, ADR 007 G-D9) a un
+-- organization_id NULLABLE par conception (seaux globaux par fournisseur ; CHECK organization_id OU
+-- provider non nul), n'est écrit que par service_role et n'a ni politique ni droit pour authenticated
+-- (vérifié par 050_service_layer.test.sql). Toute autre exception doit être ajoutée ici AVEC une
 -- justification en revue.
 create temporary table lint_exempt (table_name text primary key) on commit drop;
-insert into lint_exempt values ('organizations'), ('plans');
+insert into lint_exempt values ('organizations'), ('plans'), ('rate_limit_buckets');
 
 create temporary table lint_tables on commit drop as
 select c.oid as relid, c.relname::text as table_name

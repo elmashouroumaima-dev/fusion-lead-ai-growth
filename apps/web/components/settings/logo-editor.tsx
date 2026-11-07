@@ -12,7 +12,6 @@ import Image from "next/image";
 import { useActionState, useEffect, useId, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { resetLogoAction, saveLogoAction } from "../../lib/settings/actions";
 import type { SettingsActionState } from "../../lib/settings/types";
 
@@ -88,12 +87,7 @@ export function LogoEditor({ currentSrc }: Props) {
         : null;
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>{t("logo.title")}</CardTitle>
-        <CardDescription>{t("logo.description")}</CardDescription>
-      </CardHeader>
-      <CardContent className="grid gap-4">
+    <div className="grid gap-4">
         <div className="flex flex-wrap items-center gap-4">
           <div className="bg-muted flex size-20 items-center justify-center overflow-hidden rounded-lg border">
             {shown ? (
@@ -146,7 +140,6 @@ export function LogoEditor({ currentSrc }: Props) {
             </Button>
           </form>
         </div>
-      </CardContent>
-    </Card>
+    </div>
   );
 }

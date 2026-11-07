@@ -7,12 +7,11 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { setSubscriptionAction } from "../../lib/admin/actions";
 import type { AdminActionState } from "../../lib/admin/types";
 
 const initialState: AdminActionState = { status: "idle" };
-const selectClass =
-  "border-input bg-background focus-visible:border-ring focus-visible:ring-ring/50 h-9 w-full rounded-md border px-3 text-sm shadow-xs outline-none focus-visible:ring-[3px]";
 
 /** Surcharge de limites saisie champ par champ (vide = pas de surcharge pour cette métrique). */
 function overrideJson(values: Partial<Record<PlanMetric, string>>): string {
@@ -47,23 +46,33 @@ export function SubscriptionForm({ organization }: { organization: AdminOrganiza
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="grid gap-1.5">
           <Label htmlFor={`${uid}-plan`}>{t("form.plan")}</Label>
-          <select id={`${uid}-plan`} name="plan_code" defaultValue={organization.plan_code ?? "trial"} className={selectClass}>
-            {PLAN_CODES.map((code) => (
-              <option key={code} value={code}>
-                {t(`plans.${code}`)}
-              </option>
-            ))}
-          </select>
+          <Select name="plan_code" defaultValue={organization.plan_code ?? "trial"} required>
+            <SelectTrigger id={`${uid}-plan`} className="w-full">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {PLAN_CODES.map((code) => (
+                <SelectItem key={code} value={code}>
+                  {t(`plans.${code}`)}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
         <div className="grid gap-1.5">
           <Label htmlFor={`${uid}-status`}>{t("form.status")}</Label>
-          <select id={`${uid}-status`} name="status" defaultValue={organization.sub_status ?? "trial"} className={selectClass}>
-            {SUBSCRIPTION_STATUSES.map((status) => (
-              <option key={status} value={status}>
-                {t(`status.${status}`)}
-              </option>
-            ))}
-          </select>
+          <Select name="status" defaultValue={organization.sub_status ?? "trial"} required>
+            <SelectTrigger id={`${uid}-status`} className="w-full">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {SUBSCRIPTION_STATUSES.map((status) => (
+                <SelectItem key={status} value={status}>
+                  {t(`status.${status}`)}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       </div>
 

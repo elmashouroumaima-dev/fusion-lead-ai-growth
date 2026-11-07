@@ -18,7 +18,10 @@
       "dashboard": "Tableau de bord",
       "members": "Membres",
       "settings": "Paramétrage",
-      "admin": "Administration"
+      "admin": "Administration",
+      "settingsPalette": "Palette de couleurs",
+      "settingsLogo": "Logotype",
+      "settingsSmtp": "Serveur SMTP"
     },
     "sidebar": {
       "toggle": "Afficher ou masquer le menu latéral",
@@ -402,6 +405,59 @@
         "size": "Image trop lourde : 128 Ko maximum.",
         "read": "Impossible de lire ce fichier."
       }
+    },
+    "smtp": {
+      "title": "Paramètres SMTP",
+      "description": "Serveur d’envoi d’e-mails de la plateforme. Réservé aux administrateurs de la plateforme ; le mot de passe est chiffré et n’est jamais affiché.",
+      "noKey": "La clé de chiffrement du serveur (SECRETS_MASTER_KEY) n’est pas configurée : vous pouvez enregistrer les paramètres, mais pas le mot de passe.",
+      "mailtrap": "Utiliser Mailtrap",
+      "mailtrapHint": "Préremplit l’hôte, le port, la sécurité et un expéditeur par défaut (Mailtrap accepte n’importe lequel). Saisissez ensuite l’utilisateur et le mot de passe de votre boîte.",
+      "host": "Serveur SMTP",
+      "port": "Port du serveur",
+      "security": "Sécurité",
+      "username": "Utilisateur",
+      "securities": {
+        "tls": "TLS direct (SSL)",
+        "starttls": "STARTTLS (chiffrement négocié)",
+        "none": "Aucune"
+      },
+      "password": "Mot de passe",
+      "passwordHint": "Chiffré avant d’être enregistré, jamais renvoyé.",
+      "passwordSaved": "Un mot de passe est enregistré. Laissez vide pour le conserver, saisissez-en un nouveau pour le remplacer.",
+      "fromEmail": "Adresse de l’expéditeur",
+      "fromName": "Nom de l’expéditeur",
+      "save": "Enregistrer",
+      "saving": "Enregistrement…",
+      "saved": "Paramètres SMTP enregistrés.",
+      "test": "Envoyer un e-mail de test",
+      "testing": "Envoi…",
+      "testSent": "E-mail de test envoyé à votre adresse.",
+      "testHint": "Le test envoie un message à l’adresse de votre compte avec les paramètres enregistrés.",
+      "reset": "Supprimer la configuration",
+      "resetDone": "Configuration SMTP supprimée.",
+      "errors": {
+        "invalid_input": "Paramètres invalides : vérifiez le serveur, le port et l’adresse de l’expéditeur.",
+        "forbidden": "Vous n’avez pas le droit de modifier ces paramètres.",
+        "rate_limited": "Trop de tentatives. Réessayez dans un instant.",
+        "duplicate_request": "Demande déjà traitée.",
+        "idempotency_in_progress": "Demande en cours de traitement.",
+        "idempotency_conflict": "Conflit de requête. Rechargez la page.",
+        "service_unavailable": "Service momentanément indisponible.",
+        "generic": "Une erreur est survenue. Veuillez réessayer.",
+        "secrets_unavailable": "Le chiffrement des secrets n’est pas disponible sur le serveur (clé de chiffrement absente ou invalide).",
+        "not_configured": "Aucune configuration SMTP enregistrée.",
+        "blocked_host": "Ce serveur n’est pas autorisé (adresse locale ou interne).",
+        "auth_failed": "Identifiants refusés par le serveur SMTP.",
+        "connection_failed": "Connexion au serveur SMTP impossible.",
+        "timeout": "Le serveur SMTP n’a pas répondu à temps.",
+        "rejected": "Le message a été refusé par le serveur SMTP.",
+        "failed": "Échec de l’envoi du message de test.",
+        "password_required": "L’hôte, le port ou l’utilisateur ont changé : saisissez à nouveau le mot de passe (l’ancien ne peut pas être réutilisé vers une autre destination)."
+      }
+    },
+    "sections": {
+      "palette": "Palette de couleurs",
+      "paletteDescription": "Couleurs de l’application en mode clair et sombre, aperçu et contraste."
     }
   },
   "Admin": {

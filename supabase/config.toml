@@ -236,11 +236,11 @@ otp_length = 6
 otp_expiry = 3600
 
 [auth.email.template.confirmation]
-subject = "Confirmez votre e-mail · تأكيد البريد الإلكتروني · Confirm your email"
+subject = '{{- $l := "" }}{{ with .Data.locale }}{{ $l = . }}{{ end -}}{{ if eq $l "ar" }}أكِّد عنوان بريدك الإلكتروني{{ else if eq $l "en" }}Confirm your email address{{ else }}Confirmez votre adresse e-mail{{ end }}'
 content_path = "./supabase/templates/confirmation.html"
 
 [auth.email.template.recovery]
-subject = "Réinitialisez votre mot de passe · إعادة تعيين كلمة المرور · Reset your password"
+subject = '{{- $l := "" }}{{ with .Data.locale }}{{ $l = . }}{{ end -}}{{ if eq $l "ar" }}إعادة تعيين كلمة المرور{{ else if eq $l "en" }}Reset your password{{ else }}Réinitialisez votre mot de passe{{ end }}'
 content_path = "./supabase/templates/recovery.html"
 
 # Use a production-ready SMTP server

@@ -56,7 +56,7 @@ Installer [Docker Desktop](https://www.docker.com/products/docker-desktop/), le 
 ## 2. Récupérer le code
 
 ```bash
-git clone https://github.com/elmashouroumaima-dev/fusion-lead-ai-growth.git
+git clone <URL-du-dépôt-git>        # l'adresse vous est donnée par la personne qui vous envoie le code
 cd fusion-lead-ai-growth
 ```
 

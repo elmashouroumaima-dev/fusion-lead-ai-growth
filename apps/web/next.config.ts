@@ -40,6 +40,14 @@ const nextConfig: NextConfig = {
         ],
       },
       {
+        // La recherche de leads (`?q=`) peut contenir une adresse e-mail ou un téléphone : jamais de Referer sortant ni de cache.
+        source: "/:locale/leads",
+        headers: [
+          { key: "Referrer-Policy", value: "no-referrer" },
+          { key: "Cache-Control", value: "no-store" },
+        ],
+      },
+      {
         // Le jeton d'invitation est dans l'URL : jamais de Referer sortant, jamais de cache, jamais indexé.
         source: "/:locale/invite/:path*",
         headers: [

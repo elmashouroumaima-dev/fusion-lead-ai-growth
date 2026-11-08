@@ -22,7 +22,9 @@
       "settingsPalette": "Theme",
       "settingsLogo": "Profile",
       "settingsSmtp": "SMTP server",
-      "projects": "Projects"
+      "projects": "Projects",
+      "leads": "Leads",
+      "deals": "Deals"
     },
     "sidebar": {
       "toggle": "Show or hide the side menu",
@@ -674,5 +676,97 @@
   },
   "Footer": {
     "copyright": "© {year} {appName}. All rights reserved."
+  },
+  "Crm": {
+    "leads": {
+      "title": "Leads",
+      "description": "Your prospects: search, filter and follow their progress.",
+      "count": "Results: {count}",
+      "empty": "No leads yet. They arrive through your website form or a CSV import.",
+      "emptyFiltered": "No leads match these filters.",
+      "queue": "Unassigned",
+      "queueActive": "Remove the “unassigned” filter",
+      "export": "Export as CSV",
+      "exportHint": "The export follows the active filters (up to 10,000 rows) and is recorded in the audit log.",
+      "ownOnlyHint": "You only see the leads assigned to you."
+    },
+    "filters": {
+      "label": "Lead filters",
+      "search": "Search",
+      "searchPlaceholder": "Name, email or phone",
+      "project": "Project",
+      "stage": "Stage",
+      "source": "Source",
+      "assignee": "Owner",
+      "all": "All",
+      "unassigned": "Unassigned only",
+      "sort": "Sort",
+      "apply": "Apply",
+      "reset": "Reset"
+    },
+    "sorts": {
+      "created_desc": "Newest first",
+      "created_asc": "Oldest first",
+      "updated_desc": "Recently updated",
+      "name_asc": "Name (A–Z)"
+    },
+    "table": {
+      "contact": "Contact",
+      "email": "Email",
+      "phone": "Phone",
+      "source": "Source",
+      "stage": "Stage",
+      "assignee": "Owner",
+      "created": "Created",
+      "noName": "No name"
+    },
+    "assignee": {
+      "me": "Me",
+      "none": "Unassigned",
+      "member": "Member {id}"
+    },
+    "sources": {
+      "web_form": "Web form",
+      "csv_import": "CSV import",
+      "manual": "Manual entry",
+      "other": "Other"
+    },
+    "stageKinds": {
+      "open": "Open",
+      "won": "Won",
+      "lost": "Lost",
+      "unassigned": "Unassigned"
+    },
+    "pagination": {
+      "label": "Pagination",
+      "previous": "Previous page",
+      "next": "Next page",
+      "status": "Page {page} of {pageCount}"
+    },
+    "deals": {
+      "title": "Deals",
+      "description": "Your opportunities by stage. Drag a card or use its menu to move it.",
+      "empty": "No deals yet.",
+      "columnEmpty": "No deals",
+      "dragHint": "Drag and drop a card onto another column, or pick the stage in the card menu.",
+      "readOnlyHint": "Your role lets you view deals, not move them.",
+      "moveLabel": "Move {name}'s deal to",
+      "moveChoose": "Move to…",
+      "moved": "Deal moved to “{stage}”.",
+      "boardLabel": "Deals board by stage",
+      "columnLabel": "Stage {name}",
+      "project": "Project",
+      "allProjects": "All projects",
+      "filter": "Filter",
+      "limitHint": "Only the {count} most recent deals are shown."
+    },
+    "errors": {
+      "generic": "Something went wrong. Please try again in a moment.",
+      "forbidden": "Your role does not allow this action.",
+      "notFound": "This deal no longer exists or is not available to you.",
+      "conflict": "This move is not possible for this deal.",
+      "rateLimited": "Too many requests. Please wait a moment.",
+      "moveFailed": "The deal could not be moved."
+    }
   }
 }

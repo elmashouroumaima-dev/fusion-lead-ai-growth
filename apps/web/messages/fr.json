@@ -22,7 +22,9 @@
       "settingsPalette": "Thème",
       "settingsLogo": "Profil",
       "settingsSmtp": "Serveur SMTP",
-      "projects": "Projets"
+      "projects": "Projets",
+      "leads": "Leads",
+      "deals": "Deals"
     },
     "sidebar": {
       "toggle": "Afficher ou masquer le menu latéral",
@@ -674,5 +676,97 @@
   },
   "Footer": {
     "copyright": "© {year} {appName}. Tous droits réservés."
+  },
+  "Crm": {
+    "leads": {
+      "title": "Leads",
+      "description": "Vos prospects : recherchez, filtrez et suivez leur avancement.",
+      "count": "Résultats : {count}",
+      "empty": "Aucun lead pour l'instant. Ils arrivent par le formulaire de votre site ou par un import CSV.",
+      "emptyFiltered": "Aucun lead ne correspond à ces filtres.",
+      "queue": "Non assignés",
+      "queueActive": "Retirer le filtre « non assignés »",
+      "export": "Exporter en CSV",
+      "exportHint": "L'export respecte les filtres actifs (10 000 lignes au plus) et est enregistré dans le journal d'audit.",
+      "ownOnlyHint": "Vous voyez uniquement les leads qui vous sont assignés."
+    },
+    "filters": {
+      "label": "Filtres des leads",
+      "search": "Recherche",
+      "searchPlaceholder": "Nom, e-mail ou téléphone",
+      "project": "Projet",
+      "stage": "Étape",
+      "source": "Source",
+      "assignee": "Responsable",
+      "all": "Tous",
+      "unassigned": "Non assignés seulement",
+      "sort": "Tri",
+      "apply": "Appliquer",
+      "reset": "Réinitialiser"
+    },
+    "sorts": {
+      "created_desc": "Plus récents d'abord",
+      "created_asc": "Plus anciens d'abord",
+      "updated_desc": "Modifiés récemment",
+      "name_asc": "Nom (A–Z)"
+    },
+    "table": {
+      "contact": "Contact",
+      "email": "E-mail",
+      "phone": "Téléphone",
+      "source": "Source",
+      "stage": "Étape",
+      "assignee": "Responsable",
+      "created": "Créé le",
+      "noName": "Sans nom"
+    },
+    "assignee": {
+      "me": "Moi",
+      "none": "Non assigné",
+      "member": "Membre {id}"
+    },
+    "sources": {
+      "web_form": "Formulaire web",
+      "csv_import": "Import CSV",
+      "manual": "Saisie manuelle",
+      "other": "Autre"
+    },
+    "stageKinds": {
+      "open": "Ouvert",
+      "won": "Gagné",
+      "lost": "Perdu",
+      "unassigned": "Non assigné"
+    },
+    "pagination": {
+      "label": "Pagination",
+      "previous": "Page précédente",
+      "next": "Page suivante",
+      "status": "Page {page} sur {pageCount}"
+    },
+    "deals": {
+      "title": "Deals",
+      "description": "Vos opportunités par étape. Glissez une carte ou utilisez le menu pour la déplacer.",
+      "empty": "Aucun deal pour l'instant.",
+      "columnEmpty": "Aucun deal",
+      "dragHint": "Glissez-déposez une carte vers une autre colonne, ou choisissez l'étape dans le menu de la carte.",
+      "readOnlyHint": "Votre rôle permet de consulter les deals, pas de les déplacer.",
+      "moveLabel": "Déplacer le deal de {name} vers",
+      "moveChoose": "Déplacer vers…",
+      "moved": "Deal déplacé vers « {stage} ».",
+      "boardLabel": "Tableau des deals par étape",
+      "columnLabel": "Étape {name}",
+      "project": "Projet",
+      "allProjects": "Tous les projets",
+      "filter": "Filtrer",
+      "limitHint": "Seuls les {count} deals les plus récents sont affichés."
+    },
+    "errors": {
+      "generic": "Une erreur est survenue. Réessayez dans un instant.",
+      "forbidden": "Votre rôle ne permet pas cette action.",
+      "notFound": "Ce deal n'existe plus ou ne vous est pas accessible.",
+      "conflict": "Ce déplacement n'est pas possible pour ce deal.",
+      "rateLimited": "Trop de demandes. Patientez un instant.",
+      "moveFailed": "Le deal n'a pas pu être déplacé."
+    }
   }
 }

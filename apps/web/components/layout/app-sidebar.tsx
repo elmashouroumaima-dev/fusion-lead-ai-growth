@@ -2,13 +2,15 @@
 
 import {
   ChevronDownIcon,
-  FolderKanbanIcon,
   CircleUserIcon,
+  FolderKanbanIcon,
+  KanbanSquareIcon,
   LayoutDashboardIcon,
   MailIcon,
   PaletteIcon,
   ShieldIcon,
   SlidersHorizontalIcon,
+  TargetIcon,
   UsersIcon,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -31,8 +33,8 @@ import {
 import { Link, usePathname } from "../../i18n/navigation";
 
 type NavItem = {
-  href: "/dashboard" | "/projects" | "/members" | "/admin/organizations";
-  labelKey: "dashboard" | "projects" | "members" | "admin";
+  href: "/dashboard" | "/projects" | "/leads" | "/deals" | "/members" | "/admin/organizations";
+  labelKey: "dashboard" | "projects" | "leads" | "deals" | "members" | "admin";
   icon: typeof UsersIcon;
 };
 
@@ -53,10 +55,13 @@ const isCurrent = (pathname: string, href: string): boolean =>
  */
 export function AppSidebar({
   showMembers,
+  showCrm = false,
   showSettings = false,
   showAdmin = false,
 }: {
   showMembers: boolean;
+  /** « Leads » et « Deals » : rôles qui peuvent lire les leads (commodité d'affichage ; les pages et la RLS décident). */
+  showCrm?: boolean;
   showSettings?: boolean;
   showAdmin?: boolean;
 }) {
@@ -66,6 +71,12 @@ export function AppSidebar({
   const items: NavItem[] = [
     { href: "/dashboard", labelKey: "dashboard", icon: LayoutDashboardIcon },
     { href: "/projects", labelKey: "projects", icon: FolderKanbanIcon },
+    ...(showCrm
+      ? [
+          { href: "/leads", labelKey: "leads", icon: TargetIcon } satisfies NavItem,
+          { href: "/deals", labelKey: "deals", icon: KanbanSquareIcon } satisfies NavItem,
+        ]
+      : []),
     ...(showMembers
       ? [{ href: "/members", labelKey: "members", icon: UsersIcon } satisfies NavItem]
       : []),

@@ -181,6 +181,12 @@ Tables créées : `plans` (catalogue global ; ligne `trial` sans limites, valeur
 - Envoi par Server Action avec les droits de l'utilisateur (la politique Storage est la barrière, pas `service_role`) ; retrait : la base d'abord, puis l'objet.
 - Limite connue : un owner ou admin peut envoyer directement à l'API Storage (taille et types du bucket seulement) ; purge des objets non rattachés à prévoir (worker).
 
+## Mise en œuvre J20 (2026-11-08) — Activités et chronologie
+- Enum `activity_type` (7 valeurs) ; `activities` : toute activité vise un **lead** (contact déduit et vérifié) ; contenu dans `metadata`, validé par type par la base (pas de colonne texte, comme l'ADR) ; écriture uniquement par fonctions ; lecture comme les leads.
+- Journal **automatique** (déclencheurs) : `stage_change` et `assignment` pour les leads (libérations comprises), `stage_change` avec `deal_id` pour les deals. Historique **immuable** : seules les tâches évoluent, aucune suppression ; seule exception technique : la suppression de la ligne d'un membre efface le champ `owner_id`.
+- **Point soumis à la responsable technique** : le marketing lit toutes les activités (notes de vente comprises) ; l'ADR 014 n'a pas de ligne « activités ».
+- **Revue sécurité adverse J20** : 0 bloquant ; 1 moyen corrigé (le plafond de 500 activités était atteignable par les entrées automatiques et verrouillait la chronologie : plafonds séparés, 500 manuelles et 1000 automatiques) ; faibles corrigés : contenu validé avant insertion (plus de texte dans les journaux d'erreur), tâche confiée à un commercial seulement sur un lead dont il est responsable, échéance obligatoire à la modification d'une tâche ; documentés : auteur effacé après suppression d'un membre, débit d'audit, interblocage rare à rejouer.
+
 ## Mise en œuvre J19 (2026-11-08) — Pipelines, leads et deals
 - `pipelines` + `pipeline_stages` (E1) ; enum `stage_kind` (open, won, lost, unassigned) ; une étape système `unassigned` par pipeline ; étapes par défaut dans la langue de l'entreprise (fr, en, ar), créées pour les nouvelles entreprises (déclencheur) et rattrapées pour les existantes.
 - `leads` : FK composites contact / projet / étape / responsable ; `campaign_id` **sans clé étrangère jusqu'au J42** (la table `campaigns` n'existe pas) ; pas d'unicité (contact, projet) avant le J21. `deals` : `won_at` / `lost_at` cohérents avec le genre de l'étape (contrainte + déclencheur).

@@ -509,3 +509,26 @@ Cible : 31,7 % | Réel : à valider | Statut : — (le C1 attend le GO de la res
 - Le commercial ne crée pas de lead au J19 (il ne voit pas les contacts non assignés) : avec la capture et l'assignation (J21–22).
 - `campaign_id` sans clé étrangère jusqu'au J42 ; pas d'unicité (contact, projet) avant le J21.
 - Pas d'écran (le plan prévoit l'UI CRM au J24) ; l'historique des changements d'étape est l'audit jusqu'au J20 (`activities`).
+
+## J20 — Activités et chronologie (branche `day-20-activities`, NON commité)
+Cible : 33,3 % | Réel : à valider | Statut : — (le C1 attend le GO de la responsable technique)
+
+### Tâches
+| Tâche | Estimé | Livré | Validée |
+|---|---|---|---|
+| `activities` (note, appel, e-mail, tâche — E2) | 1,5 h | oui (migration `20261122100000`, contenu par type, historique immuable) | oui (pgTAP, API réelle) |
+| Journal automatique des changements d'étape | 1,5 h | oui (déclencheurs lead et deal, assignation comprise) | oui |
+| Chronologie du lead | 2 h | oui (service : chronologie paginée, sans écran : J24) | oui |
+| Tâches dues | 1 h | oui (service : tâches dues, prochaine action) | oui |
+
+### Validation du jour
+- Statut (étape), responsable et prochaine action d'un lead lisibles : `leads.stage_id`, `leads.assignee_id` et `nextAction` des tâches.
+- Un commercial ne voit et ne modifie que les activités de **ses** leads assignés (RLS, API réelle).
+
+### Revue sécurité (0 bloquant, 1 moyen, 5 faibles) — corrigés : plafond atteignable par les entrées automatiques (plafonds séparés), contenu validé avant insertion, tâche confiée seulement à un commercial responsable du lead, échéance obligatoire à la modification ; documentés : auteur effacé après suppression d'un membre, débit d'audit, interblocage rare ; à confirmer : le marketing lit toutes les activités.
+
+### Tests : domain 539 ✓ · web 2327 ✓ (activities : 17) · pgTAP 1887 (dont 150_activities : 107) ✓ · API réelle 393 ✓ (activities : 14) · acceptation 56 ✓ · lint, typecheck, check:leaks verts
+### Écarts à la spec / plan
+- Contenu des activités dans `metadata` (pas de colonne texte dans l'ADR).
+- Pas d'écran (le plan prévoit l'UI CRM au J24) ; pas de rappels d'échéance (worker avec les canaux) ; pas d'activité sans lead.
+- Bug trouvé en test et corrigé : supprimer la ligne d'un membre échouait quand il avait écrit une entrée de chronologie (clé étrangère « set null » bloquée par l'immutabilité).

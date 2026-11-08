@@ -3,6 +3,15 @@
 Format : Keep a Changelog. Une entrée par jour de travail.
 
 ## [Non publié]
+### J20 — Activités et chronologie
+- Ajout : table `activities` (enum `activity_type`), contenu par type validé par la base, FK composites, RLS comme les leads (owner / admin / marketing : tout ; commercial : ses leads ; analyste : aucun accès), écriture uniquement par fonctions ; migration `20261122100000` et retour arrière.
+- Ajout : fonctions `create_activity` (note, appel, e-mail en compte rendu, rendez-vous, tâche), `update_task`, `complete_task` ; historique immuable (aucune suppression, seules les tâches évoluent).
+- Ajout : journal automatique par déclencheurs : `stage_change` et `assignment` des leads (libérations automatiques comprises) et `stage_change` des deals.
+- Ajout : `packages/domain/src/activities` (schémas, `nextAction`, `dueTasks`) et `apps/web/lib/activities` (service, chronologie, tâches dues, prochaine action). Pas d'écran (J24).
+- Sécurité (revue adverse) : plafonds séparés (500 activités manuelles, 1000 entrées automatiques par lead) ; contenu validé avant insertion ; tâche confiée à un commercial seulement sur un lead dont il est responsable ; échéance obligatoire à la modification d'une tâche.
+- Tests : domaine (12), service web (17), pgTAP (107), API réelle (14).
+- Documentation : `docs/api/activities.md`, addendum ADR 007.
+
 ### J19 — Pipelines, leads et deals
 - Ajout : tables `pipelines`, `pipeline_stages`, `leads`, `deals` (enum `stage_kind`), étapes par défaut dans la langue de l'entreprise (nouvelles et existantes), FK composites, RLS (owner / admin / marketing : tous les leads ; commercial : les siens ; analyste : aucun accès), écriture uniquement par fonctions ; migration `20261121100000` et retour arrière.
 - Ajout : fonctions `create_pipeline`, `rename_pipeline`, `set_default_pipeline`, `create_stage`, `update_stage`, `delete_stage`, `create_lead`, `update_lead`, `assign_lead`, `move_lead_stage`, `create_deal`, `update_deal`, `move_deal_stage` ; un lead « non assigné » n'a pas de responsable ; dates gagné / perdu cohérentes avec l'étape ; libération des leads d'un membre suspendu, retiré ou rétrogradé.

@@ -215,7 +215,7 @@ select is((select count(*)::int from public.audit_logs where action = 'project.c
 select is((select count(*)::int from public.audit_logs where action = 'project.archived' and entity_id = '7c000000-0000-4000-8000-0000000000a2'), 1, 'audit : project.archived');
 select is((select (after -> 'changed') from public.audit_logs where action = 'project.updated' and entity_id = '7c000000-0000-4000-8000-0000000000a1' order by created_at desc limit 1), '["name", "owner_id", "settings"]'::jsonb, 'audit : project.updated ne liste que les NOMS des champs modifiés');
 select ok(not exists (select 1 from public.audit_logs where entity_type = 'project' and (after ? 'settings' or before ? 'settings')), 'audit : le contenu des réglages n''est jamais journalisé');
-select is((select count(*)::int from public.audit_logs where action = 'product.created' and after ->> 'kind' = 'pack'), 1, 'audit : product.created');
+select is((select count(*)::int from public.audit_logs where action = 'product.created' and organization_id = '7b000000-0000-4000-8000-00000000000a' and after ->> 'kind' = 'pack'), 1, 'audit : product.created');
 select ok(not exists (select 1 from public.audit_logs where entity_type = 'product' and (after ? 'offer' or after ? 'landing_url' or after ? 'assets')), 'audit : ni offre, ni URL, ni assets dans le journal');
 select is((select count(*)::int from public.audit_logs where action = 'product.updated' and entity_id = '7d000000-0000-4000-8000-0000000000a1' and after -> 'changed' @> '["offer"]'::jsonb), 1, 'audit : product.updated');
 

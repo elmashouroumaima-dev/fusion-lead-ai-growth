@@ -408,7 +408,7 @@ async function readBoundedText(request: Request, limit: number): Promise<string>
 }
 
 /** Taille annoncée (rejet anticipé), type de contenu, lecture plafonnée en octets, JSON. */
-async function readJsonBody(request: Request, limit: number): Promise<unknown> {
+export async function readJsonBody(request: Request, limit: number): Promise<unknown> {
   const declared = request.headers.get("content-length");
   if (declared !== null) {
     if (!/^\d+$/.test(declared.trim())) throw new ServiceError("validation_failed");

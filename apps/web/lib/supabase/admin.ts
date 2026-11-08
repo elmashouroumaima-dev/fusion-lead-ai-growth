@@ -1,4 +1,5 @@
 import "server-only";
+import { createHmac } from "node:crypto";
 import { createClient } from "@supabase/supabase-js";
 import { getServerEnv } from "../env/server";
 import { requestIdHeaders } from "../service/request-context";
@@ -20,4 +21,12 @@ export function createAdminClient() {
     auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
     global: { headers: requestIdHeaders() },
   });
+}
+
+/**
+ * Secret DÉRIVÉ pour un usage précis (clé HMAC d'un identifiant opaque, par exemple) : HMAC-SHA-256 de l'usage avec la clé
+ * secrète. La clé secrète reste lue ICI seulement ; le résultat n'en permet pas la reconstitution.
+ */
+export function deriveServerSecret(purpose: string): string {
+  return createHmac("sha256", getServerEnv().SUPABASE_SECRET_KEY).update(`fusion-leap:derive:${purpose}`, "utf8").digest("hex");
 }

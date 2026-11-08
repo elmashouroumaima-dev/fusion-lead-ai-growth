@@ -1,14 +1,21 @@
 import { describe, expect, it } from "vitest";
 import { z } from "zod";
 import { errorCode, NonRetryableError, safeCode } from "./errors";
-import { createDefaultRegistry, defineHandler, HandlerRegistry, noopHandler } from "./handlers";
+import { createDefaultRegistry, defineHandler, HandlerRegistry, leadAssignHandler, noopHandler } from "./handlers";
 
 describe("HandlerRegistry", () => {
-  it("enregistre noop par défaut ; un type absent est introuvable", () => {
+  it("enregistre noop et lead.assign (provisoire) par défaut ; un type absent est introuvable", () => {
     const registry = createDefaultRegistry();
-    expect(registry.kinds()).toEqual(["noop"]);
+    expect(registry.kinds()).toEqual(["lead.assign", "noop"]);
     expect(registry.get("noop")).toBe(noopHandler);
+    expect(registry.get("lead.assign")).toBe(leadAssignHandler);
     expect(registry.get("autre")).toBeUndefined();
+  });
+
+  it("lead.assign : charge utile = identifiant du lead seulement", () => {
+    expect(leadAssignHandler.parse({ lead_id: "11111111-1111-4111-8111-111111111111" }).success).toBe(true);
+    expect(leadAssignHandler.parse({ lead_id: "x" }).success).toBe(false);
+    expect(leadAssignHandler.parse({ lead_id: "11111111-1111-4111-8111-111111111111", email: "a@b.c" }).success).toBe(false);
   });
 
   it("refuse un doublon et un type mal formé", () => {

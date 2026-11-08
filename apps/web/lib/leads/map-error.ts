@@ -20,6 +20,7 @@ const CONFLICTS = [
   "too_many_stages",
   "too_many_leads",
   "too_many_deals",
+  "too_many_form_keys",
 ] as const;
 
 export function mapLeadsDbError(error: DbError): ServiceErrorCode {

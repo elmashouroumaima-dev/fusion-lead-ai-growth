@@ -66,6 +66,17 @@ export const noopHandler = defineHandler({
   run: async () => {},
 });
 
+/**
+ * `lead.assign` (enregistré par la capture publique, J21) : handler PROVISOIRE sans effet. Les règles d'assignation, la file
+ * « non assignés » et l'alerte au manager sont le J22 ; en attendant, le lead reste dans l'étape « non assigné » (repli prévu
+ * par la spec §9.1) et le job se termine proprement au lieu de finir en échec définitif (type inconnu).
+ */
+export const leadAssignHandler = defineHandler({
+  kind: "lead.assign",
+  schema: z.object({ lead_id: z.uuid() }).strict(),
+  run: async () => {},
+});
+
 export function createDefaultRegistry(): HandlerRegistry {
-  return new HandlerRegistry().register(noopHandler);
+  return new HandlerRegistry().register(noopHandler).register(leadAssignHandler);
 }

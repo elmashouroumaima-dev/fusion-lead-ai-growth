@@ -1,0 +1,101 @@
+Nom,Email,Téléphone,Langue,Pays
+Contact 001,contact001@leads100.test,+212 601000137,fr,MA
+Contact 002,contact002@leads100.test,00212 601000274,fr,MA
+Contact 003,contact003@leads100.test,06.01.00.04.11,ar,MA
+Contact 004,contact004@leads100.test,0601000548,fr,MA
+Contact 005,contact005@leads100.test,00966 501000685,fr,SA
+Contact 006,contact006@leads100.test,00212 601000822,ar,MA
+Contact 007,contact007@leads100.test,06.01.00.09.59,fr,MA
+Contact 008,contact008@leads100.test,0601001096,fr,MA
+Contact 009,contact009@leads100.test,+212 601001233,ar,MA
+"Benali, Nadia 10",contact010@leads100.test,00212 601001370,fr,MA
+Contact 011,contact011@leads100.test,00966 501001507,fr,SA
+Contact 012,contact012@leads100.test,0601001644,ar,MA
+Contact 013,contact013@leads100.test,+212 601001781,fr,MA
+Contact 014,contact014@leads100.test,00212 601001918,fr,MA
+Contact 015,contact015@leads100.test,06.01.00.20.55,ar,MA
+Contact 016,contact016@leads100.test,0601002192,fr,MA
+Contact 017,contact017@leads100.test,00966 501002329,fr,SA
+Contact 018,contact018@leads100.test,00212 601002466,ar,MA
+Contact 019,contact019@leads100.test,06.01.00.26.03,fr,MA
+"Benali, Nadia 20",contact020@leads100.test,0601002740,fr,MA
+Contact 021,contact021@leads100.test,+212 601002877,ar,MA
+Contact 022,contact022@leads100.test,00212 601003014,fr,MA
+Contact 023,contact023@leads100.test,00966 501003151,fr,SA
+Contact 024,contact024@leads100.test,0601003288,ar,MA
+Contact 025,contact025@leads100.test,+212 601003425,fr,MA
+Contact 026,contact026@leads100.test,00212 601003562,fr,MA
+Contact 027,contact027@leads100.test,06.01.00.36.99,ar,MA
+Contact 028,contact028@leads100.test,0601003836,fr,MA
+Contact 029,contact029@leads100.test,00966 501003973,fr,SA
+"Benali, Nadia 30",contact030@leads100.test,00212 601004110,ar,MA
+Contact 031,contact031@leads100.test,06.01.00.42.47,fr,MA
+Contact 032,contact032@leads100.test,0601004384,fr,MA
+Contact 033,contact033@leads100.test,+212 601004521,ar,MA
+Contact 034,contact034@leads100.test,00212 601004658,fr,MA
+Contact 035,contact035@leads100.test,00966 501004795,fr,SA
+Contact 036,contact036@leads100.test,0601004932,ar,MA
+Contact 037,contact037@leads100.test,+212 601005069,fr,MA
+Contact 038,contact038@leads100.test,00212 601005206,fr,MA
+Contact 039,contact039@leads100.test,06.01.00.53.43,ar,MA
+"Benali, Nadia 40",contact040@leads100.test,0601005480,fr,MA
+Contact 041,contact041@leads100.test,00966 501005617,fr,SA
+Contact 042,contact042@leads100.test,00212 601005754,ar,MA
+Contact 043,contact043@leads100.test,06.01.00.58.91,fr,MA
+Contact 044,contact044@leads100.test,0601006028,fr,MA
+Contact 045,contact045@leads100.test,+212 601006165,ar,MA
+Contact 046,contact046@leads100.test,00212 601006302,fr,MA
+Contact 047,contact047@leads100.test,00966 501006439,fr,SA
+Contact 048,contact048@leads100.test,0601006576,ar,MA
+Contact 049,contact049@leads100.test,+212 601006713,fr,MA
+"Benali, Nadia 50",contact050@leads100.test,00212 601006850,fr,MA
+Contact 051,contact051@leads100.test,06.01.00.69.87,ar,MA
+Contact 052,contact052@leads100.test,0601007124,fr,MA
+Contact 053,contact053@leads100.test,00966 501007261,fr,SA
+Contact 054,contact054@leads100.test,00212 601007398,ar,MA
+Contact 055,contact055@leads100.test,06.01.00.75.35,fr,MA
+Contact 056,contact056@leads100.test,0601007672,fr,MA
+Contact 057,contact057@leads100.test,+212 601007809,ar,MA
+Contact 058,contact058@leads100.test,00212 601007946,fr,MA
+Contact 059,contact059@leads100.test,00966 501008083,fr,SA
+"Benali, Nadia 60",contact060@leads100.test,0601008220,ar,MA
+Doublon e-mail 01,CONTACT001@Leads100.test,,fr,MA
+Doublon e-mail 02,CONTACT002@Leads100.test,,fr,MA
+Doublon e-mail 03,CONTACT003@Leads100.test,,fr,MA
+Doublon e-mail 04,CONTACT004@Leads100.test,,fr,MA
+Doublon e-mail 05,CONTACT005@Leads100.test,,fr,MA
+Doublon e-mail 06,CONTACT006@Leads100.test,,fr,MA
+Doublon e-mail 07,CONTACT007@Leads100.test,,fr,MA
+Doublon e-mail 08,CONTACT008@Leads100.test,,fr,MA
+Doublon e-mail 09,CONTACT009@Leads100.test,,fr,MA
+Doublon e-mail 10,CONTACT010@Leads100.test,,fr,MA
+Doublon tel 11,,00966 501001507,fr,MA
+Doublon tel 12,,0601001644,fr,MA
+Doublon tel 13,,+212 601001781,fr,MA
+Doublon tel 14,,00212 601001918,fr,MA
+Doublon tel 15,,06.01.00.20.55,fr,MA
+Sans identifiant 0,,,fr,MA
+Sans identifiant 1,,,fr,MA
+Sans identifiant 2,,,fr,MA
+Sans identifiant 3,,,fr,MA
+Sans identifiant 4,,,fr,MA
+Mauvais e-mail 0,pas-un-email-0,,fr,MA
+Mauvais e-mail 1,pas-un-email-1,,fr,MA
+Mauvais e-mail 2,pas-un-email-2,,fr,MA
+Mauvais e-mail 3,pas-un-email-3,,fr,MA
+Mauvais e-mail 4,pas-un-email-4,,fr,MA
+Mauvais tel 0,,120,fr,MA
+Mauvais tel 1,,121,fr,MA
+Mauvais tel 2,,122,fr,MA
+Mauvais tel 3,,123,fr,MA
+Mauvais tel 4,,124,fr,MA
+Mauvaise langue 0,langue0@leads100.test,,fra,MA
+Mauvaise langue 1,langue1@leads100.test,,fra,MA
+Mauvaise langue 2,langue2@leads100.test,,fra,MA
+Déjà client,deja.client@leads100.test,,fr,MA
+Déjà client tel,,+212600000099,fr,MA
+سارة المنصوري,arabe0@leads100.test,,ar,SA
+يوسف العلمي,arabe1@leads100.test,,ar,SA
+ليلى الإدريسي,arabe2@leads100.test,,ar,SA
+خالد الغامدي,arabe3@leads100.test,,ar,SA
+نورة القحطاني,arabe4@leads100.test,,ar,SA

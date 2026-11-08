@@ -5,11 +5,11 @@
   "tests": [
     {
       "label": "Web (application)",
-      "value": 2217
+      "value": 2265
     },
     {
       "label": "Base de données (pgTAP)",
-      "value": 1442
+      "value": 1487
     },
     {
       "label": "Permissions (RBAC)",
@@ -17,11 +17,11 @@
     },
     {
       "label": "Domaine (règles métier)",
-      "value": 444
+      "value": 462
     },
     {
       "label": "RLS via l'API réelle",
-      "value": 332
+      "value": 349
     },
     {
       "label": "Worker et adaptateurs",
@@ -183,9 +183,9 @@
           "day": "J16–J17",
           "days": 2,
           "name": "Projets et produits",
-          "progress": 85,
+          "progress": 100,
           "status": "review",
-          "note": "J16 : base, quotas, API. J17 : écran complet ; l'envoi de fichiers (Storage) reste à faire."
+          "note": "J16 : base, quotas, API. J17 : écran complet et fichiers (Storage privé, liens signés), revue sécurité corrigée."
         },
         {
           "day": "J18–J20",

@@ -260,6 +260,46 @@ export async function api<T = unknown>(
   return { status: response.status, body: parsed as T, code };
 }
 
+export interface StorageResult {
+  status: number;
+  /** Corps JSON si le type le permet, sinon null (le contenu binaire n'est pas lu). */
+  json: Record<string, unknown> | unknown[] | null;
+  contentType: string | null;
+  bytes: number;
+}
+
+/** Appel à l'API Storage (`/storage/v1/...`) avec le JWT d'un persona ; ne lève jamais sur 4xx. */
+export async function storage(
+  persona: Persona,
+  method: "GET" | "POST" | "DELETE",
+  storagePath: string,
+  body?: Uint8Array | object,
+  headers: Record<string, string> = {},
+): Promise<StorageResult> {
+  const base = headersFor(persona);
+  const { Prefer: _prefer, "Content-Type": _contentType, ...auth } = base;
+  void _prefer;
+  void _contentType;
+  const init: RequestInit = { method, headers: { ...auth, ...headers } };
+  if (body instanceof Uint8Array) init.body = body as unknown as NonNullable<RequestInit["body"]>;
+  else if (body !== undefined) {
+    init.body = JSON.stringify(body);
+    (init.headers as Record<string, string>)["Content-Type"] = "application/json";
+  }
+  const response = await fetch(`${stack.apiUrl}/storage/v1/${storagePath}`, init);
+  const contentType = response.headers.get("content-type");
+  const raw = new Uint8Array(await response.arrayBuffer());
+  let json: StorageResult["json"] = null;
+  if (contentType?.includes("json")) {
+    try {
+      json = JSON.parse(new TextDecoder().decode(raw)) as StorageResult["json"];
+    } catch {
+      json = null;
+    }
+  }
+  return { status: response.status, json, contentType, bytes: raw.length };
+}
+
 export const select = <T = Record<string, unknown>>(persona: Persona, restPath: string) =>
   api<T[]>(persona, "GET", restPath);
 

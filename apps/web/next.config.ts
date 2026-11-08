@@ -17,6 +17,9 @@ const nextConfig: NextConfig = {
   // Développement uniquement : autorise l'accès par 127.0.0.1 (les liens d'e-mail et SITE_URL l'utilisent).
   // Sans cela, Next 16 bloque les ressources de développement et les Server Actions échouent.
   allowedDevOrigins: ["127.0.0.1", "localhost"],
+  // Server Actions : corps de 512 Ko au plus (le plus gros envoi légitime est le logo, 128 Ko décodés, environ 175 Ko en base64) ;
+  // la valeur par défaut de Next est 1 Mo. Un corps plus gros est refusé par Next AVANT notre pipeline (revue J17).
+  experimental: { serverActions: { bodySizeLimit: "512kb" } },
   async redirects() {
     // /settings n'a pas de page propre : le menu latéral liste les sections ; on ouvre la première.
     return [{ source: "/:locale(fr|ar|en)/settings", destination: "/:locale/settings/appearance", permanent: false }];

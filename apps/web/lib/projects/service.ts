@@ -62,7 +62,8 @@ export async function updateProject(
     p_id: input.project_id,
     p_name: input.name,
     p_settings: settings.data,
-    p_owner: input.owner_id ?? null,
+    // Propriétaire non précisé : conservé ; `null` explicite : retiré.
+    p_owner: input.owner_id === undefined ? current.owner_id : input.owner_id,
   });
   if (error) return fail(mapProjectsDbError(error));
   const row = await readBack(() => getProject(supabase, organizationId, input.project_id));

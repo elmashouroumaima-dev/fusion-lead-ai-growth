@@ -82,6 +82,14 @@ describe("updateProject", () => {
     expect(result.ok).toBe(true);
   });
 
+  it("propriétaire non précisé : conservé ; null explicite : retiré", async () => {
+    c.rpc.mockResolvedValue({ data: null, error: null });
+    await updateProject(c.client, ORG, input);
+    expect((c.rpc.mock.calls[0]?.[1] as { p_owner: unknown }).p_owner).toBe(OWNER);
+    await updateProject(c.client, ORG, { ...input, owner_id: null });
+    expect((c.rpc.mock.calls[1]?.[1] as { p_owner: unknown }).p_owner).toBeNull();
+  });
+
   it("réglages d'un autre type refusés avant tout appel d'écriture", async () => {
     const result = await updateProject(c.client, ORG, { ...input, settings: { offers: ["x"] } });
     expect(result).toEqual({ ok: false, code: "validation_failed" });

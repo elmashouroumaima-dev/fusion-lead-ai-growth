@@ -59,6 +59,12 @@ export const serverEnvSchema = z
   ),
   /** Version de la clé maître courante (rotation, ADR 004). */
   SECRETS_KEY_VERSION: z.coerce.number().int().min(1).max(1000).default(1),
+  /**
+   * Nombre de reverse proxys de confiance devant l'application (ADR 010) : l'adresse du visiteur est l'élément `x-forwarded-for`
+   * situé à ce rang en partant de la DROITE (chaque proxy y AJOUTE l'adresse qu'il voit). 0 = aucun proxy de confiance :
+   * l'en-tête est ignoré. Chaîne vide = valeur par défaut (1).
+   */
+  TRUSTED_PROXY_HOPS: z.preprocess((value) => (value === "" ? undefined : value), z.coerce.number().int().min(0).max(5).default(1)),
   /** ADR 012 : données réelles interdites aux modèles externes tant que non activé. */
   AI_ALLOW_REAL_DATA: z.stringbool().default(false),
   })

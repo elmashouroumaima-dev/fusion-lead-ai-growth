@@ -3,6 +3,15 @@
 Format : Keep a Changelog. Une entrée par jour de travail.
 
 ## [Non publié]
+### J21 — Capture publique de leads
+- Ajout : `form_keys` (clé générée par la base, empreinte SHA-256 seule conservée, origines https exactes, 5 clés actives par projet, lecture owner / admin sans l'empreinte), fonctions `create_form_key`, `set_form_key_active`, `set_form_key_origins` ; migration `20261123100000` et retour arrière.
+- Ajout : `capture_lead` (service_role) : clé -> entreprise et projet, origine, contact dédoublonné, lead ouvert réutilisé, consentement (texte, version, page, IP), job `lead.assign`, en une transaction ; `form_origin_allowed` et `form_key_origin_ok` (sans écriture).
+- Ajout : route publique `POST /api/leads` (+ préflight CORS) : clé en en-tête `X-Form-Key`, origine de la clé, limitation de débit par adresse et par clé, corps de 16 Kio, JSON strict, champ piège, réponse identique pour un nouveau contact et un doublon, journaux sans donnée personnelle.
+- Ajout : `packages/domain/src/capture`, `apps/web/lib/forms` (gestion des clés), `apps/web/lib/service/capture-lead.ts`, `deriveServerSecret` (secret dérivé), `TRUSTED_PROXY_HOPS`, handler `lead.assign` provisoire dans le worker (traitement au J22).
+- Sécurité (revue adverse) : pas de re-consentement par la voie publique après une révocation, contact « ne plus contacter » ignoré, finalités limitées à marketing / newsletter ; adresse du visiteur lue à droite de `x-forwarded-for` (port retiré, IPv6 en /64) ; seau par clé ouvert seulement pour une clé existante ; préflight limité par adresse.
+- Tests : domaine (14), service web (30), route (18), pgTAP (137), API réelle (14), acceptation HTTP (11, dont « deux soumissions identiques = un contact »).
+- Documentation : `docs/api/capture.md`, addendum ADR 007 et ADR 010.
+
 ### J20 — Activités et chronologie
 - Ajout : table `activities` (enum `activity_type`), contenu par type validé par la base, FK composites, RLS comme les leads (owner / admin / marketing : tout ; commercial : ses leads ; analyste : aucun accès), écriture uniquement par fonctions ; migration `20261122100000` et retour arrière.
 - Ajout : fonctions `create_activity` (note, appel, e-mail en compte rendu, rendez-vous, tâche), `update_task`, `complete_task` ; historique immuable (aucune suppression, seules les tâches évoluent).

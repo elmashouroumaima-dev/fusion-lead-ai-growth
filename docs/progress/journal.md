@@ -532,3 +532,27 @@ Cible : 33,3 % | Réel : à valider | Statut : — (le C1 attend le GO de la res
 - Contenu des activités dans `metadata` (pas de colonne texte dans l'ADR).
 - Pas d'écran (le plan prévoit l'UI CRM au J24) ; pas de rappels d'échéance (worker avec les canaux) ; pas d'activité sans lead.
 - Bug trouvé en test et corrigé : supprimer la ligne d'un membre échouait quand il avait écrit une entrée de chronologie (clé étrangère « set null » bloquée par l'immutabilité).
+
+## J21 — Capture publique (branche `day-21-capture`, NON commité)
+Cible : 34,9 % | Réel : à valider | Statut : — (le C1 attend le GO de la responsable technique)
+
+### Tâches
+| Tâche | Estimé | Livré | Validée |
+|---|---|---|---|
+| Clés de formulaire par projet | 1 h | oui (migration `20261123100000`, empreinte, origines, plafond) | oui (pgTAP, API réelle) |
+| `POST /api/leads` (origine, rate limit, honeypot, zod) | 2 h | oui (route publique + préflight CORS) | oui (HTTP réel) |
+| Transaction contact + lead + consent + job d'assignation | 2 h | oui (`capture_lead`) | oui (12 soumissions simultanées : 1 contact) |
+| Tests | 1 h | oui | oui |
+
+### Validation du jour
+- Deux soumissions identiques → **un contact** (§13-3) : HTTP réel, 8 et 12 soumissions simultanées.
+- Source, UTM, `landing_page_id`, texte et version du consentement stockés ; **organisation déduite de la clé**, jamais du corps (un corps qui nomme une entreprise ou un projet est refusé).
+
+### Revue sécurité (1 bloquant, 4 moyens, 3 faibles) — corrigés : réactivation d'un contact désinscrit par la voie publique (bloquant), adresse du visiteur et proxys de confiance, seau de débit par clé inventée, préflight limité, finalités ; **soumis à la responsable technique** : double opt-in avant le premier envoi, défi anti-robot ou quota de captures publiques, oracle au quota plein, planification de `rate_limit_purge`, un usage de plus de `service_role`.
+
+### Tests : domain 553 ✓ · web 2377 ✓ (capture : 48) · worker 34 ✓ · pgTAP 2024 (dont 160_capture : 137) ✓ · API réelle 407 ✓ (capture : 14) · acceptation 68 ✓ (capture : 12) · lint, typecheck, check:leaks verts
+### Écarts à la spec / plan
+- Colonne `key_prefix` ajoutée à `form_keys` (non secrète).
+- Le traitement du job `lead.assign` est le J22 (handler provisoire sans effet).
+- Pas de double opt-in (spec muette) : consentement non vérifié ; à traiter avant tout envoi marketing.
+- Pas d'écran de gestion des clés (J24).

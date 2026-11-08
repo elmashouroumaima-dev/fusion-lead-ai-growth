@@ -23,3 +23,8 @@ Auto-hébergement complet (Docker/VPS) : plus de contrôle de région, mais char
 
 ## Conséquences
 Q5 devient bloquante pour la production (pas pour le dev/staging). Risque R-new : résidence des données non satisfaisable avec Supabase si le Moyen-Orient est exigé.
+
+## Addendum J21 — Adresse du visiteur et limitation de débit des routes publiques (2026-11-08)
+- La route publique `POST /api/leads` limite le débit **par adresse** : le reverse proxy d'hébergement doit AJOUTER l'adresse qu'il voit à `x-forwarded-for` (ou l'écraser) ; l'application lit l'élément situé à `TRUSTED_PROXY_HOPS` rangs en partant de la droite (1 par défaut, 0 = ignorer l'en-tête). **À régler et vérifier au choix de l'hébergeur** : un mauvais réglage rend la limitation par adresse contournable (la limitation par clé de formulaire reste).
+- Le proxy doit aussi retirer l'en-tête `X-Forwarded-Host` fourni par le client (voir J17).
+- Journaux Postgres : `log_error_verbosity = terse` recommandé en production (une violation de contrainte écrit la valeur fautive).

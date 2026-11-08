@@ -21,7 +21,8 @@
       "admin": "Administration",
       "settingsPalette": "Palette de couleurs",
       "settingsLogo": "Logotype",
-      "settingsSmtp": "Serveur SMTP"
+      "settingsSmtp": "Serveur SMTP",
+      "projects": "Projets"
     },
     "sidebar": {
       "toggle": "Afficher ou masquer le menu latéral",
@@ -507,6 +508,146 @@
       "idempotency_in_progress": "Demande en cours de traitement.",
       "idempotency_conflict": "Conflit de requête. Rechargez la page.",
       "service_unavailable": "Service momentanément indisponible.",
+      "generic": "Une erreur est survenue. Veuillez réessayer."
+    }
+  },
+  "Projects": {
+    "title": "Projets",
+    "description": "Vos projets et leurs offres : sites web, applications et thèmes Salla, ou autres.",
+    "list": {
+      "empty": "Aucun projet pour l'instant.",
+      "emptyArchived": "Aucun projet archivé.",
+      "new": "Nouveau projet",
+      "filterLabel": "Filtrer par statut",
+      "active": "Actifs",
+      "archived": "Archivés",
+      "open": "Ouvrir",
+      "openNamed": "Ouvrir {name}",
+      "readOnlyHint": "Votre rôle permet de consulter les projets, pas de les modifier."
+    },
+    "table": {
+      "name": "Nom",
+      "type": "Type",
+      "status": "Statut",
+      "updated": "Modifié le",
+      "actions": "Gestion"
+    },
+    "types": {
+      "website_sales": "Vente de sites web",
+      "salla_app": "Application Salla",
+      "salla_theme": "Thème Salla",
+      "custom": "Autre projet"
+    },
+    "typeHints": {
+      "website_sales": "Offres, modèles d'affaires, marché cible, questions de qualification, pages d'atterrissage.",
+      "salla_app": "Nom, problème résolu, segments de marchands, lien du store, activation, prix de test, FAQ.",
+      "salla_theme": "Lien d'aperçu, secteurs adaptés, avantages, scénarios publicitaires.",
+      "custom": "Notes libres et champs nommés."
+    },
+    "status": {
+      "active": "Actif",
+      "archived": "Archivé"
+    },
+    "new": {
+      "title": "Nouveau projet",
+      "description": "Choisissez le type de projet, puis renseignez ses réglages.",
+      "submit": "Créer le projet",
+      "creating": "Création…",
+      "back": "Retour aux projets"
+    },
+    "form": {
+      "type": "Type de projet",
+      "typeLocked": "Le type d'un projet ne peut pas être modifié.",
+      "name": "Nom du projet",
+      "nameHint": "120 caractères au maximum.",
+      "settings": "Réglages",
+      "optional": "facultatif",
+      "linesHint": "Un élément par ligne.",
+      "add": "Ajouter une ligne",
+      "remove": "Retirer cette ligne",
+      "save": "Enregistrer",
+      "saving": "Enregistrement…"
+    },
+    "fields": {
+      "offers": "Offres et formules",
+      "business_models": "Modèles d'affaires",
+      "target_market": "Marché cible",
+      "qualification_questions": "Questions de qualification",
+      "landing_pages": "Pages d'atterrissage",
+      "landing_page_name": "Nom",
+      "landing_page_url": "Adresse https",
+      "app_name": "Nom de l'application",
+      "problem_solved": "Problème résolu",
+      "merchant_segments": "Segments de marchands",
+      "store_url": "Lien du store (https)",
+      "activation_flow": "Parcours d'activation",
+      "test_pricing": "Prix de test",
+      "faqs": "Questions fréquentes",
+      "faq_question": "Intitulé de la question",
+      "faq_answer": "Réponse",
+      "preview_url": "Lien d'aperçu (https)",
+      "sectors": "Secteurs adaptés",
+      "features": "Avantages",
+      "ad_scenarios": "Scénarios publicitaires",
+      "notes": "Remarques",
+      "custom_fields": "Champs nommés",
+      "custom_key": "Nom du champ (minuscules, chiffres, _)",
+      "custom_value": "Valeur"
+    },
+    "detail": {
+      "back": "Retour aux projets",
+      "settings": "Réglages du projet",
+      "products": "Produits et offres",
+      "archivedNotice": "Ce projet est archivé : il est en lecture seule. Réactivez-le pour le modifier.",
+      "archive": "Archiver",
+      "reactivate": "Réactiver",
+      "archiveTitle": "Archiver ce projet",
+      "archiveConfirm": "Archiver ce projet ? Il deviendra lecture seule et ne comptera plus dans la limite de votre plan.",
+      "confirm": "Confirmer",
+      "cancel": "Annuler",
+      "emptySettings": "Aucun réglage renseigné.",
+      "createdOn": "Créé le {date}"
+    },
+    "products": {
+      "empty": "Aucun produit pour ce projet.",
+      "add": "Ajouter un produit",
+      "edit": "Modifier",
+      "editNamed": "Modifier {name}",
+      "addTitle": "Nouveau produit",
+      "editTitle": "Modifier le produit",
+      "kind": "Type de produit",
+      "kindHint": "50 caractères au maximum (ex. site vitrine, pack).",
+      "offer": "Offre",
+      "offerHint": "500 caractères au maximum.",
+      "priceHint": "Prix indicatif",
+      "landingUrl": "Page d'atterrissage (https)",
+      "assets": "Fichiers",
+      "assetsSoon": "L'envoi de fichiers sera disponible prochainement.",
+      "assetCount": "{count, plural, one {# fichier} other {# fichiers}}",
+      "submitAdd": "Ajouter",
+      "submitEdit": "Enregistrer",
+      "cancel": "Annuler",
+      "close": "Fermer"
+    },
+    "success": {
+      "created": "Projet créé.",
+      "updated": "Projet enregistré.",
+      "archived": "Projet archivé.",
+      "reactivated": "Projet réactivé.",
+      "productCreated": "Produit ajouté.",
+      "productUpdated": "Produit enregistré."
+    },
+    "errors": {
+      "invalid_input": "Certaines valeurs sont invalides. Vérifiez les champs (textes courts, liens en https vers un nom de domaine).",
+      "forbidden": "Votre rôle ne permet pas cette action.",
+      "quota_exceeded": "La limite de projets de votre plan est atteinte. Contactez l'administrateur de la plateforme.",
+      "conflict": "Ce projet est archivé : réactivez-le avant de le modifier.",
+      "not_found": "Ce projet est introuvable.",
+      "rate_limited": "Trop de tentatives. Réessayez dans un instant.",
+      "duplicate_request": "Cette demande a déjà été traitée.",
+      "idempotency_in_progress": "La demande est en cours de traitement.",
+      "idempotency_conflict": "Cette demande a déjà été envoyée avec d'autres valeurs. Rechargez la page.",
+      "service_unavailable": "Service momentanément indisponible. Réessayez plus tard.",
       "generic": "Une erreur est survenue. Veuillez réessayer."
     }
   }

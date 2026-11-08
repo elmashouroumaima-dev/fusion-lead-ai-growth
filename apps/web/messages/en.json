@@ -21,7 +21,8 @@
       "admin": "Platform admin",
       "settingsPalette": "Color palette",
       "settingsLogo": "Logo",
-      "settingsSmtp": "SMTP server"
+      "settingsSmtp": "SMTP server",
+      "projects": "Projects"
     },
     "sidebar": {
       "toggle": "Show or hide the side menu",
@@ -508,6 +509,146 @@
       "idempotency_conflict": "Request conflict. Reload the page.",
       "service_unavailable": "Service temporarily unavailable.",
       "generic": "Something went wrong. Please try again."
+    }
+  },
+  "Projects": {
+    "title": "Projects",
+    "description": "Your projects and their offers: websites, Salla apps and themes, or others.",
+    "list": {
+      "empty": "No project yet.",
+      "emptyArchived": "No archived project.",
+      "new": "New project",
+      "filterLabel": "Filter by status",
+      "active": "Active",
+      "archived": "Archived",
+      "open": "Open",
+      "openNamed": "Open {name}",
+      "readOnlyHint": "Your role lets you view projects, not change them."
+    },
+    "table": {
+      "name": "Name",
+      "type": "Kind",
+      "status": "Status",
+      "updated": "Updated on",
+      "actions": "Manage"
+    },
+    "types": {
+      "website_sales": "Website sales",
+      "salla_app": "Salla app",
+      "salla_theme": "Salla theme",
+      "custom": "Other project"
+    },
+    "typeHints": {
+      "website_sales": "Offers, business models, target market, qualification questions, landing pages.",
+      "salla_app": "Name, problem solved, merchant segments, store link, activation, test pricing, FAQ.",
+      "salla_theme": "Preview link, suitable sectors, features, ad scenarios.",
+      "custom": "Free notes and named fields."
+    },
+    "status": {
+      "active": "Active",
+      "archived": "Archived"
+    },
+    "new": {
+      "title": "New project",
+      "description": "Choose the project type, then fill in its settings.",
+      "submit": "Create project",
+      "creating": "Creating…",
+      "back": "Back to projects"
+    },
+    "form": {
+      "type": "Project type",
+      "typeLocked": "A project type cannot be changed.",
+      "name": "Project name",
+      "nameHint": "120 characters at most.",
+      "settings": "Settings",
+      "optional": "optional",
+      "linesHint": "One item per line.",
+      "add": "Add a row",
+      "remove": "Remove this row",
+      "save": "Save",
+      "saving": "Saving…"
+    },
+    "fields": {
+      "offers": "Offers and packages",
+      "business_models": "Business models",
+      "target_market": "Target market",
+      "qualification_questions": "Qualification questions",
+      "landing_pages": "Landing pages",
+      "landing_page_name": "Name",
+      "landing_page_url": "https address",
+      "app_name": "App name",
+      "problem_solved": "Problem solved",
+      "merchant_segments": "Merchant segments",
+      "store_url": "Store link (https)",
+      "activation_flow": "Activation flow",
+      "test_pricing": "Test pricing",
+      "faqs": "Frequently asked questions",
+      "faq_question": "Question",
+      "faq_answer": "Answer",
+      "preview_url": "Preview link (https)",
+      "sectors": "Suitable sectors",
+      "features": "Features",
+      "ad_scenarios": "Ad scenarios",
+      "notes": "Notes",
+      "custom_fields": "Named fields",
+      "custom_key": "Field name (lowercase, digits, _)",
+      "custom_value": "Value"
+    },
+    "detail": {
+      "back": "Back to projects",
+      "settings": "Project settings",
+      "products": "Products and offers",
+      "archivedNotice": "This project is archived: it is read-only. Reactivate it to edit it.",
+      "archive": "Archive",
+      "reactivate": "Reactivate",
+      "archiveTitle": "Archive this project",
+      "archiveConfirm": "Archive this project? It becomes read-only and no longer counts toward your plan limit.",
+      "confirm": "Confirm",
+      "cancel": "Cancel",
+      "emptySettings": "No setting filled in.",
+      "createdOn": "Created on {date}"
+    },
+    "products": {
+      "empty": "No product for this project.",
+      "add": "Add a product",
+      "edit": "Edit",
+      "editNamed": "Edit {name}",
+      "addTitle": "New product",
+      "editTitle": "Edit product",
+      "kind": "Product kind",
+      "kindHint": "50 characters at most (e.g. showcase site, pack).",
+      "offer": "Offer",
+      "offerHint": "500 characters at most.",
+      "priceHint": "Price hint",
+      "landingUrl": "Landing page (https)",
+      "assets": "Files",
+      "assetsSoon": "File upload will be available soon.",
+      "assetCount": "{count, plural, one {# file} other {# files}}",
+      "submitAdd": "Add",
+      "submitEdit": "Save",
+      "cancel": "Cancel",
+      "close": "Close"
+    },
+    "success": {
+      "created": "Project created.",
+      "updated": "Project saved.",
+      "archived": "Project archived.",
+      "reactivated": "Project reactivated.",
+      "productCreated": "Product added.",
+      "productUpdated": "Product saved."
+    },
+    "errors": {
+      "invalid_input": "Some values are invalid. Check the fields (short texts, https links to a domain name).",
+      "forbidden": "Your role does not allow this action.",
+      "quota_exceeded": "Your plan's project limit is reached. Contact the platform administrator.",
+      "conflict": "This project is archived: reactivate it before editing.",
+      "not_found": "This project cannot be found.",
+      "rate_limited": "Too many attempts. Try again in a moment.",
+      "duplicate_request": "This request was already processed.",
+      "idempotency_in_progress": "The request is being processed.",
+      "idempotency_conflict": "This request was already sent with other values. Reload the page.",
+      "service_unavailable": "Service temporarily unavailable. Try again later.",
+      "generic": "An error occurred. Please try again."
     }
   }
 }

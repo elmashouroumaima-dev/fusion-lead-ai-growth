@@ -29,11 +29,12 @@ export type AppShellProps = {
   activeOrganizationName?: string | undefined;
 };
 
-type PageKey = "dashboard" | "members" | "settings" | "admin" | "onboarding" | "selectOrganization";
+type PageKey = "dashboard" | "projects" | "members" | "settings" | "admin" | "onboarding" | "selectOrganization";
 
 function pageKeyOf(pathname: string): PageKey | null {
   const is = (base: string) => pathname === base || pathname.startsWith(`${base}/`);
   if (is("/dashboard")) return "dashboard";
+  if (is("/projects")) return "projects";
   if (is("/members")) return "members";
   if (is("/settings")) return "settings";
   if (is("/admin")) return "admin";
@@ -52,7 +53,7 @@ export function AppShell({ children, email, showMembers, showSettings = false, s
   const pathname = usePathname();
   const chromeless = isSwitcherHiddenPath(pathname);
   const pageKey = pageKeyOf(pathname);
-  const pageLabel = pageKey === null ? null : pageKey === "dashboard" || pageKey === "members" || pageKey === "settings" || pageKey === "admin" ? t(`nav.${pageKey}`) : t(`pages.${pageKey}`);
+  const pageLabel = pageKey === null ? null : pageKey === "dashboard" || pageKey === "projects" || pageKey === "members" || pageKey === "settings" || pageKey === "admin" ? t(`nav.${pageKey}`) : t(`pages.${pageKey}`);
 
   const switcher =
     organizations.length >= 2 ? <OrganizationSwitcher options={organizations} selectedId={selectedOrganizationId} /> : null;

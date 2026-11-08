@@ -2,6 +2,7 @@
 
 import {
   ChevronDownIcon,
+  FolderKanbanIcon,
   ImageIcon,
   LayoutDashboardIcon,
   MailIcon,
@@ -30,8 +31,8 @@ import {
 import { Link, usePathname } from "../../i18n/navigation";
 
 type NavItem = {
-  href: "/dashboard" | "/members" | "/admin/organizations";
-  labelKey: "dashboard" | "members" | "admin";
+  href: "/dashboard" | "/projects" | "/members" | "/admin/organizations";
+  labelKey: "dashboard" | "projects" | "members" | "admin";
   icon: typeof UsersIcon;
 };
 
@@ -64,6 +65,7 @@ export function AppSidebar({
 
   const items: NavItem[] = [
     { href: "/dashboard", labelKey: "dashboard", icon: LayoutDashboardIcon },
+    { href: "/projects", labelKey: "projects", icon: FolderKanbanIcon },
     ...(showMembers
       ? [{ href: "/members", labelKey: "members", icon: UsersIcon } satisfies NavItem]
       : []),

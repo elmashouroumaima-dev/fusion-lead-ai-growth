@@ -463,3 +463,26 @@ Cible : 28,6 % | Réel : à valider | Statut : — (le C1 attend le GO de la res
 - CSV : au J23 (import des leads).
 - Purge des objets non rattachés : à prévoir avec le worker (runbook `storage-assets.md`).
 
+## J18 — Contacts et consentement (branche `day-18-contacts`, NON commité)
+Cible : 30,2 % | Réel : à valider | Statut : — (le C1 attend le GO de la responsable technique)
+
+### Tâches
+| Tâche | Estimé | Livré | Validée |
+|---|---|---|---|
+| `contacts` + `consent_events` + RLS | 2 h | oui (migration `20261120100000`, retour arrière, écriture par fonctions, quota) | oui (pgTAP, API réelle) |
+| Normalisation e-mail / E.164 (libphonenumber) | 1,5 h | oui (`packages/domain/src/contacts`) | oui (téléphones marocains et saoudiens) |
+| Déduplication intra-entreprise | 1,5 h | oui (règle `findDuplicate` + index uniques partiels) | oui (12 créations simultanées : 1 contact) |
+| Tests | 1 h | oui | oui |
+
+### Validation du jour
+- Même e-mail dans deux entreprises -> deux contacts (pgTAP + API réelle) ; même e-mail dans la même entreprise -> refusé.
+- `06 12 34 56 78` (MA) -> `+212612345678` ; `050 123 4567` (SA) -> `+966501234567`.
+
+### Revue sécurité (1 bloquant, 3 moyens, 3 faibles) — corrigés : contournement de « ne plus contacter » par échange d'identifiants, consentement lié à l'adresse, canal cohérent, plafond de 50 consentements, e-mail ASCII, caractères dans les attributs ; documentés : journaux Postgres, fonction `can_contact` et table de suppression d'identifiants (décisions pour la responsable technique).
+
+### Tests : domain 511 ✓ · web 2288 ✓ (contacts : 23) · pgTAP 1598 (dont 130_contacts_consent : 111) ✓ · API réelle 365 ✓ (contacts : 16) · acceptation 56 ✓ · lint, typecheck, check:leaks verts
+### Écarts à la spec / plan
+- Le commercial (« own ») et l'analyste n'ont aucun accès aux contacts au J18 (le commercial l'obtient avec les leads, J19).
+- Pas d'écran (le plan n'en prévoit pas au J18).
+- Conflit e-mail / téléphone : refus `conflict`, pas de table de file de revue (non prévue par la spec ni un ADR).
+- `suppressions` et désinscription : avec l'e-mail (J31–33), comme dans le plan validé (le prompt parlait de « J18–20 désabonnement »).

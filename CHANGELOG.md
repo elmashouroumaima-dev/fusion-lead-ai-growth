@@ -3,6 +3,15 @@
 Format : Keep a Changelog. Une entrée par jour de travail.
 
 ## [Non publié]
+### J18 — Contacts et consentement
+- Ajout : tables `contacts` et `consent_events` (enums `channel_type`, `consent_status`), index uniques partiels (e-mail, téléphone, identifiant externe), RLS en lecture (owner, admin, marketing), historique de consentement append-only ; migration `20261120100000` et retour arrière.
+- Ajout : fonctions `create_contact`, `update_contact`, `record_consent`, `revoke_consent`, `set_do_not_contact` (écriture uniquement par fonctions, quota « contacts » du plan, audit sans donnée personnelle).
+- Ajout : `packages/domain/src/contacts` (normalisation e-mail et E.164 par `libphonenumber-js`, règle de déduplication, schémas zod) et `apps/web/lib/contacts` (service, lectures, erreurs). Nouvelle dépendance : `libphonenumber-js`.
+- Modifié : `current_stock_usage` compte les contacts (quota « contacts »).
+- Sécurité (revue adverse) : l'identité d'un contact « ne plus contacter » ne change plus que par owner / admin ; consentements révoqués quand l'adresse change ; canal cohérent avec l'identifiant ; 50 consentements au plus par contact ; e-mail saisi en ASCII ; attributs sans caractères de contrôle ni de direction.
+- Tests : domaine (49), service web (23), pgTAP (111), API réelle (16, dont 12 créations simultanées pour 1 place).
+- Documentation : `docs/api/contacts.md`, addendum ADR 007.
+
 ### J17 partie 2 — Storage : fichiers des produits
 - Ajout : bucket privé `assets` et politiques Storage par entreprise (lecture : membres ; écriture et suppression : owner et admin sur un projet actif ; aucune mise à jour ; rien pour `anon`), chemin `{entreprise}/{projet}/{fichier}/{nom}` imposé ; migration `20261119100000` et retour arrière.
 - Ajout : envoi de fichiers (PNG, JPEG, WebP, PDF, 5 Mo) depuis la fenêtre d'un produit : type RÉEL par les octets, nom d'objet généré par le serveur, envoi avec les droits de l'utilisateur, retrait ; aperçu des images et téléchargement des PDF par liens signés de 60 s ; `packages/domain/src/projects/assets.ts` ; messages fr / ar / en.

@@ -181,3 +181,10 @@ Tables créées : `plans` (catalogue global ; ligne `trial` sans limites, valeur
 - Envoi par Server Action avec les droits de l'utilisateur (la politique Storage est la barrière, pas `service_role`) ; retrait : la base d'abord, puis l'objet.
 - Limite connue : un owner ou admin peut envoyer directement à l'API Storage (taille et types du bucket seulement) ; purge des objets non rattachés à prévoir (worker).
 
+## Mise en œuvre J18 (2026-11-08) — Contacts et consentement
+- Enums `channel_type` (email, whatsapp ; extensible) et `consent_status` (unknown, granted, revoked). `consent_events` = source de vérité, `contacts.consent_status` dérivé par la fonction `refresh_consent_status` (G-D4).
+- Écriture **uniquement par fonctions** (comme les projets) ; lecture limitée à owner, admin et marketing. **Écart assumé** avec l'ADR 014 : le commercial (« own ») n'a aucun accès au J18 ; il l'obtient au J19 avec les leads qui lui sont assignés. L'analyste reste sans accès (PII).
+- Unicité par index uniques partiels (e-mail, téléphone, identifiant externe) ; la fusion automatique n'existe pas : e-mail d'un contact et téléphone d'un autre = `conflict`, aucune table de « file de revue » au J18 (à décider avec la responsable technique).
+- `suppressions` (G-D5) : reportée à l'e-mail (J31–33).
+- Au moins un identifiant (e-mail ou téléphone) par contact ; pas de suppression de contact ; audit sans donnée personnelle.
+- **Revue sécurité adverse J18** : 1 bloquant corrigé (changer l'e-mail ou le téléphone d'un contact « ne plus contacter » libérait l'identifiant pour un nouveau contact : réservé à owner et admin) ; 3 moyens corrigés (consentements révoqués quand l'adresse change, canal cohérent avec l'identifiant, plafond de 50 consentements par contact) ; 2 faibles corrigés (e-mail saisi ASCII, caractères de contrôle et de direction dans les attributs). **Soumis à la responsable technique** : table de suppression d'identifiants (G-D5, aujourd'hui prévue au J31–33) et fonction `can_contact` pour le contrôle final d'envoi.

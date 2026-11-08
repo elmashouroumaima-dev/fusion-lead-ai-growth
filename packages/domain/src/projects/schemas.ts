@@ -83,6 +83,14 @@ const productFields = {
   organization_id: claimedOrganization,
 };
 
+/** Envoi d'un fichier : le fichier lui-même est lu du formulaire (jamais d'un champ texte) ; seul le produit est désigné. */
+export const uploadAssetSchema = z.object({ product_id: uuidSchema, organization_id: claimedOrganization }).strict();
+export type UploadAssetInput = z.infer<typeof uploadAssetSchema>;
+
+/** Retrait d'un fichier : le chemin doit déjà être associé au produit (revérifié par le serveur). */
+export const removeAssetSchema = z.object({ product_id: uuidSchema, path: assetPathSchema, organization_id: claimedOrganization }).strict();
+export type RemoveAssetInput = z.infer<typeof removeAssetSchema>;
+
 export const createProductSchema = z.object({ project_id: uuidSchema, ...productFields }).strict();
 export type CreateProductInput = z.infer<typeof createProductSchema>;
 

@@ -99,5 +99,40 @@ Réponse : `{ status, code?, fieldErrors?, success? }`, jamais de texte : `code`
 
 Sécurité des entrées (revue J17) : un champ JSON de plus de 6 niveaux d'imbrication ou portant une clé `__proto__` est **refusé** (`invalid_input`) avant tout décodage récursif ; corps des Server Actions plafonné à 512 Ko (`serverActions.bodySizeLimit`, avant le pipeline : l'erreur de Next n'est alors pas normalisée) ; liens : `isSafeHttpsUrl` n'empêche **pas** un nom de domaine de résoudre vers une adresse interne (DNS rebinding, `*.nip.io`) : tout futur chargement serveur d'un lien (`landing_url`, `store_url`, `preview_url`) devra résoudre le nom, refuser les adresses privées et les redirections.
 
-Règles : le créateur est propriétaire du projet (aucun sélecteur tant que la liste des membres n'affiche pas d'identité lisible) ; à la modification le propriétaire est conservé ; les réglages voyagent en JSON dans un champ caché, **toujours revalidés** par zod puis par la base (un JSON illisible est refusé, jamais remplacé par un objet vide) ; les listes se saisissent « une ligne par élément » ; à la modification d'un produit, les fichiers déjà associés (`assets`) sont repris tels quels (l'envoi de fichiers et le Storage arrivent en deuxième partie du J17).
+Règles : le créateur est propriétaire du projet (aucun sélecteur tant que la liste des membres n'affiche pas d'identité lisible) ; à la modification le propriétaire est conservé ; les réglages voyagent en JSON dans un champ caché, **toujours revalidés** par zod puis par la base (un JSON illisible est refusé, jamais remplacé par un objet vide) ; les listes se saisissent « une ligne par élément » ; les fichiers (`assets`) ne passent **plus** par les formulaires de création et de modification : toute liste venue du client est ignorée, `update_product` n'écrit plus cette colonne.
+
+## Fichiers des produits (J17, partie 2 — Storage)
+Migration `20261119100000_storage_assets.sql` (retour arrière : `supabase/rollbacks/`). ADR 005 §12, ADR 007 G-D11.
+
+**Bucket** `assets` : privé, 10 Mo au plus, types `image/png`, `image/jpeg`, `image/webp`, `application/pdf` (le CSV viendra avec l'import des leads, J23). Aucune URL publique.
+
+**Chemin obligatoire** `{organization_id}/{project_id}/{asset_id}/{fichier}` : UUID en minuscules, nom `[A-Za-z0-9._-]` (120 caractères au plus). Le projet doit exister **dans cette entreprise**.
+
+| Opération | Qui | Condition |
+|---|---|---|
+| Lire, lister, signer | membres actifs de l'entreprise du chemin (tous les rôles) | projet existant dans l'entreprise (actif ou archivé) |
+| Envoyer, supprimer | owner et admin | projet **actif** |
+| Mettre à jour (écraser, renommer) | personne | aucune politique |
+| `anon` | personne | — |
+
+**Interface** : fenêtre « Modifier » d'un produit → bloc « Fichiers du produit » (liste avec aperçu des images, téléchargement des PDF, envoi, retrait). Lecture des fichiers pour tous les rôles dans la liste des produits.
+
+**Server Actions** (pipeline `withAction`, rôle `update` projets, limitation de débit « mutation ») :
+
+| Action | Champs | Effet |
+|---|---|---|
+| `uploadProductAssetAction` | `product_id`, `organization_id`, `file` | contrôle, envoi avec les droits de l'utilisateur, association ATOMIQUE au produit (`append_product_asset`) |
+| `removeProductAssetAction` | `product_id`, `path`, `organization_id` | retire le chemin du produit (`remove_product_asset`, base d'abord), puis supprime l'objet **seulement si aucun autre produit ne le référence** ; seul un chemin **déjà associé au produit** est accepté |
+
+Contrôles de l'envoi (`apps/web/lib/projects/assets.ts`) : type **réel par les octets** (PNG, JPEG, WebP, `%PDF-` ; SVG, HTML, GIF, exécutables, archives refusés — le type annoncé et l'extension du nom sont ignorés) ; **5 Mo au plus** pour tous les types au J17 (la spec autorise 10 Mo pour un PDF : à relever avec un envoi par route dédiée, la limite des corps de Server Actions est de 6 Mo) ; 50 fichiers par produit ; nom d'objet **généré par le serveur** (`uuid` + nom nettoyé : minuscules ASCII, accents retirés, extension du type réel, « fichier » si le nom n'a aucun caractère exploitable) ; produit relu par RLS (autre entreprise → `not_found`), projet archivé → `conflict` ; si l'association échoue, l'objet envoyé est supprimé.
+
+Codes d'erreur ajoutés : `file_missing`, `file_empty`, `file_too_large`, `file_type`, `too_many_files` (plus ceux du pipeline).
+
+**Lecture** : liens signés de **60 secondes** générés à chaque affichage (images : affichage ; PDF : téléchargement forcé) ; jamais d'URL publique ; un lien signé est un secret porteur (il ouvre le fichier sans session pendant sa durée de vie).
+
+**Fonctions atomiques** (revue J17) : `append_product_asset(p_org, p_product, p_path)` et `remove_product_asset(p_org, p_product, p_path)` (`SECURITY DEFINER`, owner / admin, projet actif) travaillent sous verrou de la ligne du produit : plus de perte de mise à jour sous envois simultanés. L'ajout exige que l'objet existe, appartienne au dossier du projet et ne soit pas déjà rattaché à un AUTRE produit ; 50 fichiers au plus (`too_many_files`) ; chemin déjà présent : sans effet. Le retrait renvoie le nombre de produits qui référencent encore l'objet.
+
+**Risques acceptés (revue J17)** : lien signé de 60 s = secret porteur (durée courte, jamais journalisé) ; jeton d'envoi signé de Storage (valable 2 h) : l'objet reste sous le dossier de l'entreprise, au pire un orphelin purgé ; pas de plafond d'octets par entreprise (surveillance du volume, purge du worker) ; PDF servis en téléchargement forcé (`download`), images servies avec leur type réel contrôlé par les octets.
+
+**Limites connues** : un owner ou admin peut envoyer directement à l'API Storage (sans passer par l'application) ; seules la taille (10 Mo) et la liste de types du bucket s'appliquent alors (le contrôle des octets n'a pas lieu) ; des objets peuvent rester non rattachés à un produit (purge à prévoir, tâche du worker).
 

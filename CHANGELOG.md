@@ -3,6 +3,13 @@
 Format : Keep a Changelog. Une entrée par jour de travail.
 
 ## [Non publié]
+### J17 partie 2 — Storage : fichiers des produits
+- Ajout : bucket privé `assets` et politiques Storage par entreprise (lecture : membres ; écriture et suppression : owner et admin sur un projet actif ; aucune mise à jour ; rien pour `anon`), chemin `{entreprise}/{projet}/{fichier}/{nom}` imposé ; migration `20261119100000` et retour arrière.
+- Ajout : envoi de fichiers (PNG, JPEG, WebP, PDF, 5 Mo) depuis la fenêtre d'un produit : type RÉEL par les octets, nom d'objet généré par le serveur, envoi avec les droits de l'utilisateur, retrait ; aperçu des images et téléchargement des PDF par liens signés de 60 s ; `packages/domain/src/projects/assets.ts` ; messages fr / ar / en.
+- Modifié : limite des corps de Server Actions de 512 Ko à 6 Mo (`next.config.ts`).
+- Corrigé (revue sécurité) : ajout et retrait de fichiers ATOMIQUES (`append_product_asset`, `remove_product_asset`, verrou du produit) ; `update_product` n'écrit plus `assets` et toute liste venue du client est ignorée ; un objet partagé par un autre produit n'est jamais supprimé ; rattachement d'un fichier déjà utilisé par un autre produit refusé.
+- Tests : pgTAP (45), API Storage réelle (17), unitaires (domaine et service).
+
 ### J17 — Écran Projets (partie 1 : sans Storage)
 - Ajout : menu « Projets », pages liste (filtre Actifs / Archivés), création (formulaire dynamique selon le type : site web, application Salla, thème Salla, autre) et détail (réglages, produits en fenêtre, archivage et réactivation avec confirmation) ; lecture pour tous les rôles, écriture owner et admin.
 - Ajout : Server Actions `createProjectAction`, `updateProjectAction`, `setProjectStatusAction`, `createProductAction`, `updateProductAction` (pipeline commun, idempotence, rôles) ; composant `Textarea` ; messages fr / ar / en ; `settings-form` (saisie « une ligne par élément », nettoyage avant envoi).

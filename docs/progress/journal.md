@@ -445,3 +445,21 @@ Manager + A5 (revue sécurité adverse : actions appelées directement avec de v
 ### Blocages / à faire
 - GO du C1 ; Storage (partie 2) ; décider de la présence des notifications rouges (PR `feat-toast-style`).
 
+
+## J17 partie 2 — Storage et fichiers des produits (préparé en avance, NON commité, branche `day-17-storage`)
+Cible : 28,6 % | Réel : à valider | Statut : — (le C1 attend le GO de la responsable technique)
+
+### Tâches
+| Tâche | Estimé | Livré | Validée |
+|---|---|---|---|
+| Bucket privé `assets` + politiques Storage par entreprise (G-D11) | 1 h | oui (migration `20261119100000`, retour arrière) | oui |
+| Envoi, retrait et lecture des fichiers d'un produit | 1,5 h | oui (Server Actions, octets réels, liens signés 60 s) | oui (navigateur) |
+
+### Revue sécurité (0 bloquant, 5 moyens, 5 faibles) — corrigés : pertes de mises à jour sous concurrence et rattachement d'un fichier à un autre produit (fonctions SQL atomiques `append_product_asset` / `remove_product_asset`, `update_product` n'écrit plus `assets`, liste client ignorée, objet partagé jamais supprimé) ; acceptés et documentés : durée des liens signés, jeton d'envoi signé, plafond par entreprise, purge des orphelins.
+
+### Tests : domain 462 ✓ · web 2238 ✓ (assets : 17) · pgTAP 1487 (dont 120_storage_assets : 45) ✓ · API Storage réelle 17 ✓ (RLS : 349) · acceptation 56 ✓ · lint, typecheck verts · vérifié dans le navigateur : envoi PNG et PDF, refus d'un SVG déguisé en .png et d'un fichier vide, retrait
+### Écarts à la spec / plan
+- 5 Mo pour tous les types (spec : 10 Mo pour un PDF) : limite des corps de Server Actions à 6 Mo ; à relever avec une route dédiée.
+- CSV : au J23 (import des leads).
+- Purge des objets non rattachés : à prévoir avec le worker (runbook `storage-assets.md`).
+

@@ -3,6 +3,14 @@
 Format : Keep a Changelog. Une entrée par jour de travail.
 
 ## [Non publié]
+### J24 — UI CRM
+- Ajout : page `/leads` (filtres projet, étape, source, responsable, « non assignés » ; recherche nom, e-mail, téléphone ; tri ; pagination serveur) et page `/deals` (tableau par étape, glisser-déposer et menu « Déplacer vers… ») en français, arabe (RTL) et anglais ; liens « Leads » et « Deals » dans la barre latérale (rôles qui lisent les leads).
+- Ajout : `GET /api/leads/export` (owner et admin, mêmes filtres que la liste, 10 000 lignes au plus, **audité** avant l'envoi, protégé contre l'injection de formule, jamais tronqué en silence) et `POST /api/deals/move` (Idempotency-Key obligatoire).
+- Ajout : migration `20261126100000` (extension `pg_trgm`, index de recherche, `search_leads` SECURITY INVOKER, `log_export`) et retour arrière ; `packages/domain/src/crm` ; `apps/web/lib/crm` ; `withRoute` : contexte `request` et réponse texte.
+- Sécurité (revue adverse) : GET d'export inter-sites refusé, export tronqué refusé, paramètre de filtre invalide refusé, formule précédée d'espaces neutralisée, total conservé hors page, `Referrer-Policy: no-referrer` sur `/leads`.
+- Tests : domaine (15), service web (7), messages et CSS logique (14), pgTAP (63), API réelle (6), acceptation HTTP (16).
+- Documentation : `docs/api/crm.md`, addendum ADR 007.
+
 ### J23 — Import CSV de leads
 - Ajout : tables `import_batches` et `import_rows`, bucket privé `imports` (10 Mo, owner et admin), fonctions `create_import_batch`, `import_dedup_check`, `confirm_import`, `cancel_import` (owner et admin) et `import_start`, `import_row`, `import_record_error`, `import_finish`, `import_fail` (service_role) ; migration `20261125100000` et retour arrière.
 - Ajout : routes `POST /api/imports` (fichier brut), `/preview`, `/confirm`, `/cancel`, `GET /api/imports` et `/report` (CSV sans donnée de contact) ; assistant en 3 étapes, **rien n'est écrit avant la confirmation**.

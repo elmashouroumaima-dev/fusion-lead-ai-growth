@@ -603,3 +603,25 @@ Cible : 38,1 % | Réel : à valider | Statut : — (le C1 attend le GO de la res
 - Import réservé à owner et admin (l'ADR 014 y ajoute marketing et commercial « assigné à soi »).
 - Pas d'écran (J24) ; pas de purge du Storage (à planifier avec le worker).
 - Numéros du rapport = numéros d'enregistrement (lignes vides ignorées).
+
+## J24 — UI CRM (branche `day-24-crm-ui`, NON commité)
+Cible : 39,7 % | Réel : à valider | Statut : — (le C1 attend le GO de la responsable technique)
+
+### Tâches
+| Tâche | Estimé | Livré | Validée |
+|---|---|---|---|
+| Liste + filtres + recherche | 2,5 h | oui (`/leads`, `search_leads`, pagination serveur) | oui (pgTAP, API réelle, HTTP réel, vérification visuelle fr / ar / en) |
+| Kanban des deals | 2,5 h | oui (`/deals`, glisser-déposer + menu clavier, `POST /api/deals/move`) | oui (HTTP réel, déplacement vérifié en base) |
+| Export CSV | 1 h | oui (`GET /api/leads/export`, audité, sans troncature, anti-formule) | oui |
+
+### Validation du jour
+- Recherche et export limités à l'entreprise active **et au rôle** : le commercial ne voit que ses leads, l'analyste est renvoyé au tableau de bord, Beta ne voit rien d'Alpha (HTTP réel).
+- Export **journalisé** (`export.created` : nombre de lignes et noms de filtres) avant l'envoi du fichier.
+
+### Revue sécurité (0 bloquant, 2 moyens, 7 faibles) — corrigés : GET d'export inter-sites refusé, export tronqué refusé (413), paramètre invalide refusé (400), formule précédée d'espaces, total conservé hors page, `no-referrer` sur `/leads` ; **soumis à la responsable technique** : « export » comme barrière de lecture, lecture en volume par `rpc/search_leads`, Playwright, recherche sans accents.
+
+### Tests : domain 589 ✓ · web 2452 ✓ (crm : 7 + messages 14) · worker 56 ✓ · pgTAP 2290 (dont 190_crm_search : 63) ✓ · API réelle 431 ✓ (crm : 6) · acceptation 99 ✓ (crm : 16) · lint, typecheck, check:leaks verts
+### Écarts à la spec / plan
+- Pas de Playwright (non installé) : acceptation HTTP + vérification visuelle dans le navigateur intégré (fr, ar, en).
+- Glisser-déposer natif (aucune bibliothèque) + menu « Déplacer vers… » ; extension `pg_trgm`.
+- Pas de fiche détaillée d'un lead ; responsable affiché par un identifiant court.

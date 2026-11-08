@@ -14,6 +14,11 @@ export type ProjectsActionErrorCode =
   | "idempotency_in_progress"
   | "idempotency_conflict"
   | "service_unavailable"
+  | "file_empty"
+  | "file_too_large"
+  | "file_type"
+  | "file_missing"
+  | "too_many_files"
   | "generic";
 
 /** État renvoyé aux formulaires (useActionState) : seulement un code ; l'interface le traduit (fr / ar / en). */
@@ -22,5 +27,5 @@ export type ProjectsActionState = {
   code?: ProjectsActionErrorCode;
   fieldErrors?: Record<string, string[]>;
   /** Clé de la phrase de succès (`Projects.success.*`). */
-  success?: "created" | "updated" | "archived" | "reactivated" | "productCreated" | "productUpdated";
+  success?: "created" | "updated" | "archived" | "reactivated" | "productCreated" | "productUpdated" | "fileUploaded" | "fileRemoved";
 };

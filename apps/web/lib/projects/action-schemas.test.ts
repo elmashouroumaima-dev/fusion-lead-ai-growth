@@ -84,12 +84,14 @@ describe("produits (champs de formulaire)", () => {
     expect(parsed.success && parsed.data).toEqual({ project_id: PROJECT, kind: "pack", offer: "Pack e-commerce", price_hint: null, landing_url: null, assets: [] });
   });
 
-  it("modification : les fichiers déjà associés sont repris tels quels (chemins valides seulement)", () => {
-    const asset = `${ORG}/${PROJECT}/logo.png`;
-    const ok = updateProductFormSchema.safeParse({ ...raw(), project_id: undefined, product_id: PRODUCT, assets: JSON.stringify([asset]) });
-    expect(ok.success && ok.data.assets).toEqual([asset]);
-    expect(updateProductFormSchema.safeParse({ ...raw(), project_id: undefined, product_id: PRODUCT, assets: '["../x.png"]' }).success).toBe(false);
-    expect(updateProductFormSchema.safeParse({ ...raw(), project_id: undefined, product_id: PRODUCT, assets: "pas du json" }).success).toBe(false);
+  it("création et modification : une liste de fichiers venue du client est TOUJOURS ignorée (revue J17)", () => {
+    const asset = `${ORG}/${PROJECT}/7d100000-0000-4000-8000-000000000001/logo.png`;
+    for (const assets of [JSON.stringify([asset]), '["../x.png"]', "pas du json"]) {
+      const update = updateProductFormSchema.safeParse({ ...raw(), project_id: undefined, product_id: PRODUCT, assets });
+      expect(update.success && update.data.assets).toEqual([]);
+      const create = createProductFormSchema.safeParse(raw({ assets }));
+      expect(create.success && create.data.assets).toEqual([]);
+    }
   });
 
   it("URL http, texte avec caractère invisible ou prix trop long : refusés", () => {

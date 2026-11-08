@@ -1,8 +1,9 @@
 import type { ServiceErrorCode } from "../service/errors";
+import type { AssetFailure } from "./assets";
 import type { ProjectsActionErrorCode } from "./types";
 
 /** Code de la couche service -> code d'état de formulaire (traduit par l'interface). */
-export function toActionCode(code: ServiceErrorCode): ProjectsActionErrorCode {
+export function toActionCode(code: ServiceErrorCode | AssetFailure): ProjectsActionErrorCode {
   switch (code) {
     case "validation_failed":
     case "payload_too_large":
@@ -18,6 +19,11 @@ export function toActionCode(code: ServiceErrorCode): ProjectsActionErrorCode {
     case "idempotency_in_progress":
     case "idempotency_conflict":
     case "service_unavailable":
+    case "file_empty":
+    case "file_too_large":
+    case "file_type":
+    case "file_missing":
+    case "too_many_files":
       return code;
     default:
       return "generic";

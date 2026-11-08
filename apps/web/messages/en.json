@@ -622,7 +622,7 @@
       "priceHint": "Price hint",
       "landingUrl": "Landing page (https)",
       "assets": "Files",
-      "assetsSoon": "File upload will be available soon.",
+      "assetsSoon": "Files are managed from the edit window of an existing product.",
       "assetCount": "{count, plural, one {# file} other {# files}}",
       "submitAdd": "Add",
       "submitEdit": "Save",
@@ -635,7 +635,9 @@
       "archived": "Project archived.",
       "reactivated": "Project reactivated.",
       "productCreated": "Product added.",
-      "productUpdated": "Product saved."
+      "productUpdated": "Product saved.",
+      "fileUploaded": "File uploaded.",
+      "fileRemoved": "File removed."
     },
     "errors": {
       "invalid_input": "Some values are invalid. Check the fields (short texts, https links to a domain name).",
@@ -648,7 +650,26 @@
       "idempotency_in_progress": "The request is being processed.",
       "idempotency_conflict": "This request was already sent with other values. Reload the page.",
       "service_unavailable": "Service temporarily unavailable. Try again later.",
-      "generic": "An error occurred. Please try again."
+      "generic": "An error occurred. Please try again.",
+      "file_empty": "This file is empty.",
+      "file_too_large": "This file is larger than 5 MB.",
+      "file_type": "File type not accepted: PNG, JPEG, WebP or PDF only.",
+      "file_missing": "Choose a file to upload.",
+      "too_many_files": "This product already has 50 files."
+    },
+    "files": {
+      "title": "Product files",
+      "empty": "No file.",
+      "choose": "Choose a file",
+      "hint": "PNG, JPEG, WebP or PDF, 5 MB at most.",
+      "upload": "Upload",
+      "uploading": "Uploading…",
+      "remove": "Remove",
+      "removeNamed": "Remove {name}",
+      "open": "Open {name}",
+      "download": "Download {name}",
+      "unavailable": "Link unavailable",
+      "readOnly": "Files can be changed by owners and administrators."
     }
   },
   "Footer": {

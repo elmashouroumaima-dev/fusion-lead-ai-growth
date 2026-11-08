@@ -98,7 +98,7 @@ export async function createProduct(
     p_offer: input.offer,
     p_price_hint: input.price_hint ?? null,
     p_landing_url: input.landing_url ?? null,
-    p_assets: input.assets,
+    p_assets: [],
   });
   if (error) return fail(mapProjectsDbError(error));
   if (typeof data !== "string") return fail("internal_error");
@@ -118,7 +118,8 @@ export async function updateProduct(
     p_offer: input.offer,
     p_price_hint: input.price_hint ?? null,
     p_landing_url: input.landing_url ?? null,
-    p_assets: input.assets,
+    // Ignoré côté base (les fichiers se modifient par append_product_asset / remove_product_asset).
+    p_assets: [],
   });
   if (error) return fail(mapProjectsDbError(error));
   const row = await readBack(() => getProduct(supabase, organizationId, input.product_id));

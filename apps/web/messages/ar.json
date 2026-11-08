@@ -622,7 +622,7 @@
       "priceHint": "السعر التقريبي",
       "landingUrl": "صفحة الهبوط (https)",
       "assets": "الملفات",
-      "assetsSoon": "رفع الملفات سيتوفر قريبًا.",
+      "assetsSoon": "تُدار الملفات من نافذة تعديل منتج موجود.",
       "assetCount": "{count, plural, one {ملف واحد} other {# ملفات}}",
       "submitAdd": "إضافة",
       "submitEdit": "حفظ",
@@ -635,7 +635,9 @@
       "archived": "تمت أرشفة المشروع.",
       "reactivated": "تمت إعادة تفعيل المشروع.",
       "productCreated": "تمت إضافة المنتج.",
-      "productUpdated": "تم حفظ المنتج."
+      "productUpdated": "تم حفظ المنتج.",
+      "fileUploaded": "تم رفع الملف.",
+      "fileRemoved": "تمت إزالة الملف."
     },
     "errors": {
       "invalid_input": "بعض القيم غير صالحة. تحققوا من الحقول (نصوص قصيرة وروابط https إلى اسم نطاق).",
@@ -648,7 +650,26 @@
       "idempotency_in_progress": "الطلب قيد المعالجة.",
       "idempotency_conflict": "أُرسل هذا الطلب من قبل بقيم مختلفة. أعيدوا تحميل الصفحة.",
       "service_unavailable": "الخدمة غير متاحة مؤقتًا. أعيدوا المحاولة لاحقًا.",
-      "generic": "حدث خطأ. يرجى إعادة المحاولة."
+      "generic": "حدث خطأ. يرجى إعادة المحاولة.",
+      "file_empty": "هذا الملف فارغ.",
+      "file_too_large": "يتجاوز هذا الملف 5 ميغابايت.",
+      "file_type": "نوع الملف غير مقبول: PNG أو JPEG أو WebP أو PDF فقط.",
+      "file_missing": "اختاروا ملفًا لرفعه.",
+      "too_many_files": "لهذا المنتج 50 ملفًا بالفعل."
+    },
+    "files": {
+      "title": "ملفات المنتج",
+      "empty": "لا توجد ملفات.",
+      "choose": "اختيار ملف",
+      "hint": "PNG أو JPEG أو WebP أو PDF، بحد أقصى 5 ميغابايت.",
+      "upload": "رفع",
+      "uploading": "جارٍ الرفع…",
+      "remove": "إزالة",
+      "removeNamed": "إزالة {name}",
+      "open": "فتح {name}",
+      "download": "تنزيل {name}",
+      "unavailable": "الرابط غير متاح",
+      "readOnly": "يمكن لأصحاب الشركة ومديريها تعديل الملفات."
     }
   },
   "Footer": {

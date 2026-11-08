@@ -5,6 +5,8 @@ import { uiLocaleOf } from "../service/form";
 import { redirectTo, withAction, type ActionFailure } from "../service/with-service";
 import { toActionCode } from "./action-code";
 import {
+  ASSET_REMOVE_FIELDS,
+  ASSET_UPLOAD_FIELDS,
   createProductFormSchema,
   createProjectFormSchema,
   PRODUCT_CREATE_FIELDS,
@@ -12,10 +14,13 @@ import {
   PROJECT_FORM_FIELDS,
   PROJECT_STATUS_FIELDS,
   PROJECT_UPDATE_FIELDS,
+  removeAssetFormSchema,
   setProjectStatusFormSchema,
   updateProductFormSchema,
   updateProjectFormSchema,
+  uploadAssetFormSchema,
 } from "./action-schemas";
+import { removeProductAsset, uploadProductAsset, type AssetFailure } from "./assets";
 import { createProduct, createProject, setProjectStatus, updateProduct, updateProject } from "./service";
 import type { ProjectsActionState } from "./types";
 
@@ -161,3 +166,60 @@ const updateProductAct = withAction(
 export async function updateProductAction(prev: ProjectsActionState, formData: FormData): Promise<ProjectsActionState> {
   return updateProductAct(prev, formData);
 }
+
+const assetFailure = (code: AssetFailure): ProjectsActionState => ({ status: "error", code: toActionCode(code) });
+
+const uploadAssetAct = withAction(
+  {
+    name: "products.upload_asset",
+    auth: "tenant",
+    schema: uploadAssetFormSchema,
+    fields: ASSET_UPLOAD_FIELDS,
+    permission: { action: "update", resource: "projects" },
+    rateLimit: "mutation",
+    idempotency: { mode: "optional", storeResponse: true },
+    failure,
+    loginPath,
+  },
+  async (ctx, input): Promise<ProjectsActionState> => {
+    // Le fichier est lu du formulaire (jamais d'un champ texte) ; son type réel, sa taille et son nom sont contrôlés par le service.
+    const value = ctx.formData.get("file");
+    const result = await uploadProductAsset(ctx.supabase, ctx.organizationId, input.product_id, value instanceof File ? value : null);
+    if (!result.ok) return assetFailure(result.code);
+    const uiLocale = uiLocaleOf(ctx.formData);
+    revalidatePath(`/${uiLocale}/projects/${result.value.project_id}`);
+    return { status: "success", success: "fileUploaded" };
+  },
+);
+
+/** Envoie un fichier (png, jpeg, webp ou pdf, 5 Mo au plus) et l'associe à un produit d'un projet actif. */
+export async function uploadProductAssetAction(prev: ProjectsActionState, formData: FormData): Promise<ProjectsActionState> {
+  return uploadAssetAct(prev, formData);
+}
+
+const removeAssetAct = withAction(
+  {
+    name: "products.remove_asset",
+    auth: "tenant",
+    schema: removeAssetFormSchema,
+    fields: ASSET_REMOVE_FIELDS,
+    permission: { action: "update", resource: "projects" },
+    rateLimit: "mutation",
+    idempotency: { mode: "optional", storeResponse: true },
+    failure,
+    loginPath,
+  },
+  async (ctx, input): Promise<ProjectsActionState> => {
+    const result = await removeProductAsset(ctx.supabase, ctx.organizationId, input.product_id, input.path);
+    if (!result.ok) return assetFailure(result.code);
+    const uiLocale = uiLocaleOf(ctx.formData);
+    revalidatePath(`/${uiLocale}/projects/${result.value.project_id}`);
+    return { status: "success", success: "fileRemoved" };
+  },
+);
+
+/** Retire un fichier d'un produit (owner et admin, projet actif) et supprime l'objet. */
+export async function removeProductAssetAction(prev: ProjectsActionState, formData: FormData): Promise<ProjectsActionState> {
+  return removeAssetAct(prev, formData);
+}
+

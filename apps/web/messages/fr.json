@@ -622,7 +622,7 @@
       "priceHint": "Prix indicatif",
       "landingUrl": "Page d'atterrissage (https)",
       "assets": "Fichiers",
-      "assetsSoon": "L'envoi de fichiers sera disponible prochainement.",
+      "assetsSoon": "Les fichiers se gèrent dans la fenêtre de modification d'un produit existant.",
       "assetCount": "{count, plural, one {# fichier} other {# fichiers}}",
       "submitAdd": "Ajouter",
       "submitEdit": "Enregistrer",
@@ -635,7 +635,9 @@
       "archived": "Projet archivé.",
       "reactivated": "Projet réactivé.",
       "productCreated": "Produit ajouté.",
-      "productUpdated": "Produit enregistré."
+      "productUpdated": "Produit enregistré.",
+      "fileUploaded": "Fichier envoyé.",
+      "fileRemoved": "Fichier retiré."
     },
     "errors": {
       "invalid_input": "Certaines valeurs sont invalides. Vérifiez les champs (textes courts, liens en https vers un nom de domaine).",
@@ -648,7 +650,26 @@
       "idempotency_in_progress": "La demande est en cours de traitement.",
       "idempotency_conflict": "Cette demande a déjà été envoyée avec d'autres valeurs. Rechargez la page.",
       "service_unavailable": "Service momentanément indisponible. Réessayez plus tard.",
-      "generic": "Une erreur est survenue. Veuillez réessayer."
+      "generic": "Une erreur est survenue. Veuillez réessayer.",
+      "file_empty": "Ce fichier est vide.",
+      "file_too_large": "Ce fichier dépasse 5 Mo.",
+      "file_type": "Type de fichier non accepté : PNG, JPEG, WebP ou PDF seulement.",
+      "file_missing": "Choisissez un fichier à envoyer.",
+      "too_many_files": "Ce produit a déjà 50 fichiers."
+    },
+    "files": {
+      "title": "Fichiers du produit",
+      "empty": "Aucun fichier.",
+      "choose": "Choisir un fichier",
+      "hint": "PNG, JPEG, WebP ou PDF, 5 Mo au maximum.",
+      "upload": "Envoyer",
+      "uploading": "Envoi…",
+      "remove": "Retirer",
+      "removeNamed": "Retirer {name}",
+      "open": "Ouvrir {name}",
+      "download": "Télécharger {name}",
+      "unavailable": "Lien indisponible",
+      "readOnly": "Les fichiers sont modifiables par les propriétaires et administrateurs."
     }
   },
   "Footer": {

@@ -11,7 +11,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { createProductAction, updateProductAction } from "../../lib/projects/actions";
+import type { AssetLink } from "../../lib/projects/assets";
 import type { ProjectsActionState } from "../../lib/projects/types";
+import { ProductFiles } from "./product-files";
 
 type Props = {
   organizationId: string;
@@ -20,12 +22,14 @@ type Props = {
   product?: ProductRow;
   /** Clé d'idempotence (création), générée côté serveur à chaque rendu de la page. */
   idempotencyKey?: string;
+  /** Fichiers du produit (modification) : liens signés de 60 s générés côté serveur. */
+  files?: readonly AssetLink[];
 };
 
 const initialState: ProjectsActionState = { status: "idle" };
 
 /** Fenêtre d'ajout ou de modification d'un produit (offre, prix indicatif, page d'atterrissage https). */
-export function ProductDialog({ organizationId, projectId, product, idempotencyKey }: Props) {
+export function ProductDialog({ organizationId, projectId, product, idempotencyKey, files = [] }: Props) {
   const t = useTranslations("Projects");
   const uiLocale = useLocale();
   const uid = useId();
@@ -64,7 +68,7 @@ export function ProductDialog({ organizationId, projectId, product, idempotencyK
           </Button>
         )}
       </DialogTrigger>
-      <DialogContent closeLabel={t("products.close")}>
+      <DialogContent closeLabel={t("products.close")} className="max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
           <DialogDescription>{t("products.assetsSoon")}</DialogDescription>
@@ -121,6 +125,7 @@ export function ProductDialog({ organizationId, projectId, product, idempotencyK
             </Button>
           </DialogFooter>
         </form>
+        {editing ? <ProductFiles organizationId={organizationId} productId={product.id} files={files} /> : null}
       </DialogContent>
     </Dialog>
   );

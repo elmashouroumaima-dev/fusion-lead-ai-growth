@@ -72,3 +72,32 @@ Métrique `projects` = projets **actifs** (un projet archivé ne compte pas). Pl
 
 ## Seed local
 Deux projets par entreprise (Alpha : site vitrine, application Salla ; Beta : boutique, thème Salla) et un produit sur le premier : le scénario T1 (isolation) les couvre automatiquement.
+
+## Écran Projets (J17)
+Pages (menu latéral « Projets », visible pour tous les rôles de l'entreprise active) :
+
+| Page | Contenu | Rôles |
+|---|---|---|
+| `/{locale}/projects` | liste (nom, type, statut, date), filtre Actifs / Archivés | lecture : tous ; bouton « Nouveau projet » : owner et admin |
+| `/{locale}/projects/new` | choix du type puis réglages du type | owner et admin (les autres sont renvoyés vers la liste) |
+| `/{locale}/projects/{id}` | réglages (modifiables si projet actif), produits (ajout et modification en fenêtre), archivage / réactivation | lecture : tous ; écriture : owner et admin |
+
+Un projet d'une autre entreprise, un identifiant inconnu ou illisible donnent la même page « introuvable » (404).
+
+### Server Actions (`apps/web/lib/projects/actions.ts`)
+Pipeline commun `withAction` (zod, contexte tenant relu en base, comparaison de l'`organization_id` posté, `can()` ADR 014, limitation de débit « mutation », idempotence) puis services J16.
+
+| Action | Champs | Droit | Idempotence |
+|---|---|---|---|
+| `createProjectAction` | `type`, `name`, `settings` (JSON), `organization_id`, `uiLocale` | `create` projets | obligatoire (`idempotency_key`, champ caché généré au rendu) |
+| `updateProjectAction` | `project_id`, `name`, `settings`, `organization_id` | `update` | facultative |
+| `setProjectStatusAction` | `project_id`, `status`, `organization_id` | `archive` | facultative |
+| `createProductAction` | `project_id`, `kind`, `offer`, `price_hint`, `landing_url`, `assets`, `organization_id` | `create` | obligatoire |
+| `updateProductAction` | `product_id`, mêmes champs | `update` | facultative |
+
+Réponse : `{ status, code?, fieldErrors?, success? }`, jamais de texte : `code` ∈ `invalid_input`, `forbidden`, `quota_exceeded`, `conflict` (projet archivé), `not_found`, `rate_limited`, `duplicate_request`, `idempotency_in_progress`, `idempotency_conflict`, `service_unavailable`, `generic` ; l'interface les traduit (fr / ar / en).
+
+Sécurité des entrées (revue J17) : un champ JSON de plus de 6 niveaux d'imbrication ou portant une clé `__proto__` est **refusé** (`invalid_input`) avant tout décodage récursif ; corps des Server Actions plafonné à 512 Ko (`serverActions.bodySizeLimit`, avant le pipeline : l'erreur de Next n'est alors pas normalisée) ; liens : `isSafeHttpsUrl` n'empêche **pas** un nom de domaine de résoudre vers une adresse interne (DNS rebinding, `*.nip.io`) : tout futur chargement serveur d'un lien (`landing_url`, `store_url`, `preview_url`) devra résoudre le nom, refuser les adresses privées et les redirections.
+
+Règles : le créateur est propriétaire du projet (aucun sélecteur tant que la liste des membres n'affiche pas d'identité lisible) ; à la modification le propriétaire est conservé ; les réglages voyagent en JSON dans un champ caché, **toujours revalidés** par zod puis par la base (un JSON illisible est refusé, jamais remplacé par un objet vide) ; les listes se saisissent « une ligne par élément » ; à la modification d'un produit, les fichiers déjà associés (`assets`) sont repris tels quels (l'envoi de fichiers et le Storage arrivent en deuxième partie du J17).
+

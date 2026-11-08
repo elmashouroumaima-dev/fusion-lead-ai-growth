@@ -418,3 +418,30 @@ Manager + A5 (revue sécurité adverse, attaques réelles sur la base locale). M
 - GO du C1 ; valider les 5 choix du mini-plan J16 ; interface des projets au J17.
 ### Demain : J17 (UI projets et Storage)
 
+
+## J17 — jeu 3 déc 2026 — Phase 2, partie 1 (préparé en avance, NON commité, branche `day-17-projects-ui`)
+Cible : 28,6 % | Réel : à valider | Statut : — (le C1 attend le GO de la responsable technique)
+
+### Organisation du travail
+Manager + A5 (revue sécurité adverse : actions appelées directement avec de vraies sessions). Interface, actions, tests et documentation par le manager.
+
+### Tâches
+| Tâche | Estimé | Livré | Validée |
+|---|---|---|---|
+| Liste et création de projets | 2 h | oui (`/projects`, `/projects/new`, filtre Actifs / Archivés) | oui (navigateur) |
+| Formulaires dynamiques par type | 2,5 h | oui (4 types ; listes « une ligne par élément », lignes répétables) | oui |
+| Assets Storage tenant | 1,5 h | **reporté (partie 2)** : bucket privé, politiques, envoi de fichiers | — |
+| Détail, produits, archivage (ajout au plan) | — | oui (fenêtres, confirmation d'archivage) | oui |
+
+### Tests : web 2217 ✓ · acceptation 56 ✓ (projects-pages : 11) · domain 444 · lint, typecheck, `check:leaks` verts · vérifié dans le navigateur : création, produit, archivage
+### Écarts à la spec / plan
+- Storage et envoi de fichiers : partie 2 (le produit affiche « 0 fichier », les fichiers déjà associés sont conservés à la modification).
+- Pas de sélecteur de propriétaire : le créateur est propriétaire (la liste des membres n'a pas d'identité lisible).
+- Les erreurs s'affichent dans la page (règle d'accessibilité de cette pile) ; les notifications rouges sont dans la PR `feat-toast-style`.
+### Constats de sécurité (A5)
+- Aucune faille bloquante ni moyenne : rôles, isolation (identifiants d'une autre entreprise, cookie d'entreprise, organization_id falsifié), idempotence, quota sous concurrence, XSS stocké, CSRF natif de Next : tenus.
+- **Faibles, corrigés** : `__proto__` accepté dans les réglages à la modification ; JSON très profond (erreur interne) ; corps de plus de 1 Mo (plafond 512 Ko).
+- **Documentés** : DNS rebinding des liens (avant tout chargement serveur) ; `X-Forwarded-Host` client (à retirer au reverse proxy) ; identifiants d'URL très longs.
+### Blocages / à faire
+- GO du C1 ; Storage (partie 2) ; décider de la présence des notifications rouges (PR `feat-toast-style`).
+

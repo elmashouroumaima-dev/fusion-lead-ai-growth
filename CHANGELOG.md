@@ -3,6 +3,14 @@
 Format : Keep a Changelog. Une entrée par jour de travail.
 
 ## [Non publié]
+### J17 — Écran Projets (partie 1 : sans Storage)
+- Ajout : menu « Projets », pages liste (filtre Actifs / Archivés), création (formulaire dynamique selon le type : site web, application Salla, thème Salla, autre) et détail (réglages, produits en fenêtre, archivage et réactivation avec confirmation) ; lecture pour tous les rôles, écriture owner et admin.
+- Ajout : Server Actions `createProjectAction`, `updateProjectAction`, `setProjectStatusAction`, `createProductAction`, `updateProductAction` (pipeline commun, idempotence, rôles) ; composant `Textarea` ; messages fr / ar / en ; `settings-form` (saisie « une ligne par élément », nettoyage avant envoi).
+- Modifié : `updateProject` conserve le propriétaire quand il n'est pas précisé.
+- Sécurité (revue adverse) : clé `__proto__` et JSON de plus de 6 niveaux refusés dans les champs de formulaire ; corps des Server Actions plafonné à 512 Ko ; les scénarios d'acceptation nettoient les clés d'idempotence et seaux de débit pour ne pas faire échouer `pnpm test:db`.
+- Tests : composants et schémas d'action (web), 11 scénarios HTTP d'acceptation (rôles, isolation Alpha / Beta, 404 identique).
+- À venir (partie 2) : Storage et envoi de fichiers.
+
 ### J16 — Projets et produits
 - Ajout : tables `projects` (4 types : site web, application Salla, thème Salla, autre) et `products`, FK composites, RLS en lecture seule, écriture par fonctions `create_project`, `update_project`, `set_project_status`, `create_product`, `update_product` (owner et admin) ; quota « projects » (projets actifs) sous verrou, réactivation comprise ; audit `project.*` et `product.*` ; migration `20261118100000` et retour arrière.
 - Ajout : `packages/domain/src/projects` (réglages stricts par type, textes sûrs, URL https, chemins d'assets), `apps/web/lib/projects` (services, lectures, erreurs) et `POST /api/projects` (Idempotency-Key obligatoire) ; nouveau code d'erreur `conflict` (409, projet archivé).

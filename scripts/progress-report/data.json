@@ -5,11 +5,11 @@
   "tests": [
     {
       "label": "Web (application)",
-      "value": 2406
+      "value": 2452
     },
     {
       "label": "Base de données (pgTAP)",
-      "value": 2227
+      "value": 2290
     },
     {
       "label": "Permissions (RBAC)",
@@ -17,11 +17,11 @@
     },
     {
       "label": "Domaine (règles métier)",
-      "value": 574
+      "value": 589
     },
     {
       "label": "RLS via l'API réelle",
-      "value": 425
+      "value": 431
     },
     {
       "label": "Worker et adaptateurs",
@@ -29,7 +29,7 @@
     },
     {
       "label": "Acceptation (T1, T5)",
-      "value": 83
+      "value": 99
     }
   ],
   "adrCount": 14,
@@ -201,7 +201,7 @@
           "name": "Leads, deals, pipelines",
           "progress": 100,
           "status": "review",
-          "note": "Livré aux J19–J20 : pipelines, leads, deals, activités."
+          "note": "Livré aux J19–J20 (pipelines, leads, deals, activités) et J24 (écrans leads, deals et export)."
         },
         {
           "day": "J24–J26",

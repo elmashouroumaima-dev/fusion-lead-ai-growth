@@ -645,7 +645,7 @@ select is(
 select is(
   (select count(*)::int from pg_proc pr join pg_namespace n on n.oid = pr.pronamespace
     where n.nspname = 'private' and (pr.proname like 'audit\_%' or pr.proname = 'mask_email')),
-  9, 'neuf fonctions d''audit dans le schéma private (dont audit_subscriptions, J14)'
+  11, 'onze fonctions d''audit dans le schéma private (dont audit_subscriptions, J14, audit_projects et audit_products, J16)'
 );
 select is(
   (select pr.prosecdef and pr.proconfig = array['search_path=""']::text[]

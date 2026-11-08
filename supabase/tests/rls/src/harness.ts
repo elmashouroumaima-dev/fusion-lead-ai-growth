@@ -69,6 +69,18 @@ export const ORG = {
   beta: "b0000000-0000-4000-8000-0000000000b1",
 } as const;
 
+/** Projets et produits du seed (J16) : 2 projets par entreprise, un produit sur le premier. */
+export const PROJECT = {
+  alphaSite: "a1000000-0000-4000-8000-000000000001",
+  alphaApp: "a1000000-0000-4000-8000-000000000002",
+  betaShop: "b1000000-0000-4000-8000-000000000001",
+  betaTheme: "b1000000-0000-4000-8000-000000000002",
+} as const;
+export const PRODUCT = {
+  alpha: "a2000000-0000-4000-8000-000000000001",
+  beta: "b2000000-0000-4000-8000-000000000001",
+} as const;
+
 export const USER = {
   shared: "00000000-0000-4000-8000-000000000001", // owner Alpha, sales_agent Beta
   alphaAdmin: "00000000-0000-4000-8000-000000000002",
@@ -183,6 +195,8 @@ export async function cleanupTestUsers(userIds: string[]): Promise<void> {
   const sql = [
     "set session_replication_role = replica;",
     `create temp table victims as select id from public.organizations where created_by in (${list});`,
+    "delete from public.products where organization_id in (select id from victims);",
+    "delete from public.projects where organization_id in (select id from victims);",
     "delete from public.invitations where organization_id in (select id from victims);",
     "delete from public.idempotency_keys where organization_id in (select id from victims);",
     "delete from public.rate_limit_buckets where organization_id in (select id from victims);",

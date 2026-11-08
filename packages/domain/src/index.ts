@@ -15,4 +15,5 @@ export * from "./activities";
 export * from "./assignment";
 export * from "./capture";
 export * from "./crm";
+export * from "./crm-sync";
 export * from "./imports";

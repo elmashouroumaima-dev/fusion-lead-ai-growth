@@ -20,7 +20,7 @@ const delivery: SmtpDelivery = {
   from_name: "Fusion Leap",
   secret: null,
 };
-const base = { delivery, password: "pw-test", to: "admin@example.test", allowInternalHosts: false };
+const base = { delivery, password: "pw-test", to: "admin@example.test", allowInternalHosts: false, locale: "fr" as const };
 
 beforeEach(() => {
   sendMail.mockReset();
@@ -42,6 +42,27 @@ describe("sendSmtpTest : envoi", () => {
     const mail = sendMail.mock.calls[0]?.[0] as Record<string, unknown>;
     expect(mail.to).toBe("admin@example.test");
     expect(mail.from).toEqual({ name: "Fusion Leap", address: "no-reply@example.test" });
+    // Message HTML de la marque : logo joint (cid), pied « Tous droits réservés », version texte.
+    expect(String(mail.html)).toContain("cid:fusion-leap-logo");
+    expect(String(mail.html)).toContain("Tous droits réservés.");
+    expect(String(mail.text)).toContain("Tous droits réservés.");
+    expect(mail.subject).toBe("Fusion Leap AI Growth : Test de la configuration SMTP");
+    const attachments = mail.attachments as { cid: string; contentType: string; content: Buffer }[];
+    expect(attachments).toHaveLength(1);
+    expect(attachments[0]).toMatchObject({ cid: "fusion-leap-logo", contentType: "image/png" });
+    expect(attachments[0]?.content.subarray(1, 4).toString("latin1")).toBe("PNG");
+  });
+
+  it("le message suit la langue de l'interface de l'administrateur (une seule langue)", async () => {
+    await sendSmtpTest({ ...base, locale: "en" });
+    const en = sendMail.mock.calls[0]?.[0] as Record<string, string>;
+    expect(en.subject).toBe("Fusion Leap AI Growth : SMTP configuration test");
+    expect(en.html).toContain("All rights reserved.");
+    expect(en.html).not.toContain("Tous droits réservés.");
+    await sendSmtpTest({ ...base, locale: "ar" });
+    const ar = sendMail.mock.calls[1]?.[0] as Record<string, string>;
+    expect(ar.html).toContain('dir="rtl"');
+    expect(ar.html).toContain("جميع الحقوق محفوظة.");
   });
 
   it("modes de sécurité : TLS direct, aucune", async () => {

@@ -3,6 +3,7 @@
 import { useTranslations } from "next-intl";
 import type { ReactNode } from "react";
 import { Brand } from "@/components/brand/logo";
+import { AppFooter } from "@/components/layout/app-footer";
 import { AppSidebar } from "@/components/layout/app-sidebar";
 import { LanguageSwitcher } from "@/components/layout/language-switcher";
 import { UserMenu } from "@/components/layout/user-menu";
@@ -74,6 +75,7 @@ export function AppShell({ children, email, showMembers, showSettings = false, s
         <main id="main" className="flex flex-1 items-start justify-center px-4 py-8">
           {children}
         </main>
+        <AppFooter />
       </div>
     );
   }
@@ -112,6 +114,7 @@ export function AppShell({ children, email, showMembers, showSettings = false, s
         <SidebarInset id="main" className="p-4 md:p-6">
           {children}
         </SidebarInset>
+        <AppFooter />
       </div>
     </SidebarProvider>
   );

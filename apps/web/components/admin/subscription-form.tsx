@@ -35,6 +35,7 @@ export function SubscriptionForm({ organization }: { organization: AdminOrganiza
 
   useEffect(() => {
     if (state.status === "success") toast.success(t("form.saved"));
+    if (state.status === "error") toast.error(t(`errors.${state.code ?? "generic"}`));
   }, [state, t]);
 
   return (

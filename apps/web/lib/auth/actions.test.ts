@@ -135,6 +135,23 @@ describe("signInAction", () => {
     expect(auth.signInWithPassword).toHaveBeenCalledWith({ email: EMAIL, password: PASSWORD });
   });
 
+  it("la langue de la connexion est enregistrée pour les e-mails d'authentification (seulement si elle change)", async () => {
+    auth.signInWithPassword.mockResolvedValueOnce({ data: { user: { user_metadata: { locale: "fr" } } }, error: null });
+    await redirectOf(signInAction(IDLE, form(valid)));
+    expect(auth.updateUser).toHaveBeenCalledWith({ data: { locale: "en" } });
+
+    auth.updateUser.mockClear();
+    auth.signInWithPassword.mockResolvedValueOnce({ data: { user: { user_metadata: { locale: "en" } } }, error: null });
+    await redirectOf(signInAction(IDLE, form(valid)));
+    expect(auth.updateUser).not.toHaveBeenCalled();
+  });
+
+  it("un échec d'enregistrement de la langue ne bloque pas la connexion", async () => {
+    auth.signInWithPassword.mockResolvedValueOnce({ data: { user: { user_metadata: {} } }, error: null });
+    auth.updateUser.mockRejectedValueOnce(new Error("indisponible"));
+    expect(await redirectOf(signInAction(IDLE, form(valid)))).toBe("/en/dashboard");
+  });
+
   it("succès avec next interne valide -> redirigé vers next", async () => {
     expect(await redirectOf(signInAction(IDLE, form({ ...valid, next: "/en/leads?tab=1" })))).toBe("/en/leads?tab=1");
   });
@@ -162,6 +179,11 @@ describe("signUpAction", () => {
     expect(auth.signUp).not.toHaveBeenCalled();
     const ok = await signUpAction(IDLE, form({ ...valid, password: "x".repeat(10) }));
     expect(ok).toEqual({ status: "success" });
+  });
+
+  it("la langue de l'interface est enregistrée pour les e-mails d'authentification", async () => {
+    await signUpAction(IDLE, form({ ...valid, locale: "ar" }));
+    expect(auth.signUp.mock.calls[0]![0].options.data).toEqual({ locale: "ar" });
   });
 
   it("emailRedirectTo vient du serveur, pas du client", async () => {
@@ -320,6 +342,8 @@ describe("garde transversale", () => {
     await signUpAction(IDLE, form({ email: EMAIL, password: PASSWORD, locale: "en", organization_id: "o1", role: "owner" }));
     const arg = auth.signUp.mock.calls[0]![0];
     expect(Object.keys(arg).sort()).toEqual(["email", "options", "password"]);
-    expect(Object.keys(arg.options)).toEqual(["emailRedirectTo"]);
+    // `data` ne porte que la langue (choix du texte des e-mails d'authentification), jamais un rôle ni une organisation.
+    expect(Object.keys(arg.options).sort()).toEqual(["data", "emailRedirectTo"]);
+    expect(arg.options.data).toEqual({ locale: "en" });
   });
 });

@@ -52,9 +52,11 @@ export function PaletteEditor({ initial }: Props) {
 
   useEffect(() => {
     if (saveState.status === "success") toast.success(t("saved"));
+    if (saveState.status === "error") toast.error(t(`errors.${saveState.code ?? "generic"}`));
   }, [saveState, t]);
   useEffect(() => {
     if (resetState.status === "success") toast.success(t("resetDone"));
+    if (resetState.status === "error") toast.error(t(`errors.${resetState.code ?? "generic"}`));
   }, [resetState, t]);
 
   // Fond -> texte associé : quand on change un fond, son texte devient automatiquement le plus lisible

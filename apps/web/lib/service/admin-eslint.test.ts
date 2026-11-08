@@ -1,6 +1,10 @@
 import path from "node:path";
 import { ESLint } from "eslint";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
+
+// Le premier appel ESLint charge toute la configuration (plusieurs secondes) : sous charge (`pnpm test` en parallèle),
+// les 5 s par défaut ne suffisent pas.
+vi.setConfig({ testTimeout: 30_000 });
 
 /**
  * La règle ESLint de confinement de service_role (J11) est exécutée pour de bon (API ESLint) sur des

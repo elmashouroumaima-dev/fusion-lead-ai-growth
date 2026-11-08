@@ -19,8 +19,8 @@
       "members": "Members",
       "settings": "Settings",
       "admin": "Platform admin",
-      "settingsPalette": "Color palette",
-      "settingsLogo": "Logo",
+      "settingsPalette": "Theme",
+      "settingsLogo": "Profile",
       "settingsSmtp": "SMTP server",
       "projects": "Projects"
     },
@@ -650,5 +650,8 @@
       "service_unavailable": "Service temporarily unavailable. Try again later.",
       "generic": "An error occurred. Please try again."
     }
+  },
+  "Footer": {
+    "copyright": "© {year} {appName}. All rights reserved."
   }
 }

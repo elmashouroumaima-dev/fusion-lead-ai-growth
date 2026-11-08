@@ -1,6 +1,79 @@
-<h2>Confirmez votre adresse e-mail · تأكيد البريد الإلكتروني · Confirm your email</h2>
-<p>Suivez ce lien pour confirmer votre compte Fusion Leap :</p>
-<p dir="rtl">اتبع هذا الرابط لتأكيد حسابك في Fusion Leap:</p>
-<p>Follow this link to confirm your Fusion Leap account:</p>
-<p><a href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=signup&next=/dashboard">{{ .SiteURL }}/auth/confirm</a></p>
-<p>Si vous n’avez pas créé de compte, ignorez ce message. · إذا لم تنشئ حسابًا فتجاهل هذه الرسالة. · If you did not create an account, ignore this email.</p>
+{{- $l := "" }}{{ with .Data.locale }}{{ $l = . }}{{ end -}}{{ if eq $l "ar" }}<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<meta name="supported-color-schemes" content="light">
+<title>أكِّد عنوان بريدك الإلكتروني · Fusion Leap AI Growth</title>
+</head>
+<body style="margin:0;padding:0;background-color:#f4f4f5;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#f4f4f5" style="background-color:#f4f4f5;">
+<tr><td align="center" style="padding:24px 12px;">
+<table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" style="width:100%;max-width:600px;background-color:#ffffff;border:1px solid #d4d4d8;">
+<tr><td align="center" bgcolor="#006a4e" height="170" style="background-color:#006a4e;background-image:linear-gradient(135deg,#00382a,#006a4e 62%,#ae2b2f);padding:58px 24px;">
+<img src="{{ .SiteURL }}/brand/email-logo.png" width="260" height="53" alt="Fusion Leap AI Growth" style="display:block;margin:0 auto;width:260px;height:53px;border:0;">
+</td></tr>
+<tr><td dir="rtl" style="padding:32px 32px 28px;text-align:right;font-family:'Segoe UI',Tahoma,Arial,sans-serif;color:#18181b;"><h1 style="margin:0 0 14px;font-family:'Segoe UI',Tahoma,Arial,sans-serif;font-size:22px;line-height:1.3;font-weight:700;color:#00382a;">أكِّد عنوان بريدك الإلكتروني</h1><p style="margin:0;font-family:'Segoe UI',Tahoma,Arial,sans-serif;font-size:16px;line-height:1.6;color:#3f3f46;">شكرًا لتسجيلك في Fusion Leap AI Growth. اضغط على الزر أدناه لتأكيد حسابك.</p><table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:22px 0 4px;"><tr><td bgcolor="#006a4e" style="border-radius:8px;"><a href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&amp;type=signup&amp;next=/dashboard" target="_blank" style="display:inline-block;padding:13px 26px;font-family:'Segoe UI',Tahoma,Arial,sans-serif;font-size:16px;font-weight:700;line-height:1.2;color:#ffffff;text-decoration:none;border-radius:8px;">تأكيد بريدي الإلكتروني</a></td></tr></table><p style="margin:16px 0 0;font-family:'Segoe UI',Tahoma,Arial,sans-serif;font-size:13px;line-height:1.5;color:#52525b;">إذا لم تنشئ حسابًا، فتجاهل هذه الرسالة.</p></td></tr>
+<tr><td style="padding:18px 32px;border-top:1px solid #e4e4e7;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td align="left" style="font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:14px;font-weight:700;color:#18181b;">Fusion Leap AI Growth</td></tr></table></td></tr>
+<tr><td bgcolor="#ae2b2f" style="background-color:#ae2b2f;padding:14px 24px;">
+<p dir="rtl" style="margin:0;font-family:'Segoe UI',Tahoma,Arial,sans-serif;font-size:12px;font-weight:700;line-height:1.5;color:#ffffff;text-align:center;">© Fusion Leap AI Growth. جميع الحقوق محفوظة.</p>
+</td></tr>
+</table>
+</td></tr>
+</table>
+</body>
+</html>
+{{ else if eq $l "en" }}<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<meta name="supported-color-schemes" content="light">
+<title>Confirm your email address · Fusion Leap AI Growth</title>
+</head>
+<body style="margin:0;padding:0;background-color:#f4f4f5;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#f4f4f5" style="background-color:#f4f4f5;">
+<tr><td align="center" style="padding:24px 12px;">
+<table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" style="width:100%;max-width:600px;background-color:#ffffff;border:1px solid #d4d4d8;">
+<tr><td align="center" bgcolor="#006a4e" height="170" style="background-color:#006a4e;background-image:linear-gradient(135deg,#00382a,#006a4e 62%,#ae2b2f);padding:58px 24px;">
+<img src="{{ .SiteURL }}/brand/email-logo.png" width="260" height="53" alt="Fusion Leap AI Growth" style="display:block;margin:0 auto;width:260px;height:53px;border:0;">
+</td></tr>
+<tr><td style="padding:32px 32px 28px;text-align:left;font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#18181b;"><h1 style="margin:0 0 14px;font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:22px;line-height:1.3;font-weight:700;color:#00382a;">Confirm your email address</h1><p style="margin:0;font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:16px;line-height:1.6;color:#3f3f46;">Thanks for signing up for Fusion Leap AI Growth. Click the button below to confirm your account.</p><table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:22px 0 4px;"><tr><td bgcolor="#006a4e" style="border-radius:8px;"><a href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&amp;type=signup&amp;next=/dashboard" target="_blank" style="display:inline-block;padding:13px 26px;font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:16px;font-weight:700;line-height:1.2;color:#ffffff;text-decoration:none;border-radius:8px;">Confirm my email</a></td></tr></table><p style="margin:16px 0 0;font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:13px;line-height:1.5;color:#52525b;">If you did not create an account, ignore this email.</p></td></tr>
+<tr><td style="padding:18px 32px;border-top:1px solid #e4e4e7;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td align="left" style="font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:14px;font-weight:700;color:#18181b;">Fusion Leap AI Growth</td></tr></table></td></tr>
+<tr><td bgcolor="#ae2b2f" style="background-color:#ae2b2f;padding:14px 24px;">
+<p style="margin:0;font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:12px;font-weight:700;line-height:1.5;color:#ffffff;text-align:center;">© Fusion Leap AI Growth. All rights reserved.</p>
+</td></tr>
+</table>
+</td></tr>
+</table>
+</body>
+</html>
+{{ else }}<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<meta name="supported-color-schemes" content="light">
+<title>Confirmez votre adresse e-mail · Fusion Leap AI Growth</title>
+</head>
+<body style="margin:0;padding:0;background-color:#f4f4f5;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#f4f4f5" style="background-color:#f4f4f5;">
+<tr><td align="center" style="padding:24px 12px;">
+<table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" style="width:100%;max-width:600px;background-color:#ffffff;border:1px solid #d4d4d8;">
+<tr><td align="center" bgcolor="#006a4e" height="170" style="background-color:#006a4e;background-image:linear-gradient(135deg,#00382a,#006a4e 62%,#ae2b2f);padding:58px 24px;">
+<img src="{{ .SiteURL }}/brand/email-logo.png" width="260" height="53" alt="Fusion Leap AI Growth" style="display:block;margin:0 auto;width:260px;height:53px;border:0;">
+</td></tr>
+<tr><td style="padding:32px 32px 28px;text-align:left;font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#18181b;"><h1 style="margin:0 0 14px;font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:22px;line-height:1.3;font-weight:700;color:#00382a;">Confirmez votre adresse e-mail</h1><p style="margin:0;font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:16px;line-height:1.6;color:#3f3f46;">Merci de votre inscription à Fusion Leap AI Growth. Cliquez sur le bouton ci-dessous pour confirmer votre compte.</p><table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:22px 0 4px;"><tr><td bgcolor="#006a4e" style="border-radius:8px;"><a href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&amp;type=signup&amp;next=/dashboard" target="_blank" style="display:inline-block;padding:13px 26px;font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:16px;font-weight:700;line-height:1.2;color:#ffffff;text-decoration:none;border-radius:8px;">Confirmer mon e-mail</a></td></tr></table><p style="margin:16px 0 0;font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:13px;line-height:1.5;color:#52525b;">Si vous n’avez pas créé de compte, ignorez ce message.</p></td></tr>
+<tr><td style="padding:18px 32px;border-top:1px solid #e4e4e7;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td align="left" style="font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:14px;font-weight:700;color:#18181b;">Fusion Leap AI Growth</td></tr></table></td></tr>
+<tr><td bgcolor="#ae2b2f" style="background-color:#ae2b2f;padding:14px 24px;">
+<p style="margin:0;font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:12px;font-weight:700;line-height:1.5;color:#ffffff;text-align:center;">© Fusion Leap AI Growth. Tous droits réservés.</p>
+</td></tr>
+</table>
+</td></tr>
+</table>
+</body>
+</html>
+{{ end }}

@@ -18,6 +18,24 @@ Format : Keep a Changelog. Une entrée par jour de travail.
 - Sécurité (revue adverse) : caractères invisibles et de direction refusés, liens https vers un nom de domaine seulement, réglages contrôlés par la base (clés par type, profondeur), plafond de 100 produits par projet, propriétaire explicite à la modification, `not_found` en 404, propriétaire suspendu ou retiré remis à NULL.
 - Ajout : `docs/api/projects.md`, addendum ADR 007.
 
+### Menu Paramétrage : libellés
+- Modifié : dans le menu latéral, « Palette de couleurs » devient « Thème » et « Logotype » devient « Profil » (en : Theme, Profile ; ar : المظهر، الملف التعريفي), avec l'icône profil ; les pages et leurs adresses ne changent pas.
+
+### Logo officiel sur les pages publiques
+- Modifié : connexion, inscription, mot de passe oublié, invitation et accueil affichent le logo officiel « FUSION LEAP » (blanc, `public/brand/logo-white.png`, composant `OfficialLogo`). Il est **fixe** : il ne change pas avec le logo personnalisé du Paramétrage, réservé à l'application connectée.
+
+### Gabarits d'e-mail : logo et « Tous droits réservés »
+- Ajout : gabarit HTML des e-mails de la plateforme (`packages/adapters/src/email`) : grand en-tête avec logo, titre, bouton, signature en gras, barre de pied « © Fusion Leap AI Growth. Tous droits réservés. » ; compatible Gmail, Outlook et Mailtrap (tableaux, styles en ligne). **Une seule langue par message** (fr, ar en RTL ou en).
+- Modifié : les e-mails Supabase Auth (confirmation, réinitialisation) et leurs objets sont générés depuis cette source (`pnpm email:templates`, test de concordance) et suivent `user_metadata.locale` (enregistrée à l'inscription et à la connexion, français par défaut) ; le message de test SMTP devient un e-mail HTML de la marque dans la langue de l'interface de l'administrateur (logo joint en `cid:`, version texte, date et année).
+- Ajout : logo officiel « FUSION LEAP » (blanc, fond transparent) `apps/web/public/brand/email-logo.png` en tête des e-mails.
+
+### Notifications : en haut, vertes (succès) et rouges (erreur)
+- Modifié : les notifications s'affichent en haut au centre, avec bouton de fermeture, coins arrondis et ombre ; succès en vert (nouveau jeton `--success`), erreur en rouge (`--destructive`), contraste AA du texte blanc en clair et en sombre ; les erreurs restent 6 s.
+- Ajout : toute erreur d'action (abonnement, invitation, membres, logo, palette, SMTP) est aussi une notification rouge ; le message reste écrit dans la page. Le test d'accessibilité « un seul canal pour les erreurs » est remplacé par « notification rouge ET message dans la page ».
+
+### Pied de page sur toutes les pages
+- Ajout : composant `AppFooter` (© année, nom de l'application, droits réservés ; fr / ar / en, sans lien) affiché par la coquille de l'application (pages normales et réduites) et par le cadre public (accueil, connexion, inscription, mot de passe oublié, invitation).
+
 ### J15 — Checkpoint C1 / gate G1 : isolation de deux entreprises
 - Ajout : paquet `tests/acceptance` (`pnpm test:e2e`, 35 tests sur la pile locale réelle) : T1 (RLS / API sur toutes les tables tenant découvertes dans le catalogue, écritures vers l'autre entreprise, file de jobs, pages de l'application par HTTP) et T5 (changement d'entreprise, indice falsifié, rôle rétrogradé / adhésion retirée / entreprise suspendue en cours de session).
 - Ajout : `docs/checkpoints/C1.md` (audit de conformité de la Phase 1, écarts, recommandation de GO avec réserves).

@@ -10,3 +10,4 @@ export * from "./plans";
 export * from "./smtp";
 export * from "./projects";
 export * from "./contacts";
+export * from "./leads";

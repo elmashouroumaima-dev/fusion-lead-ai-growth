@@ -556,3 +556,26 @@ Cible : 34,9 % | Réel : à valider | Statut : — (le C1 attend le GO de la res
 - Le traitement du job `lead.assign` est le J22 (handler provisoire sans effet).
 - Pas de double opt-in (spec muette) : consentement non vérifié ; à traiter avant tout envoi marketing.
 - Pas d'écran de gestion des clés (J24).
+
+## J22 — Assignation (branche `day-22-assignment`, NON commité)
+Cible : 36,5 % | Réel : à valider | Statut : — (le C1 attend le GO de la responsable technique)
+
+### Tâches
+| Tâche | Estimé | Livré | Validée |
+|---|---|---|---|
+| `assignment_rules` (E8) round-robin et par projet | 2 h | oui (migration `20261124100000`, règle projet / défaut) | oui (pgTAP, API réelle) |
+| Handler worker `lead.assign` idempotent | 1,5 h | oui (`auto_assign_lead` + handler, dernier essai = alerte) | oui (unitaires, acceptation) |
+| File « non assignés » + alerte manager | 1,5 h | oui (`notifications`, `listUnassignedLeads`) | oui |
+| Tests | 1 h | oui | oui |
+
+### Validation du jour
+- Échec d'assignation → le lead reste dans la file « non assignés » et chaque owner / admin reçoit **une** alerte.
+- Rejeu du job : aucune double assignation, aucune double alerte (acceptation HTTP : capture → job → assignation → rejeu).
+
+### Revue sécurité (0 bloquant, 2 moyens, 7 faibles) — corrigés : évincement des notifications lues au plafond, plafond de règles sérialisé, réactivation refusée si abonnement suspendu, tableau 2D / NULL, curseur, motif ; **soumis à la responsable technique** : leads libérés sans nouveau job, membre ré-ajouté, projet archivé, délai dépassé, abonnement des jobs en vol.
+
+### Tests : domain 559 ✓ · web 2389 ✓ (assignment : 12) · worker 39 ✓ · pgTAP 2110 (dont 170_assignment : 86) ✓ · API réelle 415 ✓ (assignment : 8) · acceptation 71 ✓ (assignation : 3) · lint, typecheck, check:leaks verts
+### Écarts à la spec / plan
+- Table `notifications` créée au J22 (l'ADR 007 J14 la renvoyait au J39) : nécessaire à l'alerte du plan.
+- Vue « Leads non assignés » = UI (J24) ; le J22 livre le service et l'API.
+- Un lead créé à la main (J19) ne passe pas par la règle (la spec ne le prévoit que pour la capture) ; le commercial ne crée toujours pas de lead.

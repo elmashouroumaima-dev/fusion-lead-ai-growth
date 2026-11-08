@@ -3,6 +3,14 @@
 Format : Keep a Changelog. Une entrée par jour de travail.
 
 ## [Non publié]
+### J22 — Assignation automatique
+- Ajout : `assignment_rules` (round-robin ou membre fixe, règle par projet ou par défaut, 1 à 50 membres, curseur) et `notifications` (alerte in-app par destinataire, dédupliquée) ; fonctions `create_assignment_rule`, `update_assignment_rule`, `delete_assignment_rule`, `mark_notification_read` ; migration `20261124100000` et retour arrière.
+- Ajout : `auto_assign_lead` et `flag_lead_unassigned` (service_role) : lead verrouillé, membre éligible encore actif choisi à partir du curseur, rejeu sans double assignation ; sans règle ou sans membre, le lead reste « non assigné » et les owner / admin sont alertés.
+- Ajout : handler worker `lead.assign` (remplace le handler provisoire du J21) : entreprise de la ligne du job, alerte à la dernière tentative ; `packages/domain/src/assignment`, `apps/web/lib/assignment` (règles, file « non assignés », notifications). Pas d'écran (J24).
+- Sécurité (revue adverse) : évincement des notifications lues au plafond, plafond de règles sérialisé, réactivation refusée si abonnement suspendu, tableau 2D ou NULL refusé, curseur conservé.
+- Tests : domaine (6), service web (12), worker (5), pgTAP (86), API réelle (8), acceptation (3).
+- Documentation : `docs/api/assignment.md`, addendum ADR 007.
+
 ### J21 — Capture publique de leads
 - Ajout : `form_keys` (clé générée par la base, empreinte SHA-256 seule conservée, origines https exactes, 5 clés actives par projet, lecture owner / admin sans l'empreinte), fonctions `create_form_key`, `set_form_key_active`, `set_form_key_origins` ; migration `20261123100000` et retour arrière.
 - Ajout : `capture_lead` (service_role) : clé -> entreprise et projet, origine, contact dédoublonné, lead ouvert réutilisé, consentement (texte, version, page, IP), job `lead.assign`, en une transaction ; `form_origin_allowed` et `form_key_origin_ok` (sans écriture).

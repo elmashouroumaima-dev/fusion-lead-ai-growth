@@ -3,6 +3,13 @@
 Format : Keep a Changelog. Une entrée par jour de travail.
 
 ## [Non publié]
+### J16 — Projets et produits
+- Ajout : tables `projects` (4 types : site web, application Salla, thème Salla, autre) et `products`, FK composites, RLS en lecture seule, écriture par fonctions `create_project`, `update_project`, `set_project_status`, `create_product`, `update_product` (owner et admin) ; quota « projects » (projets actifs) sous verrou, réactivation comprise ; audit `project.*` et `product.*` ; migration `20261118100000` et retour arrière.
+- Ajout : `packages/domain/src/projects` (réglages stricts par type, textes sûrs, URL https, chemins d'assets), `apps/web/lib/projects` (services, lectures, erreurs) et `POST /api/projects` (Idempotency-Key obligatoire) ; nouveau code d'erreur `conflict` (409, projet archivé).
+- Ajout : seed (2 projets par entreprise et un produit) couvert automatiquement par le scénario T1 ; tests pgTAP (105), RLS via l'API (21, dont 12 créations simultanées pour 5 places) et acceptation HTTP (10).
+- Sécurité (revue adverse) : caractères invisibles et de direction refusés, liens https vers un nom de domaine seulement, réglages contrôlés par la base (clés par type, profondeur), plafond de 100 produits par projet, propriétaire explicite à la modification, `not_found` en 404, propriétaire suspendu ou retiré remis à NULL.
+- Ajout : `docs/api/projects.md`, addendum ADR 007.
+
 ### J15 — Checkpoint C1 / gate G1 : isolation de deux entreprises
 - Ajout : paquet `tests/acceptance` (`pnpm test:e2e`, 35 tests sur la pile locale réelle) : T1 (RLS / API sur toutes les tables tenant découvertes dans le catalogue, écritures vers l'autre entreprise, file de jobs, pages de l'application par HTTP) et T5 (changement d'entreprise, indice falsifié, rôle rétrogradé / adhésion retirée / entreprise suspendue en cours de session).
 - Ajout : `docs/checkpoints/C1.md` (audit de conformité de la Phase 1, écarts, recommandation de GO avec réserves).

@@ -388,3 +388,33 @@ Cible : 25,4 % | Réel : à valider | Statut : —
 ### Blocages / à faire
 - Décision de la responsable technique : GO / NO-GO du C1 ; ADR « Proposed » ; branchement de `test:e2e` en CI ; navigateur piloté (téléchargement de binaires).
 ### Demain : J16 (projets et produits), après GO
+
+
+## J16 — mer 2 déc 2026 — Phase 2 (préparé en avance, NON commité, branche `day-16-projects-products`)
+Cible : 27,0 % | Réel : à valider | Statut : — (le C1 attend le GO de la responsable technique)
+
+### Organisation du travail
+Manager + A5 (revue sécurité adverse, attaques réelles sur la base locale). Migration, domaine, application, tests et documentation par le manager.
+
+### Tâches
+| Tâche | Estimé | Livré | Validée |
+|---|---|---|---|
+| Migrations `projects`, `products` + RLS + tests | 2,5 h | oui (lecture seule, écriture par fonctions, FK composites) | oui |
+| Services CRUD avec quota | 2 h | oui (`apps/web/lib/projects`, `POST /api/projects`) | oui |
+| Schémas zod de réglages par type | 1,5 h | oui (4 types stricts) | oui |
+
+### Tests : domain 444 ✓ · web 2144 ✓ · pgTAP 1442 ✓ (110_projects_products : 128) · RLS 332 ✓ (projects : 24, dont 12 créations simultanées pour 5 places : exactement 5) · acceptation 45 ✓ (projects-api : 10) · lint, typecheck verts
+### Constats de sécurité (A5, attaques réelles sur la base locale)
+- Aucune faille bloquante : rôles, JWT forgés, p_org falsifié, identifiants d'une autre entreprise, accès direct aux tables, quota sous concurrence (25 créations parallèles), assets, idempotence : refusés.
+- **Moyennes, corrigées** : caractères invisibles et de direction non filtrés (U+061C, U+2060 à U+206F…) ; la base ne reproduisait pas zod (réglages, liens, hôtes internes, port) ; aucun plafond de produits (100 par projet ajouté).
+- **Faibles** : `update_project` effaçait le propriétaire s'il était omis (corrigé : explicite) ; `not_found` en HTTP 500 (corrigé : PT404, 404) ; membre suspendu restait propriétaire (corrigé : NULL) ; pas de contrôle `Origin` sur les mutations (non traité, valable pour toutes les routes).
+- Reste (documenté) : adresse des liens à revalider (DNS) avant tout chargement serveur.
+### Écarts à la spec / plan
+- Archivage à la place de la suppression (matrice ADR 014 ; ADR 007 disait « delete ») : aucun DELETE.
+- Aucun archivage de produit (la spec ne lui donne pas de statut) : point soumis à la responsable technique.
+- `products.kind` : texte court contrôlé, pas d'énumération (la spec n'en définit pas) ; `salla_theme` : les captures d'écran (Storage) viennent au J17.
+- Nouveau code d'erreur `conflict` (409) pour un projet archivé.
+### Blocages / à faire
+- GO du C1 ; valider les 5 choix du mini-plan J16 ; interface des projets au J17.
+### Demain : J17 (UI projets et Storage)
+

@@ -38,7 +38,7 @@
 ## 5. Scénarios d'acceptation (spec §13)
 | ID | Scénario | Jour |
 |---|---|---|
-| T1 | 2 entreprises, utilisateur à 2 rôles, 2 projets par entreprise : aucune fuite (UI, API, RLS, worker) | J15 (fait : `tests/acceptance`), J59 |
+| T1 | 2 entreprises, utilisateur à 2 rôles, 2 projets par entreprise : aucune fuite (UI, API, RLS, worker) | J15 (fait : `tests/acceptance`), complété au J16 (2 projets et un produit par entreprise dans le seed, tables découvertes automatiquement), J59 |
 | T2 | 100 leads importés avec doublons et formats de téléphone variés, puis assignation et rapports | J26 |
 | T3 | Série d'e-mails vers liste consentante, désabonnement en cours | J40 |
 | T4 | WhatsApp client + template, webhook dupliqué, panne 503 | J40 |

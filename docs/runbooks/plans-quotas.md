@@ -11,7 +11,7 @@
 
 - **Abonnement** (`public.subscriptions`) : un par organisation ; `limits_override` (même forme) l'emporte sur le plan ; une clé absente partout = **pas de limite** pour cette métrique ; `0` bloque la métrique.
 - **Métriques de flux** (`messages_per_month`, `ai_runs`) : compteur mensuel (UTC) dans `usage_counters`, incrément **atomique** par un UPDATE conditionnel (jamais de dépassement sous concurrence).
-- **Métriques de stock** (`users`, `projects`, `contacts`, `integrations`) : usage = lignes existantes. `users` = membres actifs + invitations en attente non expirées. Les trois autres valent 0 tant que leurs tables n'existent pas (J16 et suivants) : leur module doit redéfinir `private.current_stock_usage`.
+- **Métriques de stock** (`users`, `projects`, `contacts`, `integrations`) : usage = lignes existantes. `users` = membres actifs + invitations en attente non expirées. `projects` = projets **actifs** (J16 ; un projet archivé ne compte pas, la réactivation consomme le quota). `contacts` et `integrations` valent 0 tant que leurs tables n'existent pas (J18 et suivants) : leur module doit redéfinir `private.current_stock_usage`.
 - **Contrôle** : `private.assert_within_limit(org, métrique, quantité)` renvoie `{metric, used, limit, remaining, near_limit}` (alerte à 80 %) ou lève `quota_exceeded` (SQLSTATE `P0001`, detail = métrique) ; abonnement suspendu, annulé ou absent : `subscription_inactive`. Côté application, l'erreur devient `quota_exceeded` (HTTP 429, message traduit).
 - **Invitations** : `create_invitation` contrôle la limite `users` dans la même transaction (après la révocation de l'ancienne invitation de la même adresse) ; un refus annule tout.
 

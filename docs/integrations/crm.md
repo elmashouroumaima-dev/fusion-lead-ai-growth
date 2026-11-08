@@ -27,3 +27,6 @@
 
 ## Plan B
 CRM interne + export/import CSV (déjà le défaut). Si l'API arrive après le MVP : backlog post-MVP « synchro bidirectionnelle ».
+
+## Mise en œuvre J25 (2026-11-08)
+Interface `CrmAdapter`, adaptateurs `internal` et `csv`, `crm_field_mappings`, moteur de conflit et job `crm_sync` (contacts) livrés : voir `docs/api/crm-sync.md`. **Aucun squelette du CRM Fusion Leap** : l'API n'est pas documentée (Q1 toujours à confirmer) ; il sera ajouté quand la responsable technique aura renseigné le tableau ci-dessus.

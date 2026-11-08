@@ -625,3 +625,26 @@ Cible : 39,7 % | Réel : à valider | Statut : — (le C1 attend le GO de la res
 - Pas de Playwright (non installé) : acceptation HTTP + vérification visuelle dans le navigateur intégré (fr, ar, en).
 - Glisser-déposer natif (aucune bibliothèque) + menu « Déplacer vers… » ; extension `pg_trgm`.
 - Pas de fiche détaillée d'un lead ; responsable affiché par un identifiant court.
+
+## J25 — Adaptateur CRM (branche `day-25-crm-adapter`, NON commité)
+Cible : 41,3 % | Réel : à valider | Statut : — (le C1 attend le GO de la responsable technique)
+
+### Tâches
+| Tâche | Estimé | Livré | Validée |
+|---|---|---|---|
+| Interface `CrmAdapter` | 1,5 h | oui (`packages/adapters/src/crm`) | oui (contrat commun testé) |
+| Adaptateur interne + CSV | 2 h | oui (`internal`, `csv` aller-retour, dates ISO strictes) | oui |
+| `crm_field_mappings` + `source_of_truth` | 1,5 h | oui (migration `20261127100000`, moteur de conflit) | oui (pgTAP, domaine) |
+| Statut de synchro | 1 h | oui (`/crm`, API, « Réessayer ») | oui (HTTP réel, vérification visuelle fr / ar) |
+
+### Validation du jour
+- **Aucune synchro bidirectionnelle sans règle de conflit** : conflit seulement si les deux côtés ont changé, `source_of_truth` par champ, perdant dans l'audit.
+- **Échec visible et rejouable sans doublon** : statut « En échec » + code d'erreur, « Réessayer » rejoue le même job (acceptation HTTP + navigateur).
+
+### Revue sécurité (0 bloquant, 2 moyens, 8 faibles) — corrigés : faux conflits (curseur de fin), lot de fichier consommé (`synced`), colonne d'identifiant absente, dates ISO strictes, cellule vide, source propre à l'intégration, abonnement ; **soumis à la responsable technique** : documentation du CRM Fusion Leap, équité du worker pour les gros fichiers, `external_id` libre pour le marketing.
+
+### Tests : domain 608 ✓ · adapters 34 ✓ · worker 76 ✓ (crm_sync : 21) · web 2469 ✓ · pgTAP 2397 (dont 200_crm_sync : 107) ✓ · API réelle 436 ✓ (crm-sync : 5) · acceptation 106 ✓ (crm-sync : 7) · lint, typecheck, check:leaks verts
+### Écarts à la spec / plan
+- **Pas de squelette du CRM Fusion Leap** (API non documentée, Q1) ; adaptateurs `internal` et `csv` seulement.
+- Table `integrations` créée ici en version minimale (le J28 l'étend avec les secrets).
+- Synchro de contacts seulement ; pas d'historique dédié (état = job).

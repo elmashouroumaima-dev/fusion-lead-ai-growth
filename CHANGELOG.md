@@ -3,6 +3,15 @@
 Format : Keep a Changelog. Une entrée par jour de travail.
 
 ## [Non publié]
+### J25 — Adaptateur CRM
+- Ajout : interface `CrmAdapter` (`connect`, `validate`, `send`, `receive`, `refresh`, `disconnect`) et adaptateurs `internal` (source de vérité) et `csv` (lecture et écriture selon le mapping, dates ISO strictes, anti-formule) dans `packages/adapters/src/crm`.
+- Ajout : tables `integrations` (minimale) et `crm_field_mappings` (champ interne, champ externe, `source_of_truth`, `direction`, liste blanche de champs), fonctions `create_integration`, `save_crm_mappings`, `request_crm_sync`, `retry_crm_sync`, `crm_sync_status` (owner et admin) et `crm_sync_*` (service_role) ; migration `20261127100000` et retour arrière ; statut `synced` des lots de fichier.
+- Ajout : moteur de synchro pur (`packages/domain/src/crm-sync`) : conflit seulement si les deux côtés ont changé, `source_of_truth` par champ, perdant consigné dans l'audit sans valeur ; job worker `crm_sync` (contacts : créer, rattacher, mettre à jour ; idempotent par identifiant externe ; identité jamais écrasée ; « ne plus contacter » intact ; aucun consentement).
+- Ajout : routes `/api/crm/integrations`, `/api/crm/mappings`, `/api/crm/sync`, `/api/crm/sync/retry` et écran `/crm` (statut, mapping, « Réessayer ») en français, arabe (RTL) et anglais.
+- Sécurité (revue adverse) : curseur de fin (pas de faux conflit), lot de fichier consommé, colonne d'identifiant absente = échec, cellule vide non destructrice, identifiant externe propre à l'intégration, abonnement vérifié.
+- Tests : domaine (22), adaptateurs (11), worker (21), service web (9), messages (4), pgTAP (107), API réelle (5), acceptation (7).
+- Documentation : `docs/api/crm-sync.md`, `docs/integrations/crm.md`, addendum ADR 007.
+
 ### J24 — UI CRM
 - Ajout : page `/leads` (filtres projet, étape, source, responsable, « non assignés » ; recherche nom, e-mail, téléphone ; tri ; pagination serveur) et page `/deals` (tableau par étape, glisser-déposer et menu « Déplacer vers… ») en français, arabe (RTL) et anglais ; liens « Leads » et « Deals » dans la barre latérale (rôles qui lisent les leads).
 - Ajout : `GET /api/leads/export` (owner et admin, mêmes filtres que la liste, 10 000 lignes au plus, **audité** avant l'envoi, protégé contre l'injection de formule, jamais tronqué en silence) et `POST /api/deals/move` (Idempotency-Key obligatoire).

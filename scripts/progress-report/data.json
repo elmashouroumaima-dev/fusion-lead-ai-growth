@@ -5,11 +5,11 @@
   "tests": [
     {
       "label": "Web (application)",
-      "value": 2108
+      "value": 2144
     },
     {
       "label": "Base de données (pgTAP)",
-      "value": 1314
+      "value": 1442
     },
     {
       "label": "Permissions (RBAC)",
@@ -17,11 +17,11 @@
     },
     {
       "label": "Domaine (règles métier)",
-      "value": 419
+      "value": 444
     },
     {
       "label": "RLS via l'API réelle",
-      "value": 308
+      "value": 332
     },
     {
       "label": "Worker et adaptateurs",
@@ -29,7 +29,7 @@
     },
     {
       "label": "Acceptation (T1, T5)",
-      "value": 35
+      "value": 45
     }
   ],
   "adrCount": 14,
@@ -183,9 +183,9 @@
           "day": "J16–J17",
           "days": 2,
           "name": "Projets et produits",
-          "progress": 0,
-          "status": "todo",
-          "note": ""
+          "progress": 50,
+          "status": "review",
+          "note": "J16 : tables, RLS, quotas, API. L'interface et Storage arrivent au J17."
         },
         {
           "day": "J18–J20",

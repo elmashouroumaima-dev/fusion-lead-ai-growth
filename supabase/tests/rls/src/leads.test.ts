@@ -39,6 +39,7 @@ const stagesOf = async (persona: Persona, org: string) =>
 afterAll(() => {
   psql(`
     set session_replication_role = replica;
+    delete from public.activities where lead_id in (select id from public.leads where source = '${source}');
     delete from public.deals where lead_id in (select id from public.leads where source = '${source}');
     delete from public.leads where source = '${source}';
     delete from public.consent_events where contact_id in (select id from public.contacts where email_normalized like 'rlsl-${run}-%');

@@ -58,11 +58,12 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
-      # Pile minimale (base, auth, API) : suffisante pour les tests SQL et les tests RLS via PostgREST.
+      # Pile minimale (base, auth, API, Storage) : suffisante pour les tests SQL et les tests RLS via PostgREST et l'API Storage
+      # (J17 : bucket `assets`, J23 : bucket `imports`).
       - name: Démarrer Supabase local
         run: >
           pnpm db:start -x
-          studio,imgproxy,edge-runtime,logflare,vector,mailpit,realtime,storage-api,postgres-meta,supavisor
+          studio,imgproxy,edge-runtime,logflare,vector,mailpit,realtime,postgres-meta,supavisor
 
       - run: pnpm db:reset
       - name: Tests SQL pgTAP (contraintes, fonctions d'aide, schema lint)

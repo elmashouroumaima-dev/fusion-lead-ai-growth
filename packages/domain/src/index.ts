@@ -11,3 +11,4 @@ export * from "./smtp";
 export * from "./projects";
 export * from "./contacts";
 export * from "./leads";
+export * from "./activities";

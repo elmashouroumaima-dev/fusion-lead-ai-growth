@@ -106,9 +106,11 @@ type UserOptions<T> = CommonOptions<T> & {
 
 // --- Routes ---
 
-export type RouteResult = { status: number; body?: unknown; headers?: Record<string, string> };
-export type RouteTenantContext = TenantServiceContext & { headers: Headers };
-export type RouteUserContext = UserServiceContext & { headers: Headers };
+/** `text` : réponse texte brute (ex. rapport CSV) ; sans lui, `body` est rendu en JSON. */
+export type RouteResult = { status: number; body?: unknown; headers?: Record<string, string>; text?: string };
+/** `request` : permet à un handler de lire lui-même un gros corps APRÈS l'authentification, le contrôle de rôle et la limite de débit. */
+export type RouteTenantContext = TenantServiceContext & { headers: Headers; request: Request };
+export type RouteUserContext = UserServiceContext & { headers: Headers; request: Request };
 type RouteExtras = {
   bodyLimitBytes?: number;
   /**
@@ -117,6 +119,11 @@ type RouteExtras = {
    * Sans cette option, le schéma reçoit le corps seul.
    */
   input?: (body: unknown, headers: Headers) => unknown;
+  /**
+   * Remplace la lecture JSON du corps (ex. envoi d'un fichier CSV brut, J23). La fonction applique elle-même ses plafonds
+   * (`readBoundedBytes`) ; sa valeur est soumise au schéma comme le corps JSON l'aurait été.
+   */
+  readBody?: (request: Request) => Promise<unknown>;
 };
 
 export type TenantRouteOptions<T> = TenantOptions<T> & RouteExtras;
@@ -383,8 +390,13 @@ async function execute<T, R>(p: CoreParams<T, R>): Promise<Executed<R>> {
  * Lit le corps en le plafonnant en OCTETS (pas en unités UTF-16). La lecture s'arrête dès le
  * dépassement, sans accumuler le reste du flux.
  */
-async function readBoundedText(request: Request, limit: number): Promise<string> {
-  if (!request.body) return "";
+export async function readBoundedBytes(request: Request, limit: number): Promise<Uint8Array> {
+  const declared = request.headers.get("content-length");
+  if (declared !== null) {
+    if (!/^\d+$/.test(declared.trim())) throw new ServiceError("validation_failed");
+    if (Number(declared) > limit) throw new ServiceError("payload_too_large");
+  }
+  if (!request.body) return new Uint8Array(0);
   const reader = request.body.getReader();
   const chunks: Uint8Array[] = [];
   let total = 0;
@@ -404,7 +416,11 @@ async function readBoundedText(request: Request, limit: number): Promise<string>
     bytes.set(chunk, offset);
     offset += chunk.byteLength;
   }
-  return new TextDecoder().decode(bytes);
+  return bytes;
+}
+
+async function readBoundedText(request: Request, limit: number): Promise<string> {
+  return new TextDecoder().decode(await readBoundedBytes(request, limit));
 }
 
 /** Taille annoncée (rejet anticipé), type de contenu, lecture plafonnée en octets, JSON. */
@@ -459,7 +475,9 @@ export function withRoute<T>(
       const bodyless = request.method === "GET" || request.method === "HEAD";
       const raw: unknown = bodyless
         ? Object.fromEntries(url.searchParams)
-        : await readJsonBody(request, options.bodyLimitBytes ?? DEFAULT_BODY_LIMIT_BYTES);
+        : options.readBody
+          ? await options.readBody(request)
+          : await readJsonBody(request, options.bodyLimitBytes ?? DEFAULT_BODY_LIMIT_BYTES);
 
       // 3. zod (corps + en-têtes composés par `input`) ; `organization_id` interdit d'abord.
       assertNoOrganizationClaim(raw, "forbidOrganizationId" in options ? options.forbidOrganizationId : undefined);
@@ -476,7 +494,7 @@ export function withRoute<T>(
         method: request.method,
         path: url.pathname,
         rawKey: request.headers.get(IDEMPOTENCY_HEADER),
-        run: (principal) => run({ ...principal, headers: request.headers } as RouteTenantContext | RouteUserContext, input),
+        run: (principal) => run({ ...principal, headers: request.headers, request } as RouteTenantContext | RouteUserContext, input),
         isSuccess: (result) => result.status < 400,
         serialize: (result) => ({ statusCode: result.status, body: result.body ?? null }),
       });
@@ -484,7 +502,10 @@ export function withRoute<T>(
       if (outcome.kind === "replay") {
         return jsonResponse(outcome.statusCode, outcome.body, requestId, { "idempotent-replay": "true" });
       }
-      const { status, body, headers } = outcome.result;
+      const { status, body, headers, text } = outcome.result;
+      if (text !== undefined) {
+        return new Response(text, { status, headers: { ...headers, [REQUEST_ID_HEADER]: requestId, "cache-control": "no-store" } });
+      }
       return jsonResponse(status, body, requestId, headers);
     } catch (error) {
       const service = toServiceError(error);

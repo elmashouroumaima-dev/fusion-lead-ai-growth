@@ -3,6 +3,7 @@ import { hostname } from "node:os";
 import { randomBytes } from "node:crypto";
 import { createSupabaseLeadAssigner } from "./assignment";
 import { loadWorkerEnv } from "./env";
+import { createSupabaseImportGateway } from "./imports";
 import { createDefaultRegistry } from "./handlers";
 import { WORKER_NAME } from "./info";
 import { Runner, type WorkerLogger } from "./runner";
@@ -21,7 +22,7 @@ try {
   const workerId = `${hostname().replace(/[^A-Za-z0-9._-]/g, "-").slice(0, 60)}:${process.pid}:${randomBytes(4).toString("hex")}`;
   const runner = new Runner({
     store: createSupabaseJobStore(env),
-    registry: createDefaultRegistry({ assigner: createSupabaseLeadAssigner(env) }),
+    registry: createDefaultRegistry({ assigner: createSupabaseLeadAssigner(env), imports: createSupabaseImportGateway(env) }),
     workerId,
     logger,
   });

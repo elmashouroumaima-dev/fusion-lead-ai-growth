@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { z } from "zod";
 import { MemoryAssigner } from "./assigner.testkit";
+import { MemoryCrm } from "./crm-sync.testkit";
 import { MemoryImports } from "./imports.testkit";
 import { NonRetryableError } from "./errors";
 import { createDefaultRegistry, defineHandler, HandlerRegistry } from "./handlers";
@@ -25,7 +26,7 @@ describe("Runner : exécution", () => {
   it("exécute un job noop puis le clôt en succès", async () => {
     const store = new MemoryStore();
     store.add({ id: ID(1) });
-    const runner = new Runner({ store, registry: createDefaultRegistry({ assigner: new MemoryAssigner(), imports: new MemoryImports() }), workerId: "w1" });
+    const runner = new Runner({ store, registry: createDefaultRegistry({ assigner: new MemoryAssigner(), imports: new MemoryImports(), crm: new MemoryCrm() }), workerId: "w1" });
     expect(await runner.tick()).toBe(1);
     await runner.idle();
     expect(store.jobs.get(ID(1))?.status).toBe("succeeded");
@@ -35,7 +36,7 @@ describe("Runner : exécution", () => {
   it("type inconnu : échec définitif, code unknown_kind", async () => {
     const store = new MemoryStore();
     store.add({ id: ID(1), kind: "inconnu" });
-    const runner = new Runner({ store, registry: createDefaultRegistry({ assigner: new MemoryAssigner(), imports: new MemoryImports() }), workerId: "w1" });
+    const runner = new Runner({ store, registry: createDefaultRegistry({ assigner: new MemoryAssigner(), imports: new MemoryImports(), crm: new MemoryCrm() }), workerId: "w1" });
     await runner.tick();
     await runner.idle();
     expect(store.jobs.get(ID(1))).toMatchObject({ status: "dead_letter", lastError: "unknown_kind", retryable: false });
@@ -295,7 +296,7 @@ describe("Runner : robustesse", () => {
     store.add({ id: ID(1) });
     store.failClaim = 2;
     const { lines, logger } = capture();
-    const runner = new Runner({ store, registry: createDefaultRegistry({ assigner: new MemoryAssigner(), imports: new MemoryImports() }), workerId: "w1", pollMs: 3, logger });
+    const runner = new Runner({ store, registry: createDefaultRegistry({ assigner: new MemoryAssigner(), imports: new MemoryImports(), crm: new MemoryCrm() }), workerId: "w1", pollMs: 3, logger });
     runner.start();
     await wait(80);
     await runner.stop();
@@ -308,7 +309,7 @@ describe("Runner : robustesse", () => {
     const store = new MemoryStore();
     store.add({ id: ID(1), payload: { email: "marie@example.com", note: "texte du message" } });
     const { lines, logger } = capture();
-    const runner = new Runner({ store, registry: createDefaultRegistry({ assigner: new MemoryAssigner(), imports: new MemoryImports() }), workerId: "w1", logger });
+    const runner = new Runner({ store, registry: createDefaultRegistry({ assigner: new MemoryAssigner(), imports: new MemoryImports(), crm: new MemoryCrm() }), workerId: "w1", logger });
     await runner.tick();
     await runner.idle();
     expect(lines.join("\n")).not.toContain("marie@example.com");
@@ -338,7 +339,7 @@ describe("Runner : délai maximal et enregistrement du succès", () => {
       throw new Error("réseau");
     };
     const { lines, logger } = capture();
-    const runner = new Runner({ store, registry: createDefaultRegistry({ assigner: new MemoryAssigner(), imports: new MemoryImports() }), workerId: "w1", logger });
+    const runner = new Runner({ store, registry: createDefaultRegistry({ assigner: new MemoryAssigner(), imports: new MemoryImports(), crm: new MemoryCrm() }), workerId: "w1", logger });
     await runner.tick();
     await runner.idle();
     expect(store.calls.fail).toBe(0);

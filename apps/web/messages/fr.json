@@ -24,7 +24,8 @@
       "settingsSmtp": "Serveur SMTP",
       "projects": "Projets",
       "leads": "Leads",
-      "deals": "Deals"
+      "deals": "Deals",
+      "crmSync": "CRM"
     },
     "sidebar": {
       "toggle": "Afficher ou masquer le menu latéral",
@@ -768,5 +769,63 @@
       "rateLimited": "Trop de demandes. Patientez un instant.",
       "moveFailed": "Le deal n'a pas pu être déplacé."
     }
+  },
+  "CrmSync": {
+    "title": "Synchronisation CRM",
+    "description": "Intégrations CRM, correspondance des champs et état de la dernière synchronisation. Le CRM interne reste la source de vérité.",
+    "empty": "Aucune intégration pour l'instant.",
+    "providers": {
+      "csv": "Fichier CSV",
+      "internal": "CRM interne"
+    },
+    "status": {
+      "label": "État",
+      "never": "Jamais synchronisé",
+      "queued": "En file",
+      "running": "En cours",
+      "ok": "Réussie",
+      "failed": "En échec"
+    },
+    "lastSync": "Dernière synchronisation",
+    "lastSyncNever": "Aucune",
+    "lastError": "Dernière erreur",
+    "errors": {
+      "file_missing": "Le fichier de synchronisation est introuvable.",
+      "file_malformed": "Le fichier n'est pas un CSV lisible (UTF-8, guillemets).",
+      "mapping_invalid": "La correspondance des champs est invalide.",
+      "failed": "La synchronisation a échoué. Vous pouvez la relancer."
+    },
+    "mapping": {
+      "title": "Correspondance des champs",
+      "internal": "Champ interne",
+      "external": "Champ du fournisseur",
+      "truth": "Source de vérité",
+      "direction": "Sens",
+      "none": "Aucune correspondance définie."
+    },
+    "fields": {
+      "external_id": "Identifiant externe",
+      "external_updated_at": "Modifié le (fournisseur)",
+      "email": "E-mail",
+      "phone": "Téléphone",
+      "name": "Nom",
+      "language": "Langue",
+      "country": "Pays"
+    },
+    "truth": {
+      "internal": "CRM interne",
+      "external": "Fournisseur"
+    },
+    "directions": {
+      "pull": "Lecture",
+      "push": "Envoi",
+      "both": "Lecture et envoi"
+    },
+    "rule": "En cas de conflit (les deux côtés ont changé), la source de vérité du champ l'emporte et le perdant est consigné dans le journal d'audit.",
+    "retry": "Réessayer",
+    "retryNamed": "Réessayer la synchronisation de {name}",
+    "retried": "Synchronisation relancée.",
+    "retryNothing": "Rien à relancer.",
+    "retryFailed": "La synchronisation n'a pas pu être relancée."
   }
 }

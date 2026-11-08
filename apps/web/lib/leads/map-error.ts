@@ -25,6 +25,9 @@ const CONFLICTS = [
   "assignment_rule_exists",
   "too_many_imports",
   "import_not_pending",
+  "too_many_integrations",
+  "sync_in_progress",
+  "mapping_missing",
 ] as const;
 
 export function mapLeadsDbError(error: DbError): ServiceErrorCode {

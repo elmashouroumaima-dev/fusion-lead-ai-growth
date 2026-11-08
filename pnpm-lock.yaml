@@ -314,6 +314,9 @@ importers:
 
   apps/worker:
     dependencies:
+      '@fusion-leap/adapters':
+        specifier: workspace:*
+        version: link:../../packages/adapters
       '@fusion-leap/domain':
         specifier: workspace:*
         version: link:../../packages/domain

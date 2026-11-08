@@ -23,6 +23,7 @@ export type AppShellProps = {
   showMembers: boolean;
   /** Liens « Leads » et « Deals » (rôles qui lisent les leads). */
   showCrm?: boolean;
+  showCrmSync?: boolean;
   showSettings?: boolean;
   showAdmin?: boolean;
   /** Organisations actives de l'utilisateur ; le sélecteur n'apparaît qu'à partir de deux. */
@@ -32,7 +33,7 @@ export type AppShellProps = {
   activeOrganizationName?: string | undefined;
 };
 
-type PageKey = "dashboard" | "projects" | "leads" | "deals" | "members" | "settings" | "admin" | "onboarding" | "selectOrganization";
+type PageKey = "dashboard" | "projects" | "leads" | "deals" | "crmSync" | "members" | "settings" | "admin" | "onboarding" | "selectOrganization";
 
 function pageKeyOf(pathname: string): PageKey | null {
   const is = (base: string) => pathname === base || pathname.startsWith(`${base}/`);
@@ -40,6 +41,7 @@ function pageKeyOf(pathname: string): PageKey | null {
   if (is("/projects")) return "projects";
   if (is("/leads")) return "leads";
   if (is("/deals")) return "deals";
+  if (is("/crm")) return "crmSync";
   if (is("/members")) return "members";
   if (is("/settings")) return "settings";
   if (is("/admin")) return "admin";
@@ -53,12 +55,12 @@ function pageKeyOf(pathname: string): PageKey | null {
  * sélecteur d'organisation, langue, thème, compte). Sur les pages d'onboarding et de sélection, aucune
  * navigation d'organisation : un en-tête réduit et le contenu centré.
  */
-export function AppShell({ children, email, showMembers, showCrm = false, showSettings = false, showAdmin = false, organizations, selectedOrganizationId, activeOrganizationName }: AppShellProps) {
+export function AppShell({ children, email, showMembers, showCrm = false, showCrmSync = false, showSettings = false, showAdmin = false, organizations, selectedOrganizationId, activeOrganizationName }: AppShellProps) {
   const t = useTranslations("Shell");
   const pathname = usePathname();
   const chromeless = isSwitcherHiddenPath(pathname);
   const pageKey = pageKeyOf(pathname);
-  const pageLabel = pageKey === null ? null : pageKey === "dashboard" || pageKey === "projects" || pageKey === "leads" || pageKey === "deals" || pageKey === "members" || pageKey === "settings" || pageKey === "admin" ? t(`nav.${pageKey}`) : t(`pages.${pageKey}`);
+  const pageLabel = pageKey === null ? null : pageKey === "dashboard" || pageKey === "projects" || pageKey === "leads" || pageKey === "deals" || pageKey === "crmSync" || pageKey === "members" || pageKey === "settings" || pageKey === "admin" ? t(`nav.${pageKey}`) : t(`pages.${pageKey}`);
 
   const switcher =
     organizations.length >= 2 ? <OrganizationSwitcher options={organizations} selectedId={selectedOrganizationId} /> : null;
@@ -86,7 +88,7 @@ export function AppShell({ children, email, showMembers, showCrm = false, showSe
 
   return (
     <SidebarProvider>
-      <AppSidebar showMembers={showMembers} showCrm={showCrm} showSettings={showSettings} showAdmin={showAdmin} />
+      <AppSidebar showMembers={showMembers} showCrm={showCrm} showCrmSync={showCrmSync} showSettings={showSettings} showAdmin={showAdmin} />
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="bg-background/95 supports-[backdrop-filter]:bg-background/60 sticky top-0 z-20 flex h-14 shrink-0 items-center gap-2 border-b px-4 backdrop-blur">
           <SidebarTrigger label={t("sidebar.toggle")} className="-ms-1" />

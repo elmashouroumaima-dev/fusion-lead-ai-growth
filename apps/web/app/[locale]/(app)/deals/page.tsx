@@ -3,7 +3,7 @@ import { can } from "@fusion-leap/permissions";
 import { KanbanSquareIcon } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import { redirect } from "next/navigation";
-import { Alert } from "@/components/ui/alert";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -68,7 +68,7 @@ export default async function DealsPage({ params, searchParams }: Props) {
 
       {loaded === null ? (
         <Alert variant="destructive" role="alert">
-          {t("errors.generic")}
+          <AlertDescription>{t("errors.generic")}</AlertDescription>
         </Alert>
       ) : (
         <>

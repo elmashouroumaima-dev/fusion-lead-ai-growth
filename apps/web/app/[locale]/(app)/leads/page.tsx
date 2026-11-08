@@ -3,7 +3,7 @@ import { can } from "@fusion-leap/permissions";
 import { ChevronLeftIcon, ChevronRightIcon, DownloadIcon, InboxIcon } from "lucide-react";
 import { getFormatter, getTranslations } from "next-intl/server";
 import { redirect } from "next/navigation";
-import { Alert } from "@/components/ui/alert";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { LeadFilters } from "../../../../components/crm/lead-filters";
@@ -104,7 +104,7 @@ export default async function LeadsPage({ params, searchParams }: Props) {
         <CardContent>
           {loaded === null ? (
             <Alert variant="destructive" role="alert">
-              {t("errors.generic")}
+              <AlertDescription>{t("errors.generic")}</AlertDescription>
             </Alert>
           ) : (
             <LeadFilters

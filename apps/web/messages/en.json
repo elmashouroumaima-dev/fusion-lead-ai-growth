@@ -24,7 +24,8 @@
       "settingsSmtp": "SMTP server",
       "projects": "Projects",
       "leads": "Leads",
-      "deals": "Deals"
+      "deals": "Deals",
+      "crmSync": "CRM"
     },
     "sidebar": {
       "toggle": "Show or hide the side menu",
@@ -768,5 +769,63 @@
       "rateLimited": "Too many requests. Please wait a moment.",
       "moveFailed": "The deal could not be moved."
     }
+  },
+  "CrmSync": {
+    "title": "CRM sync",
+    "description": "CRM integrations, field mapping and the state of the last sync. The internal CRM remains the source of truth.",
+    "empty": "No integrations yet.",
+    "providers": {
+      "csv": "CSV file",
+      "internal": "Internal CRM"
+    },
+    "status": {
+      "label": "Status",
+      "never": "Never synced",
+      "queued": "Queued",
+      "running": "Running",
+      "ok": "Succeeded",
+      "failed": "Failed"
+    },
+    "lastSync": "Last sync",
+    "lastSyncNever": "None",
+    "lastError": "Last error",
+    "errors": {
+      "file_missing": "The sync file could not be found.",
+      "file_malformed": "The file is not a readable CSV (UTF-8, quotes).",
+      "mapping_invalid": "The field mapping is invalid.",
+      "failed": "The sync failed. You can retry it."
+    },
+    "mapping": {
+      "title": "Field mapping",
+      "internal": "Internal field",
+      "external": "Provider field",
+      "truth": "Source of truth",
+      "direction": "Direction",
+      "none": "No mapping defined."
+    },
+    "fields": {
+      "external_id": "External ID",
+      "external_updated_at": "Modified on (provider)",
+      "email": "Email",
+      "phone": "Phone",
+      "name": "Name",
+      "language": "Language",
+      "country": "Country"
+    },
+    "truth": {
+      "internal": "Internal CRM",
+      "external": "Provider"
+    },
+    "directions": {
+      "pull": "Read",
+      "push": "Send",
+      "both": "Read and send"
+    },
+    "rule": "On a conflict (both sides changed), the field's source of truth wins and the loser is recorded in the audit log.",
+    "retry": "Retry",
+    "retryNamed": "Retry the sync for {name}",
+    "retried": "Sync restarted.",
+    "retryNothing": "Nothing to retry.",
+    "retryFailed": "The sync could not be restarted."
   }
 }

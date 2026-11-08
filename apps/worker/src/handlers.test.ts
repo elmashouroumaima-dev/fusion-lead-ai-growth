@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { z } from "zod";
 import { errorCode, NonRetryableError, safeCode } from "./errors";
 import { MemoryAssigner } from "./assigner.testkit";
+import { MemoryCrm } from "./crm-sync.testkit";
 import { MemoryImports } from "./imports.testkit";
 import { createDefaultRegistry, createLeadAssignHandler, defineHandler, HandlerRegistry, noopHandler } from "./handlers";
 import type { JobContext } from "./handlers";
@@ -15,8 +16,8 @@ const leadAssignHandler = createLeadAssignHandler(new MemoryAssigner());
 
 describe("HandlerRegistry", () => {
   it("enregistre noop et lead.assign par défaut ; un type absent est introuvable", () => {
-    const registry = createDefaultRegistry({ assigner: new MemoryAssigner(), imports: new MemoryImports() });
-    expect(registry.kinds()).toEqual(["import_csv", "lead.assign", "noop"]);
+    const registry = createDefaultRegistry({ assigner: new MemoryAssigner(), imports: new MemoryImports(), crm: new MemoryCrm() });
+    expect(registry.kinds()).toEqual(["crm_sync", "import_csv", "lead.assign", "noop"]);
     expect(registry.get("noop")).toBe(noopHandler);
     expect(registry.get("lead.assign")?.kind).toBe("lead.assign");
     expect(registry.get("autre")).toBeUndefined();

@@ -1,5 +1,10 @@
 import { z } from "zod";
-import { CsvError, CsvParser, detectDelimiter, IMPORT_MAX_BYTES, normalizeImportRow } from "@fusion-leap/domain";
+import { CsvCrmAdapter } from "@fusion-leap/adapters";
+import {
+  CsvError, CsvParser, crmMappingsSchema, decideCreate, detectDelimiter, IMPORT_MAX_BYTES, normalizeContactEmail, normalizeImportRow, normalizePhone,
+  resolveContactRecord, type CrmMappingEntry,
+} from "@fusion-leap/domain";
+import type { CrmCounts, CrmSyncGateway } from "./crm-sync";
 import type { LeadAssigner } from "./assignment";
 import { NonRetryableError } from "./errors";
 import { ImportGatewayError, type ImportGateway } from "./imports";
@@ -170,11 +175,141 @@ async function runImport(gateway: ImportGateway, ctx: JobContext, org: string, b
   await gateway.finish(org, batch, Math.max(rows.length - 1, 0));
 }
 
-export type RegistryDeps = { assigner: LeadAssigner; imports: ImportGateway };
+/**
+ * `crm_sync` (J25, spec §9.1 étapes 5–6) : synchronise des CONTACTS depuis un fichier CSV déjà envoyé (assistant d'import) selon le
+ * mapping de l'intégration. L'entreprise est celle de la LIGNE DU JOB ; la charge utile ne porte que des identifiants. Pour chaque ligne :
+ * création, rattachement ou mise à jour décidés par le moteur du domaine (`decideCreate` / `resolveContactRecord` : conflit seulement si
+ * les deux côtés ont changé, `source_of_truth` par champ, perdant consigné dans l'audit sans valeur), idempotent par identifiant externe
+ * (un rejeu ne recrée rien). Jamais d'écrasement de l'identité, jamais de contact « ne plus contacter » modifié, aucun consentement
+ * touché. Fichier absent ou illisible, mapping invalide : échec définitif (code seulement). Panne technique : réessayée ; à la dernière
+ * tentative l'échec est enregistré sur l'intégration (visible, rejouable).
+ */
+export function createCrmSyncHandler(gateway: CrmSyncGateway): JobHandler {
+  return defineHandler({
+    kind: "crm_sync",
+    schema: z.object({ integration_id: z.uuid(), batch_id: z.uuid() }).strict(),
+    run: async (ctx, payload) => {
+      const org = ctx.organizationId;
+      try {
+        await runCrmSync(gateway, ctx, org, payload.integration_id, payload.batch_id);
+      } catch (error) {
+        if (error instanceof NonRetryableError) throw error;
+        if (ctx.attempt >= ctx.maxAttempts) await bestEffort(() => gateway.fail(org, payload.integration_id, "failed"));
+        throw error;
+      }
+    },
+  });
+}
+
+async function crmFail(gateway: CrmSyncGateway, org: string, integration: string, code: "file_missing" | "file_malformed" | "mapping_invalid"): Promise<never> {
+  await gateway.fail(org, integration, code);
+  throw new NonRetryableError(code);
+}
+
+async function runCrmSync(gateway: CrmSyncGateway, ctx: JobContext, org: string, integration: string, batch: string): Promise<void> {
+  const started = await gateway.start(org, integration, batch);
+  if (started.status !== "running") {
+    if (started.status === "missing") return;
+    return crmFail(gateway, org, integration, "file_missing");
+  }
+
+  const mappings = crmMappingsSchema.safeParse(started.mappings);
+  if (!mappings.success) return crmFail(gateway, org, integration, "mapping_invalid");
+  const entries: CrmMappingEntry[] = mappings.data;
+
+  const bytes = await gateway.readFile(started.path);
+  if (bytes === null) return crmFail(gateway, org, integration, "file_missing");
+  if (bytes.byteLength > IMPORT_MAX_BYTES) return crmFail(gateway, org, integration, "file_malformed");
+  let received;
+  try {
+    const text = new TextDecoder("utf-8", { fatal: true }).decode(bytes);
+    received = await new CsvCrmAdapter(entries).receive({ text });
+  } catch (error) {
+    if (error instanceof CsvError || error instanceof TypeError) return crmFail(gateway, org, integration, "file_malformed");
+    throw error;
+  }
+
+  // Revue sécurité : un fichier SANS colonne d'identifiant externe (mauvais fichier, en-tête renommé), ou dont AUCUNE ligne n'est lisible,
+  // n'est pas une synchro réussie : échec définitif (sinon la date de synchro avancerait et un ancien export serait ignoré ensuite).
+  const idColumn = entries.find((entry) => entry.internal_field === "external_id")?.external_field;
+  if (idColumn !== undefined && received.missingColumns.includes(idColumn)) return crmFail(gateway, org, integration, "mapping_invalid");
+  if (received.records.length === 0 && received.rejected.length > 0) return crmFail(gateway, org, integration, "file_malformed");
+
+  const counts: CrmCounts = { created: 0, updated: 0, linked: 0, unchanged: 0, skipped: 0, rejected: received.rejected.length, conflicts: 0 };
+  for (const record of received.records) {
+    if (ctx.signal.aborted) throw new Error("aborted");
+    const rawEmail = (record.fields.email ?? "").trim();
+    const rawPhone = (record.fields.phone ?? "").trim();
+    const email = rawEmail ? normalizeContactEmail(rawEmail) : null;
+    const phone = rawPhone ? normalizePhone(rawPhone) : null;
+    const external = { externalId: record.externalId, fields: record.fields as never, externalUpdatedAt: record.updatedAt };
+
+    const found = await gateway.find(org, started.source, record.externalId, email?.ok ? email.value : null, phone?.ok ? phone.value : null);
+    if (found !== null && found.status === "identity_taken") {
+      counts.rejected += 1;
+      continue;
+    }
+    if (found === null) {
+      const decision = decideCreate(external);
+      if (decision.kind !== "create") {
+        counts.rejected += 1;
+        continue;
+      }
+      const phoneOk = decision.fields.phone;
+      const result = await gateway.create(org, started.source, {
+        externalId: record.externalId, name: decision.fields.name, emailRaw: decision.fields.email,
+        emailNormalized: decision.fields.email ? (normalizeContactEmail(decision.fields.email) as { ok: true; value: string }).value : null,
+        phoneE164: phoneOk, language: decision.fields.language, country: decision.fields.country,
+      });
+      if (result.status === "created") counts.created += 1;
+      else if (result.status === "exists") counts.unchanged += 1;
+      else counts.rejected += 1;
+      continue;
+    }
+
+    const decision = resolveContactRecord(
+      external,
+      { id: found.id, fields: { name: found.name, language: found.language, country: found.country }, updatedAt: found.updatedAt, doNotContact: found.doNotContact },
+      entries,
+      started.lastSyncAt,
+      started.lastSyncFinishedAt,
+    );
+    if (decision.kind === "invalid") {
+      counts.rejected += 1;
+      continue;
+    }
+    if (decision.kind === "skip" && decision.reason === "do_not_contact") {
+      counts.skipped += 1;
+      continue;
+    }
+    const fields = decision.kind === "update" ? decision.fields : {};
+    // un contact rattachable (même e-mail ou téléphone, sans identifiant externe) est RATTACHÉ même sans changement de valeur
+    if (decision.kind === "skip" && found.linked) {
+      counts.unchanged += 1;
+      continue;
+    }
+    const written = await gateway.update(org, found.id, started.source, record.externalId, fields as Record<string, string | null>);
+    if (written.status !== "updated") {
+      if (written.status === "do_not_contact") counts.skipped += 1;
+      else counts.rejected += 1;
+      continue;
+    }
+    if (!found.linked) counts.linked += 1;
+    else counts.updated += 1;
+    if (decision.kind === "update" && decision.conflicts.length > 0) {
+      counts.conflicts += decision.conflicts.length;
+      await gateway.auditConflict(org, integration, found.id, decision.conflicts.map((c) => ({ field: c.field, winner: c.winner })));
+    }
+  }
+  await gateway.finish(org, integration, batch, started.startedAt, counts);
+}
+
+export type RegistryDeps = { assigner: LeadAssigner; imports: ImportGateway; crm: CrmSyncGateway };
 
 export function createDefaultRegistry(deps: RegistryDeps): HandlerRegistry {
   return new HandlerRegistry()
     .register(noopHandler)
     .register(createLeadAssignHandler(deps.assigner))
-    .register(createImportCsvHandler(deps.imports));
+    .register(createImportCsvHandler(deps.imports))
+    .register(createCrmSyncHandler(deps.crm));
 }

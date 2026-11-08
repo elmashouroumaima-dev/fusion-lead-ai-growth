@@ -3,6 +3,15 @@
 Format : Keep a Changelog. Une entrée par jour de travail.
 
 ## [Non publié]
+### J19 — Pipelines, leads et deals
+- Ajout : tables `pipelines`, `pipeline_stages`, `leads`, `deals` (enum `stage_kind`), étapes par défaut dans la langue de l'entreprise (nouvelles et existantes), FK composites, RLS (owner / admin / marketing : tous les leads ; commercial : les siens ; analyste : aucun accès), écriture uniquement par fonctions ; migration `20261121100000` et retour arrière.
+- Ajout : fonctions `create_pipeline`, `rename_pipeline`, `set_default_pipeline`, `create_stage`, `update_stage`, `delete_stage`, `create_lead`, `update_lead`, `assign_lead`, `move_lead_stage`, `create_deal`, `update_deal`, `move_deal_stage` ; un lead « non assigné » n'a pas de responsable ; dates gagné / perdu cohérentes avec l'étape ; libération des leads d'un membre suspendu, retiré ou rétrogradé.
+- Ajout : `packages/domain/src/leads` (schémas, règles d'étapes) et `apps/web/lib/leads` (service, lectures, erreurs). Pas d'écran (J24).
+- Modifié : le commercial lit les contacts et consentements de ses leads et peut révoquer / poser « ne plus contacter » sur eux (promesse du J18).
+- Sécurité (revue adverse) : le marketing ne choisit pas le responsable à la création ; NaN et dates infinies refusés ; un lead ne change pas de pipeline ; libération à la suppression de la ligne du membre et à la rétrogradation ; abonnement actif exigé ; plafonds de 50 leads par contact et de 50 deals par lead ; audit sans réglage de session.
+- Tests : domaine (16), service web (22), pgTAP (182), API réelle (13, dont 12 déplacements simultanés d'un deal).
+- Documentation : `docs/api/leads.md`, addendum ADR 007.
+
 ### J18 — Contacts et consentement
 - Ajout : tables `contacts` et `consent_events` (enums `channel_type`, `consent_status`), index uniques partiels (e-mail, téléphone, identifiant externe), RLS en lecture (owner, admin, marketing), historique de consentement append-only ; migration `20261120100000` et retour arrière.
 - Ajout : fonctions `create_contact`, `update_contact`, `record_consent`, `revoke_consent`, `set_do_not_contact` (écriture uniquement par fonctions, quota « contacts » du plan, audit sans donnée personnelle).

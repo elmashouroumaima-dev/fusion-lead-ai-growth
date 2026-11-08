@@ -486,3 +486,26 @@ Cible : 30,2 % | Réel : à valider | Statut : — (le C1 attend le GO de la res
 - Pas d'écran (le plan n'en prévoit pas au J18).
 - Conflit e-mail / téléphone : refus `conflict`, pas de table de file de revue (non prévue par la spec ni un ADR).
 - `suppressions` et désinscription : avec l'e-mail (J31–33), comme dans le plan validé (le prompt parlait de « J18–20 désabonnement »).
+
+## J19 — Pipelines, leads et deals (branche `day-19-leads`, NON commité)
+Cible : 31,7 % | Réel : à valider | Statut : — (le C1 attend le GO de la responsable technique)
+
+### Tâches
+| Tâche | Estimé | Livré | Validée |
+|---|---|---|---|
+| `pipelines` / `pipeline_stages` (E1) | 1,5 h | oui (migration `20261121100000`, étapes par défaut par langue, étape système) | oui (pgTAP, API réelle) |
+| `leads` | 1,5 h | oui (FK composites, responsable, étape cohérente, UTM, score) | oui |
+| `deals` | 2 h | oui (won / lost cohérents avec l'étape, devise, valeur) | oui |
+| Tests RLS | 1 h | oui | oui |
+
+### Validation du jour
+- Un lead ne peut référencer qu'un projet et un contact de **son** entreprise (FK composites ; refus testé en base et par l'API).
+- Les étapes sont configurables par entreprise (création, renommage, repositionnement, suppression contrôlée, pipeline par défaut).
+
+### Revue sécurité (0 bloquant, 3 moyens, 6 faibles) — corrigés : marketing ne choisit plus le responsable à la création, NaN et dates infinies, lead qui change de pipeline, libération des leads à la suppression de la ligne et à la rétrogradation, verrou sur le membre assigné, abonnement actif exigé, plafonds de leads et deals, audit sans réglage de session, erreurs NOT NULL ; documenté : idempotence au niveau des routes.
+
+### Tests : domain 527 ✓ · web 2310 ✓ (leads : 22) · pgTAP 1780 (dont 140_leads_pipelines_deals : 182) ✓ · API réelle 379 ✓ (leads : 13) · acceptation 56 ✓ · lint, typecheck, check:leaks verts
+### Écarts à la spec / plan
+- Le commercial ne crée pas de lead au J19 (il ne voit pas les contacts non assignés) : avec la capture et l'assignation (J21–22).
+- `campaign_id` sans clé étrangère jusqu'au J42 ; pas d'unicité (contact, projet) avant le J21.
+- Pas d'écran (le plan prévoit l'UI CRM au J24) ; l'historique des changements d'étape est l'audit jusqu'au J20 (`activities`).

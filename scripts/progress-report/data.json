@@ -5,7 +5,7 @@
   "tests": [
     {
       "label": "Web (application)",
-      "value": 2144
+      "value": 2217
     },
     {
       "label": "Base de données (pgTAP)",
@@ -29,7 +29,7 @@
     },
     {
       "label": "Acceptation (T1, T5)",
-      "value": 45
+      "value": 56
     }
   ],
   "adrCount": 14,
@@ -183,9 +183,9 @@
           "day": "J16–J17",
           "days": 2,
           "name": "Projets et produits",
-          "progress": 50,
+          "progress": 85,
           "status": "review",
-          "note": "J16 : tables, RLS, quotas, API. L'interface et Storage arrivent au J17."
+          "note": "J16 : base, quotas, API. J17 : écran complet ; l'envoi de fichiers (Storage) reste à faire."
         },
         {
           "day": "J18–J20",

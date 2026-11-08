@@ -645,7 +645,7 @@ select is(
 select is(
   (select count(*)::int from pg_proc pr join pg_namespace n on n.oid = pr.pronamespace
     where n.nspname = 'private' and (pr.proname like 'audit\_%' or pr.proname = 'mask_email')),
-  20, 'vingt fonctions d''audit dans le schéma private (dont audit_subscriptions, J14, audit_projects et audit_products, J16, audit_contacts et audit_consent_events, J18, audit_pipelines, audit_pipeline_stages, audit_leads et audit_deals, J19, audit_activities, J20, audit_form_keys, J21, audit_assignment_rules, J22)'
+  21, 'vingt et une fonctions d''audit dans le schéma private (dont audit_subscriptions, J14, audit_projects et audit_products, J16, audit_contacts et audit_consent_events, J18, audit_pipelines, audit_pipeline_stages, audit_leads et audit_deals, J19, audit_activities, J20, audit_form_keys, J21, audit_assignment_rules, J22, audit_import_batches, J23)'
 );
 select is(
   (select pr.prosecdef and pr.proconfig = array['search_path=""']::text[]

@@ -377,3 +377,14 @@ export function psql(sql: string): string {
     stdio: ["pipe", "pipe", "pipe"],
   }).trim();
 }
+
+/** Télécharge un objet Storage AVEC LE RÔLE service_role (comme le worker) ; `null` s'il n'existe pas. */
+export async function downloadAsService(bucket: string, objectPath: string): Promise<Uint8Array | null> {
+  const { Prefer: _prefer, "Content-Type": _contentType, ...auth } = headersFor("service");
+  void _prefer;
+  void _contentType;
+  const response = await fetch(`${stack.apiUrl}/storage/v1/object/${bucket}/${objectPath}`, { headers: auth });
+  if (response.status === 404 || response.status === 400) return null;
+  if (!response.ok) throw new Error(`storage_download_failed_${response.status}`);
+  return new Uint8Array(await response.arrayBuffer());
+}

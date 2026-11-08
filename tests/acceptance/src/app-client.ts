@@ -69,6 +69,32 @@ export async function getPage(session: Session | null, pathname: string, activeO
   return { status: response.status, location: response.headers.get("location"), body: await response.text() };
 }
 
+export type ApiResponse = { status: number; headers: Headers; json: Record<string, unknown> };
+
+/** POST JSON vers une route d'API (`activeOrg` : indice d'entreprise active, cookie ; `headers` : en-têtes ajoutés). */
+export async function postJson(
+  session: Session | null,
+  pathname: string,
+  body: unknown,
+  options: { activeOrg?: string; headers?: Record<string, string> } = {},
+): Promise<ApiResponse> {
+  const jar = { ...(session?.cookies ?? {}), ...(options.activeOrg ? { fl_active_org: options.activeOrg } : {}) };
+  const response = await fetch(`${BASE_URL}${pathname}`, {
+    method: "POST",
+    redirect: "manual",
+    headers: { "content-type": "application/json", cookie: Object.entries(jar).map(([k, v]) => `${k}=${v}`).join("; "), ...options.headers },
+    body: typeof body === "string" ? body : JSON.stringify(body),
+  });
+  const text = await response.text();
+  let json: Record<string, unknown> = {};
+  try {
+    json = text ? (JSON.parse(text) as Record<string, unknown>) : {};
+  } catch {
+    json = { raw: text.slice(0, 200) };
+  }
+  return { status: response.status, headers: response.headers, json };
+}
+
 /** Texte visible d'une page (scripts, styles et balises retirés) : sert aux assertions « aucune donnée de l'autre entreprise ». */
 export const visibleText = (page: Page): string =>
   page.body

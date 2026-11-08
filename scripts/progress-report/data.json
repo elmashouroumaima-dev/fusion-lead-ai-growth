@@ -5,11 +5,11 @@
   "tests": [
     {
       "label": "Web (application)",
-      "value": 2452
+      "value": 2469
     },
     {
       "label": "Base de données (pgTAP)",
-      "value": 2290
+      "value": 2397
     },
     {
       "label": "Permissions (RBAC)",
@@ -17,19 +17,19 @@
     },
     {
       "label": "Domaine (règles métier)",
-      "value": 589
+      "value": 608
     },
     {
       "label": "RLS via l'API réelle",
-      "value": 431
+      "value": 436
     },
     {
       "label": "Worker et adaptateurs",
-      "value": 80
+      "value": 110
     },
     {
       "label": "Acceptation (T1, T5)",
-      "value": 99
+      "value": 106
     }
   ],
   "adrCount": 14,
@@ -215,9 +215,9 @@
           "day": "J27",
           "days": 1,
           "name": "Adaptateur CRM · Gate G2",
-          "progress": 0,
-          "status": "todo",
-          "note": "Lead → deal gagné, historique"
+          "progress": 60,
+          "status": "part",
+          "note": "Adaptateur CRM, mapping et synchro de contacts livrés (J25) ; Gate G2 (lead → deal gagné, historique) à valider."
         }
       ]
     },

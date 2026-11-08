@@ -1,4 +1,5 @@
 import { z } from "zod";
+import type { LeadAssigner } from "./assignment";
 
 /**
  * Contexte d'exécution d'un job. `organizationId` vient de la ligne du job (jamais de la charge utile) : tout
@@ -67,16 +68,35 @@ export const noopHandler = defineHandler({
 });
 
 /**
- * `lead.assign` (enregistré par la capture publique, J21) : handler PROVISOIRE sans effet. Les règles d'assignation, la file
- * « non assignés » et l'alerte au manager sont le J22 ; en attendant, le lead reste dans l'étape « non assigné » (repli prévu
- * par la spec §9.1) et le job se termine proprement au lieu de finir en échec définitif (type inconnu).
+ * `lead.assign` (enregistré par la capture publique, J21 ; spec §9.1 étape 4). L'entreprise est celle de la LIGNE DU JOB ; la charge
+ * utile ne porte que l'identifiant du lead. Idempotent : un lead déjà assigné (ou plus dans la file « non assignés ») est ignoré,
+ * donc un rejeu ne réassigne pas. Sans règle ni membre éligible, la base laisse le lead « non assigné » et alerte les admins
+ * (réussite du job). Une erreur technique est réessayée ; à la dernière tentative, le lead reste « non assigné » et les admins
+ * sont alertés avant l'échec définitif.
  */
-export const leadAssignHandler = defineHandler({
-  kind: "lead.assign",
-  schema: z.object({ lead_id: z.uuid() }).strict(),
-  run: async () => {},
-});
+export function createLeadAssignHandler(assigner: LeadAssigner): JobHandler {
+  return defineHandler({
+    kind: "lead.assign",
+    schema: z.object({ lead_id: z.uuid() }).strict(),
+    run: async (ctx, payload) => {
+      try {
+        await assigner.assign(ctx.organizationId, payload.lead_id);
+      } catch (error) {
+        if (ctx.attempt >= ctx.maxAttempts) {
+          try {
+            await assigner.flagUnassigned(ctx.organizationId, payload.lead_id);
+          } catch {
+            // l'alerte est un effort ; l'erreur d'origine reste celle du job
+          }
+        }
+        throw error;
+      }
+    },
+  });
+}
 
-export function createDefaultRegistry(): HandlerRegistry {
-  return new HandlerRegistry().register(noopHandler).register(leadAssignHandler);
+export type RegistryDeps = { assigner: LeadAssigner };
+
+export function createDefaultRegistry(deps: RegistryDeps): HandlerRegistry {
+  return new HandlerRegistry().register(noopHandler).register(createLeadAssignHandler(deps.assigner));
 }

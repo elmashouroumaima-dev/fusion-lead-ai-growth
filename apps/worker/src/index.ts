@@ -1,6 +1,7 @@
 import { EnvValidationError } from "@fusion-leap/domain";
 import { hostname } from "node:os";
 import { randomBytes } from "node:crypto";
+import { createSupabaseLeadAssigner } from "./assignment";
 import { loadWorkerEnv } from "./env";
 import { createDefaultRegistry } from "./handlers";
 import { WORKER_NAME } from "./info";
@@ -20,7 +21,7 @@ try {
   const workerId = `${hostname().replace(/[^A-Za-z0-9._-]/g, "-").slice(0, 60)}:${process.pid}:${randomBytes(4).toString("hex")}`;
   const runner = new Runner({
     store: createSupabaseJobStore(env),
-    registry: createDefaultRegistry(),
+    registry: createDefaultRegistry({ assigner: createSupabaseLeadAssigner(env) }),
     workerId,
     logger,
   });

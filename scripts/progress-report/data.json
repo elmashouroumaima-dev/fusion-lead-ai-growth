@@ -5,11 +5,11 @@
   "tests": [
     {
       "label": "Web (application)",
-      "value": 2265
+      "value": 2288
     },
     {
       "label": "Base de données (pgTAP)",
-      "value": 1487
+      "value": 1598
     },
     {
       "label": "Permissions (RBAC)",
@@ -17,11 +17,11 @@
     },
     {
       "label": "Domaine (règles métier)",
-      "value": 462
+      "value": 511
     },
     {
       "label": "RLS via l'API réelle",
-      "value": 349
+      "value": 365
     },
     {
       "label": "Worker et adaptateurs",
@@ -191,9 +191,9 @@
           "day": "J18–J20",
           "days": 3,
           "name": "Contacts, consentement, désabonnement",
-          "progress": 0,
-          "status": "todo",
-          "note": ""
+          "progress": 33,
+          "status": "part",
+          "note": "J18 livré (contacts, consentement, déduplication) ; leads, deals et activités aux J19–J20."
         },
         {
           "day": "J21–J23",

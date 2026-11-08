@@ -579,3 +579,27 @@ Cible : 36,5 % | Réel : à valider | Statut : — (le C1 attend le GO de la res
 - Table `notifications` créée au J22 (l'ADR 007 J14 la renvoyait au J39) : nécessaire à l'alerte du plan.
 - Vue « Leads non assignés » = UI (J24) ; le J22 livre le service et l'API.
 - Un lead créé à la main (J19) ne passe pas par la règle (la spec ne le prévoit que pour la capture) ; le commercial ne crée toujours pas de lead.
+
+## J23 — Import CSV (branche `day-23-import`, NON commité)
+Cible : 38,1 % | Réel : à valider | Statut : — (le C1 attend le GO de la responsable technique)
+
+### Tâches
+| Tâche | Estimé | Livré | Validée |
+|---|---|---|---|
+| Envoi + analyse en continu | 1,5 h | oui (route `POST /api/imports`, parseur CSV sans dépendance, bucket privé `imports`) | oui (unitaires, Storage réel) |
+| Mapping + aperçu 20 lignes | 2 h | oui (`/api/imports/preview`, n'écrit rien) | oui (HTTP réel) |
+| Rapport de dédup | 1 h | oui (nouveaux, connus, doublons, erreurs par ligne ; rapport CSV téléchargeable) | oui |
+| Commit via job | 1,5 h | oui (`/api/imports/confirm` -> job `import_csv`, handler worker idempotent) | oui |
+
+### Validation du jour
+- **Rien n'est écrit avant la confirmation** (HTTP réel : après l'envoi et l'aperçu, aucun contact, lead ni job).
+- `leads-100.csv` : **65 contacts créés, 17 rattachés, 18 lignes refusées**, un job d'assignation par lead (67), **aucun consentement** ; rejeu du job sans doublon ; rapport sans donnée de contact.
+
+### Revue sécurité (0 bloquant, 6 moyens, 6 faibles) — corrigés : rapport lu par blocs (plus de troncature à 1000), projet archivé, corps lu après l'authentification, lot « running » annulable si son job est mort, fichier retiré à l'annulation, plafond de lots sur 90 jours, jobs d'assignation étalés ; **soumis à la responsable technique** : purge du Storage, écart avec l'ADR 014 (owner et admin seulement), hash du fichier, double opt-in.
+
+### Tests : domain 574 ✓ · web 2406 ✓ (imports : 17) · worker 56 ✓ (import_csv : 12) · pgTAP 2227 (dont 180_imports : 117) ✓ · API réelle 425 ✓ (imports : 10) · acceptation 83 ✓ (import : 12) · lint, typecheck, check:leaks verts
+### Écarts à la spec / plan
+- Tables `import_batches` / `import_rows` et bucket `imports` : ajouts (addendum ADR 007).
+- Import réservé à owner et admin (l'ADR 014 y ajoute marketing et commercial « assigné à soi »).
+- Pas d'écran (J24) ; pas de purge du Storage (à planifier avec le worker).
+- Numéros du rapport = numéros d'enregistrement (lignes vides ignorées).

@@ -3,6 +3,15 @@
 Format : Keep a Changelog. Une entrée par jour de travail.
 
 ## [Non publié]
+### J23 — Import CSV de leads
+- Ajout : tables `import_batches` et `import_rows`, bucket privé `imports` (10 Mo, owner et admin), fonctions `create_import_batch`, `import_dedup_check`, `confirm_import`, `cancel_import` (owner et admin) et `import_start`, `import_row`, `import_record_error`, `import_finish`, `import_fail` (service_role) ; migration `20261125100000` et retour arrière.
+- Ajout : routes `POST /api/imports` (fichier brut), `/preview`, `/confirm`, `/cancel`, `GET /api/imports` et `/report` (CSV sans donnée de contact) ; assistant en 3 étapes, **rien n'est écrit avant la confirmation**.
+- Ajout : handler worker `import_csv` (même dédup que la capture publique, lead « non assigné » + job `lead.assign` étalé, contact « ne plus contacter » ignoré, aucun consentement créé, rejeu sans doublon) ; `packages/domain/src/imports` (parseur CSV en continu sans dépendance, mapping, normalisation) ; `apps/web/lib/imports` ; fixture `tests/fixtures/leads-100.csv`.
+- Ajout : `withRoute` accepte un corps brut (`readBody`, `request` dans le contexte) et une réponse texte.
+- Sécurité (revue adverse) : rapport lu par blocs de 1000, projet archivé refusé, corps de 10 Mo lu après l'authentification, lot « running » dont le job est mort annulable, fichier retiré à l'annulation, plafond de lots sur 90 jours, jobs d'assignation étalés.
+- Tests : domaine (21), service web (17), worker (12), pgTAP (117), API réelle (10), acceptation (12 : 100 lignes, 65 créés, 17 rattachés, 18 refusés).
+- Documentation : `docs/api/imports.md`, addendum ADR 007.
+
 ### J22 — Assignation automatique
 - Ajout : `assignment_rules` (round-robin ou membre fixe, règle par projet ou par défaut, 1 à 50 membres, curseur) et `notifications` (alerte in-app par destinataire, dédupliquée) ; fonctions `create_assignment_rule`, `update_assignment_rule`, `delete_assignment_rule`, `mark_notification_read` ; migration `20261124100000` et retour arrière.
 - Ajout : `auto_assign_lead` et `flag_lead_unassigned` (service_role) : lead verrouillé, membre éligible encore actif choisi à partir du curseur, rejeu sans double assignation ; sans règle ou sans membre, le lead reste « non assigné » et les owner / admin sont alertés.

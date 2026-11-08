@@ -17,6 +17,7 @@ export type ServiceErrorCode =
   | "rate_limited"
   | "payload_too_large"
   | "quota_exceeded"
+  | "conflict"
   | "service_unavailable"
   | "internal_error";
 
@@ -32,6 +33,7 @@ const STATUS: Record<ServiceErrorCode, number> = {
   rate_limited: 429,
   payload_too_large: 413,
   quota_exceeded: 429,
+  conflict: 409,
   service_unavailable: 503,
   internal_error: 500,
 };
@@ -48,6 +50,7 @@ const MESSAGE: Record<ServiceErrorCode, string> = {
   rate_limited: "Too many requests. Please retry later.",
   payload_too_large: "The request body is too large.",
   quota_exceeded: "The quota of your plan has been reached.",
+  conflict: "The resource is in a state that does not allow this operation.",
   service_unavailable: "The service is temporarily unavailable.",
   internal_error: "An unexpected error occurred.",
 };

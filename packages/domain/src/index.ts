@@ -8,3 +8,4 @@ export * from "./members";
 export * from "./theme";
 export * from "./plans";
 export * from "./smtp";
+export * from "./projects";

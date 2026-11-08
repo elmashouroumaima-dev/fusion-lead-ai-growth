@@ -5,11 +5,11 @@
   "tests": [
     {
       "label": "Web (application)",
-      "value": 2377
+      "value": 2389
     },
     {
       "label": "Base de données (pgTAP)",
-      "value": 2024
+      "value": 2110
     },
     {
       "label": "Permissions (RBAC)",
@@ -17,19 +17,19 @@
     },
     {
       "label": "Domaine (règles métier)",
-      "value": 553
+      "value": 559
     },
     {
       "label": "RLS via l'API réelle",
-      "value": 407
+      "value": 415
     },
     {
       "label": "Worker et adaptateurs",
-      "value": 58
+      "value": 63
     },
     {
       "label": "Acceptation (T1, T5)",
-      "value": 68
+      "value": 71
     }
   ],
   "adrCount": 14,
@@ -207,9 +207,9 @@
           "day": "J24–J26",
           "days": 3,
           "name": "Capture publique, assignation, import CSV",
-          "progress": 33,
+          "progress": 67,
           "status": "part",
-          "note": "J21 livré (clés de formulaire, capture publique) ; assignation (J22), import CSV (J23) à faire."
+          "note": "J21 et J22 livrés (clés de formulaire, capture publique, assignation automatique et alertes) ; import CSV (J23) à faire."
         },
         {
           "day": "J27",

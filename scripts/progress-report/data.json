@@ -29,7 +29,7 @@
     },
     {
       "label": "Acceptation (T1, T5)",
-      "value": 134
+      "value": 143
     }
   ],
   "adrCount": 14,
@@ -215,9 +215,9 @@
           "day": "J27",
           "days": 1,
           "name": "Adaptateur CRM · Gate G2",
-          "progress": 80,
-          "status": "part",
-          "note": "Adaptateur CRM, mapping et synchro de contacts livrés (J25) ; tests ventes T2 et matrice des rôles livrés (J26) ; Gate G2 (lead → deal gagné, historique) à valider."
+          "progress": 100,
+          "status": "review",
+          "note": "Adaptateur CRM (J25), tests ventes (J26) et parcours lead → deal gagné avec historique (J27) livrés ; checkpoint C2 rédigé : GO avec réserves proposé, décision de la responsable technique."
         }
       ]
     },

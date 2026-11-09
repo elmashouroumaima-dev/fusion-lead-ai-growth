@@ -3,6 +3,9 @@
 Format : Keep a Changelog. Une entrée par jour de travail.
 
 ## [Non publié]
+### Décision C2 — écrans CRM avant G3
+- Modification : `docs/plan/development-plan.md` (addendum C2) : 5 jours d'écrans insérés (J30b contacts et consentement, J30c et J30d fiche lead, J39b configuration, J39c import) ; le plan passe de 63 à 68 jours ouvrés (408 h) ; G3 lun 18 jan 2027, fin du pilote mar 16 fév 2027 ; dates et cibles de tous les jours et des fiches `docs/backlog/` recalculées sur 68 jours ; fiches J30b, J30c, J30d, J39b, J39c ajoutées ; matrice de traçabilité §13-4 complétée.
+- Modification : `docs/checkpoints/C2.md` et `C2-decisions.md` (décision A enregistrée ; la boîte de réception est J37, pas J38) ; rapport d'avancement : 2 modules « écrans CRM » (5 jours).
 ### J27 — Checkpoint C2 / Gate G2
 - Ajout : scénario **G2** (`tests/acceptance/src/g2-lead-to-deal.test.ts`, 9 tests) : formulaire public -> lead -> vrai handler `lead.assign` -> deal créé et déplacé par `/api/deals/move` jusqu'à « gagné » -> historique d'activités lu par chaque rôle (jamais par l'analyste ni l'autre entreprise) -> audit sans valeur ni adresse -> rejeu sans effet ; même parcours chez Beta sans fuite.
 - Ajout : `docs/checkpoints/C2.md` (audit de conformité Phase 2 par un relecteur indépendant : 0 bloquant, 3 majeurs, 9 mineurs ; recommandation GO avec réserves, décision à la responsable technique).

@@ -695,3 +695,7 @@ Cible : 44,4 % | Réel : à valider | Statut : GO du C2 donné par la responsabl
 ### Écarts à la spec / plan
 - Aucun code applicatif ni migration. Helper `assign-worker.ts` extrait (partagé par `t2-sales` et G2).
 - Pas de Playwright (HTTP réel, comme T1 et T2) : réserve C1 n°2 maintenue.
+
+### Décision C2 du 9 nov 2026 (suite du J27)
+- GO du C2 donné par la responsable technique. Écrans CRM : **option A** (avant G3), mise en œuvre dans le plan : J30b contacts et consentement, J30c et J30d fiche lead, J39b configuration, J39c import. Plan : 68 jours, G3 le lun 18 jan 2027, fin le mar 16 fév 2027. Cibles de tous les jours recalculées sur 68 jours (les cibles citées plus haut sont celles de l'ancien plan à 63 jours).
+- Restent à décider : relecture et acceptation des ADR (004 et 008 avant J28 ; 007 pour les 8 tables de la Phase 2), job CI de bout en bout.

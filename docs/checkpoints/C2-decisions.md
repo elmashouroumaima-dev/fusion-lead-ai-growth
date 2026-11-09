@@ -12,7 +12,7 @@ Contexte : `docs/checkpoints/C2.md` (audit de la Phase 2, 0 bloquant, 3 majeurs)
 | NO-GO | La Phase 3 attend la correction des écarts 1 à 3. |
 
 ## 2. Écrans manquants (écart 1) : avant G3 ou G2 « au niveau API » ?
-**Décision (9 nov 2026) : option A**, choisie par l'ingénieur·e sur délégation de la responsable technique. Les écrans sont planifiés avant G3 : fiche lead (détail, chronologie, note / appel / tâche, création de deal) **avant J38** (la boîte de réception en dépend) ; clés de formulaire, règles d'assignation, notifications et import **avant G3 (J41)** ; contacts et consentement **avant le premier envoi (J31)**. L'insertion de ces jours dans `docs/plan/development-plan.md` fait l'objet d'un mini-plan à valider.
+**Décision (9 nov 2026) : option A**, choisie par l'ingénieur·e sur délégation de la responsable technique. Les écrans sont planifiés avant G3 : fiche lead (détail, chronologie, note / appel / tâche, création de deal) **avant J37** (la boîte de réception en dépend) ; clés de formulaire, règles d'assignation, notifications et import **avant G3 (J41)** ; contacts et consentement **avant le premier envoi (J31)**. **Mis en œuvre le 9 nov 2026** (mini-plan validé) : 5 jours insérés dans `docs/plan/development-plan.md` (addendum C2) : J30b contacts et consentement, J30c et J30d fiche lead, J39b configuration, J39c import. Le plan passe à 68 jours ; G3 devient le lun 18 jan et la fin du pilote le mar 16 fév (jours fériés exclus).
 
 Aujourd'hui aucun écran ni route ne permet de : créer un lead ou un deal, noter une activité, voir la chronologie, gérer les clés de formulaire, les règles d'assignation, les contacts et le consentement, importer un fichier. Le critère §13-4 (« visible ») est démontré au niveau service, API et base.
 

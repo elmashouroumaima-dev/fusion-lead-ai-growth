@@ -699,3 +699,6 @@ Cible : 44,4 % | Réel : à valider | Statut : GO du C2 donné par la responsabl
 ### Décision C2 du 9 nov 2026 (suite du J27)
 - GO du C2 donné par la responsable technique. Écrans CRM : **option A** (avant G3), mise en œuvre dans le plan : J30b contacts et consentement, J30c et J30d fiche lead, J39b configuration, J39c import. Plan : 68 jours, G3 le lun 18 jan 2027, fin le mar 16 fév 2027. Cibles de tous les jours recalculées sur 68 jours (les cibles citées plus haut sont celles de l'ancien plan à 63 jours).
 - Restent à décider : relecture et acceptation des ADR (004 et 008 avant J28 ; 007 pour les 8 tables de la Phase 2), job CI de bout en bout.
+
+### Décisions du 2026-11-09 (ADR, CI, Playwright)
+- ADR acceptés par délégation de la responsable technique : 001 à 006, 014, 015 ; 007 pour les Phases 1 et 2 ; 016 sous condition (avant J54). Restent Proposed : 008 (Q2, à trancher au début de J31), 010 (Q5), 012 (avant J47). Job CI e2e (option A) avant J29 ; Playwright décidé au J58 ; `libphonenumber-js` épinglé. Q1 reste ouverte ; fusion des PR #8 à #31 en attente de l'ordre de la responsable technique.

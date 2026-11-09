@@ -3,6 +3,10 @@
 Format : Keep a Changelog. Une entrée par jour de travail.
 
 ## [Non publié]
+### Décisions du 2026-11-09 (ADR, CI, Playwright)
+- Modification : ADR 001 à 006, 014, 015 passés en **Accepted** ; 007 accepté pour les Phases 1 et 2 ; 016 accepté sous condition (écriture restreinte aux administrateurs de la plateforme avant tout client réel, au plus tard J54) ; 008, 010 et 012 restent Proposed ; ADR 005 complété (modèle « lecture par politique, écriture par fonctions »).
+- Modification : `libphonenumber-js` épinglé en `1.13.15`.
+- Décision : job CI de bout en bout (option A) avant J29 ; Playwright décidé au J58. Détail : `docs/checkpoints/C2-decisions.md`.
 ### Décision C2 — écrans CRM avant G3
 - Modification : `docs/plan/development-plan.md` (addendum C2) : 5 jours d'écrans insérés (J30b contacts et consentement, J30c et J30d fiche lead, J39b configuration, J39c import) ; le plan passe de 63 à 68 jours ouvrés (408 h) ; G3 lun 18 jan 2027, fin du pilote mar 16 fév 2027 ; dates et cibles de tous les jours et des fiches `docs/backlog/` recalculées sur 68 jours ; fiches J30b, J30c, J30d, J39b, J39c ajoutées ; matrice de traçabilité §13-4 complétée.
 - Modification : `docs/checkpoints/C2.md` et `C2-decisions.md` (décision A enregistrée ; la boîte de réception est J37, pas J38) ; rapport d'avancement : 2 modules « écrans CRM » (5 jours).

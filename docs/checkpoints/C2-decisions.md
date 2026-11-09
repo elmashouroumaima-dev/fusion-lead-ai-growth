@@ -36,3 +36,13 @@ Les ADR 001 à 008, 010 à 012 et 014 à 016 sont à relire. Les 8 tables ajout�
 - Q1 : l'API du CRM Fusion Leap est-elle documentée ? Sans réponse, pas d'adaptateur réel (CRM interne et CSV seulement).
 - Playwright (binaires de navigateur) : à installer ou à garder en HTTP ? Réserve C1 n°2 toujours ouverte.
 - `libphonenumber-js` : épingler la version exacte (aujourd'hui `^1.13.15`).
+
+## Décisions du 2026-11-09 (prises par l'ingénieur·e sur délégation de la responsable technique)
+| Sujet | Décision |
+|---|---|
+| **ADR** | **Acceptés** : 001, 002, 003, 004, 005 (avec ajout sur le modèle d'écriture par fonctions), 006, 014, 015 ; 011 l'était déjà. **007** accepté pour les entités des Phases 1 et 2 seulement. **016** accepté **sous condition** : écriture restreinte aux administrateurs de la plateforme avant tout client réel (au plus tard J54). **Restent Proposed** : 008 (dépend de Q2 ; à trancher au début de J31), 010 (dépend de Q5), 012 (fournisseur IA, avant J47). |
+| **Job CI de bout en bout** | **Option A** : job dédié (pile Supabase locale, build, démarrage de l'application, `pnpm test:e2e`, `test:coverage` de `domain` et `permissions`). Réalisé dans une PR séparée **avant J29** (environ 2 h, mini-plan à valider) ; pas de jour ajouté au plan. |
+| **Playwright** | Rester en **HTTP réel** jusqu'au J58 ; décider l'installation (binaires de navigateur) au J58 pour la recette AR (RTL) et EN du J59. Réserve C1 n°2 maintenue. |
+| **`libphonenumber-js`** | Version exacte `1.13.15` épinglée (fait). |
+| **Q1** (API du CRM Fusion Leap) | **Reste ouverte** : l'information doit venir de l'équipe du CRM. Sans réponse, CRM interne et CSV seulement. |
+| **Fusion des PR (#8 à #31)** | Recommandation : fusion **dans l'ordre**, de #8 à #31, une fois le CI vert sur chacune (merge commit, la base de chaque PR suivante passe alors sur `main`). Non exécutée : elle écrit sur `main` et attend l'ordre explicite de la responsable technique. |

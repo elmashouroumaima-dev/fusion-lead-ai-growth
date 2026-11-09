@@ -3,6 +3,10 @@
 Format : Keep a Changelog. Une entrée par jour de travail.
 
 ## [Non publié]
+### J27 — Checkpoint C2 / Gate G2
+- Ajout : scénario **G2** (`tests/acceptance/src/g2-lead-to-deal.test.ts`, 9 tests) : formulaire public -> lead -> vrai handler `lead.assign` -> deal créé et déplacé par `/api/deals/move` jusqu'à « gagné » -> historique d'activités lu par chaque rôle (jamais par l'analyste ni l'autre entreprise) -> audit sans valeur ni adresse -> rejeu sans effet ; même parcours chez Beta sans fuite.
+- Ajout : `docs/checkpoints/C2.md` (audit de conformité Phase 2 par un relecteur indépendant : 0 bloquant, 3 majeurs, 9 mineurs ; recommandation GO avec réserves, décision à la responsable technique).
+- Modification : helper `assign-worker.ts` partagé par `t2-sales` et G2. Aucune migration, aucun code applicatif modifié. Tests : acceptation 134 -> 143.
 ### J26 — Tests ventes
 - Ajout : scénario **T2** automatisé (`tests/acceptance/src/t2-sales.test.ts`) : `leads-100.csv` par HTTP puis par le vrai handler `import_csv` (65 contacts créés, 17 rattachés, 18 lignes refusées, 67 leads), un job `lead.assign` par lead traité par le VRAI handler du worker (rotation round-robin dans l'ordre de la règle, répartition 22 / 22 / 23, rejeu sans seconde assignation), chiffres affichés sur `/leads` par rôle, rapport CSV sans donnée de contact, rejeu du fichier sans aucun doublon, puis le même fichier chez l'autre entreprise (jeux de contacts séparés, aucune adresse partagée, assignation limitée à ses membres) et un test de contexte forgé (propriétaire de Beta désignant Alpha).
 - Ajout : matrice des rôles du CRM (`crm-roles-matrix.test.ts`) : 13 routes d'API (export, deals, intégrations, mapping, synchro, import complet) et 3 pages x 5 rôles + anonyme ; rôle non autorisé = 403 exact, rôle autorisé = statut exact de la route, anonyme = 401 ; capture publique : une session ne donne aucun droit.

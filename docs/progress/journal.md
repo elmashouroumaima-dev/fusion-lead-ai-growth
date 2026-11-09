@@ -510,7 +510,7 @@ Cible : 31,7 % | Réel : à valider | Statut : — (le C1 attend le GO de la res
 - `campaign_id` sans clé étrangère jusqu'au J42 ; pas d'unicité (contact, projet) avant le J21.
 - Pas d'écran (le plan prévoit l'UI CRM au J24) ; l'historique des changements d'étape est l'audit jusqu'au J20 (`activities`).
 
-## J20 — Activités et chronologie (branche `day-20-activities`, NON commité)
+## J20 — Activités et chronologie (branche `day-20-activities`, commité, PR ouverte)
 Cible : 33,3 % | Réel : à valider | Statut : — (le C1 attend le GO de la responsable technique)
 
 ### Tâches
@@ -533,7 +533,7 @@ Cible : 33,3 % | Réel : à valider | Statut : — (le C1 attend le GO de la res
 - Pas d'écran (le plan prévoit l'UI CRM au J24) ; pas de rappels d'échéance (worker avec les canaux) ; pas d'activité sans lead.
 - Bug trouvé en test et corrigé : supprimer la ligne d'un membre échouait quand il avait écrit une entrée de chronologie (clé étrangère « set null » bloquée par l'immutabilité).
 
-## J21 — Capture publique (branche `day-21-capture`, NON commité)
+## J21 — Capture publique (branche `day-21-capture`, commité, PR ouverte)
 Cible : 34,9 % | Réel : à valider | Statut : — (le C1 attend le GO de la responsable technique)
 
 ### Tâches
@@ -557,7 +557,7 @@ Cible : 34,9 % | Réel : à valider | Statut : — (le C1 attend le GO de la res
 - Pas de double opt-in (spec muette) : consentement non vérifié ; à traiter avant tout envoi marketing.
 - Pas d'écran de gestion des clés (J24).
 
-## J22 — Assignation (branche `day-22-assignment`, NON commité)
+## J22 — Assignation (branche `day-22-assignment`, commité, PR ouverte)
 Cible : 36,5 % | Réel : à valider | Statut : — (le C1 attend le GO de la responsable technique)
 
 ### Tâches
@@ -580,7 +580,7 @@ Cible : 36,5 % | Réel : à valider | Statut : — (le C1 attend le GO de la res
 - Vue « Leads non assignés » = UI (J24) ; le J22 livre le service et l'API.
 - Un lead créé à la main (J19) ne passe pas par la règle (la spec ne le prévoit que pour la capture) ; le commercial ne crée toujours pas de lead.
 
-## J23 — Import CSV (branche `day-23-import`, NON commité)
+## J23 — Import CSV (branche `day-23-import`, commité, PR ouverte)
 Cible : 38,1 % | Réel : à valider | Statut : — (le C1 attend le GO de la responsable technique)
 
 ### Tâches
@@ -604,7 +604,7 @@ Cible : 38,1 % | Réel : à valider | Statut : — (le C1 attend le GO de la res
 - Pas d'écran (J24) ; pas de purge du Storage (à planifier avec le worker).
 - Numéros du rapport = numéros d'enregistrement (lignes vides ignorées).
 
-## J24 — UI CRM (branche `day-24-crm-ui`, NON commité)
+## J24 — UI CRM (branche `day-24-crm-ui`, commité, PR ouverte)
 Cible : 39,7 % | Réel : à valider | Statut : — (le C1 attend le GO de la responsable technique)
 
 ### Tâches
@@ -626,7 +626,7 @@ Cible : 39,7 % | Réel : à valider | Statut : — (le C1 attend le GO de la res
 - Glisser-déposer natif (aucune bibliothèque) + menu « Déplacer vers… » ; extension `pg_trgm`.
 - Pas de fiche détaillée d'un lead ; responsable affiché par un identifiant court.
 
-## J25 — Adaptateur CRM (branche `day-25-crm-adapter`, NON commité)
+## J25 — Adaptateur CRM (branche `day-25-crm-adapter`, commité, PR ouverte)
 Cible : 41,3 % | Réel : à valider | Statut : — (le C1 attend le GO de la responsable technique)
 
 ### Tâches
@@ -649,7 +649,7 @@ Cible : 41,3 % | Réel : à valider | Statut : — (le C1 attend le GO de la res
 - Table `integrations` créée ici en version minimale (le J28 l'étend avec les secrets).
 - Synchro de contacts seulement ; pas d'historique dédié (état = job).
 
-## J26 — Tests ventes (branche `day-25-crm-adapter`, NON commité)
+## J26 — Tests ventes (branche `day-26-sales-tests`, commité, PR ouverte)
 Cible : 42,9 % | Réel : à valider | Statut : — (le C1 attend le GO de la responsable technique)
 
 ### Tâches
@@ -673,3 +673,25 @@ Cible : 42,9 % | Réel : à valider | Statut : — (le C1 attend le GO de la res
 - Constat : `POST /api/imports` valide le type de contenu avant le rôle (un marketing avec un type refusé reçoit 400, pas 403) ; sans conséquence (rien n'est écrit), signalé.
 - `@vitest/coverage-v8` ajouté en devDependency de `packages/domain` (validé au mini-plan) ; déjà présent pour `packages/permissions`.
 
+## J27 — Checkpoint C2 / Gate G2 (branche `day-26-sales-tests`, NON commité)
+Cible : 44,4 % | Réel : à valider | Statut : — (GO du C2 à décider par la responsable technique)
+
+### Tâches
+| Tâche | Estimé | Livré | Validée |
+|---|---|---|---|
+| E2E formulaire -> lead -> assignation -> deal gagné | 2,5 h | oui (`g2-lead-to-deal.test.ts`, 9 tests, HTTP réel + vrai handler `lead.assign`) | oui (vert, 3 exécutions de suite) |
+| Corrections | 2 h | aucune correction applicative nécessaire | — |
+| Audit de conformité Phase 2 | 1,5 h | oui (relecteur indépendant, sans code ; 0 bloquant, 3 majeurs, 9 mineurs) | oui |
+| `docs/checkpoints/C2.md` | — | oui (GO avec réserves proposé) | à valider |
+
+### Validation du jour
+- **§13-4** : lead capturé -> assigné -> deal créé -> gagné, avec l'historique d'activités (assignation, sortie de « non assigné », appel, changements d'étape du deal) lu à l'identique par les rôles autorisés et jamais par l'analyste ni l'autre entreprise ; échec de synchro CRM rejoué sans doublon (`crm-sync-flow`, relancé).
+- **Réserve principale (écart 1 du C2)** : le parcours n'est démontré qu'au niveau service, API et base : aucun écran ne crée un lead ou un deal, ne note une activité, ni n'affiche la chronologie ; le test crée le deal par la fonction SQL et la clé de formulaire et la règle d'assignation par SQL.
+- Observation : l'assignation et la sortie de l'étape « non assigné » ont le même horodatage (même transaction) ; leur ordre dans la chronologie n'est pas défini.
+
+### Revue adverse : l'audit Phase 2 tient lieu de revue du jour (tests seulement ce jour-là) ; correction documentaire : en-têtes J20 à J26 du journal (« NON commité » devenu « commité, PR ouverte »).
+
+### Tests : domain 608 ✓ · adapters 34 ✓ · permissions 394 ✓ · worker 76 ✓ · web 2469 ✓ · pgTAP 2397 ✓ · API réelle 436 ✓ · acceptation 143 ✓ (+9 : g2-lead-to-deal) · lint, typecheck, check:leaks verts
+### Écarts à la spec / plan
+- Aucun code applicatif ni migration. Helper `assign-worker.ts` extrait (partagé par `t2-sales` et G2).
+- Pas de Playwright (HTTP réel, comme T1 et T2) : réserve C1 n°2 maintenue.

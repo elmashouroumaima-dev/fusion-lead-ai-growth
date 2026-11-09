@@ -113,6 +113,14 @@ jobs:
             echo "SUPABASE_SECRET_KEY=$(get SECRET_KEY)"
           } >> "$GITHUB_ENV"
           rm -f "$RUNNER_TEMP/supabase.env"
+          # Clé maître de chiffrement des secrets (ADR 004) : aléatoire, propre à cette exécution, jamais réutilisée ; le test
+          # d'acceptation des intégrations (J28) l'utilise aussi pour vérifier que le chiffré se déchiffre.
+          KEY="$(node -e "console.log(require('crypto').randomBytes(32).toString('base64'))")"
+          echo "::add-mask::$KEY"
+          {
+            echo "SECRETS_MASTER_KEY=$KEY"
+            echo "SECRETS_KEY_VERSION=1"
+          } >> "$GITHUB_ENV"
 
       - run: pnpm build
 

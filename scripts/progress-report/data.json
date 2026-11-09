@@ -5,11 +5,11 @@
   "tests": [
     {
       "label": "Web (application)",
-      "value": 2469
+      "value": 2492
     },
     {
       "label": "Base de données (pgTAP)",
-      "value": 2397
+      "value": 2516
     },
     {
       "label": "Permissions (RBAC)",
@@ -17,19 +17,19 @@
     },
     {
       "label": "Domaine (règles métier)",
-      "value": 608
+      "value": 615
     },
     {
       "label": "RLS via l'API réelle",
-      "value": 436
+      "value": 448
     },
     {
       "label": "Worker et adaptateurs",
-      "value": 110
+      "value": 120
     },
     {
       "label": "Acceptation (T1, T5)",
-      "value": 143
+      "value": 153
     }
   ],
   "adrCount": 14,
@@ -229,9 +229,9 @@
           "day": "J28–J30",
           "days": 3,
           "name": "Intégrations et secrets",
-          "progress": 0,
-          "status": "todo",
-          "note": ""
+          "progress": 33,
+          "status": "part",
+          "note": "Intégrations, canaux et secrets chiffrés livrés (J28) ; webhooks (J29) et conversations (J30) à faire."
         },
         {
           "day": "J31–J33",

@@ -706,3 +706,24 @@ Cible : 44,4 % | Réel : à valider | Statut : GO du C2 donné par la responsabl
 ### Job CI de bout en bout (9 nov 2026, branche `ci-e2e-job`)
 - `.github/workflows/ci.yml` : job `e2e` (Supabase local, build, `next start`, `pnpm test:e2e`) et étape de couverture 80 % dans `verify`. Ferme l'écart 3 du C2 (réserve C1 n°4). Aucun code applicatif ni migration.
 
+## J28 — Intégrations et secrets (branche `day-28-integrations`, NON commité)
+Cible : 42,6 % (plan à 68 jours) | Réel : à valider | Statut : —
+
+### Tâches
+| Tâche | Estimé | Livré | Validée |
+|---|---|---|---|
+| `integrations` + `channels` + RLS | 2 h | oui (migration `20261128100000`, SELECT par colonnes, fonctions owner / admin) | oui (pgTAP 119, API réelle 12) |
+| Stockage chiffré `secret_ref` (ADR 004) | 2 h | oui (`store.ts`, rotation, reconnexion, lecture service_role) | oui (adapters 10, acceptation avec déchiffrement réel) |
+| Écran « Intégrations » sans secret brut | 2 h | oui (`/integrations` fr / ar / en, écriture seule) | oui (HTTP réel ; la vérification visuelle dans un navigateur reste à faire) |
+
+### Validation du jour
+- **Aucun jeton lisible** via la Data API ni par un Company Admin : `secret_ref` et `select *` refusés, `private.secrets` sans droit, `get_integration_secret` réservé à service_role ; le jeton n'apparaît ni dans les réponses, ni dans les pages, ni dans l'audit, ni dans `idempotency_keys`.
+- **Rotation testée** : remplacer le jeton supprime l'ancien secret dans la même transaction ; reconnexion et déconnexion testées ; isolation Alpha / Beta (AAD et clé composite).
+
+### Revue sécurité (0 bloquant, 3 majeurs, 4 moyens) — corrigés : identité de canal (format), compte déconnecté verrouillé (reconnexion), rejeu d'une clé d'idempotence avec un autre jeton (HMAC), plafond en octets, statuts servis par `get_integration_secret`, tests renforcés ; **soumis à la responsable technique** : squat et énumération du compte global (valider le jeton auprès du fournisseur avant de réserver ? libérer un `pending` après un délai ?), unicité globale des expéditeurs de canal, fonctions d'écriture appelables directement par la Data API avec un chiffré arbitraire.
+
+### Tests : domain 615 ✓ · adapters 44 ✓ · permissions 394 ✓ · worker 76 ✓ · web 2492 ✓ · pgTAP 2516 (dont 210_integrations_secrets : 119) ✓ · API réelle 448 (integrations-secrets : 12) ✓ · acceptation 153 ✓ (+1 test réservé à un serveur sans clé maître ; integrations-flow : 9) · couverture domain 97,9 % · lint, typecheck, check:leaks verts
+### Écarts à la spec / plan
+- Pas de formulaire de création dans l'écran (chaque fournisseur a ses champs : J31 e-mail, J34 WhatsApp) : création par l'API seulement ; l'écran liste, remplace, reconnecte et déconnecte.
+- Pas de rotation de la clé maître (J58 et J59, `docs/runbooks/secret-rotation.md`).
+- Aucune validation par un fournisseur réel : toute intégration reste `pending`.

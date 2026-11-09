@@ -3,6 +3,15 @@
 Format : Keep a Changelog. Une entrée par jour de travail.
 
 ## [Non publié]
+### J28 — Intégrations et secrets
+- Ajout : migration `20261128100000` (et retour arrière) : `integrations` étendue (`scopes`, `secret_ref`, `has_secret`, fournisseurs `email` et `whatsapp`, statuts `pending`, `active`, `error`, `disconnected`, `disabled`, unicité globale des comptes e-mail et WhatsApp), table `channels` (ADR 007 E4), fonctions `create_provider_integration`, `set_integration_secret` (rotation et reconnexion), `disconnect_integration`, `create_channel`, `update_channel` (owner et admin) et `get_integration_secret` (service_role seulement).
+- Sécurité : SELECT par colonnes (`secret_ref` illisible, `select *` refusé), `private.secrets` sans droit d'API, clé étrangère composite secret / entreprise, AAD par entreprise ; le jeton n'est jamais renvoyé, journalisé, audité ni stocké dans les clés d'idempotence (HMAC avec une clé serveur : rejouer une clé avec un autre jeton donne 422).
+- Ajout : `packages/adapters/src/secrets/store.ts` (`put`, `get`, `rotate`, `delete`, secrets d'organisation), `packages/domain/src/integrations`, `apps/web/lib/integrations`, `lib/service/integration-secrets.ts` ; routes `GET/POST /api/integrations`, `POST /api/integrations/secret` et `/disconnect` ; écran `/integrations` (fr, ar, en) : statut, portée, canaux, « Remplacer le jeton » (écriture seule), « Reconnecter », « Déconnecter ».
+- Ajout : `withRoute` option `hashOmit` (HMAC des champs secrets dans l'empreinte d'idempotence) ; le service CRM ne liste que les intégrations `csv` et `internal`.
+- CI : le job `e2e` génère une clé maître aléatoire (masquée) pour que l'acceptation des intégrations déchiffre réellement.
+- Revue adverse : identité d'un canal au format e-mail ou E.164, reconnexion d'un compte déconnecté, plafond du secret en octets, `get_integration_secret` limité aux statuts pending, active et error.
+- Tests : adapters (10), domaine (7), service web et idempotence (22), pgTAP (119), API réelle (12), acceptation (9).
+- Documentation : `docs/api/integrations.md`, `docs/runbooks/secret-rotation.md`, addendums ADR 004 et 007.
 ### CI — job de bout en bout et couverture (décision C2, option A)
 - Ajout : job `e2e` dans `.github/workflows/ci.yml` : pile Supabase locale (même liste d'exclusions que `database`, Storage conservé), `pnpm db:reset`, variables de l'application tirées de `supabase status`, `pnpm build`, `next start` sur le port 3000 avec attente de `/fr/login`, `pnpm test:e2e`, journal de l'application en cas d'échec.
 - Ajout : étape « Couverture » dans le job `verify` (`test:coverage` de `domain` et `permissions`, seuil 80 %).

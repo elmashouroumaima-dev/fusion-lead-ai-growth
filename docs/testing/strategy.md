@@ -39,18 +39,18 @@
 | ID | Scénario | Jour |
 |---|---|---|
 | T1 | 2 entreprises, utilisateur à 2 rôles, 2 projets par entreprise : aucune fuite (UI, API, RLS, worker) | J15 (fait : `tests/acceptance`), complété au J16 (2 projets et un produit par entreprise dans le seed, tables découvertes automatiquement), J59 |
-| T2 | 100 leads importés avec doublons et formats de téléphone variés, puis assignation et rapports | J26 |
+| T2 | 100 leads importés avec doublons et formats de téléphone variés, puis assignation et rapports | J26 (fait : `tests/acceptance/src/t2-sales.test.ts`) |
 | T3 | Série d'e-mails vers liste consentante, désabonnement en cours | J40 |
 | T4 | WhatsApp client + template, webhook dupliqué, panne 503 | J40 |
 | T5 | Changement d'entreprise en session, puis lien profond de l'ancienne entreprise | J15 (fait : `tests/acceptance`), J59 |
 
-Exécution locale des scénarios T1 et T5 : `pnpm db:start`, `pnpm db:reset`, `pnpm dev`, puis `pnpm test:e2e` (adresse de l'application : `E2E_BASE_URL`, défaut `http://localhost:3000`). Les comptes sont ceux du seed local, le mot de passe est lu dans `supabase/seed.sql`.
+Exécution locale des scénarios T1, T2 et T5 : `pnpm db:start`, `pnpm db:reset`, `pnpm dev`, puis `pnpm test:e2e` (adresse de l'application : `E2E_BASE_URL`, défaut `http://localhost:3000`). Les comptes sont ceux du seed local, le mot de passe est lu dans `supabase/seed.sql`.
 
 ## 6. Exécution en CI
 À chaque PR : `pnpm lint && pnpm typecheck && pnpm test && pnpm test:rls` (+ schema lint, garde-fous). E2E sur un environnement local (Supabase Docker) à chaque PR touchant l'UI ; suite complète sur staging pour la recette. Une PR rouge ne se fusionne pas.
 
 ## 7. Seuils de qualité
-- Couverture ≥ 80 % sur `packages/domain` et `packages/permissions`.
+- Couverture ≥ 80 % sur `packages/domain` et `packages/permissions` (seuil appliqué par `pnpm --filter @fusion-leap/domain test:coverage` et `pnpm --filter @fusion-leap/permissions test:coverage` ; relevé J26 : domain 97,9 % des instructions / 94,8 % des branches, permissions 98,4 % / 98,4 %).
 - 0 test RLS rouge ; 0 table sans test RLS.
 - Aucun test `skip`/`only` committé (lint).
 - Suivi de l'avancement : seules les tâches dont les tests sont verts comptent (plan §12).

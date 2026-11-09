@@ -3,6 +3,12 @@
 Format : Keep a Changelog. Une entrée par jour de travail.
 
 ## [Non publié]
+### J26 — Tests ventes
+- Ajout : scénario **T2** automatisé (`tests/acceptance/src/t2-sales.test.ts`) : `leads-100.csv` par HTTP puis par le vrai handler `import_csv` (65 contacts créés, 17 rattachés, 18 lignes refusées, 67 leads), un job `lead.assign` par lead traité par le VRAI handler du worker (rotation round-robin dans l'ordre de la règle, répartition 22 / 22 / 23, rejeu sans seconde assignation), chiffres affichés sur `/leads` par rôle, rapport CSV sans donnée de contact, rejeu du fichier sans aucun doublon, puis le même fichier chez l'autre entreprise (jeux de contacts séparés, aucune adresse partagée, assignation limitée à ses membres) et un test de contexte forgé (propriétaire de Beta désignant Alpha).
+- Ajout : matrice des rôles du CRM (`crm-roles-matrix.test.ts`) : 13 routes d'API (export, deals, intégrations, mapping, synchro, import complet) et 3 pages x 5 rôles + anonyme ; rôle non autorisé = 403 exact, rôle autorisé = statut exact de la route, anonyme = 401 ; capture publique : une session ne donne aucun droit.
+- Ajout : seuil de couverture de 80 % (`test:coverage`) pour `packages/domain` et `packages/permissions` ; devDependency `@vitest/coverage-v8` 5.1.0 dans `packages/domain`.
+- Modification : passerelle et exécution du job d'import des tests d'acceptation extraites dans `import-worker.ts` (partagées par `import-flow` et `t2-sales`).
+- Aucune migration, aucun code applicatif modifié. Tests : acceptation 106 -> 134.
 ### J25 — Adaptateur CRM
 - Ajout : interface `CrmAdapter` (`connect`, `validate`, `send`, `receive`, `refresh`, `disconnect`) et adaptateurs `internal` (source de vérité) et `csv` (lecture et écriture selon le mapping, dates ISO strictes, anti-formule) dans `packages/adapters/src/crm`.
 - Ajout : tables `integrations` (minimale) et `crm_field_mappings` (champ interne, champ externe, `source_of_truth`, `direction`, liste blanche de champs), fonctions `create_integration`, `save_crm_mappings`, `request_crm_sync`, `retry_crm_sync`, `crm_sync_status` (owner et admin) et `crm_sync_*` (service_role) ; migration `20261127100000` et retour arrière ; statut `synced` des lots de fichier.

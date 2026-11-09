@@ -648,3 +648,28 @@ Cible : 41,3 % | Réel : à valider | Statut : — (le C1 attend le GO de la res
 - **Pas de squelette du CRM Fusion Leap** (API non documentée, Q1) ; adaptateurs `internal` et `csv` seulement.
 - Table `integrations` créée ici en version minimale (le J28 l'étend avec les secrets).
 - Synchro de contacts seulement ; pas d'historique dédié (état = job).
+
+## J26 — Tests ventes (branche `day-25-crm-adapter`, NON commité)
+Cible : 42,9 % | Réel : à valider | Statut : — (le C1 attend le GO de la responsable technique)
+
+### Tâches
+| Tâche | Estimé | Livré | Validée |
+|---|---|---|---|
+| T2 automatisé | 2,5 h | oui (`t2-sales.test.ts`, 11 tests) | oui (vert, HTTP réel + vrais handlers `import_csv` et `lead.assign`) |
+| Dédup inter-entreprises | 1 h | oui (même fichier chez Alpha puis Beta ; formulaire public déjà couvert par `capture-api`) | oui |
+| Rôles sur le CRM | 1,5 h | oui (`crm-roles-matrix.test.ts`, 17 tests : 13 routes + capture publique + 3 pages x 5 rôles + anonyme) | oui |
+| Couverture | 1 h | oui (seuil 80 % appliqué ; domain 97,9 % / 94,8 %, permissions 98,4 % / 98,4 %) | oui |
+
+### Validation du jour
+- **T2 vert** : 100 lignes -> 65 créés, 17 rattachés (15 doublons du fichier + 2 déjà connus), 18 refusées ; 67 leads assignés en round-robin (écart maximal 1) ; rejeu = 0 doublon ; totaux affichés cohérents avec la base et le rapport.
+- **§13-3 démontré** : même fichier chez deux entreprises = deux jeux de contacts séparés ; deux envois identiques du formulaire dans une entreprise = un contact (`capture-api`, 8 soumissions simultanées).
+- **§13-2** : matrice des rôles du CRM sans trou sur les routes et pages existantes ; Analyst ne déplace pas un deal, commercial ne touche ni l'intégration ni l'export, ni un lead non assigné.
+- Constat : la recherche par domaine retrouve 66 leads sur 67 (le contact créé avec un téléphone seul n'a pas d'e-mail) : le test distingue les deux nombres.
+
+### Tests : domain 608 ✓ · adapters 34 ✓ · permissions 394 ✓ · worker 76 ✓ · web 2469 ✓ · pgTAP 2397 ✓ · API réelle 436 ✓ · acceptation 134 ✓ (+28 : t2-sales 11, crm-roles-matrix 17) · lint, typecheck, check:leaks verts
+### Revue adverse (0 bloquant) — corrigés : matrice incomplète (import, mapping, capture publique ajoutés), statuts exacts au lieu de « pas 403 », vrai handler `lead.assign`, ordre de rotation vérifié, totaux Beta stricts, aucun doublon intra-entreprise, contexte forgé, rapport CSV lu par colonne, chemins Storage lus en base. **Non corrigé, à décider** : la couverture n'est pas exécutée en CI (commande manuelle `test:coverage`) ; suppression des règles d'assignation par projet dans les nettoyages (le seed n'en a pas).
+### Écarts à la spec / plan
+- Aucun code applicatif ni migration : le jour ne contient que des tests.
+- Constat : `POST /api/imports` valide le type de contenu avant le rôle (un marketing avec un type refusé reçoit 400, pas 403) ; sans conséquence (rien n'est écrit), signalé.
+- `@vitest/coverage-v8` ajouté en devDependency de `packages/domain` (validé au mini-plan) ; déjà présent pour `packages/permissions`.
+

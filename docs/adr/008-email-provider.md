@@ -32,3 +32,5 @@ Gmail (B) : hors MVP — l'envoi seul serait possible, mais recevoir exige un sc
 ## Note (2026-11-07) — Paramètres SMTP de la plateforme
 Une configuration SMTP générique (option C) est désormais saisissable dans Paramétrage par les administrateurs de la plateforme (boîte de test Mailtrap comprise) : elle sert aux e-mails de la plateforme et aux tests, mais **ne remplace pas** la décision de cet ADR pour l'envoi de campagnes (option A : API avec événements, réception, webhooks). Voir `docs/runbooks/smtp-settings.md`.
 
+## Décision du 2026-11-09
+L'ADR reste **Proposed** : le choix du fournisseur dépend de Q2 (propriétaire du domaine, Gmail ou fournisseur transactionnel), toujours sans réponse, et aucune des alternatives à Postmark n'a été vérifiée. **À trancher au plus tard au début du J31** (compte sandbox ouvert) ; sans réponse à Q2, appliquer l'hypothèse §14 (option A, Postmark) et le noter ici.

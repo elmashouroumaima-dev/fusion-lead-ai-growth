@@ -1,6 +1,6 @@
 # ADR 006 — Conventions de code, de données et de livraison
 
-- **Statut :** Proposed
+- **Statut :** Accepted (2026-11-09, décision de la responsable technique par délégation, après les audits de conformité C1 et C2)
 - **Date :** 2026-11-10
 - **Section de spec :** §7, §8, §12 (migrations réversibles), CLAUDE.md
 

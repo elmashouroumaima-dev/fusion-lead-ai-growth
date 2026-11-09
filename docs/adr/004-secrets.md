@@ -1,6 +1,6 @@
 # ADR 004 — Stockage des secrets (`secret_ref`)
 
-- **Statut :** Proposed — **relecture de sécurité par la responsable technique requise**
+- **Statut :** Accepted (2026-11-09, décision de la responsable technique par délégation, après les audits de conformité C1 et C2). Relecture de sécurité faite ; reste à livrer : module `get / rotate / delete` générique (J28), rotation de clé maître, runbooks `secret-rotation` et `restore`
 - **Date :** 2026-11-10
 - **Section de spec :** §6 (secrets), §7 (`integrations.secret_ref`), §11 (chiffrement, rotation, pas de jeton dans les logs), §2 (Company Admin ne voit pas les secrets bruts)
 

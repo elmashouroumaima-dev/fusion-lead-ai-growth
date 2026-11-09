@@ -1,6 +1,6 @@
 # ADR 007 — Modèle de données réconcilié
 
-- **Statut :** Proposed — décisions E1–E12 / G-D / G-R reprises des propositions par défaut du Jour 0 (validées globalement par « PLAN VALIDÉ », à relire ligne à ligne)
+- **Statut :** Accepted (2026-11-09, décision de la responsable technique par délégation) **pour les entités mises en œuvre et auditées (Phases 1 et 2, C1 et C2)** ; les entités des Phases 3 à 5 (conversations, messages, modèles, campagnes, agents) restent **Proposées** et sont confirmées le jour de leur mise en œuvre
 - **Date :** 2026-11-10
 - **Section de spec :** §7, §7.1, §7.2, §9, §10, §11 ; analyses : `docs/analysis/gaps-and-questions.md`
 - **ERD :** `docs/architecture/erd.md`

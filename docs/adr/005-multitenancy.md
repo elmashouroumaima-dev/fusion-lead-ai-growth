@@ -1,6 +1,6 @@
 # ADR 005 — Multi-tenancy et isolation
 
-- **Statut :** Proposed — **relecture de sécurité par la responsable technique requise**
+- **Statut :** Accepted (2026-11-09, décision de la responsable technique par délégation, après les audits de conformité C1 et C2). Relecture de sécurité faite (audits C1 et C2 : aucune fuite entre entreprises)
 - **Date :** 2026-11-10
 - **Section de spec :** §2, §7, §7.2 (RLS), §8, §11, §13-1
 
@@ -57,3 +57,5 @@ Coût de lecture de `organization_members` à chaque ligne : index `(user_id, or
 ## Mise en œuvre J14 — Platform Admin (§10)
 `private.platform_admins (user_id)` existe (migration `20261116100000`). Géré par SQL uniquement. Il autorise uniquement la gestion des plans et abonnements (`admin_list_organizations`, `admin_set_subscription`) ; **aucun accès aux données tenant** : les sessions de support (`support_sessions`, `has_active_support_session`) restent à construire.
 
+## Mise en œuvre Phases 1 et 2 (2026-11-09) — modèle « lecture par politique, écriture par fonctions »
+Constat de l'audit C2 (écart 4) : les tables métier (`projects` à `crm_field_mappings`) n'ont qu'**une politique SELECT** (`to authenticated`, rôle lu par `private.has_role` / `private.is_member`) et **aucun droit INSERT, UPDATE ou DELETE** pour `authenticated`, `anon` ni `service_role`. Toute écriture passe par une fonction `SECURITY DEFINER` (`search_path` vide) de `private.*`, exposée par un wrapper `public.*` `SECURITY INVOKER` ; la fonction contrôle le rôle, l'appartenance à l'entreprise et la propriété du lead, écrit l'audit et applique les quotas. Cela respecte l'esprit de la décision 6 (un contrôle par opération, jamais plus de droits que nécessaire) : refus par défaut, `900_schema_lint` exige une politique pour chaque droit accordé. `FORCE ROW LEVEL SECURITY` n'est pas activé (les fonctions s'exécutent comme propriétaire) ; le contrôle d'identité et de rôle est donc dans chaque fonction, vérifié par pgTAP et par les tests RLS.

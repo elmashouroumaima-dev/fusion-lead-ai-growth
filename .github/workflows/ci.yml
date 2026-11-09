@@ -36,6 +36,12 @@ jobs:
       - run: pnpm typecheck
       - run: pnpm test
 
+      # Seuil de couverture de 80 % (plan J26, docs/testing/strategy.md §7) sur les deux paquets de règles.
+      - name: Couverture (domain, permissions)
+        run: |
+          pnpm --filter @fusion-leap/domain test:coverage
+          pnpm --filter @fusion-leap/permissions test:coverage
+
       # Garde-fou anti-fuite (J5, spec §6) : build puis scan du bundle client et des variables publiques.
       # Variables publiques factices : le build pré-rend des pages qui valident l'environnement client
       # (J8). Aucun secret : ce sont des valeurs de placeholder, jamais utilisées pour se connecter.
@@ -70,3 +76,59 @@ jobs:
         run: pnpm test:db
       - name: Tests RLS via la Data API (matrice utilisateur x entreprise x opération)
         run: pnpm test:rls
+
+  e2e:
+    name: acceptation (T1, T2, T5, G2 en HTTP réel)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      # Même pile minimale que le job `database` (base, auth, API, Storage : le bucket `imports` sert à l'import CSV).
+      - name: Démarrer Supabase local
+        run: >
+          pnpm db:start -x
+          studio,imgproxy,edge-runtime,logflare,vector,mailpit,realtime,postgres-meta,supavisor
+      - run: pnpm db:reset
+
+      # Variables de l'application = clés de la pile LOCALE de ce job (valeurs de démonstration de Supabase local, jamais un
+      # secret réel). Elles sont écrites dans l'environnement des étapes suivantes uniquement.
+      - name: Environnement de l'application
+        run: |
+          pnpm exec supabase status -o env > "$RUNNER_TEMP/supabase.env"
+          get() { grep "^$1=" "$RUNNER_TEMP/supabase.env" | head -1 | cut -d= -f2- | tr -d '"'; }
+          {
+            echo "APP_ENV=development"
+            echo "SITE_URL=http://127.0.0.1:3000"
+            echo "TRUSTED_PROXY_HOPS=1"
+            echo "NEXT_PUBLIC_SUPABASE_URL=$(get API_URL)"
+            echo "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=$(get PUBLISHABLE_KEY)"
+            echo "SUPABASE_URL=$(get API_URL)"
+            echo "SUPABASE_SECRET_KEY=$(get SECRET_KEY)"
+          } >> "$GITHUB_ENV"
+          rm -f "$RUNNER_TEMP/supabase.env"
+
+      - run: pnpm build
+
+      - name: Démarrer l'application
+        run: |
+          pnpm --filter @fusion-leap/web start > "$RUNNER_TEMP/web.log" 2>&1 &
+          for i in $(seq 1 60); do
+            code=$(curl -s -o /dev/null -w '%{http_code}' http://localhost:3000/fr/login || true)
+            if [ "$code" = "200" ]; then echo "application prête"; exit 0; fi
+            sleep 2
+          done
+          echo "L'application ne répond pas :"; tail -n 40 "$RUNNER_TEMP/web.log"; exit 1
+
+      - name: Scénarios d'acceptation
+        run: pnpm test:e2e
+
+      - name: Journal de l'application (en cas d'échec)
+        if: failure()
+        run: tail -n 80 "$RUNNER_TEMP/web.log" || true

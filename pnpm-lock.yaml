@@ -359,7 +359,7 @@ importers:
   packages/domain:
     dependencies:
       libphonenumber-js:
-        specifier: ^1.13.15
+        specifier: 1.13.15
         version: 1.13.15
       zod:
         specifier: 4.6.7

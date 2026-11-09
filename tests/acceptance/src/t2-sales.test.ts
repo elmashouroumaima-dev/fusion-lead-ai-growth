@@ -2,11 +2,10 @@ import { randomUUID } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { api, ORG, PROJECT, psql, USER } from "../../../supabase/tests/rls/src/harness";
+import { ORG, PROJECT, psql, USER } from "../../../supabase/tests/rls/src/harness";
 import { BASE_URL, getPage, postJson, redirectPath, signIn, visibleText, type Session } from "./app-client";
+import { assignAll, assigneesOf } from "./assign-worker";
 import { runImportJob } from "./import-worker";
-import { createLeadAssignHandler } from "../../../apps/worker/src/handlers";
-import type { LeadAssigner } from "../../../apps/worker/src/assignment";
 
 /**
  * T2 (docs/testing/strategy.md, spec §13-3 et « tests d'acceptation réalistes ») : 100 leads importés avec doublons et téléphones
@@ -54,40 +53,6 @@ const searchableLeadsIn = (org: string, extra = "") =>
 const jobsToAssign = (org: string): string[] =>
   psql(`select l.id from public.leads l join public.contacts c on c.id = l.contact_id and c.organization_id = l.organization_id where ${ofFixture(org)} order by l.created_at, l.id`)
     .split("\n").filter(Boolean);
-
-/** Passerelle de test du handler `lead.assign` : mêmes fonctions SQL que le worker (rôle service_role). */
-const assigner: LeadAssigner = {
-  async assign(org, lead) {
-    const result = await api<Record<string, unknown>>("service", "POST", "rpc/auto_assign_lead", { p_org: org, p_lead: lead });
-    if (result.status >= 300) throw new Error("assignment_assign_failed");
-    return result.body as never;
-  },
-  async flagUnassigned(org, lead) {
-    await api("service", "POST", "rpc/flag_lead_unassigned", { p_org: org, p_lead: lead });
-  },
-};
-const assignHandler = createLeadAssignHandler(assigner);
-/** Responsable de chaque lead donné (une seule requête), dans l'ordre demandé ; chaîne vide = non assigné. */
-const assigneesOf = (leads: string[]): string[] => {
-  const out = psql(`select id || ':' || coalesce(assignee_id::text, '') from public.leads where id in (${leads.map((l) => `'${l}'`).join(",")})`);
-  const rows = new Map(out.split(/\r?\n/).filter(Boolean).map((r) => [r.slice(0, 36), r.slice(37)] as const));
-  return leads.map((l) => rows.get(l) ?? "?");
-};
-/** Entreprise de la LIGNE de chaque job `lead.assign` (une seule requête) : jamais la charge utile. */
-const jobOrganizations = (): Map<string, string> => {
-  const out = psql(`select (payload ->> 'lead_id') || ':' || organization_id from public.jobs where kind = 'lead.assign'`);
-  return new Map(out.split(/\r?\n/).filter(Boolean).map((r) => [r.slice(0, 36), r.slice(37)] as const));
-};
-/** Ce que fait le worker pour les jobs `lead.assign` : le VRAI handler, un job après l'autre, dans l'ordre. Renvoie le responsable de chaque lead. */
-const assignAll = async (leads: string[]): Promise<string[]> => {
-  const orgs = jobOrganizations();
-  for (const lead of leads) {
-    const organizationId = orgs.get(lead);
-    if (!organizationId) throw new Error(`job lead.assign absent pour ${lead}`);
-    await assignHandler.run({ jobId: randomUUID(), organizationId, idempotencyKey: `lead.assign:${lead}`, attempt: 1, maxAttempts: 5, signal: new AbortController().signal }, { lead_id: lead });
-  }
-  return assigneesOf(leads);
-};
 
 const cleanup = () => {
   const ids = batches.map((b) => `'${b}'`).join(",") || "'00000000-0000-4000-8000-000000000000'";

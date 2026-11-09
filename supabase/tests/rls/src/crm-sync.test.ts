@@ -55,11 +55,11 @@ describe("intégrations et mappings : rôles, lecture, aucune écriture directe"
 
   it("lecture : owner et admin ; commercial, marketing, analyste, Beta et anon non", async () => {
     for (const persona of ["shared", "alphaAdmin"] as const) {
-      expect(rowsOf<{ id: string }>(await select(persona, `integrations?id=eq.${integration}`)).map((r) => r.id), persona).toEqual([integration]);
+      expect(rowsOf<{ id: string }>(await select(persona, `integrations?id=eq.${integration}&select=id`)).map((r) => r.id), persona).toEqual([integration]);
       expect(rowsOf(await select(persona, `crm_field_mappings?integration_id=eq.${integration}`)), persona).toHaveLength(2);
     }
     for (const persona of ["alphaSales", "alphaMarketing", "alphaAnalyst", "betaOwner"] as const) {
-      expect(rowsOf(await select(persona, `integrations?id=eq.${integration}`)), persona).toEqual([]);
+      expect(rowsOf(await select(persona, `integrations?id=eq.${integration}&select=id`)), persona).toEqual([]);
       expect(rowsOf(await select(persona, `crm_field_mappings?integration_id=eq.${integration}`)), persona).toEqual([]);
     }
     expect(isDenied(await select("anon", "integrations"))).toBe(true);
@@ -69,7 +69,7 @@ describe("intégrations et mappings : rôles, lecture, aucune écriture directe"
     for (const persona of ["shared", "service"] as const) {
       const insert = await api<unknown>(persona, "POST", "integrations", { organization_id: ORG.alpha, provider: "csv", external_account_id: `${ACCOUNT}-direct` });
       expect(insert.status, persona).not.toBe(201);
-      expect(rowsOf(await api<unknown>(persona, "PATCH", `integrations?id=eq.${integration}`, { status: "disabled" })), persona).toEqual([]);
+      expect(rowsOf(await api<unknown>(persona, "PATCH", `integrations?id=eq.${integration}&select=id`, { status: "disabled" })), persona).toEqual([]);
       const mapping = await api<unknown>(persona, "POST", "crm_field_mappings", { organization_id: ORG.alpha, integration_id: integration, internal_field: "name", external_field: "X", source_of_truth: "internal", direction: "both" });
       expect(mapping.status, persona).not.toBe(201);
     }

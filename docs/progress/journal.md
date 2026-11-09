@@ -702,3 +702,7 @@ Cible : 44,4 % | Réel : à valider | Statut : GO du C2 donné par la responsabl
 
 ### Décisions du 2026-11-09 (ADR, CI, Playwright)
 - ADR acceptés par délégation de la responsable technique : 001 à 006, 014, 015 ; 007 pour les Phases 1 et 2 ; 016 sous condition (avant J54). Restent Proposed : 008 (Q2, à trancher au début de J31), 010 (Q5), 012 (avant J47). Job CI e2e (option A) avant J29 ; Playwright décidé au J58 ; `libphonenumber-js` épinglé. Q1 reste ouverte ; fusion des PR #8 à #31 en attente de l'ordre de la responsable technique.
+
+### Job CI de bout en bout (9 nov 2026, branche `ci-e2e-job`)
+- `.github/workflows/ci.yml` : job `e2e` (Supabase local, build, `next start`, `pnpm test:e2e`) et étape de couverture 80 % dans `verify`. Ferme l'écart 3 du C2 (réserve C1 n°4). Aucun code applicatif ni migration.
+

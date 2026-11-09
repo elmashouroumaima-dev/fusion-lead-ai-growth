@@ -47,7 +47,7 @@
 Exécution locale des scénarios T1, T2 et T5 : `pnpm db:start`, `pnpm db:reset`, `pnpm dev`, puis `pnpm test:e2e` (adresse de l'application : `E2E_BASE_URL`, défaut `http://localhost:3000`). Les comptes sont ceux du seed local, le mot de passe est lu dans `supabase/seed.sql`.
 
 ## 6. Exécution en CI
-À chaque PR : `pnpm lint && pnpm typecheck && pnpm test && pnpm test:rls` (+ schema lint, garde-fous). E2E sur un environnement local (Supabase Docker) à chaque PR touchant l'UI ; suite complète sur staging pour la recette. Une PR rouge ne se fusionne pas.
+À chaque PR : `pnpm lint && pnpm typecheck && pnpm test && pnpm test:rls` (+ schema lint, garde-fous) et la couverture (`test:coverage` de `domain` et `permissions`, seuil 80 %). Depuis le 9 nov 2026, un job `e2e` dédié démarre une pile Supabase locale, construit et lance l'application (`next start`) puis exécute `pnpm test:e2e` (T1, T2, T5, G2 et les scénarios CRM, en HTTP réel). Suite complète sur staging pour la recette. Une PR rouge ne se fusionne pas.
 
 ## 7. Seuils de qualité
 - Couverture ≥ 80 % sur `packages/domain` et `packages/permissions` (seuil appliqué par `pnpm --filter @fusion-leap/domain test:coverage` et `pnpm --filter @fusion-leap/permissions test:coverage` ; relevé J26 : domain 97,9 % des instructions / 94,8 % des branches, permissions 98,4 % / 98,4 %).

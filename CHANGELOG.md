@@ -3,6 +3,10 @@
 Format : Keep a Changelog. Une entrée par jour de travail.
 
 ## [Non publié]
+### CI — job de bout en bout et couverture (décision C2, option A)
+- Ajout : job `e2e` dans `.github/workflows/ci.yml` : pile Supabase locale (même liste d'exclusions que `database`, Storage conservé), `pnpm db:reset`, variables de l'application tirées de `supabase status`, `pnpm build`, `next start` sur le port 3000 avec attente de `/fr/login`, `pnpm test:e2e`, journal de l'application en cas d'échec.
+- Ajout : étape « Couverture » dans le job `verify` (`test:coverage` de `domain` et `permissions`, seuil 80 %).
+- Aucun code applicatif ni migration. Ferme l'écart 3 du C2 et l'écart 4 du C1.
 ### Décisions du 2026-11-09 (ADR, CI, Playwright)
 - Modification : ADR 001 à 006, 014, 015 passés en **Accepted** ; 007 accepté pour les Phases 1 et 2 ; 016 accepté sous condition (écriture restreinte aux administrateurs de la plateforme avant tout client réel, au plus tard J54) ; 008, 010 et 012 restent Proposed ; ADR 005 complété (modèle « lecture par politique, écriture par fonctions »).
 - Modification : `libphonenumber-js` épinglé en `1.13.15`.

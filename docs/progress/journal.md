@@ -674,7 +674,7 @@ Cible : 42,9 % | Réel : à valider | Statut : — (le C1 attend le GO de la res
 - `@vitest/coverage-v8` ajouté en devDependency de `packages/domain` (validé au mini-plan) ; déjà présent pour `packages/permissions`.
 
 ## J27 — Checkpoint C2 / Gate G2 (branche `day-27-checkpoint-c2`, commité, PR ouverte)
-Cible : 44,4 % | Réel : à valider | Statut : — (GO du C2 à décider par la responsable technique)
+Cible : 44,4 % | Réel : à valider | Statut : GO du C2 donné par la responsable technique (9 nov 2026) ; écrans, ADR et job CI restent à décider
 
 ### Tâches
 | Tâche | Estimé | Livré | Validée |

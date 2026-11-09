@@ -3,6 +3,8 @@
 Contexte : `docs/checkpoints/C2.md` (audit de la Phase 2, 0 bloquant, 3 majeurs). Le plan (§15) dit : sans GO écrit, la Phase 3 ne démarre pas. Quatre décisions sont nécessaires. L'ingénieur·e propose, la responsable technique tranche.
 
 ## 1. GO / NO-GO du checkpoint C2
+**Décision (9 nov 2026) : GO.** J28 peut démarrer. Les points 2 à 4 restent à trancher ; ils ne bloquent pas J28 mais restent au registre des écarts.
+
 | Option | Effet |
 |---|---|
 | **GO avec réserves** (proposé) | J28 (Intégrations et secrets) démarre ; les écarts 1 à 3 restent au registre avec une échéance. |

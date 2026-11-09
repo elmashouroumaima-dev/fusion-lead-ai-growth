@@ -673,7 +673,7 @@ Cible : 42,9 % | Réel : à valider | Statut : — (le C1 attend le GO de la res
 - Constat : `POST /api/imports` valide le type de contenu avant le rôle (un marketing avec un type refusé reçoit 400, pas 403) ; sans conséquence (rien n'est écrit), signalé.
 - `@vitest/coverage-v8` ajouté en devDependency de `packages/domain` (validé au mini-plan) ; déjà présent pour `packages/permissions`.
 
-## J27 — Checkpoint C2 / Gate G2 (branche `day-26-sales-tests`, NON commité)
+## J27 — Checkpoint C2 / Gate G2 (branche `day-27-checkpoint-c2`, commité, PR ouverte)
 Cible : 44,4 % | Réel : à valider | Statut : — (GO du C2 à décider par la responsable technique)
 
 ### Tâches

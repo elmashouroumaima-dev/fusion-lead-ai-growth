@@ -256,6 +256,22 @@
           "progress": 0,
           "status": "todo",
           "note": "Envoi, réception, arrêt sûrs"
+        },
+        {
+          "day": "J30b–J30d",
+          "days": 3,
+          "name": "Écrans CRM : contacts et fiche lead (décision C2)",
+          "progress": 0,
+          "status": "todo",
+          "note": "Avant le premier envoi (contacts) et avant la boîte de réception (fiche lead)"
+        },
+        {
+          "day": "J39b–J39c",
+          "days": 2,
+          "name": "Écrans CRM : configuration et import (décision C2)",
+          "progress": 0,
+          "status": "todo",
+          "note": "Clés de formulaire, règles d'assignation, notifications, import ; avant G3"
         }
       ]
     },

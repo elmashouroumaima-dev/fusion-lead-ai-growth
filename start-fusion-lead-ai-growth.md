@@ -19,6 +19,9 @@ Ce guide explique, étape par étape, comment récupérer le code, installer ce 
 12. [Dépannage](#12-dépannage)
 13. [Règles à respecter](#13-règles-à-respecter)
 14. [Pour aller plus loin](#14-pour-aller-plus-loin)
+15. [Ce que contient le projet (J0 à J25)](#15-ce-que-contient-le-projet-j0-à-j25)
+16. [Parcours de démonstration](#16-parcours-de-démonstration)
+17. [Checklist « nouveau PC »](#17-checklist--nouveau-pc-)
 
 ---
 
@@ -64,8 +67,10 @@ Les journées de travail sont livrées par **pull requests empilées** : tant qu
 
 ```bash
 git fetch --all
-git checkout day-14-plans-quotas     # ou la branche indiquée par la personne qui vous envoie le code
+git checkout day-25-crm-adapter      # dernière journée livrée (J25) ; ou la branche indiquée par la personne qui vous envoie le code
 ```
+
+Ordre des branches (chaque PR s'appuie sur la précédente) : `day-17-projects-ui` → `day-17-storage` → `day-18-contacts` → `day-19-leads` → `day-20-activities` → `day-21-capture` → `day-22-assignment` → `day-23-import` → `day-24-crm-ui` → `day-25-crm-adapter`.
 
 ---
 
@@ -155,6 +160,8 @@ Ouvrir **http://127.0.0.1:3000** (utiliser `127.0.0.1`, c'est l'adresse prévue 
 
 - Connexion : http://127.0.0.1:3000/fr/login (langues : `/fr`, `/ar`, `/en`)
 - Tableau de bord, Membres, Paramétrage (couleurs et logo), Administration (voir §7).
+- Ventes (J16 à J25) : **Projets**, **Leads** (recherche, filtres, export CSV), **Deals** (tableau par étape), **CRM** (état de la synchronisation, « Réessayer »). Choisir l'organisation **Alpha** avec `shared@seed.test`.
+- Sans écran (API ou tests seulement) : import CSV, capture de leads par formulaire, assignation automatique, contacts et consentement.
 
 Arrêter : `Ctrl+C`.
 
@@ -199,6 +206,8 @@ docker exec supabase_db_fusion-leap psql -U postgres -c "select private.enqueue_
 
 Le worker affiche `job_succeeded`. Détails : `docs/runbooks/jobs-worker.md`.
 
+Il traite aussi les jobs métier : `lead.assign` (assignation automatique), `import_csv` (import de leads) et `crm_sync` (synchronisation CRM). Sans worker, ces jobs restent « En file ».
+
 ---
 
 ## 9. E-mails de test (facultatif)
@@ -229,6 +238,14 @@ pnpm build           # build de production de l'application
 pnpm check:leaks --require-bundle   # aucun secret dans le bundle navigateur
 ```
 
+Tests d'acceptation (HTTP réel : il faut `pnpm dev` dans un autre terminal, et la base démarrée et réinitialisée) :
+
+```bash
+pnpm test:e2e
+```
+
+Ordres de grandeur à J25 : domaine 608, web 2469, worker 76, adaptateurs 34, pgTAP 2397, RLS 436, acceptation 106. Les tests RLS qui touchent au Storage exigent le service `storage-api` de Supabase (il est actif par défaut avec `pnpm db:start`).
+
 Tout doit être **vert**. Si `pnpm test:db` signale un test sur « aucun seau créé », c'est que des données d'usage traînent : `pnpm db:reset` puis relancer.
 
 ---
@@ -242,7 +259,7 @@ Tout doit être **vert**. Si `pnpm test:db` signale un test sur « aucun seau cr
 | `pnpm db:start` / `pnpm db:stop` | démarrer / arrêter la pile Supabase locale |
 | `pnpm db:reset` | recréer la base (migrations + seed) |
 | `pnpm db:migrate` | appliquer les nouvelles migrations sans tout effacer |
-| `pnpm test`, `pnpm test:db`, `pnpm test:rls` | tests |
+| `pnpm test`, `pnpm test:db`, `pnpm test:rls`, `pnpm test:e2e` | tests (le dernier exige `pnpm dev`) |
 | `pnpm format` | formater le code (Prettier) |
 | `pnpm report:progress` | générer le rapport d'avancement (HTML + PDF) |
 | `pnpm exec supabase status` | adresses et clés locales |
@@ -283,9 +300,53 @@ Tout doit être **vert**. Si `pnpm test:db` signale un test sur « aucun seau cr
 | Vue d'ensemble, arborescence, commandes | `README.md` |
 | Spécification technique (en arabe) | `docs/spec/Fusion-Leap-AI-Growth-Technical-Spec.md` |
 | Plan de développement (63 jours) | `docs/plan/development-plan.md` |
+| API des modules de vente (projets, contacts, leads, capture, import, CRM) | `docs/api/` |
+| Intégration CRM | `docs/integrations/crm.md` |
 | Journal d'avancement et rapport PDF | `docs/progress/journal.md`, `docs/progress/report/` |
 | Décisions d'architecture (ADR) | `docs/adr/` |
 | Runbooks (e-mails, jobs, audit, plans et quotas, rapport) | `docs/runbooks/` |
 | Conventions de travail | `CLAUDE.md` |
 
 Structure du monorepo : `apps/web` (Next.js), `apps/worker` (worker de jobs), `packages/domain` (règles métier et validation), `packages/permissions` (droits), `packages/adapters` (intégrations), `supabase/` (migrations, politiques RLS, tests).
+
+---
+
+## 15. Ce que contient le projet (J0 à J25)
+
+| Phase | Jours | Contenu | Écran ? |
+|---|---|---|---|
+| 0 — Cadrage | J0–J3 | Analyse de la spec, ADR 001 à 016, plan, menaces (STRIDE), backlog, checkpoint C0 | non (documents dans `docs/`) |
+| 1 — Fondations | J4–J15 | Monorepo, environnements et secrets, schéma multi-entreprise et RLS, connexion fr/ar/en, organisations, membres et invitations, rôles, couche de services, audit, file de jobs et worker, plans et quotas, SMTP, apparence | oui |
+| 2 — Ventes et CRM | J16–J25 | Projets et produits (+ fichiers), contacts et consentement, pipelines, leads, deals, activités, capture publique, assignation automatique, import CSV, écrans Leads/Deals, synchronisation CRM (interne + CSV) | en partie |
+
+Pas d'écran (API, worker ou tests seulement) : import CSV, capture de leads par formulaire, clés de formulaire, règles d'assignation, contacts et consentement, activités.
+
+Pas encore livré : J26 (tests ventes) et J27 (checkpoint C2 / Gate G2), puis les phases suivantes du plan (e-mail, WhatsApp, campagnes, IA).
+
+---
+
+## 16. Parcours de démonstration
+
+Pré-requis : §4 à §6 faits (base démarrée et réinitialisée, `.env.local` rempli, `pnpm dev` lancé), puis :
+
+1. Ouvrir `http://127.0.0.1:3000/fr/login`, se connecter avec `shared@seed.test` (mot de passe : `dev_password` dans `supabase/seed.sql`), choisir **Alpha**.
+2. **Phase 1** : *Membres* (liste, invitation), *Paramétrage* (couleurs, logo, SMTP), puis *Administration* (liste des organisations, réservée à l'administrateur de la plateforme). Changer la langue en `/ar` : la page s'inverse (droite-gauche).
+3. **Phase 2** : *Projets* (création par type), *Leads*, *Deals*, *CRM*. Après un `db:reset`, ces listes sont **vides** : le seed ne crée pas de leads. Pour les remplir, créer des données par les tests d'acceptation (`pnpm test:e2e`) ou par l'API (import CSV : `POST /api/imports`, voir `docs/api/imports.md` ; fichier d'exemple `tests/fixtures/leads-100.csv`).
+4. **Preuves de sécurité sans écran** : `pnpm test:rls` (chaque rôle ne voit que son entreprise) et `pnpm test:db` (audit non modifiable, quotas, jobs).
+
+Pour montrer l'isolation à la main : se connecter avec `beta-owner@seed.test` et constater qu'aucune donnée d'Alpha n'apparaît.
+
+---
+
+## 17. Checklist « nouveau PC »
+
+- [ ] Git, Node 24.13.1 (`nvm use`), pnpm 12.18.0 (`corepack enable`), Docker Desktop **démarré**
+- [ ] `git clone` puis `git checkout day-25-crm-adapter`
+- [ ] `pnpm install`
+- [ ] `pnpm db:start` puis `pnpm db:reset` (refaire `db:reset` à chaque changement de branche)
+- [ ] `cp .env.development.example .env.local`, puis recopier `PUBLISHABLE_KEY` et `SECRET_KEY` de `pnpm exec supabase status -o env`
+- [ ] `pnpm dev` puis http://127.0.0.1:3000/fr/login
+- [ ] (facultatif) `pnpm worker:dev` dans un second terminal
+- [ ] `pnpm lint && pnpm typecheck && pnpm test` : tout vert
+
+**À ne pas copier d'un PC à l'autre** : `.env`, `.env.local`, `supabase/.env`, `node_modules/`, `.turbo/`. Chaque machine génère ses propres clés locales (`supabase status`).

@@ -143,3 +143,36 @@ describe("appels RPC (client de l'utilisateur)", () => {
     });
   });
 });
+
+describe("fingerprintSecrets", () => {
+  const KEY = "cle-serveur-de-test";
+
+  it("l'empreinte dépend du secret (HMAC) : un autre secret donne une autre empreinte, le même secret la même", async () => {
+    const { fingerprintSecrets } = await import("./idempotency");
+    const hash = (secret: string, id = "1") => canonicalRequestHash({ method: "POST", path: "/x", body: fingerprintSecrets({ id, secret }, ["secret"], KEY) });
+    expect(hash("jeton-A")).toBe(hash("jeton-A"));
+    expect(hash("jeton-A")).not.toBe(hash("jeton-B"));
+    expect(hash("jeton-A", "1")).not.toBe(hash("jeton-A", "2"));
+  });
+
+  it("une autre clé serveur donne une autre empreinte : sans la clé, une hypothèse sur le secret ne se confirme pas", async () => {
+    const { fingerprintSecrets } = await import("./idempotency");
+    const a = JSON.stringify(fingerprintSecrets({ secret: "jeton-A" }, ["secret"], "cle-1"));
+    const b = JSON.stringify(fingerprintSecrets({ secret: "jeton-A" }, ["secret"], "cle-2"));
+    expect(a).not.toBe(b);
+  });
+
+  it("sans champ à protéger, ou corps qui n'est pas un objet : le corps est inchangé", async () => {
+    const { fingerprintSecrets } = await import("./idempotency");
+    const body = { id: "1", secret: "jeton" };
+    expect(fingerprintSecrets(body, undefined, KEY)).toBe(body);
+    expect(fingerprintSecrets(body, [], KEY)).toBe(body);
+    expect(fingerprintSecrets("texte", ["secret"], KEY)).toBe("texte");
+    expect(fingerprintSecrets([1, 2], ["secret"], KEY)).toEqual([1, 2]);
+  });
+
+  it("ne contient jamais la valeur du secret", async () => {
+    const { fingerprintSecrets } = await import("./idempotency");
+    expect(JSON.stringify(fingerprintSecrets({ secret: "jeton-très-secret" }, ["secret"], KEY))).not.toContain("très-secret");
+  });
+});

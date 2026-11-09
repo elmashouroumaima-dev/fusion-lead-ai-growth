@@ -8,6 +8,7 @@ import { ServiceError, errorResponse, normalizeError, type ServiceErrorCode } fr
 import { field, toFieldErrors } from "./form";
 import {
   canonicalRequestHash,
+  fingerprintSecrets,
   errorForDecision,
   IDEMPOTENCY_FIELD,
   IDEMPOTENCY_HEADER,
@@ -93,6 +94,8 @@ type TenantOptions<T> = CommonOptions<T> & {
   auth: "tenant";
   permission?: PermissionOption<T>;
   idempotency: IdempotencyOption;
+  /** Champs du corps qui portent un secret : remplacés par leur HMAC (clé serveur) dans l'empreinte d'idempotence conservée en base (voir `fingerprintSecrets`). */
+  hashOmit?: readonly string[];
 };
 
 type UserOptions<T> = CommonOptions<T> & {
@@ -223,6 +226,7 @@ type CoreOptions<T> = {
   rateLimit: RateLimitOption;
   idempotency: IdempotencyOption;
   forbidOrganizationId?: boolean | undefined;
+  hashOmit?: readonly string[] | undefined;
 };
 
 type Principal = TenantServiceContext | UserServiceContext;
@@ -322,9 +326,11 @@ async function execute<T, R>(p: CoreParams<T, R>): Promise<Executed<R>> {
       if (!key.success) throw new ServiceError("validation_failed");
       if (!principal.organizationId) throw new ServiceError("internal_error");
       const candidate: IdempotencyRef = { organizationId: principal.organizationId, key: key.data };
+      // clé serveur du HMAC des champs secrets (chargée seulement pour les routes qui en déclarent : `server-only` n'est pas chargé ailleurs)
+      const hashKey = options.hashOmit?.length ? (await import("../supabase/admin")).deriveServerSecret("idempotency-secret-v1") : "";
       const decision = await idempotencyBegin(principal.supabase, {
         ...candidate,
-        requestHash: canonicalRequestHash({ method: p.method, path: p.path, body: input }),
+        requestHash: canonicalRequestHash({ method: p.method, path: p.path, body: fingerprintSecrets(input, options.hashOmit, hashKey) }),
       });
       const blocked = errorForDecision(decision);
       if (blocked) throw blocked;

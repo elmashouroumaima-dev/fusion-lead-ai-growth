@@ -1,4 +1,5 @@
 import {
+  CRM_PROVIDERS,
   crmIntegrationRowSchema,
   crmMappingRowSchema,
   type CreateCrmIntegrationInput,
@@ -34,6 +35,7 @@ export async function listIntegrations(supabase: ServerSupabase, organizationId:
     .from("integrations")
     .select(INTEGRATION_COLUMNS)
     .eq("organization_id", organizationId)
+    .in("provider", CRM_PROVIDERS)
     .order("created_at", { ascending: true })
     .order("id", { ascending: true });
   if (error || !Array.isArray(data)) throw new Error("integrations_lookup_failed");

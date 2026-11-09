@@ -25,7 +25,8 @@
       "projects": "Projets",
       "leads": "Leads",
       "deals": "Deals",
-      "crmSync": "CRM"
+      "crmSync": "CRM",
+      "integrations": "Intégrations"
     },
     "sidebar": {
       "toggle": "Afficher ou masquer le menu latéral",
@@ -827,5 +828,63 @@
     "retried": "Synchronisation relancée.",
     "retryNothing": "Rien à relancer.",
     "retryFailed": "La synchronisation n'a pas pu être relancée."
+  },
+  "Integrations": {
+    "title": "Intégrations",
+    "description": "Fournisseurs connectés à l'entreprise : état, portée et dernière synchronisation. Les jetons sont chiffrés et ne s'affichent jamais.",
+    "encryptionOff": "Le chiffrement des secrets n'est pas configuré sur ce serveur : aucun jeton ne peut être enregistré ou remplacé.",
+    "empty": "Aucune intégration pour l'instant.",
+    "loadFailed": "Les intégrations n'ont pas pu être chargées.",
+    "providers": {
+      "csv": "Fichier CSV",
+      "internal": "CRM interne",
+      "email": "E-mail",
+      "whatsapp": "WhatsApp"
+    },
+    "status": {
+      "label": "État",
+      "pending": "En attente de validation",
+      "active": "Connectée",
+      "error": "En erreur",
+      "disconnected": "Déconnectée",
+      "disabled": "Désactivée"
+    },
+    "account": "Compte",
+    "scopes": "Portée",
+    "scopesNone": "Aucune portée déclarée",
+    "lastSync": "Dernière synchronisation",
+    "lastSyncNever": "Aucune",
+    "lastError": "Une erreur est survenue lors de la dernière utilisation.",
+    "secretStored": "Jeton enregistré et chiffré",
+    "secretMissing": "Aucun jeton enregistré",
+    "secretNote": "Le jeton ne peut pas être consulté, même par un administrateur : vous pouvez seulement le remplacer.",
+    "channels": "Canaux",
+    "channelsNone": "Aucun canal pour cette intégration.",
+    "channelStatus": {
+      "pending": "En attente",
+      "active": "Actif",
+      "paused": "En pause",
+      "disconnected": "Déconnecté"
+    },
+    "crmLink": "Gérer la synchronisation dans la page CRM",
+    "replace": {
+      "title": "Remplacer le jeton",
+      "label": "Nouveau jeton",
+      "hint": "Le nouveau jeton remplace l'ancien immédiatement. Il n'est jamais affiché ensuite.",
+      "submit": "Remplacer",
+      "done": "Jeton remplacé.",
+      "failed": "Le jeton n'a pas pu être remplacé.",
+      "unavailable": "Le chiffrement des secrets n'est pas configuré sur ce serveur.",
+      "invalid": "Le jeton est invalide (8 à 4096 caractères, sans caractère de contrôle).",
+      "reconnect": "Reconnecter"
+    },
+    "disconnect": {
+      "button": "Déconnecter",
+      "confirm": "Déconnecter cette intégration supprime son jeton et met ses canaux en pause. Cette action est irréversible.",
+      "confirmButton": "Oui, déconnecter",
+      "cancel": "Annuler",
+      "done": "Intégration déconnectée.",
+      "failed": "L'intégration n'a pas pu être déconnectée."
+    }
   }
 }

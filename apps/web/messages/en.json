@@ -25,7 +25,8 @@
       "projects": "Projects",
       "leads": "Leads",
       "deals": "Deals",
-      "crmSync": "CRM"
+      "crmSync": "CRM",
+      "integrations": "Integrations"
     },
     "sidebar": {
       "toggle": "Show or hide the side menu",
@@ -827,5 +828,63 @@
     "retried": "Sync restarted.",
     "retryNothing": "Nothing to retry.",
     "retryFailed": "The sync could not be restarted."
+  },
+  "Integrations": {
+    "title": "Integrations",
+    "description": "Providers connected to the company: status, scope and last synchronization. Tokens are encrypted and never displayed.",
+    "encryptionOff": "Secret encryption is not configured on this server: no token can be saved or replaced.",
+    "empty": "No integration yet.",
+    "loadFailed": "Integrations could not be loaded.",
+    "providers": {
+      "csv": "CSV file",
+      "internal": "Internal CRM",
+      "email": "Email",
+      "whatsapp": "WhatsApp"
+    },
+    "status": {
+      "label": "Status",
+      "pending": "Awaiting validation",
+      "active": "Active",
+      "error": "Error",
+      "disconnected": "Disconnected",
+      "disabled": "Disabled"
+    },
+    "account": "Account",
+    "scopes": "Scope",
+    "scopesNone": "No scope declared",
+    "lastSync": "Last synchronization",
+    "lastSyncNever": "None",
+    "lastError": "An error occurred the last time it was used.",
+    "secretStored": "Token saved and encrypted",
+    "secretMissing": "No token saved",
+    "secretNote": "The token cannot be viewed, even by an administrator: you can only replace it.",
+    "channels": "Channels",
+    "channelsNone": "No channel for this integration.",
+    "channelStatus": {
+      "pending": "Pending",
+      "active": "Active",
+      "paused": "Paused",
+      "disconnected": "Disconnected"
+    },
+    "crmLink": "Manage synchronization on the CRM page",
+    "replace": {
+      "title": "Replace the token",
+      "label": "New token",
+      "hint": "The new token replaces the old one immediately. It is never displayed afterwards.",
+      "submit": "Replace",
+      "done": "Token replaced.",
+      "failed": "The token could not be replaced.",
+      "unavailable": "Secret encryption is not configured on this server.",
+      "invalid": "The token is invalid (8 to 4096 characters, no control characters).",
+      "reconnect": "Reconnect"
+    },
+    "disconnect": {
+      "button": "Disconnect",
+      "confirm": "Disconnecting this integration deletes its token and pauses its channels. This cannot be undone.",
+      "confirmButton": "Yes, disconnect",
+      "cancel": "Cancel",
+      "done": "Integration disconnected.",
+      "failed": "The integration could not be disconnected."
+    }
   }
 }

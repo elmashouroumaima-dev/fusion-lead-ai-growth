@@ -5,6 +5,7 @@ import {
   CircleUserIcon,
   FolderKanbanIcon,
   KanbanSquareIcon,
+  PlugIcon,
   LayoutDashboardIcon,
   MailIcon,
   PaletteIcon,
@@ -34,8 +35,8 @@ import {
 import { Link, usePathname } from "../../i18n/navigation";
 
 type NavItem = {
-  href: "/dashboard" | "/projects" | "/leads" | "/deals" | "/crm" | "/members" | "/admin/organizations";
-  labelKey: "dashboard" | "projects" | "leads" | "deals" | "crmSync" | "members" | "admin";
+  href: "/dashboard" | "/projects" | "/leads" | "/deals" | "/crm" | "/members" | "/admin/organizations" | "/integrations";
+  labelKey: "dashboard" | "projects" | "leads" | "deals" | "crmSync" | "members" | "admin" | "integrations";
   icon: typeof UsersIcon;
 };
 
@@ -64,7 +65,7 @@ export function AppSidebar({
   showMembers: boolean;
   /** « Leads » et « Deals » : rôles qui peuvent lire les leads (commodité d'affichage ; les pages et la RLS décident). */
   showCrm?: boolean;
-  /** « CRM » (synchronisation) : owner et admin (commodité d'affichage ; la page et la base décident). */
+  /** « CRM » (synchronisation) et « Intégrations » : owner et admin (commodité d'affichage ; la page et la base décident). */
   showCrmSync?: boolean;
   showSettings?: boolean;
   showAdmin?: boolean;
@@ -81,7 +82,12 @@ export function AppSidebar({
           { href: "/deals", labelKey: "deals", icon: KanbanSquareIcon } satisfies NavItem,
         ]
       : []),
-    ...(showCrmSync ? [{ href: "/crm", labelKey: "crmSync", icon: RefreshCwIcon } satisfies NavItem] : []),
+    ...(showCrmSync
+      ? [
+          { href: "/crm", labelKey: "crmSync", icon: RefreshCwIcon } satisfies NavItem,
+          { href: "/integrations", labelKey: "integrations", icon: PlugIcon } satisfies NavItem,
+        ]
+      : []),
     ...(showMembers
       ? [{ href: "/members", labelKey: "members", icon: UsersIcon } satisfies NavItem]
       : []),

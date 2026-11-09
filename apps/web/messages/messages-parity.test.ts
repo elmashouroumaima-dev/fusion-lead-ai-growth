@@ -131,7 +131,7 @@ describe("messages fr/ar/en", () => {
     const allowed = new Set([
       "Meta.title", "Common.appName", "Home.title",
       "Shell.nav.leads", "Shell.nav.deals", "Crm.leads.title", "Crm.deals.title", "Crm.filters.source", "Crm.table.contact", "Crm.table.source",
-      "Crm.pagination.label",
+      "Crm.pagination.label", "Integrations.providers.whatsapp",
     ]);
     const same = [...frFlat].filter(([k, v]) => !allowed.has(k) && enFlat.get(k) === v && /[A-Za-z]{4,}/.test(v));
     expect(same.map(([k]) => k)).toEqual([]);

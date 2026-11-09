@@ -21,7 +21,7 @@ function fakeClient() {
   });
   const from = (table: string) => {
     const query: Record<string, unknown> = {};
-    for (const method of ["select", "eq", "order"]) {
+    for (const method of ["select", "eq", "in", "order"]) {
       query[method] = (...args: unknown[]) => {
         calls.push({ op: `${table}.${method}`, args });
         return query;

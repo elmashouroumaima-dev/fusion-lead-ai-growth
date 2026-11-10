@@ -5,11 +5,15 @@ import { createSupabaseLeadAssigner } from "./assignment";
 import { loadWorkerEnv } from "./env";
 import { createSupabaseCrmSyncGateway } from "./crm-sync";
 import { createSupabaseImportGateway } from "./imports";
+import { createSupabaseWebhookGateway, type WebhookProcessors } from "./webhooks";
 import { createDefaultRegistry } from "./handlers";
 import { WORKER_NAME } from "./info";
 import { Runner, type WorkerLogger } from "./runner";
 import { installShutdown } from "./shutdown";
 import { createSupabaseJobStore } from "./store";
+
+/** Processeurs de webhooks par fournisseur (J29) : VIDE pour l'instant, l'e-mail s'enregistre au J32 et WhatsApp au J35. Sans processeur, un événement est marqué `failed` (`no_processor`), re-jouable. */
+const WEBHOOK_PROCESSORS: WebhookProcessors = new Map();
 
 /** Journal JSON sur stdout : un événement par ligne, champs scalaires seulement. */
 const logger: WorkerLogger = {
@@ -23,7 +27,7 @@ try {
   const workerId = `${hostname().replace(/[^A-Za-z0-9._-]/g, "-").slice(0, 60)}:${process.pid}:${randomBytes(4).toString("hex")}`;
   const runner = new Runner({
     store: createSupabaseJobStore(env),
-    registry: createDefaultRegistry({ assigner: createSupabaseLeadAssigner(env), imports: createSupabaseImportGateway(env), crm: createSupabaseCrmSyncGateway(env) }),
+    registry: createDefaultRegistry({ assigner: createSupabaseLeadAssigner(env), imports: createSupabaseImportGateway(env), crm: createSupabaseCrmSyncGateway(env), webhooks: { gateway: createSupabaseWebhookGateway(env), processors: WEBHOOK_PROCESSORS } }),
     workerId,
     logger,
   });

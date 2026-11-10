@@ -1,3 +1,4 @@
+import { MemoryWebhooks } from "./webhooks.testkit";
 import { describe, expect, it } from "vitest";
 import { z } from "zod";
 import { errorCode, NonRetryableError, safeCode } from "./errors";
@@ -16,8 +17,8 @@ const leadAssignHandler = createLeadAssignHandler(new MemoryAssigner());
 
 describe("HandlerRegistry", () => {
   it("enregistre noop et lead.assign par défaut ; un type absent est introuvable", () => {
-    const registry = createDefaultRegistry({ assigner: new MemoryAssigner(), imports: new MemoryImports(), crm: new MemoryCrm() });
-    expect(registry.kinds()).toEqual(["crm_sync", "import_csv", "lead.assign", "noop"]);
+    const registry = createDefaultRegistry({ assigner: new MemoryAssigner(), imports: new MemoryImports(), crm: new MemoryCrm(), webhooks: { gateway: new MemoryWebhooks(), processors: new Map() } });
+    expect(registry.kinds()).toEqual(["crm_sync", "import_csv", "lead.assign", "noop", "process_webhook"]);
     expect(registry.get("noop")).toBe(noopHandler);
     expect(registry.get("lead.assign")?.kind).toBe("lead.assign");
     expect(registry.get("autre")).toBeUndefined();

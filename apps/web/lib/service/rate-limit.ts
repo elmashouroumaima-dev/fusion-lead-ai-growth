@@ -100,6 +100,8 @@ export const PUBLIC_LIMITS = {
   /** Préflight CORS : un par envoi de formulaire, donc un seau à part (il ne consomme pas le budget des envois). */
   capture_preflight: { capacity: 60, refillPerSecond: 1 },
   capture_key: { capacity: 200, refillPerSecond: 2 },
+  /** Webhooks entrants (J29), par fournisseur et adresse source : les fournisseurs envoient en rafale depuis peu d'adresses. */
+  webhook_ip: { capacity: 300, refillPerSecond: 10 },
 } as const;
 export type PublicRateLimitScope = keyof typeof PUBLIC_LIMITS;
 

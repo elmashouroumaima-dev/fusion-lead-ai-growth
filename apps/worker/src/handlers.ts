@@ -8,6 +8,7 @@ import type { CrmCounts, CrmSyncGateway } from "./crm-sync";
 import type { LeadAssigner } from "./assignment";
 import { NonRetryableError } from "./errors";
 import { ImportGatewayError, type ImportGateway } from "./imports";
+import type { WebhookGateway, WebhookProcessors } from "./webhooks";
 
 /**
  * Contexte d'exécution d'un job. `organizationId` vient de la ligne du job (jamais de la charge utile) : tout
@@ -304,12 +305,49 @@ async function runCrmSync(gateway: CrmSyncGateway, ctx: JobContext, org: string,
   await gateway.finish(org, integration, batch, started.startedAt, counts);
 }
 
-export type RegistryDeps = { assigner: LeadAssigner; imports: ImportGateway; crm: CrmSyncGateway };
+/**
+ * `process_webhook` (J29) : traite un événement webhook DÉJÀ enregistré et authentifié par la route publique. L'entreprise est celle de
+ * la LIGNE du job. Un événement terminé, inconnu ou d'une autre entreprise est ignoré (rejeu sans effet). Sans processeur pour le
+ * fournisseur (e-mail J32, WhatsApp J35), l'événement est marqué `failed` avec le code `no_processor` : il reste visible et RE-JOUABLE (le
+ * payload reste en base), au lieu d'être classé « sans effet ».
+ * Échec définitif : `failed` + code ; le job suit la politique de reprise habituelle.
+ */
+export function createProcessWebhookHandler(gateway: WebhookGateway, processors: WebhookProcessors): JobHandler {
+  return defineHandler({
+    kind: "process_webhook",
+    schema: z.object({ event_id: z.uuid() }).strict(),
+    run: async (ctx, payload) => {
+      const org = ctx.organizationId;
+      const event = payload.event_id;
+      const started = await gateway.start(org, event);
+      if (started.status !== "running") return;
+      const processor = processors.get(started.provider);
+      if (!processor) {
+        await gateway.finish(org, event, "failed", "no_processor");
+        return;
+      }
+      try {
+        const outcome = await processor.process({ organizationId: org, eventId: event, integrationId: started.integrationId, payload: started.payload });
+        await gateway.finish(org, event, outcome, null);
+      } catch (error) {
+        if (error instanceof NonRetryableError) {
+          await bestEffort(() => gateway.finish(org, event, "failed", error.code));
+          throw error;
+        }
+        if (ctx.attempt >= ctx.maxAttempts) await bestEffort(() => gateway.finish(org, event, "failed", "failed"));
+        throw error;
+      }
+    },
+  });
+}
+
+export type RegistryDeps = { assigner: LeadAssigner; imports: ImportGateway; crm: CrmSyncGateway; webhooks: { gateway: WebhookGateway; processors: WebhookProcessors } };
 
 export function createDefaultRegistry(deps: RegistryDeps): HandlerRegistry {
   return new HandlerRegistry()
     .register(noopHandler)
     .register(createLeadAssignHandler(deps.assigner))
     .register(createImportCsvHandler(deps.imports))
-    .register(createCrmSyncHandler(deps.crm));
+    .register(createCrmSyncHandler(deps.crm))
+    .register(createProcessWebhookHandler(deps.webhooks.gateway, deps.webhooks.processors));
 }

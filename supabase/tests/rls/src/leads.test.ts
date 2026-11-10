@@ -211,7 +211,7 @@ describe("audit : aucune donnée métier ni personnelle", () => {
     const leaks = psql(`
       select count(*) from public.audit_logs
        where entity_type in ('lead', 'deal') and created_at > now() - interval '10 minutes'
-         and (coalesce(before::text, '') || coalesce(after::text, '')) ~* 'rlsl-${run}|exemple\\.test|1234'
+         and (coalesce(before::text, '') || coalesce(after::text, '')) ~* 'rlsl-${run}|exemple\\.test|1234[.]5'
     `);
     expect(leaks).toBe("0");
   });

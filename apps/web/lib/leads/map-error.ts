@@ -30,6 +30,8 @@ const CONFLICTS = [
   "mapping_missing",
   "integration_not_replaceable",
   "too_many_channels",
+  "idempotency_conflict",
+  "too_many_messages",
 ] as const;
 
 export function mapLeadsDbError(error: DbError): ServiceErrorCode {

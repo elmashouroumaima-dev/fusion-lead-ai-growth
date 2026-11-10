@@ -237,3 +237,8 @@ Tables créées : `plans` (catalogue global ; ligne `trial` sans limites, valeur
 - **`integrations`** : `scopes`, `secret_ref` (non lisible par l'API) et `has_secret` ajoutés ; fournisseurs `email` et `whatsapp` ajoutés (`salla` au J55) ; statuts `pending`, `active`, `error`, `disconnected`, `disabled` ; unicité **globale** `(provider, compte)` pour `email` et `whatsapp` seulement (G-R6), par entreprise pour `csv` et `internal` (J25).
 - **`channels`** (E4) : écriture par fonctions owner / admin (modèle de l'ADR 005) ; identité e-mail ou E.164 ; la preuve de propriété de l'expéditeur viendra de la validation par le fournisseur (J31, J34) ; un canal ne passe `active` qu'à ce moment-là.
 - **Écart** : `integration_status` n'est pas un enum Postgres mais une contrainte `CHECK` (comme les autres listes fermées du projet).
+
+## Notes J29 (2026-11-09) — webhook_events
+- **`webhook_events`** : `integration_id` (clé composite), `status` `received`, `processed`, `ignored`, `failed`, `rejected` (contrainte `CHECK`, pas un enum), `failure_code`, `signature_valid` ; `payload jsonb` de 4 Mo au plus et **non lisible par l'API** (SELECT par colonnes, service_role seulement pour l'écriture et la lecture du payload).
+- **Écart** : unicité `(organization_id, provider, external_event_id)` et non `(provider, external_event_id)` : avec une unicité globale, une entreprise pourrait réserver des identifiants d'événements pour en priver une autre.
+- Un événement `rejected` (signature invalide, horodatage hors fenêtre) n'a ni payload ni identifiant ; il est plafonné à 200 par intégration et par heure. Un compte inconnu n'écrit rien.

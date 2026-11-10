@@ -3,6 +3,13 @@
 Format : Keep a Changelog. Une entrée par jour de travail.
 
 ## [Non publié]
+### J29 — Pipeline webhook
+- Ajout : migration `20261129100000` (et retour arrière) : table `webhook_events` (métadonnées seules lisibles par owner et admin, payload jamais exposé), fonctions service_role `webhook_resolve_integration`, `webhook_record` (événement + job `process_webhook` dans la même transaction, unicité par entreprise, plafond de file sur 7 jours), `webhook_record_rejection` (plafonnée), `webhook_start` et `webhook_finish`.
+- Ajout : `packages/adapters/src/webhooks` : interface `WebhookAdapter`, helper `verifyHmacSha256Hex` (temps constant, corps brut) et pipeline pur `ingestWebhook` (taille, compte, tenant par le COMPTE, signature, fenêtre de 5 minutes, enregistrement idempotent).
+- Ajout : route `POST /api/webhooks/[provider]` (sans session, limitation de débit par fournisseur et adresse, corps borné, ACK rapide ; 404 sans adaptateur) ; handler worker `process_webhook` et passerelle ; registre d'adaptateurs et de processeurs vides (e-mail J32, WhatsApp J34 et J35).
+- Sécurité (revue adverse) : compte inconnu = même 401 qu'une signature invalide (aucun oracle d'existence), seau de débit par adresse agrégée (IPv6 /64) et refus 503 sans adresse source, secret absent refusé, horodatage strict, adaptateur qui lève = requête invalide, sans processeur = `failed` re-jouable, marge de taille du jsonb, plafond de file sur 7 jours.
+- Tests : adapters (19), route (11), magasin (6), worker (12), pgTAP (78), API réelle (6), acceptation (16).
+- Documentation : `docs/api/webhooks.md`, addendum ADR 007.
 ### J28 — Intégrations et secrets
 - Ajout : migration `20261128100000` (et retour arrière) : `integrations` étendue (`scopes`, `secret_ref`, `has_secret`, fournisseurs `email` et `whatsapp`, statuts `pending`, `active`, `error`, `disconnected`, `disabled`, unicité globale des comptes e-mail et WhatsApp), table `channels` (ADR 007 E4), fonctions `create_provider_integration`, `set_integration_secret` (rotation et reconnexion), `disconnect_integration`, `create_channel`, `update_channel` (owner et admin) et `get_integration_secret` (service_role seulement).
 - Sécurité : SELECT par colonnes (`secret_ref` illisible, `select *` refusé), `private.secrets` sans droit d'API, clé étrangère composite secret / entreprise, AAD par entreprise ; le jeton n'est jamais renvoyé, journalisé, audité ni stocké dans les clés d'idempotence (HMAC avec une clé serveur : rejouer une clé avec un autre jeton donne 422).

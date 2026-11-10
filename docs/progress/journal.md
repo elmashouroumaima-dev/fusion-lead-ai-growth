@@ -727,3 +727,25 @@ Cible : 42,6 % (plan à 68 jours) | Réel : à valider | Statut : —
 - Pas de formulaire de création dans l'écran (chaque fournisseur a ses champs : J31 e-mail, J34 WhatsApp) : création par l'API seulement ; l'écran liste, remplace, reconnecte et déconnecte.
 - Pas de rotation de la clé maître (J58 et J59, `docs/runbooks/secret-rotation.md`).
 - Aucune validation par un fournisseur réel : toute intégration reste `pending`.
+
+## J29 — Pipeline webhook (branche `day-29-webhooks`, NON commité)
+Cible : 44,1 % (plan à 68 jours) | Réel : à valider | Statut : —
+
+### Tâches
+| Tâche | Estimé | Livré | Validée |
+|---|---|---|---|
+| `webhook_events` + unicité | 1,5 h | oui (migration `20261129100000`, unicité par entreprise) | oui (pgTAP 78, API réelle 6) |
+| Route `/api/webhooks/[provider]` | 2,5 h | oui (taille, signature, tenant par le compte, limitation de débit) | oui (route 11, acceptation 16) |
+| ACK rapide + job | 1 h | oui (job `process_webhook` dans la même transaction, handler worker) | oui (worker 12, acceptation) |
+| Tests | 1 h | oui | oui |
+
+### Validation du jour
+- **Signature invalide rejetée et journalisée** : 401, ligne `rejected` sans payload ; **rejeu traité une seule fois** (8 envois simultanés : un événement, un job) ; **payload trop gros** : 413 ; **compte inconnu** : même 401 que la signature invalide (aucun oracle) ; **tenant forgé dans le payload** : l'événement reste à l'entreprise du compte.
+- Réserve : aucun adaptateur de production n'existe (e-mail J32, WhatsApp J34 et J35) : la route répond 404 pour tous les fournisseurs et les scénarios de signature tournent avec un adaptateur de test injecté sur les vraies fonctions SQL (pas de test HTTP de signature avant J32).
+
+### Revue sécurité (0 bloquant, 2 majeurs, 5 moyens) — corrigés : oracle d'existence d'un compte (même réponse et même travail), seau de débit (IPv6 /64 et adresse inconnue), secret absent, horodatage strict, adaptateur qui lève, sans processeur = `failed` re-jouable, marge de taille et caractère nul du jsonb, plafond de file sur 7 jours, tests (magasin, réponses identiques) ; **à décider avant le J34** : secret de webhook distinct et propre à chaque entreprise (App Secret WhatsApp), identifiant d'événement dérivé de contenu signé ; **avec l'exploitation (J39)** : balayage des événements bloqués, rétention du payload et des rejets, limite par intégration.
+
+### Tests : domain 615 ✓ · adapters 63 ✓ · permissions 394 ✓ · worker 88 ✓ · web 2509 ✓ · pgTAP 2594 (dont 220_webhook_events : 78) ✓ · API réelle 454 (webhooks : 6) ✓ · acceptation 169 ✓ (+1 test réservé à un serveur sans clé maître ; webhooks-flow : 16) · couverture domain 97,9 % · lint, typecheck, check:leaks verts
+### Écarts à la spec / plan
+- Unicité `(organization_id, provider, external_event_id)` au lieu de `(provider, external_event_id)` (ADR 007 mis à jour).
+- Pas de purge du payload ni des rejets (J39, J58) ; pas de limite par intégration.

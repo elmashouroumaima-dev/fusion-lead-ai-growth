@@ -3,6 +3,13 @@
 Format : Keep a Changelog. Une entrée par jour de travail.
 
 ## [Non publié]
+### J30 — Conversations et messages
+- Ajout : migration `20261130100000` (et retour arrière) : tables `conversations` (un fil par contact et canal, états `open`, `pending`, `closed`, `to_triage` cohérents avec le responsable par CHECK) et `messages` (clé composite entreprise + conversation + canal, unicité du message fournisseur et de la clé d'envoi, corps de 1 à 100 000 caractères, immuables : organisation, conversation, canal, sens, corps).
+- Ajout : RLS (owner et admin tout, le commercial SES conversations et leurs messages, marketing et analyste rien) ; fonctions `assign_conversation` et `set_conversation_state` (par rôle) ; fonctions service_role `conversation_get_or_create` et `message_record` (idempotentes : rejeu identique = `duplicate`, rejeu contradictoire = `idempotency_conflict`) ; libération des conversations d'un membre qui perd son accès ; audit sans corps de message.
+- Ajout : `packages/domain/src/conversations`, `apps/web/lib/conversations` (liste, détail, messages, assigner, état). Pas d'écran ni de route (inbox au J37).
+- Sécurité (revue adverse) : entrées validées avant insertion (aucun corps dans les erreurs), conflit d'idempotence, verrous dans l'ordre membre puis conversation, plafond de 10 000 messages par conversation, horodatage limité à maintenant + 5 minutes, aucun message sur un canal déconnecté, index alignés sur le tri.
+- Tests : domaine (6), service web (6), pgTAP (126), API réelle (12).
+- Documentation : `docs/api/conversations.md`, addendum ADR 007.
 ### J29 — Pipeline webhook
 - Ajout : migration `20261129100000` (et retour arrière) : table `webhook_events` (métadonnées seules lisibles par owner et admin, payload jamais exposé), fonctions service_role `webhook_resolve_integration`, `webhook_record` (événement + job `process_webhook` dans la même transaction, unicité par entreprise, plafond de file sur 7 jours), `webhook_record_rejection` (plafonnée), `webhook_start` et `webhook_finish`.
 - Ajout : `packages/adapters/src/webhooks` : interface `WebhookAdapter`, helper `verifyHmacSha256Hex` (temps constant, corps brut) et pipeline pur `ingestWebhook` (taille, compte, tenant par le COMPTE, signature, fenêtre de 5 minutes, enregistrement idempotent).

@@ -749,3 +749,25 @@ Cible : 44,1 % (plan à 68 jours) | Réel : à valider | Statut : —
 ### Écarts à la spec / plan
 - Unicité `(organization_id, provider, external_event_id)` au lieu de `(provider, external_event_id)` (ADR 007 mis à jour).
 - Pas de purge du payload ni des rejets (J39, J58) ; pas de limite par intégration.
+
+## J30 — Conversations et messages (branche `day-30-conversations`, NON commité)
+Cible : 45,6 % (plan à 68 jours) | Réel : à valider | Statut : —
+
+### Tâches
+| Tâche | Estimé | Livré | Validée |
+|---|---|---|---|
+| Tables + RLS | 2 h | oui (migration `20261130100000`, lecture par rôle, aucune écriture directe) | oui (pgTAP 126, API réelle 12) |
+| Cohérence d'entreprise des messages | 1 h | oui (clé composite + déclencheurs d'immuabilité) | oui |
+| Unicité `provider_message_id` | 1 h | oui (+ clé d'idempotence, conflit si rejeu contradictoire) | oui (8 envois simultanés = 1 message) |
+| Services d'état et d'assignation | 2 h | oui (fonctions SQL par rôle + service web) | oui |
+
+### Validation du jour
+- **Un message ne peut porter une autre `organization_id`** (ni un autre canal) que sa conversation : refusé par la base, y compris en insertion forgée.
+- **Le commercial ne lit que SES conversations** (et leurs messages) ; la file `to_triage`, marketing, analyste, l'autre entreprise et l'anonyme : rien.
+
+### Revue sécurité (0 bloquant, 2 majeurs, 5 moyens) — corrigés : rejeu contradictoire (autre conversation ou autre corps) devenu un conflit d'idempotence, corps de message dans le DETAIL des erreurs de contrainte (validation avant insertion), `pending` sans responsable et CHECK état / responsable, ordre des verrous (membre puis conversation), index du tri, plafond de messages par conversation, horodatage clampé, canal déconnecté, tests renforcés (PATCH vacuous, erreurs précises) ; **à noter** : un message sortant naît `queued` sans approbation (le worker d'envoi J31 doit exiger la chaîne de contrôle), `handled_by` et verrou sans écrivain avant J38, effacement RGPD d'un contact avec messages (anonymisation à définir), pas de quota `messages_per_month`.
+
+### Tests : domain 621 ✓ · adapters 63 ✓ · permissions 394 ✓ · worker 88 ✓ · web 2515 ✓ · pgTAP 2720 (dont 230_conversations_messages : 126) ✓ · API réelle 466 (conversations : 12) ✓ · acceptation 169 ✓ (+1 test réservé à un serveur sans clé maître) · lint, typecheck, check:leaks verts
+### Écarts à la spec / plan
+- Statut de message `received` ajouté (entrants seulement) ; états par `CHECK` et non par enum.
+- Pas de route ni d'écran (J37) ; pas d'envoi ni de réception réels (J31, J32, J35).

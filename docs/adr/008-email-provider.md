@@ -1,6 +1,6 @@
 # ADR 008 — Fournisseur e-mail
 
-- **Statut :** Proposed — **dépend de Q2** (hypothèse §14 : un fournisseur, Gmail non requis)
+- **Statut :** Accepted **sous réserve de Q2** (hypothèse §14 appliquée le 2026-11-11 : option A, Postmark ; Gmail non requis)
 - **Date :** 2026-11-11
 - **Section de spec :** §9.2, §11, §13-5, §14 Q2 ; fiche : `docs/integrations/email.md`
 
@@ -34,3 +34,6 @@ Une configuration SMTP générique (option C) est désormais saisissable dans Pa
 
 ## Décision du 2026-11-09
 L'ADR reste **Proposed** : le choix du fournisseur dépend de Q2 (propriétaire du domaine, Gmail ou fournisseur transactionnel), toujours sans réponse, et aucune des alternatives à Postmark n'a été vérifiée. **À trancher au plus tard au début du J31** (compte sandbox ouvert) ; sans réponse à Q2, appliquer l'hypothèse §14 (option A, Postmark) et le noter ici.
+
+## Décision du 2026-11-11 (J31)
+Q2 n'a toujours pas de réponse : en application de la règle du 2026-11-09, l'**hypothèse §14 est retenue** (option A, Postmark) et l'adaptateur `packages/adapters/src/email/postmark.ts` l'implémente derrière l'interface `EmailProvider` (changer de fournisseur ne touche ni le domaine ni le worker). **Aucun compte n'est ouvert et aucun envoi réel n'est fait** avant le checkpoint C3 ; le comportement du fournisseur (codes d'erreur, forfait de réception, limites, sandbox) reste **À CONFIRMER** sur un compte réel (`docs/integrations/email.md`). Si la réponse à Q2 change le fournisseur, seul l'adaptateur est à remplacer. Voir `docs/api/send.md`.

@@ -771,3 +771,25 @@ Cible : 45,6 % (plan à 68 jours) | Réel : à valider | Statut : —
 ### Écarts à la spec / plan
 - Statut de message `received` ajouté (entrants seulement) ; états par `CHECK` et non par enum.
 - Pas de route ni d'écran (J37) ; pas d'envoi ni de réception réels (J31, J32, J35).
+
+## J31 — Envoi d'e-mail derrière la chaîne de contrôles (branche `day-31-email-send`, NON commité)
+Cible : 51,5 % (plan à 68 jours) | Réel : à valider | Statut : —
+
+### Tâches
+| Tâche | Estimé | Livré | Validée |
+|---|---|---|---|
+| `assertCanSend` (chaîne de contrôles) | 2 h | oui (`packages/domain/src/outbound`, 15 refus typés, échec fermé) | oui (33 tests) |
+| Adaptateur e-mail (ADR 008) | 2,5 h | oui (interface + Postmark, `fetch` injecté) | oui (11 tests, aucun appel réel) |
+| Handler `send_message` | 1,5 h | oui (+ migration, approbation, tentative unique) | oui (worker 30 tests, pgTAP 94, API 10) |
+
+### Validation du jour
+- **Contrôle final dans le worker juste avant l'appel** : l'état est relu dans une transaction verrouillée (`message_send_claim`) puis `checkCanSend` décide ; aucune route HTTP n'envoie.
+- **`accepted` n'est pas `delivered`** : le worker s'arrête à `accepted` ; la base interdit `queued` vers `delivered` et tout envoi accepté sans approbation.
+
+### Revue sécurité (0 bloquant, 2 majeurs, 5 moyens) — corrigés : entreprise suspendue ou abonnement inactif ignorés, clé étrangère de `approved_by` qui bloquait la suppression d'un compte, approbation jamais revalidée (approbateur rétrogradé, durée), adresse du contact modifiable après approbation, `accepted` perdu après une panne base ou un second worker, 502 / 504 classés « renvoyable » ; mineurs traités : compteur de débit sérialisé, secret mal formé refusé avant l'appel ; **à noter** : lien de désabonnement (J33), annulation d'un message approuvé (J38), quota `messages_per_month` (J39).
+
+### Tests : domain 654 ✓ · adapters 74 ✓ · permissions 394 ✓ · worker 118 ✓ · web 2515 ✓ · pgTAP 2814 (dont 240_send_chain : 94) ✓ · API réelle 476 (send-chain : 10) ✓ · lint, typecheck, check:leaks verts · acceptation 169 ✓ (+1 réservé à un serveur sans clé maître)
+### Écarts à la spec / plan
+- `message_approve` (owner et admin) ajoutée : point d'entrée de l'approbation humaine avant les écrans J38 et J44 ; l'approbation met le job en file.
+- Objet de l'e-mail dérivé du corps (pas de colonne `subject` avant J40) ; limite de débit provisoire de 100 e-mails par heure et par canal ; `fetch` injecté au lieu de MSW (non installé).
+- Aucun flux n'active encore un canal ou une intégration e-mail : le premier envoi réel attend la validation des identifiants (J32) et le checkpoint C3 ; Postmark reste une hypothèse (Q2).

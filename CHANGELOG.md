@@ -3,6 +3,13 @@
 Format : Keep a Changelog. Une entrée par jour de travail.
 
 ## [Non publié]
+### J31 — Envoi d'e-mail derrière la chaîne de contrôles
+- Ajout : migration `20261201100000` (et retour arrière) : approbation humaine d'un message sortant (`approved_by`, `approved_at`, `approved_purpose`, `approved_recipient`), tentative d'envoi unique (`send_claimed_at`), garde-fous de base (pas d'envoi accepté sans approbation, statuts qui ne reculent pas), table `suppressions` (lecture seule), fonctions `message_approve` (owner et admin, met le job en file) et, pour le worker, `message_send_claim`, `message_mark_accepted`, `message_mark_failed`, `message_release_claim`.
+- Ajout : `packages/domain/src/outbound` (`checkCanSend` / `assertCanSend`, 15 contrôles dans un ordre fixe, échec fermé), `packages/adapters/src/email` (interface `EmailProvider`, fournisseur Postmark), handler worker `send_message` (au plus un envoi par message, `accepted` n'est pas `delivered`).
+- Sécurité (revue adverse, 0 bloquant, 2 majeurs, 5 moyens corrigés) : approbation revalidée à l'envoi (approbateur toujours owner ou admin, moins de 72 h, adresse inchangée, entreprise et abonnement actifs), `approved_by` sans clé étrangère (suppression de compte non bloquée), envoi en cours distingué du résultat inconnu, `accepted` tardif permis, compteur de débit sérialisé par canal, 502 et 504 classés « inconnu » (jamais renvoyés).
+- Test existant modifié : `230_conversations_messages` (un message ne passe plus à `accepted` sans approbation).
+- Tests : domaine (+33), adaptateur (+11), worker (+30), pgTAP (+94), API réelle (+10).
+- Documentation : `docs/api/send.md`, ADR 008 (Accepted sous réserve de Q2).
 ### J30 — Conversations et messages
 - Ajout : migration `20261130100000` (et retour arrière) : tables `conversations` (un fil par contact et canal, états `open`, `pending`, `closed`, `to_triage` cohérents avec le responsable par CHECK) et `messages` (clé composite entreprise + conversation + canal, unicité du message fournisseur et de la clé d'envoi, corps de 1 à 100 000 caractères, immuables : organisation, conversation, canal, sens, corps).
 - Ajout : RLS (owner et admin tout, le commercial SES conversations et leurs messages, marketing et analyste rien) ; fonctions `assign_conversation` et `set_conversation_state` (par rôle) ; fonctions service_role `conversation_get_or_create` et `message_record` (idempotentes : rejeu identique = `duplicate`, rejeu contradictoire = `idempotency_conflict`) ; libération des conversations d'un membre qui perd son accès ; audit sans corps de message.

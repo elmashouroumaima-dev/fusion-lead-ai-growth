@@ -176,7 +176,7 @@ select throws_ok($$update public.conversations set state = 'pending', assignee_i
 select throws_ok($$update public.messages set body = 'modifié' where idempotency_key = 'envoi-cv-0001'$$, '23514', 'message_immutable', 'le corps d''un message ne change pas');
 select throws_ok($$update public.messages set conversation_id = (select id from public.conversations where contact_id = 'ec000000-0000-4000-8000-0000000000a2' limit 1) where idempotency_key = 'envoi-cv-0001'$$, '23514', 'message_immutable', 'un message ne change pas de conversation');
 select throws_ok($$update public.messages set provider_message_id = 'wamid.AUTRE' where provider_message_id = 'wamid.CV1' and channel_id = (select id from public.channels where sender_identity = 'ventes@cv.test')$$, '23514', 'message_immutable', 'l''identifiant du fournisseur ne change plus une fois connu');
-select lives_ok($$update public.messages set provider_message_id = 'wamid.ACCEPTE', status = 'accepted' where idempotency_key = 'envoi-cv-0001'$$, 'l''identifiant du fournisseur se renseigne une fois (envoi accepté)');
+select lives_ok($$update public.messages set approved_by = 'ea000000-0000-4000-8000-000000000001', approved_at = now(), approved_purpose = 'marketing', approved_recipient = 'a1@cv.test', provider_message_id = 'wamid.ACCEPTE', status = 'accepted' where idempotency_key = 'envoi-cv-0001'$$, 'l''identifiant du fournisseur se renseigne une fois (envoi accepté)');
 select throws_ok($$update public.messages set organization_id = 'eb000000-0000-4000-8000-00000000000b' where idempotency_key = 'envoi-cv-0001'$$, '23514', null, 'l''entreprise d''un message ne change jamais');
 
 -- ---------------------------------------------------------------------------

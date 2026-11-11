@@ -1,9 +1,10 @@
 import { z } from "zod";
-import { CsvCrmAdapter } from "@fusion-leap/adapters";
+import { CsvCrmAdapter, type EmailProvider } from "@fusion-leap/adapters";
 import {
-  CsvError, CsvParser, crmMappingsSchema, decideCreate, detectDelimiter, IMPORT_MAX_BYTES, normalizeContactEmail, normalizeImportRow, normalizePhone,
-  resolveContactRecord, type CrmMappingEntry,
+  checkCanSend, CsvError, CsvParser, crmMappingsSchema, decideCreate, deriveEmailSubject, detectDelimiter, EMAIL_SENDS_PER_HOUR, IMPORT_MAX_BYTES,
+  isRetryableRefusal, normalizeContactEmail, normalizeImportRow, normalizePhone, resolveContactRecord, type CrmMappingEntry,
 } from "@fusion-leap/domain";
+import type { SecretReader, SendGateway } from "./send";
 import type { CrmCounts, CrmSyncGateway } from "./crm-sync";
 import type { LeadAssigner } from "./assignment";
 import { NonRetryableError } from "./errors";
@@ -341,7 +342,132 @@ export function createProcessWebhookHandler(gateway: WebhookGateway, processors:
   });
 }
 
-export type RegistryDeps = { assigner: LeadAssigner; imports: ImportGateway; crm: CrmSyncGateway; webhooks: { gateway: WebhookGateway; processors: WebhookProcessors } };
+/**
+ * `send_message` (J31, spec §5.7 et §9.2, figure 9) : envoie UN e-mail déjà approuvé par un humain habilitée, depuis le worker (jamais depuis
+ * une requête HTTP). L'entreprise est celle de la LIGNE du job ; la charge utile ne porte que l'identifiant du message. Ordre fixe :
+ *  1. `claim` : relit l'état (approbation, consentement, ne plus contacter, suppression, canal, pause, débit) dans une transaction verrouillée
+ *     et pose l'UNIQUE tentative ; un message déjà tenté sans résultat connu n'est JAMAIS renvoyé (`send_outcome_unknown`) ;
+ *  2. `checkCanSend` (domaine) : contrôle final, juste avant l'appel ; un refus est un résultat métier (message `failed` + code, le job réussit),
+ *     sauf la limite de débit (tentative libérée, job rejoué plus tard) ;
+ *  3. lecture du jeton (`secret_ref`, déchiffré en mémoire) puis appel du fournisseur ;
+ *  4. `accepted` ≠ `delivered` : seul l'événement du fournisseur (J32) fera passer le message à `delivered`.
+ * Résultat inconnu (aucune réponse) : message `failed` / `send_outcome_unknown`, jamais renvoyé automatiquement. Aucun corps, adresse ni jeton
+ * n'est journalisé : seuls des codes courts sortent d'ici.
+ */
+export type SendDeps = { gateway: SendGateway; readSecret: SecretReader; provider: EmailProvider };
+
+export function createSendMessageHandler(deps: SendDeps): JobHandler {
+  return defineHandler({
+    kind: "send_message",
+    schema: z.object({ message_id: z.uuid() }).strict(),
+    run: async (ctx, payload) => {
+      const org = ctx.organizationId;
+      const messageId = payload.message_id;
+      const { gateway } = deps;
+      const claim = await gateway.claim(org, messageId);
+      if (claim.status === "missing" || claim.status === "not_queued") return;
+      if (claim.status === "in_progress") {
+        // un autre worker a posé la tentative il y a moins de 5 minutes : on ne la déclare pas « inconnue » tout de suite
+        if (ctx.attempt < ctx.maxAttempts) throw new Error("send_in_progress");
+        return;
+      }
+      if (claim.status === "ambiguous") {
+        await gateway.markFailed(org, messageId, "send_outcome_unknown");
+        return;
+      }
+      // à partir d'ici la tentative est posée : toute sortie anticipée la libère (essai sûr) ou clôt le message
+      if (claim.channel.type !== "email") {
+        await gateway.markFailed(org, messageId, "channel_unsupported");
+        return;
+      }
+      const check = checkCanSend({
+        approved: claim.message.approved,
+        approval: { validApprover: claim.message.approverValid, ageSeconds: claim.message.approvalAgeSeconds, recipientUnchanged: claim.message.recipientUnchanged },
+        purpose: claim.message.purpose,
+        organizationActive: claim.organizationActive,
+        organizationSendPaused: claim.organizationSendPaused,
+        channel: { status: claim.channel.status, sendPaused: claim.channel.sendPaused, integrationStatus: claim.channel.integrationStatus },
+        recipient: claim.contact.email,
+        doNotContact: claim.contact.doNotContact,
+        suppressed: claim.suppressed,
+        consent: claim.consent,
+        template: { required: false, approved: false },
+        rate: { sentInWindow: claim.sentLastHour, limit: EMAIL_SENDS_PER_HOUR },
+      });
+      if (!check.ok) {
+        if (isRetryableRefusal(check.reason) && ctx.attempt < ctx.maxAttempts) {
+          await gateway.releaseClaim(org, messageId);
+          throw new Error(check.reason);
+        }
+        await gateway.markFailed(org, messageId, `refused_${check.reason}`.slice(0, 40));
+        return;
+      }
+
+      let secret: string | null;
+      try {
+        secret = await deps.readSecret(org, claim.channel.integrationId);
+      } catch (error) {
+        await bestEffort(() => gateway.releaseClaim(org, messageId));
+        throw error;
+      }
+      if (secret === null) {
+        await gateway.markFailed(org, messageId, "no_credentials");
+        return;
+      }
+      if (ctx.signal.aborted) {
+        await bestEffort(() => gateway.releaseClaim(org, messageId));
+        throw new Error("aborted");
+      }
+
+      // juste avant l'appel : aucun autre accès base entre le contrôle final et le fournisseur
+      const outcome = await deps.provider.send(
+        { from: claim.channel.sender, to: claim.contact.email as string, subject: deriveEmailSubject(claim.message.body), textBody: claim.message.body },
+        secret,
+      );
+      switch (outcome.kind) {
+        case "accepted":
+          await markAcceptedWithRetry(gateway, org, messageId, outcome.providerMessageId);
+          return;
+        case "rejected":
+          await gateway.markFailed(org, messageId, outcome.code);
+          return;
+        case "retryable":
+          if (ctx.attempt >= ctx.maxAttempts) {
+            await gateway.markFailed(org, messageId, outcome.code);
+            return;
+          }
+          await gateway.releaseClaim(org, messageId);
+          throw new Error(outcome.code);
+        case "unknown":
+          await gateway.markFailed(org, messageId, "send_outcome_unknown");
+          return;
+      }
+    },
+  });
+}
+
+/** Le fournisseur a accepté : l'enregistrement ne doit pas se perdre sur une panne brève (sinon le message serait déclaré « résultat inconnu »). */
+async function markAcceptedWithRetry(gateway: SendGateway, org: string, messageId: string, providerMessageId: string): Promise<void> {
+  let lastError: unknown;
+  for (let attempt = 1; attempt <= 3; attempt += 1) {
+    try {
+      await gateway.markAccepted(org, messageId, providerMessageId);
+      return;
+    } catch (error) {
+      lastError = error;
+      await new Promise((resolve) => setTimeout(resolve, 200 * attempt));
+    }
+  }
+  throw lastError;
+}
+
+export type RegistryDeps = {
+  assigner: LeadAssigner;
+  imports: ImportGateway;
+  crm: CrmSyncGateway;
+  webhooks: { gateway: WebhookGateway; processors: WebhookProcessors };
+  send: SendDeps;
+};
 
 export function createDefaultRegistry(deps: RegistryDeps): HandlerRegistry {
   return new HandlerRegistry()
@@ -349,5 +475,6 @@ export function createDefaultRegistry(deps: RegistryDeps): HandlerRegistry {
     .register(createLeadAssignHandler(deps.assigner))
     .register(createImportCsvHandler(deps.imports))
     .register(createCrmSyncHandler(deps.crm))
-    .register(createProcessWebhookHandler(deps.webhooks.gateway, deps.webhooks.processors));
+    .register(createProcessWebhookHandler(deps.webhooks.gateway, deps.webhooks.processors))
+    .register(createSendMessageHandler(deps.send));
 }

@@ -9,7 +9,7 @@
     },
     {
       "label": "Base de données (pgTAP)",
-      "value": 2720
+      "value": 2814
     },
     {
       "label": "Permissions (RBAC)",
@@ -17,15 +17,15 @@
     },
     {
       "label": "Domaine (règles métier)",
-      "value": 621
+      "value": 654
     },
     {
       "label": "RLS via l'API réelle",
-      "value": 466
+      "value": 476
     },
     {
       "label": "Worker et adaptateurs",
-      "value": 151
+      "value": 192
     },
     {
       "label": "Acceptation (T1, T5)",
@@ -237,9 +237,9 @@
           "day": "J31–J33",
           "days": 3,
           "name": "Webhooks et e-mail",
-          "progress": 0,
-          "status": "todo",
-          "note": ""
+          "progress": 33,
+          "status": "part",
+          "note": "J31 : envoi d'e-mail derrière la chaîne de contrôles livré (approbation humaine, contrôle final dans le worker, accepted distinct de delivered) ; J32 (événements du fournisseur, réception) et J33 (désabonnement) à faire."
         },
         {
           "day": "J34–J37",

@@ -19,3 +19,4 @@ export * from "./crm-sync";
 export * from "./imports";
 export * from "./integrations";
 export * from "./conversations";
+export * from "./outbound";

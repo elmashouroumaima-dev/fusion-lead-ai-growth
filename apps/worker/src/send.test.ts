@@ -34,7 +34,7 @@ describe("send_message : chemin nominal", () => {
     await run();
     expect(provider.sent).toHaveLength(1);
     const call = provider.sent[0];
-    expect(call?.input).toEqual({ from: "ventes@acme.test", to: "karim@example.test", subject: "Bonjour Karim", textBody: "Bonjour Karim\nVoici notre offre." });
+    expect(call?.input).toEqual({ from: "ventes@acme.test", to: "karim@example.test", subject: "Bonjour Karim", textBody: "Bonjour Karim\nVoici notre offre.", metadata: { fusion_message_id: SEND_MESSAGE } });
     expect(call?.secret).toBe("tok-SECRET-0123456789");
     expect(gateway.accepted).toEqual([{ providerMessageId: "pm-123" }]);
     expect(gateway.calls.filter((c) => c.startsWith("failed"))).toEqual([]);

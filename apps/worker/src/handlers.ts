@@ -421,7 +421,10 @@ export function createSendMessageHandler(deps: SendDeps): JobHandler {
 
       // juste avant l'appel : aucun autre accès base entre le contrôle final et le fournisseur
       const outcome = await deps.provider.send(
-        { from: claim.channel.sender, to: claim.contact.email as string, subject: deriveEmailSubject(claim.message.body), textBody: claim.message.body },
+        {
+          from: claim.channel.sender, to: claim.contact.email as string, subject: deriveEmailSubject(claim.message.body), textBody: claim.message.body,
+          metadata: { fusion_message_id: messageId },
+        },
         secret,
       );
       switch (outcome.kind) {

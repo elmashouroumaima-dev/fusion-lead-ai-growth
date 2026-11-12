@@ -10,9 +10,21 @@ import { getKeyRing } from "../smtp/secrets";
  * journalisé, renvoyé au navigateur ni stocké ; toute erreur est opaque (aucun détail du chiffrement).
  */
 export async function readIntegrationSecret(organizationId: string, integrationId: string): Promise<string | null> {
+  return readSealedSecret("get_integration_secret", organizationId, integrationId);
+}
+
+/**
+ * Secret de WEBHOOK d'une intégration (J32) : le mot de passe du Basic Auth du fournisseur, distinct du jeton d'envoi. Mêmes garanties que
+ * `readIntegrationSecret` (serveur seulement, entreprise du contexte, erreurs opaques, jamais journalisé).
+ */
+export async function readIntegrationWebhookSecret(organizationId: string, integrationId: string): Promise<string | null> {
+  return readSealedSecret("get_integration_webhook_secret", organizationId, integrationId);
+}
+
+async function readSealedSecret(rpcName: "get_integration_secret" | "get_integration_webhook_secret", organizationId: string, integrationId: string): Promise<string | null> {
   const keyRing = getKeyRing();
   if (!keyRing) throw new Error("secrets_unavailable");
-  const { data, error } = await createAdminClient().rpc("get_integration_secret", { p_org: organizationId, p_integration: integrationId });
+  const { data, error } = await createAdminClient().rpc(rpcName, { p_org: organizationId, p_integration: integrationId });
   if (error) throw new Error("secret_lookup_failed");
   if (data === null || data === undefined) return null;
   const row = data as { secret_id?: unknown; ciphertext?: unknown; nonce?: unknown; key_version?: unknown };

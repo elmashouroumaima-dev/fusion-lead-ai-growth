@@ -8,6 +8,7 @@ import {
   type DisconnectIntegrationInput,
   type IntegrationRow,
   type ReplaceIntegrationSecretInput,
+  type ReplaceWebhookSecretInput,
   type UpdateChannelInput,
 } from "@fusion-leap/domain";
 import { mapLeadsDbError } from "../leads/map-error";
@@ -25,7 +26,7 @@ export type IntegrationsResult<T> = { ok: true; value: T } | { ok: false; code: 
 const fail = (code: ServiceErrorCode): { ok: false; code: ServiceErrorCode } => ({ ok: false, code });
 
 const INTEGRATION_COLUMNS =
-  "id, organization_id, provider, status, external_account_id, scopes, has_secret, last_sync_at, last_sync_finished_at, last_error, created_at, updated_at";
+  "id, organization_id, provider, status, external_account_id, scopes, has_secret, has_webhook_secret, last_sync_at, last_sync_finished_at, last_error, created_at, updated_at";
 const CHANNEL_COLUMNS = "id, organization_id, type, integration_id, sender_identity, status, project_scope, send_paused, created_at, updated_at";
 
 export type IntegrationView = { integration: IntegrationRow; channels: ChannelRow[] };
@@ -103,6 +104,34 @@ export async function replaceIntegrationSecret(
     return fail("internal_error");
   }
   const { error } = await supabase.rpc("set_integration_secret", {
+    p_org: organizationId,
+    p_integration: input.integration_id,
+    p_secret_id: sealed.secretId,
+    p_ciphertext: sealed.ciphertext,
+    p_nonce: sealed.nonce,
+    p_key_version: sealed.keyVersion,
+  });
+  return error ? fail(mapLeadsDbError(error)) : { ok: true, value: true };
+}
+
+/**
+ * Enregistre ou remplace le secret de WEBHOOK d'une intégration (J32) : le mot de passe que le fournisseur envoie en Basic Auth. Chiffré ici
+ * (AES-256-GCM, AAD liée à l'entreprise) avant l'appel ; la base ne reçoit que le chiffré, la réponse ne le renvoie jamais.
+ */
+export async function replaceWebhookSecret(
+  supabase: ServerSupabase,
+  organizationId: string,
+  input: ReplaceWebhookSecretInput,
+): Promise<IntegrationsResult<true>> {
+  const keyRing = getKeyRing();
+  if (!keyRing) return fail("service_unavailable");
+  let sealed;
+  try {
+    sealed = sealOrganizationSecret({ organizationId, plaintext: input.secret, keyRing });
+  } catch {
+    return fail("internal_error");
+  }
+  const { error } = await supabase.rpc("set_integration_webhook_secret", {
     p_org: organizationId,
     p_integration: input.integration_id,
     p_secret_id: sealed.secretId,

@@ -16,6 +16,9 @@ export type WebhookRouteDeps = {
   getAdapter(provider: string): WebhookAdapter | null;
   limit(input: { provider: string; ip: string }): Promise<{ allowed: boolean; retryAfterSeconds: number }>;
   clientIp(headers: Headers): string | null;
+  /** Transport sécurisé exigé (production, staging) : le mot de passe du Basic Auth circule à chaque requête, jamais en HTTP. */
+  requireHttps?: boolean;
+  isSecure?(request: Request): boolean;
   readBody(request: Request, limit: number): Promise<Uint8Array>;
   store: WebhookStore;
   readSecret: WebhookSecretReader;
@@ -30,6 +33,12 @@ export async function handleWebhookRequest(request: Request, providerParam: stri
   try {
     const adapter = PROVIDER_PARAM.test(providerParam) ? deps.getAdapter(providerParam) : null;
     if (!adapter) throw new ServiceError("not_found");
+
+    // refus AVANT toute lecture : un secret reçu en clair est déjà exposé, on ne le traite pas
+    if (deps.requireHttps && !(deps.isSecure?.(request) ?? false)) {
+      deps.log("webhook.insecure_transport", { request_id: requestId, provider: adapter.provider });
+      throw new ServiceError("validation_failed");
+    }
 
     const ip = deps.clientIp(request.headers);
     // adresse source introuvable (proxy mal configuré, `TRUSTED_PROXY_HOPS`) : refus visible plutôt qu'un seau commun à tous les appelants

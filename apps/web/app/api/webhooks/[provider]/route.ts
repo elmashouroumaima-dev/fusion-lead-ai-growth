@@ -1,5 +1,6 @@
+import { getServerEnv } from "../../../../lib/env/server";
 import { clientIp, ipBucketKey } from "../../../../lib/service/capture-lead";
-import { readIntegrationSecret } from "../../../../lib/service/integration-secrets";
+import { readIntegrationWebhookSecret } from "../../../../lib/service/integration-secrets";
 import { logger } from "../../../../lib/service/logger";
 import { takePublicToken } from "../../../../lib/service/rate-limit";
 import { runWithRequestContext } from "../../../../lib/service/request-context";
@@ -10,6 +11,20 @@ import { handleWebhookRequest } from "../../../../lib/webhooks/handle";
 import { getWebhookAdapter } from "../../../../lib/webhooks/registry";
 
 export const dynamic = "force-dynamic";
+
+/** Site en HTTPS (production, staging) : le webhook refuse tout transport non sécurisé ; en développement local (http), pas d'exigence. */
+const requiresHttps = (): boolean => {
+  try {
+    return (getServerEnv().SITE_URL ?? "").startsWith("https://");
+  } catch {
+    return true;
+  }
+};
+/** Protocole vu par l'application : l'en-tête du proxy de confiance quand il existe, sinon celui de l'adresse demandée. */
+const isSecureRequest = (request: Request): boolean => {
+  const forwarded = request.headers.get("x-forwarded-proto")?.split(",")[0]?.trim().toLowerCase();
+  return (forwarded && forwarded.length > 0 ? forwarded : new URL(request.url).protocol.replace(":", "")) === "https";
+};
 
 /**
  * POST /api/webhooks/[provider] (J29, spec §8) : réception générique des webhooks, sans session. Voir `lib/webhooks/handle.ts` pour
@@ -25,9 +40,12 @@ export async function POST(request: Request, context: { params: Promise<{ provid
       // seau par fournisseur ET par adresse (IPv6 agrégée par /64 dans `ipBucketKey`) : une plage IPv6 entière ne multiplie pas les seaux
       limit: ({ provider: name, ip }) => takePublicToken({ scope: "webhook_ip", bucketKey: `${name}:${ipBucketKey(ip)}` }),
       clientIp: (headers) => clientIp(headers),
+      requireHttps: requiresHttps(),
+      isSecure: isSecureRequest,
       readBody: readBoundedBytes,
       store: createWebhookStore(),
-      readSecret: readIntegrationSecret,
+      // le secret de WEBHOOK (Basic Auth du fournisseur), distinct du jeton d'envoi : un secret de webhook divulgué ne permet pas d'envoyer
+      readSecret: readIntegrationWebhookSecret,
       log: (event, fields) => logger.info(event, fields),
     }),
   );

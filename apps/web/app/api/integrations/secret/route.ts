@@ -1,5 +1,7 @@
 import { replaceIntegrationSecretSchema } from "@fusion-leap/domain";
+import { equalsOtherSecret } from "../../../../lib/integrations/secret-guard";
 import { replaceIntegrationSecret } from "../../../../lib/integrations/service";
+import { readIntegrationWebhookSecret } from "../../../../lib/service/integration-secrets";
 import { ServiceError } from "../../../../lib/service/errors";
 import { withRoute } from "../../../../lib/service/with-service";
 
@@ -21,6 +23,14 @@ export const POST = withRoute(
     schema: replaceIntegrationSecretSchema,
   },
   async (ctx, input) => {
+    // le jeton d'envoi n'est jamais le secret de webhook (J32)
+    let same: boolean;
+    try {
+      same = await equalsOtherSecret(readIntegrationWebhookSecret, ctx.organizationId, input.integration_id, input.secret);
+    } catch {
+      throw new ServiceError("service_unavailable");
+    }
+    if (same) throw new ServiceError("validation_failed");
     const result = await replaceIntegrationSecret(ctx.supabase, ctx.organizationId, input);
     if (!result.ok) throw new ServiceError(result.code);
     return { status: 200, body: { replaced: true } };

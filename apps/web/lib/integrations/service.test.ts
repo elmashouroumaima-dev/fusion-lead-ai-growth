@@ -13,6 +13,7 @@ import {
   isEncryptionConfigured,
   listIntegrationViews,
   replaceIntegrationSecret,
+  replaceWebhookSecret,
   updateChannel,
 } from "./service";
 
@@ -149,6 +150,48 @@ describe("replaceIntegrationSecret (rotation)", () => {
     state.keyRing = null;
     c.calls.length = 0;
     expect(await replaceIntegrationSecret(c.client, ORG, { integration_id: INT, secret: TOKEN })).toEqual({ ok: false, code: "service_unavailable" });
+    expect(c.calls).toHaveLength(0);
+  });
+});
+
+describe("replaceWebhookSecret (secret de webhook, J32)", () => {
+  const WEBHOOK_SECRET = "mot-de-passe-de-webhook-de-test-0123456789";
+
+  it("chiffre avant l'appel (AAD de l'entreprise), appelle la fonction du secret de WEBHOOK, ne renvoie ni ne journalise le secret", async () => {
+    expect(await replaceWebhookSecret(c.client, ORG, { integration_id: INT, secret: WEBHOOK_SECRET })).toEqual({ ok: true, value: true });
+    expect(c.calls).toHaveLength(1);
+    expect(c.calls[0]?.op).toBe("rpc:set_integration_webhook_secret");
+    const args = c.calls[0]?.args[0] as Record<string, unknown>;
+    expect(args).toMatchObject({ p_org: ORG, p_integration: INT, p_key_version: 1 });
+    expect(JSON.stringify(c.calls)).not.toContain(WEBHOOK_SECRET);
+    const opened = openOrganizationSecret({
+      organizationId: ORG,
+      stored: { secretId: String(args.p_secret_id), ciphertext: String(args.p_ciphertext), nonce: String(args.p_nonce), keyVersion: 1 },
+      keyRing,
+    });
+    expect(opened).toBe(WEBHOOK_SECRET);
+  });
+
+  it("un secret chiffré pour une entreprise ne s'ouvre pas pour une autre", async () => {
+    await replaceWebhookSecret(c.client, ORG, { integration_id: INT, secret: WEBHOOK_SECRET });
+    const args = c.calls[0]?.args[0] as Record<string, unknown>;
+    expect(() =>
+      openOrganizationSecret({
+        organizationId: "bb000000-0000-4000-8000-00000000000b",
+        stored: { secretId: String(args.p_secret_id), ciphertext: String(args.p_ciphertext), nonce: String(args.p_nonce), keyVersion: 1 },
+        keyRing,
+      }),
+    ).toThrow();
+  });
+
+  it("intégration inconnue (PT404) = not_found ; déconnectée (P0001) = conflict ; sans clé maître = 503 sans appel", async () => {
+    c.result.rpc = () => ({ data: null, error: { code: "PT404" } });
+    expect(await replaceWebhookSecret(c.client, ORG, { integration_id: INT, secret: WEBHOOK_SECRET })).toEqual({ ok: false, code: "not_found" });
+    c.result.rpc = () => ({ data: null, error: { code: "P0001", message: "integration_not_replaceable" } });
+    expect(await replaceWebhookSecret(c.client, ORG, { integration_id: INT, secret: WEBHOOK_SECRET })).toEqual({ ok: false, code: "conflict" });
+    state.keyRing = null;
+    c.calls.length = 0;
+    expect(await replaceWebhookSecret(c.client, ORG, { integration_id: INT, secret: WEBHOOK_SECRET })).toEqual({ ok: false, code: "service_unavailable" });
     expect(c.calls).toHaveLength(0);
   });
 });

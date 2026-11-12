@@ -68,10 +68,43 @@ const signedPost = (payload: object, secret = SECRET) => {
 };
 const GOOD = { account: "acc", event: "e1", ts: NOW };
 
+describe("transport sécurisé (J32)", () => {
+  const secure = (request: Request): boolean => (request.headers.get("x-forwarded-proto") ?? new URL(request.url).protocol.replace(":", "")) === "https";
+  const http = (headers: Record<string, string> = {}) =>
+    new Request("http://app.test/api/webhooks/whatsapp", { method: "POST", body: "{}", headers: { "content-type": "application/json", ...headers } });
+
+  it("HTTP refusé 400 AVANT toute lecture quand le HTTPS est exigé ; l'en-tête du proxy « https » ou une adresse https passent", async () => {
+    const { deps, records, logs } = setup({ requireHttps: true, isSecure: secure });
+    const readBody = vi.spyOn(deps, "readBody");
+    const refused = await handleWebhookRequest(http(), "whatsapp", "req-1", deps);
+    expect(refused.status).toBe(400);
+    expect(readBody).not.toHaveBeenCalled();
+    expect(records).toHaveLength(0);
+    expect(logs.map((l) => l.event)).toContain("webhook.insecure_transport");
+    expect(JSON.stringify(logs)).not.toContain("authorization");
+    await handleWebhookRequest(http({ "x-forwarded-proto": "https" }), "whatsapp", "req-2", deps);
+    expect(readBody).toHaveBeenCalledTimes(1);
+    await handleWebhookRequest(post("{}"), "whatsapp", "req-2b", deps);
+    expect(readBody).toHaveBeenCalledTimes(2);
+  });
+
+  it("sans exigence (développement local) : HTTP accepté ; exigence sans fonction de contrôle : refus (échec fermé)", async () => {
+    const dev = setup({ requireHttps: false });
+    const devRead = vi.spyOn(dev.deps, "readBody");
+    await handleWebhookRequest(http(), "whatsapp", "req-3", dev.deps);
+    expect(devRead).toHaveBeenCalledTimes(1);
+    const noCheck = setup({ requireHttps: true });
+    const noCheckRead = vi.spyOn(noCheck.deps, "readBody");
+    expect((await handleWebhookRequest(post("{}"), "whatsapp", "req-4", noCheck.deps)).status).toBe(400);
+    expect(noCheckRead).not.toHaveBeenCalled();
+  });
+});
+
 describe("fournisseur", () => {
-  it("le registre de production est vide : tout fournisseur répond 404 (aucun adaptateur avant J32 et J34)", () => {
+  it("registre de production : seul l'e-mail (J32) a un adaptateur ; WhatsApp (J34 et J35) et tout autre fournisseur répondent 404", () => {
     expect(getWebhookAdapter("whatsapp")).toBeNull();
-    expect(getWebhookAdapter("email")).toBeNull();
+    expect(getWebhookAdapter("email")?.provider).toBe("email");
+    expect(getWebhookAdapter("salla")).toBeNull();
     expect(getWebhookAdapter("__proto__")).toBeNull();
     expect(getWebhookAdapter("constructor")).toBeNull();
   });

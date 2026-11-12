@@ -716,6 +716,20 @@ table.m tr {
   margin-left: 0;
 }
 
+/* Journal du jour */
+.jr{margin-top:10px}
+.js{border-inline-start:2px solid #d9dfd0;padding:2px 0 8px 12px;margin:0 0 6px;break-inside:avoid}
+.jt{font-size:10.5px;line-height:1.45;color:#17201a}
+.jt code{font-size:9.5px;background:#eef1e9;padding:0 3px;border-radius:3px}
+.ja{display:flex;flex-wrap:wrap;gap:5px;margin-top:4px}
+.ja span{font-size:8.5px;color:#6b7569;background:#f3f5ee;border-radius:9px;padding:1.5px 8px}
+.ja .jd{background:none;padding:1.5px 2px}
+.plus{color:#2e7d1e}.minus{color:#b3261e}
+.jth{display:flex;gap:10px;margin-top:6px}
+.jth figure{margin:0;width:1.15in}
+.jth img{width:100%;border:1px solid #d9dfd0;border-radius:4px;display:block}
+.jth figcaption{font-size:8px;color:#6b7569;margin-top:2px}
+
 </style>
 </head>
 <body>
@@ -740,7 +754,7 @@ table.m tr {
         <div class="kpi hl"><div class="n">33 / 68</div><div class="l">jours réalisés</div></div>
         <div class="kpi"><div class="n">7 404</div><div class="l">tests automatisés, tous verts</div></div>
         <div class="kpi"><div class="n">20 / 33</div><div class="l">modules terminés</div></div>
-        <div class="kpi"><div class="n">38 / 38</div><div class="l">PR fusionnées</div></div>
+        <div class="kpi"><div class="n">38 / 40</div><div class="l">PR fusionnées<br>(2 en revue)</div></div>
         <div class="kpi"><div class="n">12 / 14</div><div class="l">décisions d'architecture (ADR) acceptées</div></div>
         <div class="kpi"><div class="n">21</div><div class="l">failles trouvées par les revues adverses, toutes corrigées</div></div>
       </div>
@@ -767,7 +781,38 @@ table.m tr {
       </div>
     </div>
   </div>
-  <div class="footer"><span>Fusion Leap AI Growth · rapport du 2026-11-12 · commit ab54a68</span><span>1 / 7</span></div>
+  <div class="footer"><span>Fusion Leap AI Growth · rapport du 2026-11-12 · commit b2702a8</span><span>1 / 8</span></div>
+</div>
+
+<div class="page ">
+  <div class="top"><span class="brand"><i></i>FUSION LEAP</span><span>Journal du jour · 12 novembre 2026</span></div>
+  
+  <h2>Journal du jour <small>12 novembre 2026</small></h2>
+  <div class="sub">Le travail du jour raconté étape par étape : ce qui a été fait, les vérifications menées et le volume de code touché.</div>
+  <div class="jr">
+    <div class="js"><div class="jt">J'ai ajouté en base le secret de webhook par intégration, la file des e-mails non rattachés et les fonctions qui appliquent statuts et réponses.</div>
+      <div class="ja"><span>Migration et retour arrière écrits</span><span>Tests pgTAP lancés</span><span class="jd"><b class="plus">+978</b> <b class="minus">−0</b></span></div>
+      </div>
+    <div class="js"><div class="jt">J'ai écrit l'adaptateur Postmark (authentification, événements normalisés, contrôle SPF), le traitement côté worker et l'endpoint du secret.</div>
+      <div class="ja"><span>Adaptateur, worker et route web</span><span>Tests unitaires lancés</span><span class="jd"><b class="plus">+1 225</b> <b class="minus">−17</b></span></div>
+      </div>
+    <div class="js"><div class="jt">J'ai ajouté les tests d'acceptation du flux e-mail puis la documentation (API, runbook, ADR).</div>
+      <div class="ja"><span>Tests d'acceptation lancés</span><span>Documentation mise à jour</span><span class="jd"><b class="plus">+3 169</b> <b class="minus">−29</b></span></div>
+      </div>
+    <div class="js"><div class="jt">J'ai fusionné la chaîne de PR dans la branche principale, en gardant un commit par sujet.</div>
+      <div class="ja"><span>PR rebasées sur main</span><span>Aucune branche supprimée</span></div>
+      </div>
+    <div class="js"><div class="jt">J'ai écrit le guide de tests des phases 2 et 3 (107 cas) et les outils d'appel de l'API, puis vérifié les résultats attendus sur l'application réelle.</div>
+      <div class="ja"><span>Scénarios exécutés</span><span>Pages du PDF capturées</span><span class="jd"><b class="plus">+939</b> <b class="minus">−0</b></span></div>
+      <div class="jth"><figure><img src="journal/guide-couverture.png" alt="Couverture du guide"><figcaption>Couverture du guide</figcaption></figure><figure><img src="journal/guide-cas-de-test.png" alt="Un cas de test"><figcaption>Un cas de test</figcaption></figure></div></div>
+    <div class="js"><div class="jt">J'ai refondu le rapport d'avancement en 7 pages, avec historique et comparaison avec le rapport précédent.</div>
+      <div class="ja"><span>PDF régénéré</span><span>Pages capturées</span><span class="jd"><b class="plus">+1 933</b> <b class="minus">−680</b></span></div>
+      <div class="jth"><figure><img src="journal/rapport-synthese.png" alt="Synthèse"><figcaption>Synthèse</figcaption></figure><figure><img src="journal/rapport-feuille-de-route.png" alt="Feuille de route"><figcaption>Feuille de route</figcaption></figure></div></div>
+    <div class="js"><div class="jt">J'ai corrigé l'erreur de <code>pnpm dev</code> (module ES chargé par Turbopack) et mis à jour le runbook.</div>
+      <div class="ja"><span>Correction vérifiée</span><span>CI verte</span><span class="jd"><b class="plus">+9</b> <b class="minus">−2</b></span></div>
+      </div>
+  </div>
+  <div class="footer"><span>Fusion Leap AI Growth · rapport du 2026-11-12 · commit b2702a8</span><span>2 / 8</span></div>
 </div>
 
 <div class="page ">
@@ -801,7 +846,7 @@ table.m tr {
     <div class="ask"><div class="n">18 janv. 2027</div><div class="l">prochain jalon daté : G3 · Canaux</div></div>
     <div class="ask"><div class="n">J33</div><div class="l">prochaine journée : désabonnement, prérequis du premier envoi marketing</div></div>
   </div>
-  <div class="footer"><span>Fusion Leap AI Growth · rapport du 2026-11-12 · commit ab54a68</span><span>2 / 7</span></div>
+  <div class="footer"><span>Fusion Leap AI Growth · rapport du 2026-11-12 · commit b2702a8</span><span>3 / 8</span></div>
 </div>
 
 <div class="page ">
@@ -839,7 +884,7 @@ table.m tr {
 <tr><td class="n">Paramétrage : serveur SMTP (Mailtrap)</td><td><div class="pcell"><div class="pb"><i style="width:100%"></i></div><b>100 %</b></div></td><td><span class="chip done">Fait</span></td><td class="note">Mot de passe chiffré (AES-256-GCM), test d'envoi, administrateurs de la plateforme.</td></tr>
 <tr><td class="n">Guide de tests des phases 2 et 3 (PDF)</td><td><div class="pcell"><div class="pb"><i style="width:100%"></i></div><b>100 %</b></div></td><td><span class="chip done">Fait</span></td><td class="note">107 cas (interface et technique), fiche de résultats, données de démonstration et outil d'appel de l'API.</td></tr>
 <tr><td class="n">Refonte du rapport d'avancement</td><td><div class="pcell"><div class="pb"><i style="width:100%"></i></div><b>100 %</b></div></td><td><span class="chip done">Fait</span></td><td class="note">7 pages : synthèse, feuille de route, détail par phase, livré récemment, qualité, décisions ; historique et comparaison avec le rapport précédent.</td></tr></table>
-  <div class="footer"><span>Fusion Leap AI Growth · rapport du 2026-11-12 · commit ab54a68</span><span>3 / 7</span></div>
+  <div class="footer"><span>Fusion Leap AI Growth · rapport du 2026-11-12 · commit b2702a8</span><span>4 / 8</span></div>
 </div>
 
 <div class="page ">
@@ -870,7 +915,7 @@ table.m tr {
 <tr><td class="d">J54–J55</td><td class="n">Onboarding, Salla (mode marketing)</td><td><div class="pcell"><div class="pb"><i style="width:0%"></i></div><b>0 %</b></div></td><td><span class="chip todo">À faire</span></td><td class="note"></td></tr>
 <tr><td class="d">J56–J59</td><td class="n">Console admin, durcissement, staging</td><td><div class="pcell"><div class="pb"><i style="width:0%"></i></div><b>0 %</b></div></td><td><span class="chip todo">À faire</span></td><td class="note"></td></tr>
 <tr><td class="d">J60–J62</td><td class="n">Recette · Gate G5</td><td><div class="pcell"><div class="pb"><i style="width:0%"></i></div><b>0 %</b></div></td><td><span class="chip todo">À faire</span></td><td class="note">10 critères d'acceptation</td></tr></table>
-  <div class="footer"><span>Fusion Leap AI Growth · rapport du 2026-11-12 · commit ab54a68</span><span>4 / 7</span></div>
+  <div class="footer"><span>Fusion Leap AI Growth · rapport du 2026-11-12 · commit b2702a8</span><span>5 / 8</span></div>
 </div>
 
 <div class="page ">
@@ -897,7 +942,7 @@ table.m tr {
     <div class="cap ok"><div class="ct">Déjà possible</div><ul><li>Gérer projets, contacts, leads et deals, avec rôles et isolation entre entreprises.</li><li>Importer des contacts (CSV), capturer des leads par formulaire public, les assigner automatiquement.</li><li>Connecter une intégration e-mail, avec secrets chiffrés et jamais renvoyés.</li><li>Préparer un envoi : approbation humaine, 15 contrôles juste avant l'appel.</li><li>Recevoir les statuts du fournisseur et les réponses, rattachés à la bonne conversation.</li></ul></div>
     <div class="cap no"><div class="ct">Pas encore possible</div><ul><li>Envoyer ou recevoir un vrai e-mail : il manque l'activation d'un canal et un compte d'essai (C3).</li><li>Se désabonner (J33) : aucun envoi marketing avant ce lien.</li><li>Gérer les contacts et le consentement à l'écran (J30b) et lire les conversations (boîte de réception, J37).</li><li>WhatsApp (J34 à J37) : en attente du compte Meta.</li></ul></div>
   </div>
-  <div class="footer"><span>Fusion Leap AI Growth · rapport du 2026-11-12 · commit ab54a68</span><span>5 / 7</span></div>
+  <div class="footer"><span>Fusion Leap AI Growth · rapport du 2026-11-12 · commit b2702a8</span><span>6 / 8</span></div>
 </div>
 
 <div class="page ">
@@ -937,7 +982,7 @@ table.m tr {
     <tr><td class="d">J32</td><td class="n">Statuts et réception d'e-mail</td><td><span class="sev b">1 bloquant</span> <span class="sev m">1 majeur</span> <span class="sev m">5 moyens</span></td></tr></table>
     <div class="sub" style="margin-top:8px;">Toutes ces failles sont corrigées avant la fusion, avec un test qui la reproduit. Un bloquant empêche la fusion ; un majeur est corrigé le jour même.</div>
   </div>
-  <div class="footer"><span>Fusion Leap AI Growth · rapport du 2026-11-12 · commit ab54a68</span><span>6 / 7</span></div>
+  <div class="footer"><span>Fusion Leap AI Growth · rapport du 2026-11-12 · commit b2702a8</span><span>7 / 8</span></div>
 </div>
 
 <div class="page ">
@@ -969,7 +1014,7 @@ table.m tr {
     <div class="ct">Comment lire ce rapport</div>
     <div class="body">Avancement d'un module = part de ses livrables terminés et vérifiés : <b>100 %</b> = code, tests et documentation livrés. Statuts : <span class="chip done">Fait</span> fusionné · <span class="chip review">En revue</span> PR ouverte · <span class="chip part">À valider</span> fait mais à valider · <span class="chip todo">À faire</span> à faire. Avancement global = jours réalisés sur 68 (33 ÷ 68 = 48,5 %). Rapport régénéré à chaque commit (<code>pnpm report:progress</code>, branche <code>docs-test-guide-and-report</code>). Sources : <code>docs/progress/journal.md</code>, <code>docs/plan/development-plan.md</code>, <code>scripts/progress-report/data.json</code>, <code>scripts/progress-report/history.json</code>.</div>
   </div>
-  <div class="footer"><span>Fusion Leap AI Growth · rapport du 2026-11-12 · commit ab54a68</span><span>7 / 7</span></div>
+  <div class="footer"><span>Fusion Leap AI Growth · rapport du 2026-11-12 · commit b2702a8</span><span>8 / 8</span></div>
 </div>
 </body>
 </html>

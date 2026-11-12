@@ -709,3 +709,17 @@ table.m tr {
   font-size: 8.6px;
   margin-left: 0;
 }
+
+/* Journal du jour */
+.jr{margin-top:10px}
+.js{border-inline-start:2px solid #d9dfd0;padding:2px 0 8px 12px;margin:0 0 6px;break-inside:avoid}
+.jt{font-size:10.5px;line-height:1.45;color:#17201a}
+.jt code{font-size:9.5px;background:#eef1e9;padding:0 3px;border-radius:3px}
+.ja{display:flex;flex-wrap:wrap;gap:5px;margin-top:4px}
+.ja span{font-size:8.5px;color:#6b7569;background:#f3f5ee;border-radius:9px;padding:1.5px 8px}
+.ja .jd{background:none;padding:1.5px 2px}
+.plus{color:#2e7d1e}.minus{color:#b3261e}
+.jth{display:flex;gap:10px;margin-top:6px}
+.jth figure{margin:0;width:1.15in}
+.jth img{width:100%;border:1px solid #d9dfd0;border-radius:4px;display:block}
+.jth figcaption{font-size:8px;color:#6b7569;margin-top:2px}

@@ -597,5 +597,86 @@
       "Gérer les contacts et le consentement à l'écran (J30b) et lire les conversations (boîte de réception, J37).",
       "WhatsApp (J34 à J37) : en attente du compte Meta."
     ]
+  },
+  "journal": {
+    "title": "Journal du jour",
+    "intro": "Le travail du jour raconté étape par étape : ce qui a été fait, les vérifications menées et le volume de code touché.",
+    "steps": [
+      {
+        "sentence": "J'ai ajouté en base le secret de webhook par intégration, la file des e-mails non rattachés et les fonctions qui appliquent statuts et réponses.",
+        "actions": [
+          "Migration et retour arrière écrits",
+          "Tests pgTAP lancés"
+        ],
+        "grep": "feat\\(db\\).*J32"
+      },
+      {
+        "sentence": "J'ai écrit l'adaptateur Postmark (authentification, événements normalisés, contrôle SPF), le traitement côté worker et l'endpoint du secret.",
+        "actions": [
+          "Adaptateur, worker et route web",
+          "Tests unitaires lancés"
+        ],
+        "grep": "feat\\((adapters|worker|web)\\).*J32|feat\\((adapters|worker)\\): add the (Postmark|email)"
+      },
+      {
+        "sentence": "J'ai ajouté les tests d'acceptation du flux e-mail puis la documentation (API, runbook, ADR).",
+        "actions": [
+          "Tests d'acceptation lancés",
+          "Documentation mise à jour"
+        ],
+        "grep": "J32\\)$|docs: J32"
+      },
+      {
+        "sentence": "J'ai fusionné la chaîne de PR dans la branche principale, en gardant un commit par sujet.",
+        "actions": [
+          "PR rebasées sur main",
+          "Aucune branche supprimée"
+        ]
+      },
+      {
+        "sentence": "J'ai écrit le guide de tests des phases 2 et 3 (107 cas) et les outils d'appel de l'API, puis vérifié les résultats attendus sur l'application réelle.",
+        "actions": [
+          "Scénarios exécutés",
+          "Pages du PDF capturées"
+        ],
+        "grep": "docs\\(testing\\)|test:call",
+        "thumbs": [
+          [
+            "guide-couverture.png",
+            "Couverture du guide"
+          ],
+          [
+            "guide-cas-de-test.png",
+            "Un cas de test"
+          ]
+        ]
+      },
+      {
+        "sentence": "J'ai refondu le rapport d'avancement en 7 pages, avec historique et comparaison avec le rapport précédent.",
+        "actions": [
+          "PDF régénéré",
+          "Pages capturées"
+        ],
+        "grep": "docs\\(progress\\): redesign",
+        "thumbs": [
+          [
+            "rapport-synthese.png",
+            "Synthèse"
+          ],
+          [
+            "rapport-feuille-de-route.png",
+            "Feuille de route"
+          ]
+        ]
+      },
+      {
+        "sentence": "J'ai corrigé l'erreur de `pnpm dev` (module ES chargé par Turbopack) et mis à jour le runbook.",
+        "actions": [
+          "Correction vérifiée",
+          "CI verte"
+        ],
+        "grep": "Turbopack|pnpm dev"
+      }
+    ]
   }
 }

@@ -255,6 +255,39 @@ page(
   "cover",
 );
 
+// 2. journal du jour : une phrase par étape, activités repliées, vignettes, lignes ajoutées et retirées
+function diffStat(pattern) {
+  if (!pattern) return null;
+  const out = run("git", ["log", "--all", "--no-merges", `--since=${iso} 00:00`, "-E", `--grep=${pattern}`, "--numstat", "--format="]);
+  let added = 0;
+  let removed = 0;
+  for (const line of out.split("\n")) {
+    const [a, r] = line.split("\t");
+    if (/^\d+$/.test(a) && /^\d+$/.test(r)) {
+      added += Number(a);
+      removed += Number(r);
+    }
+  }
+  return added + removed === 0 ? null : { added, removed };
+}
+const inline = (t) => esc(t).replace(/`([^`]+)`/g, "<code>$1</code>");
+page(
+  data.journal.title,
+  `
+  <h2>${esc(data.journal.title)} <small>${longDate}</small></h2>
+  <div class="sub">${esc(data.journal.intro)}</div>
+  <div class="jr">
+    ${data.journal.steps
+      .map((st) => {
+        const stat = diffStat(st.grep);
+        return `<div class="js"><div class="jt">${inline(st.sentence)}</div>
+      <div class="ja">${st.actions.map((x) => `<span>${esc(x)}</span>`).join("")}${stat ? `<span class="jd"><b class="plus">+${fr.format(stat.added)}</b> <b class="minus">−${fr.format(stat.removed)}</b></span>` : ""}</div>
+      ${st.thumbs ? `<div class="jth">${st.thumbs.map(([f, c]) => `<figure><img src="journal/${esc(f)}" alt="${esc(c)}"><figcaption>${esc(c)}</figcaption></figure>`).join("")}</div>` : ""}</div>`;
+      })
+      .join("\n    ")}
+  </div>`,
+);
+
 // 2. feuille de route
 page(
   "Feuille de route",

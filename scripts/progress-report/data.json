@@ -1,35 +1,42 @@
 {
-  "title": "Avancement par module",
-  "intro": "Fusion Leap AI Growth : plateforme SaaS multi-tenant de croissance (CRM, canaux, campagnes, agents IA). Les fondations (sécurité, multi-tenant, authentification, membres, couche service, audit, worker, plans et quotas) sont en place ; les modules produit commencent après le jalon G1.",
-  "summary": "Phase 1 terminée : l'isolation de deux entreprises est démontrée (jalon G1, GO à valider par la responsable technique) ; le CRM démarre ensuite. S'y ajoutent, hors plan, le français par défaut, une refonte UI complète et un module « Paramétrage » (palette et logo).",
+  "title": "Rapport d'avancement",
+  "intro": "Fusion Leap AI Growth : plateforme SaaS multi-tenant de croissance (CRM, canaux, campagnes, agents IA). Les fondations, le CRM (projets, contacts, leads, deals, capture, import) et le socle des canaux e-mail (intégrations, webhooks, conversations, envoi sous contrôles, statuts et réception) sont en place et fusionnés.",
+  "summary": "Les phases 0 à 2 sont terminées et fusionnées ; la phase 3 (canaux) est bien engagée : un e-mail ne part qu'avec une approbation humaine et un contrôle final dans le worker, les statuts du fournisseur et les réponses sont rattachés sans jamais créer de contact. Rien ne peut encore partir pour de vrai : il manque le désabonnement (J33), l'écran contacts et consentement (J30b), l'activation d'un canal et le compte d'essai du fournisseur (checkpoint C3).",
   "tests": [
     {
       "label": "Web (application)",
-      "value": 2523
+      "value": 2523,
+      "note": "Écrans, routes HTTP et services de l'application"
     },
     {
       "label": "Base de données (pgTAP)",
-      "value": 2928
+      "value": 2928,
+      "note": "Tables, droits et règles de la base de données"
     },
     {
       "label": "Permissions (RBAC)",
-      "value": 394
+      "value": 394,
+      "note": "Qui a le droit de faire quoi, rôle par rôle"
     },
     {
       "label": "Domaine (règles métier)",
-      "value": 654
+      "value": 654,
+      "note": "Règles métier pures (contrôles d'envoi, consentement...)"
     },
     {
       "label": "RLS via l'API réelle",
-      "value": 485
+      "value": 485,
+      "note": "Isolation entre entreprises, vérifiée par la vraie API"
     },
     {
       "label": "Worker et adaptateurs",
-      "value": 235
+      "value": 235,
+      "note": "Tâches de fond et adaptateurs de fournisseurs"
     },
     {
       "label": "Acceptation (T1, T5)",
-      "value": 185
+      "value": 185,
+      "note": "Parcours complets en HTTP réel sur l'application construite"
     }
   ],
   "adrCount": 14,
@@ -53,7 +60,7 @@
           "name": "ADR et modèle de données",
           "progress": 100,
           "status": "part",
-          "note": "14 ADR ; seul le 011 est accepté."
+          "note": "Décisions d'architecture (ADR) et modèle de données rédigés."
         },
         {
           "day": "J2",
@@ -69,7 +76,7 @@
           "name": "Menaces, tests, backlog",
           "progress": 100,
           "status": "part",
-          "note": "53 menaces STRIDE ; C0 NO-GO provisoire."
+          "note": "53 menaces STRIDE, plan de tests et backlog."
         }
       ]
     },
@@ -146,23 +153,23 @@
           "days": 1,
           "name": "Audit et journaux",
           "progress": 100,
-          "status": "review",
-          "note": "Audit en lecture seule, logger JSON (PR n°8)."
+          "status": "done",
+          "note": "Audit en lecture seule, journal JSON."
         },
         {
           "day": "J13",
           "days": 1,
           "name": "Jobs et worker",
           "progress": 100,
-          "status": "review",
-          "note": "File Postgres, claim, bail, dead letter (PR n°10)."
+          "status": "done",
+          "note": "File Postgres, claim, bail, dead letter."
         },
         {
           "day": "J14",
           "days": 1,
           "name": "Plans et quotas",
           "progress": 100,
-          "status": "review",
+          "status": "done",
           "note": "Quotas atomiques, Platform Admin, écran d'administration."
         },
         {
@@ -170,8 +177,8 @@
           "days": 1,
           "name": "Jalon G1 : isolation",
           "progress": 100,
-          "status": "review",
-          "note": "T1 et T5 automatisés (35 tests), audit C1 : GO avec réserves à valider."
+          "status": "done",
+          "note": "Jalon G1 : T1 et T5 automatisés, audit C1."
         }
       ]
     },
@@ -184,40 +191,40 @@
           "days": 2,
           "name": "Projets et produits",
           "progress": 100,
-          "status": "review",
-          "note": "J16 : base, quotas, API. J17 : écran complet et fichiers (Storage privé, liens signés), revue sécurité corrigée."
+          "status": "done",
+          "note": "J16 base, quotas, API ; J17 écran complet et fichiers (stockage privé, liens signés)."
         },
         {
           "day": "J18–J20",
           "days": 3,
-          "name": "Contacts, consentement, désabonnement",
+          "name": "Contacts, leads, deals, activités",
           "progress": 100,
-          "status": "review",
-          "note": "J18 contacts et consentement, J19 pipelines / leads / deals, J20 activités et chronologie livrés ; désabonnement avec l'e-mail (J31–33)."
+          "status": "done",
+          "note": "J18 contacts et consentement, J19 pipelines, leads et deals, J20 activités et chronologie."
         },
         {
           "day": "J21–J23",
           "days": 3,
-          "name": "Leads, deals, pipelines",
+          "name": "Capture publique, assignation, import CSV",
           "progress": 100,
-          "status": "review",
-          "note": "Livré aux J19–J20 (pipelines, leads, deals, activités) et J24 (écrans leads, deals et export)."
+          "status": "done",
+          "note": "J21 formulaire public (clé, anti-abus), J22 assignation automatique et alertes, J23 import CSV avec aperçu et rapport."
         },
         {
           "day": "J24–J26",
           "days": 3,
-          "name": "Capture publique, assignation, import CSV",
+          "name": "Écrans CRM, adaptateur, tests de vente",
           "progress": 100,
-          "status": "review",
-          "note": "J21 à J23 livrés (capture publique, assignation automatique et alertes, import CSV avec aperçu et rapport)."
+          "status": "done",
+          "note": "J24 écrans leads, deals et export audité, J25 adaptateur CRM (fichier), J26 tests des rôles de vente."
         },
         {
           "day": "J27",
           "days": 1,
-          "name": "Adaptateur CRM · Gate G2",
+          "name": "Parcours complet · Jalon G2",
           "progress": 100,
-          "status": "review",
-          "note": "Adaptateur CRM (J25), tests ventes (J26) et parcours lead → deal gagné avec historique (J27) livrés ; checkpoint C2 rédigé : GO avec réserves proposé, décision de la responsable technique."
+          "status": "done",
+          "note": "Parcours lead jusqu'au deal gagné avec historique ; checkpoint C2 : écrans CRM planifiés avant G3."
         }
       ]
     },
@@ -230,16 +237,16 @@
           "days": 3,
           "name": "Intégrations et secrets",
           "progress": 100,
-          "status": "review",
-          "note": "Intégrations et secrets (J28), pipeline webhook (J29) et modèle de messagerie (J30) livrés ; PR ouvertes, pas encore fusionnées."
+          "status": "done",
+          "note": "J28 intégrations et secrets chiffrés, J29 pipeline des webhooks, J30 conversations et messages."
         },
         {
           "day": "J31–J33",
           "days": 3,
-          "name": "Webhooks et e-mail",
+          "name": "Envoi, statuts et réception e-mail · désabonnement",
           "progress": 67,
           "status": "part",
-          "note": "J31 (envoi d'e-mail derrière la chaîne de contrôles) et J32 (statuts du fournisseur, réception, file des cas ambigus) livrés ; J33 (désabonnement) à faire."
+          "note": "J31 envoi sous contrôles, J32 statuts du fournisseur et réponses ; J33 désabonnement à faire."
         },
         {
           "day": "J34–J37",
@@ -358,60 +365,318 @@
     {
       "name": "Paramétrage : palette de couleurs",
       "progress": 100,
-      "status": "review",
+      "status": "done",
       "note": "Couleurs claires et sombres, aperçu, contraste AA ; PR n°9."
     },
     {
       "name": "Paramétrage : logo",
       "progress": 100,
-      "status": "review",
+      "status": "done",
       "note": "PNG, JPEG, WebP ≤ 128 Ko, SVG refusé ; PR n°9."
     },
     {
       "name": "Rapport d'avancement automatisé",
       "progress": 100,
-      "status": "review",
+      "status": "done",
       "note": "Généré à chaque commit : pnpm report:progress."
     },
     {
       "name": "Guide de démarrage pour un nouveau développeur",
       "progress": 100,
-      "status": "review",
+      "status": "done",
       "note": "start-fusion-lead-ai-growth.md : prérequis, installation, comptes de test, tests."
     },
     {
       "name": "Paramétrage : serveur SMTP (Mailtrap)",
       "progress": 100,
-      "status": "review",
+      "status": "done",
       "note": "Mot de passe chiffré (AES-256-GCM), test d'envoi, administrateurs de la plateforme."
+    },
+    {
+      "name": "Guide de tests des phases 2 et 3 (PDF)",
+      "progress": 100,
+      "status": "done",
+      "note": "107 cas (interface et technique), fiche de résultats, données de démonstration et outil d'appel de l'API."
+    },
+    {
+      "name": "Refonte du rapport d'avancement",
+      "progress": 100,
+      "status": "done",
+      "note": "7 pages : synthèse, feuille de route, détail par phase, livré récemment, qualité, décisions ; historique et comparaison avec le rapport précédent."
     }
   ],
-  "controls": "Lint, typecheck, build de production avec l'environnement de la CI, recherche de fuites de secrets dans le bundle navigateur : tous verts. La CI GitHub (2 jobs) exécute le tout à chaque PR.",
-  "security": "Chaque jour passe une revue adverse (attaques réelles contre la base locale) puis une re-vérification : isolation entre organisations, journal d'audit non modifiable, quotas atomiques, aucun secret dans les logs. Aucune faille exploitable ouverte.",
+  "controls": "Lint, typecheck, tests unitaires, base de données (pgTAP), isolation par l'API réelle (RLS), acceptation en HTTP réel, build de production et recherche de fuites de secrets dans le bundle navigateur : tous verts. La CI GitHub exécute trois jobs à chaque PR.",
+  "security": "Chaque journée passe une revue adverse indépendante (attaques réelles contre la base locale, lecture critique du code) puis une re-vérification : isolation entre organisations, journal d'audit non modifiable, secrets chiffrés et jamais renvoyés, aucun contenu de message dans les journaux. Les failles trouvées sont corrigées avant la fusion ; aucune faille exploitable ouverte connue.",
   "openPoints": [
-    "Fusionner dans l'ordre les PR n°8 (J12), n°9 (Paramétrage) et n°10 (J13), puis ouvrir la PR de J14.",
-    "Accepter les ADR encore « Proposed » (dont 014 : droits, 015 : kit UI, 016 : palette et logo). C0 reste NO-GO provisoire tant que c'est en attente.",
-    "Valider les valeurs des plans (trial, starter, growth) : elles sont provisoires, la spec n'en donne aucune.",
-    "Paramétrage global : un owner ou admin de n'importe quelle organisation change les couleurs et le logo de toute la plateforme. À remplacer par le Platform Admin avant de vrais clients.",
-    "Abonnement past_due ou fin d'essai dépassée : toujours utilisable (pas d'expiration automatique).",
-    "Questions Q1 (CRM), Q2 (domaine e-mail), Q5 (marché / région) toujours sans réponse.",
-    "Compte développeur Meta bloqué (« compte trop récent ») : WhatsApp est critique pour J34.",
-    "Choisir l'hébergeur (ADR 010) avant J58 et le fournisseur IA (ADR 012) avant J47.",
-    "Rétention du journal d'audit et des jobs terminés (J57) : sinon croissance sans limite.",
-    "Saisir le mot de passe Mailtrap dans supabase/.env pour recevoir les e-mails d'inscription en local."
+    {
+      "text": "Réponse à Q2 (propriétaire du domaine d'envoi) et ouverture d'un compte d'essai Postmark : tout ce qui dépend du fournisseur est une hypothèse à confirmer (en-têtes des e-mails entrants, métadonnées des événements, codes de rebond).",
+      "owner": "Responsable technique",
+      "urgency": "Avant C3"
+    },
+    {
+      "text": "Aucun flux n'active encore un canal ou une intégration e-mail : sans lui, ni envoi ni réception réels.",
+      "owner": "Équipe",
+      "urgency": "Avant C3"
+    },
+    {
+      "text": "Désabonnement (J33) et écran contacts et consentement (J30b) : prérequis d'un premier envoi marketing.",
+      "owner": "Équipe",
+      "urgency": "Avant le premier envoi"
+    },
+    {
+      "text": "Q1 (API du CRM Fusion Leap) et Q5 (marché, région) : toujours sans réponse.",
+      "owner": "Responsable technique",
+      "urgency": "Avant J34"
+    },
+    {
+      "text": "Compte développeur Meta bloqué (« compte trop récent ») : WhatsApp est critique pour J34.",
+      "owner": "Propriétaire du produit",
+      "urgency": "Avant J34"
+    },
+    {
+      "text": "Choisir le fournisseur IA (ADR 012) et l'hébergeur (ADR 010).",
+      "owner": "Responsable technique",
+      "urgency": "Avant J47 / J58"
+    },
+    {
+      "text": "Effacement d'un contact qui a des messages (droit à l'effacement) : procédure d'anonymisation à définir.",
+      "owner": "Responsable technique",
+      "urgency": "Avant le pilote"
+    },
+    {
+      "text": "Purge des contenus conservés (événements de webhook, file de tri) et rétention du journal d'audit : sinon croissance sans limite.",
+      "owner": "Équipe",
+      "urgency": "J39 / J57"
+    },
+    {
+      "text": "Paramétrage de la palette et du logo : réservé aux administrateurs de la plateforme avant de vrais clients (condition de l'ADR 016).",
+      "owner": "Équipe",
+      "urgency": "Avant J54"
+    },
+    {
+      "text": "Protection de la branche principale non activée sur GitHub ; un test de base de données (conversations) a échoué deux fois sans cause trouvée.",
+      "owner": "Responsable technique",
+      "urgency": "À surveiller"
+    }
   ],
   "nextSteps": [
     {
       "when": "Maintenant",
-      "action": "Relecture et fusion des PR ; arbitrage sur les ADR 014 à 016 et sur les valeurs des plans."
+      "action": "Recette des phases 2 et 3 avec le guide de tests (PDF), par une personne qui n'a pas écrit le code."
     },
     {
-      "when": "Après le GO du C1",
-      "action": "Décision GO / NO-GO du C1, puis J16 : projets et produits."
+      "when": "J33",
+      "action": "Désabonnement : jeton signé, en-têtes de désabonnement, page publique en arabe et en anglais, révocation du consentement et annulation des envois en attente."
     },
     {
-      "when": "J16 à J27",
-      "action": "Ventes et CRM : projets, contacts et consentement, leads et deals, import CSV."
+      "when": "J30b à J30d",
+      "action": "Écrans contacts et consentement (avant le premier envoi), puis fiche lead (avant la boîte de réception)."
+    },
+    {
+      "when": "J34 à J37",
+      "action": "WhatsApp Cloud API et boîte de réception : dépend du compte Meta."
+    },
+    {
+      "when": "J38 à J41",
+      "action": "Envoi et réception sûrs sur la boîte unifiée, jalon G3 le 18 janvier 2027."
     }
-  ]
+  ],
+  "milestones": [
+    {
+      "label": "G1 · Isolation",
+      "when": "J15",
+      "status": "done",
+      "note": "Isolation de deux entreprises démontrée"
+    },
+    {
+      "label": "G2 · Parcours CRM",
+      "when": "J27",
+      "status": "done",
+      "note": "Lead jusqu'au deal gagné, avec historique"
+    },
+    {
+      "label": "C2 · Écrans CRM",
+      "when": "9 nov. 2026",
+      "status": "done",
+      "note": "Option A : écrans avant G3"
+    },
+    {
+      "label": "C3 · Compte d'essai e-mail",
+      "when": "avant tout envoi réel",
+      "status": "todo",
+      "note": "Fournisseur confirmé sur un compte d'essai"
+    },
+    {
+      "label": "G3 · Canaux",
+      "when": "18 janv. 2027",
+      "status": "todo",
+      "note": "Boîte unifiée, envoi et réception sûrs"
+    },
+    {
+      "label": "Fin du pilote",
+      "when": "16 févr. 2027",
+      "status": "todo",
+      "note": "Phase 5 : pilote avec un client"
+    }
+  ],
+  "recent": [
+    {
+      "day": "J28",
+      "title": "Intégrations et secrets",
+      "items": [
+        "Intégrations e-mail et WhatsApp, canaux, secrets chiffrés (jamais lisibles ni renvoyés).",
+        "Rotation et déconnexion qui supprime le secret."
+      ],
+      "proof": "pgTAP, API réelle et acceptation HTTP",
+      "review": null
+    },
+    {
+      "day": "J29",
+      "title": "Réception des webhooks",
+      "items": [
+        "Route publique sans session, entreprise retrouvée par le compte du fournisseur, jamais par le contenu.",
+        "Déduplication, rejets tracés sans contenu, traitement différé par le worker."
+      ],
+      "proof": "pipeline pur testé, acceptation HTTP",
+      "review": null
+    },
+    {
+      "day": "J30",
+      "title": "Conversations et messages",
+      "items": [
+        "Un fil par contact et canal ; un message ne peut pas porter une autre entreprise que son fil.",
+        "Lecture par rôle : le commercial ne lit que ses conversations."
+      ],
+      "proof": "126 tests de base, 12 tests API",
+      "review": {
+        "blocking": 0,
+        "major": 2,
+        "medium": 5
+      }
+    },
+    {
+      "day": "J31",
+      "title": "Envoi d'e-mail sous contrôles",
+      "items": [
+        "Approbation humaine obligatoire, contrôle final juste avant l'appel dans le worker.",
+        "Au plus un envoi par message ; « accepté » n'est pas « livré »."
+      ],
+      "proof": "94 tests de base, 10 tests API, 30 tests worker",
+      "review": {
+        "blocking": 0,
+        "major": 2,
+        "medium": 5
+      }
+    },
+    {
+      "day": "J32",
+      "title": "Statuts et réception d'e-mail",
+      "items": [
+        "Livré, rebond dur (adresse supprimée) et plainte (adresse supprimée et « ne plus contacter »).",
+        "Une réponse est rattachée à la bonne conversation ; un expéditeur inconnu ou usurpé va dans une file de tri, jamais dans un contact."
+      ],
+      "proof": "114 tests de base, 9 tests API, acceptation HTTP réelle",
+      "review": {
+        "blocking": 1,
+        "major": 1,
+        "medium": 5
+      }
+    }
+  ],
+  "capabilities": {
+    "ready": [
+      "Gérer projets, contacts, leads et deals, avec rôles et isolation entre entreprises.",
+      "Importer des contacts (CSV), capturer des leads par formulaire public, les assigner automatiquement.",
+      "Connecter une intégration e-mail, avec secrets chiffrés et jamais renvoyés.",
+      "Préparer un envoi : approbation humaine, 15 contrôles juste avant l'appel.",
+      "Recevoir les statuts du fournisseur et les réponses, rattachés à la bonne conversation."
+    ],
+    "notYet": [
+      "Envoyer ou recevoir un vrai e-mail : il manque l'activation d'un canal et un compte d'essai (C3).",
+      "Se désabonner (J33) : aucun envoi marketing avant ce lien.",
+      "Gérer les contacts et le consentement à l'écran (J30b) et lire les conversations (boîte de réception, J37).",
+      "WhatsApp (J34 à J37) : en attente du compte Meta."
+    ]
+  },
+  "journal": {
+    "title": "Journal du jour",
+    "intro": "Le travail du jour raconté étape par étape : ce qui a été fait, les vérifications menées et le volume de code touché.",
+    "steps": [
+      {
+        "sentence": "J'ai ajouté en base le secret de webhook par intégration, la file des e-mails non rattachés et les fonctions qui appliquent statuts et réponses.",
+        "actions": [
+          "Migration et retour arrière écrits",
+          "Tests pgTAP lancés"
+        ],
+        "grep": "feat\\(db\\).*J32"
+      },
+      {
+        "sentence": "J'ai écrit l'adaptateur Postmark (authentification, événements normalisés, contrôle SPF), le traitement côté worker et l'endpoint du secret.",
+        "actions": [
+          "Adaptateur, worker et route web",
+          "Tests unitaires lancés"
+        ],
+        "grep": "feat\\((adapters|worker|web)\\).*J32|feat\\((adapters|worker)\\): add the (Postmark|email)"
+      },
+      {
+        "sentence": "J'ai ajouté les tests d'acceptation du flux e-mail puis la documentation (API, runbook, ADR).",
+        "actions": [
+          "Tests d'acceptation lancés",
+          "Documentation mise à jour"
+        ],
+        "grep": "J32\\)$|docs: J32"
+      },
+      {
+        "sentence": "J'ai fusionné la chaîne de PR dans la branche principale, en gardant un commit par sujet.",
+        "actions": [
+          "PR rebasées sur main",
+          "Aucune branche supprimée"
+        ]
+      },
+      {
+        "sentence": "J'ai écrit le guide de tests des phases 2 et 3 (107 cas) et les outils d'appel de l'API, puis vérifié les résultats attendus sur l'application réelle.",
+        "actions": [
+          "Scénarios exécutés",
+          "Pages du PDF capturées"
+        ],
+        "grep": "docs\\(testing\\)|test:call",
+        "thumbs": [
+          [
+            "guide-couverture.png",
+            "Couverture du guide"
+          ],
+          [
+            "guide-cas-de-test.png",
+            "Un cas de test"
+          ]
+        ]
+      },
+      {
+        "sentence": "J'ai refondu le rapport d'avancement en 7 pages, avec historique et comparaison avec le rapport précédent.",
+        "actions": [
+          "PDF régénéré",
+          "Pages capturées"
+        ],
+        "grep": "docs\\(progress\\): redesign",
+        "thumbs": [
+          [
+            "rapport-synthese.png",
+            "Synthèse"
+          ],
+          [
+            "rapport-feuille-de-route.png",
+            "Feuille de route"
+          ]
+        ]
+      },
+      {
+        "sentence": "J'ai corrigé l'erreur de `pnpm dev` (module ES chargé par Turbopack) et mis à jour le runbook.",
+        "actions": [
+          "Correction vérifiée",
+          "CI verte"
+        ],
+        "grep": "Turbopack|pnpm dev"
+      }
+    ]
+  }
 }

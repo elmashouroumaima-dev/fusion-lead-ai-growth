@@ -25,3 +25,6 @@ next-env.d.ts
 
 # Scaffold Next.js (non maintenu par nous)
 apps/web/AGENTS.md
+
+# Fichiers temporaires des générateurs de PDF (guide de tests)
+docs/progress/report/_*.html

@@ -3,6 +3,11 @@
 Format : Keep a Changelog. Une entrée par jour de travail.
 
 ## [Non publié]
+### Hors plan — guide de tests et rapport d'avancement
+- Ajout : guide de tests fonctionnels des phases 2 et 3 (`docs/testing/phase2-3-functional-tests.md` et PDF) : 107 cas (interface : projets, leads, deals, intégrations ; technique : capture, assignation, import, synchro CRM, secrets, webhooks e-mail, conversations, envoi sous contrôles), fiche de résultats, données de démonstration (`docs/testing/fixtures/`), outils `pnpm test:call` et `pnpm test:guide`.
+- Ajout : page « journal du jour » du rapport (`journal` dans `scripts/progress-report/data.json` : phrase, activités, vignettes dans `docs/progress/report/journal/`, compteurs de lignes calculés par `git log --numstat` sur les commits du jour).
+- Modification : rapport d'avancement refondu (8 pages avec le journal : synthèse, feuille de route, phases, livré récemment, qualité, décisions) avec historique (`history.json`) et comparaison avec le rapport précédent ; textes figés corrigés (« J0 à J27 », compteur de PR), modules mal libellés corrigés.
+- Documentation : `docs/runbooks/test-guide.md`, `docs/runbooks/progress-report.md`.
 ### J32 — E-mail entrant et statuts
 - Ajout : migration `20261202100000` (et retour arrière) : **second secret par intégration** (`webhook_secret_ref`, illisible par l'API, supprimé à la déconnexion), table `inbound_unmatched` (file des cas ambigus, lecture owner et admin, aucune écriture directe), fonctions service_role `email_status_apply` (delivered, rebond dur, plainte) et `email_inbound_apply` (canal par l'adresse destinataire, contact par l'adresse expéditrice).
 - Ajout : adaptateur de webhook Postmark (Basic Auth : utilisateur = compte de l'intégration, mot de passe = secret de webhook), événements normalisés (`packages/adapters/src/email/events.ts`, fixtures = exemples officiels), processeur `email` du worker, `POST /api/integrations/webhook-secret`, `Metadata` (identifiant de notre message) à l'envoi.

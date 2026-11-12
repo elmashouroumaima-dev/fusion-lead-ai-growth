@@ -1,0 +1,5 @@
+id,email,nom,langue,pays,modifie_le
+crm-001,sync1@demo.test,Sami Lahlou,fr,MA,2026-11-01T10:00:00Z
+crm-002,sync2@demo.test,Dounia Karimi,fr,MA,2026-11-02T10:00:00Z
+crm-003,nadia@demo.test,Nadia B. (CRM),fr,MA,2026-11-03T10:00:00Z
+crm-004,sync4@demo.test,Rachid Amrani,ar,MA,2026-11-04T10:00:00Z

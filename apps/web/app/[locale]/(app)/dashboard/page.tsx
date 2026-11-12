@@ -4,9 +4,11 @@ import { getTranslations } from "next-intl/server";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { PlanUsageCard } from "@/components/plans/plan-usage-card";
 import { Link } from "../../../../i18n/navigation";
 import { requireLocale } from "../../../../i18n/require-locale";
 import { requireClaims } from "../../../../lib/auth/require-claims";
+import { getOrganizationUsage } from "../../../../lib/plans/queries";
 import { requireTenantContext } from "../../../../lib/tenant/context";
 
 export const dynamic = "force-dynamic";
@@ -22,6 +24,8 @@ export default async function DashboardPage({ params }: { params: Promise<{ loca
   // Simple commodité d'affichage : la page Membres et ses actions revérifient tout.
   const canListMembers = can(tenant.role, "list", "members");
   const language = tenant.organization.locale;
+  // Utilisation du plan : owner / admin (ADR 014 « Plan / facturation » : voir). La base refuse les autres rôles.
+  const usage = can(tenant.role, "view", "billing") ? await getOrganizationUsage(tenant.organizationId) : [];
 
   return (
     <div className="mx-auto grid w-full max-w-5xl gap-6">
@@ -34,6 +38,7 @@ export default async function DashboardPage({ params }: { params: Promise<{ loca
       </header>
 
       <div className="grid gap-4 md:grid-cols-2">
+        <PlanUsageCard rows={usage} locale={locale} />
         <Card role="region" aria-labelledby="dash-org-title">
           <CardHeader>
             <CardTitle id="dash-org-title" className="flex items-center gap-2">

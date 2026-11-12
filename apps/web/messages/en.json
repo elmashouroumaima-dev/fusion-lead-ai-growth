@@ -17,7 +17,8 @@
       "label": "Main navigation",
       "dashboard": "Dashboard",
       "members": "Members",
-      "settings": "Settings"
+      "settings": "Settings",
+      "admin": "Platform admin"
     },
     "sidebar": {
       "toggle": "Show or hide the side menu",
@@ -142,6 +143,20 @@
       "members": "Manage members",
       "membersHint": "Invite people and give them a role.",
       "noMembers": "Member management is reserved for owners and administrators."
+    },
+    "usage": {
+      "title": "Plan usage",
+      "description": "Your organization's consumption against its plan limits.",
+      "nearLimit": "You are approaching a limit of your plan. Contact the platform administrator to raise it.",
+      "blocked": "A limit of your plan has been reached: the related action is blocked. Contact the platform administrator.",
+      "metrics": {
+        "users": "Users (members and invitations)",
+        "projects": "Projects",
+        "contacts": "Contacts",
+        "messages_per_month": "Messages this month",
+        "ai_runs": "AI runs this month",
+        "integrations": "Integrations"
+      }
     }
   },
   "Org": {
@@ -281,7 +296,8 @@
       "idempotency_conflict": "This request was already submitted with different details. Reload the page and try again.",
       "service_unavailable": "The service is temporarily unavailable. Please try again in a moment.",
       "generic": "Something went wrong. Please try again.",
-      "loadFailed": "The list could not be loaded. Please try again."
+      "loadFailed": "The list could not be loaded. Please try again.",
+      "quota_exceeded": "Your plan's user limit has been reached. Contact the platform administrator."
     },
     "dialog": {
       "close": "Close"
@@ -386,6 +402,56 @@
         "size": "Image too large: 128 KB maximum.",
         "read": "This file could not be read."
       }
+    }
+  },
+  "Admin": {
+    "title": "Platform administration",
+    "description": "Plans, subscriptions and limits of the organizations. Platform administrators only; every change is recorded in the organization's audit log.",
+    "empty": "No organizations.",
+    "noPlan": "No subscription",
+    "members": "{count, plural, one {# active member} other {# active members}}",
+    "plans": {
+      "trial": "Trial",
+      "starter": "Starter",
+      "growth": "Growth"
+    },
+    "status": {
+      "trial": "Trial",
+      "active": "Active",
+      "past_due": "Past due",
+      "suspended": "Suspended",
+      "cancelled": "Cancelled"
+    },
+    "metrics": {
+      "users": "Users",
+      "projects": "Projects",
+      "contacts": "Contacts",
+      "messages_per_month": "Messages per month",
+      "ai_runs": "AI runs per month",
+      "integrations": "Integrations"
+    },
+    "form": {
+      "plan": "Plan",
+      "status": "Status",
+      "overrides": "Specific limits (optional)",
+      "overridesHint": "Leave empty to use the plan limit. 0 blocks the metric.",
+      "periodEnd": "Period end",
+      "reason": "Reason for the decision",
+      "save": "Save subscription",
+      "saving": "Saving…",
+      "saved": "Subscription saved.",
+      "reasonHint": "No secrets or personal data: this reason is recorded in the audit log (200 characters at most)."
+    },
+    "errors": {
+      "loadFailed": "Could not load the organizations.",
+      "invalid_input": "Invalid data: check the plan, limits and reason.",
+      "forbidden": "You are not allowed to change subscriptions.",
+      "rate_limited": "Too many attempts. Try again in a moment.",
+      "duplicate_request": "Request already handled.",
+      "idempotency_in_progress": "Request in progress.",
+      "idempotency_conflict": "Request conflict. Reload the page.",
+      "service_unavailable": "Service temporarily unavailable.",
+      "generic": "Something went wrong. Please try again."
     }
   }
 }

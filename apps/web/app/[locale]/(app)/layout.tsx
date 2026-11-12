@@ -2,6 +2,7 @@ import { can } from "@fusion-leap/permissions";
 import type { ReactNode } from "react";
 import { AppShell } from "@/components/layout/app-shell";
 import { requireLocale } from "../../../i18n/require-locale";
+import { isPlatformAdmin } from "../../../lib/admin/queries";
 import { requireClaims } from "../../../lib/auth/require-claims";
 import { canManagePlatformConfig } from "../../../lib/settings/queries";
 import { readActiveOrgCookie } from "../../../lib/tenant/active-org-cookie";
@@ -39,6 +40,8 @@ export default async function AppLayout({ children, params }: Props) {
   let showMembers = false;
   // Paramétrage (palette globale) : owner / admin d'organisation seulement ; commodité d'affichage.
   const showSettings = await canManagePlatformConfig();
+  // Administration de la plateforme (plans, abonnements) : administrateurs de la plateforme seulement.
+  const showAdmin = await isPlatformAdmin();
   let activeOrganizationName: string | undefined;
   try {
     const active = resolveActiveMembership(switchable, await readActiveOrgCookie());
@@ -55,6 +58,7 @@ export default async function AppLayout({ children, params }: Props) {
       email={email}
       showMembers={showMembers}
       showSettings={showSettings}
+      showAdmin={showAdmin}
       organizations={switchable.map((m) => ({ id: m.organizationId, name: m.organization.name }))}
       selectedOrganizationId={selectedId}
       activeOrganizationName={activeOrganizationName}

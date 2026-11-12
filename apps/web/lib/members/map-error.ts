@@ -10,6 +10,7 @@ export type DbError = { code?: string | null; message?: string | null } | null |
  *  - 22023 validation_failed           -> invalid_input
  *  - P0001 already_member              -> already_member
  *  - P0001 invitation_invalid          -> invitation_invalid
+ *  - P0001 quota_exceeded / subscription_inactive -> quota_exceeded (limite d'utilisateurs du plan, J14)
  *  - P0001 invalid_target              -> invalid_input
  *  - 23514 check_violation             -> last_owner (trigger protect_last_owner)
  *  - tout le reste                     -> generic
@@ -23,6 +24,7 @@ export function mapMembersDbError(error: DbError): MembersActionErrorCode {
   if (code === "P0001") {
     if (message.includes("already_member")) return "already_member";
     if (message.includes("invitation_invalid")) return "invitation_invalid";
+    if (message.includes("quota_exceeded") || message.includes("subscription_inactive")) return "quota_exceeded";
     if (message.includes("invalid_target")) return "invalid_input";
     if (message.includes("forbidden")) return "forbidden";
   }

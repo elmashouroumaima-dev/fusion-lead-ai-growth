@@ -21,8 +21,10 @@ begin
     (org_alpha, 'Alpha', 'alpha', 'Africa/Casablanca', 'en'),
     (org_beta, 'Beta', 'beta', 'Asia/Riyadh', 'ar');
 
+  -- Plan growth (15 utilisateurs) : les organisations de démonstration comptent 5 et 3 membres actifs (limite du plan
+  -- trial : 3 depuis J14). Le statut reste « trial ».
   insert into public.subscriptions (organization_id, plan_id, status)
-  select o, (select id from public.plans where code = 'trial'), 'trial'
+  select o, (select id from public.plans where code = 'growth'), 'trial'
   from unnest(array[org_alpha, org_beta]) as o;
 
   -- Utilisateurs (auth.users + identité e-mail pour pouvoir se connecter en local)
@@ -69,3 +71,8 @@ begin
     (org_beta, '00000000-0000-4000-8000-000000000007', 'analyst', 'active', '00000000-0000-4000-8000-000000000006');
 end
 $seed$;
+
+-- Administrateur de la plateforme (local uniquement) : accès à l'écran d'administration (J14, ADR 005 §10).
+-- En production, les administrateurs sont ajoutés par SQL (opérations), jamais par l'application.
+insert into private.platform_admins (user_id) values ('00000000-0000-4000-8000-000000000001') on conflict do nothing;
+

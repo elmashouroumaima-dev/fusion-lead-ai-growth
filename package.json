@@ -18,6 +18,7 @@
     "db:reset": "supabase db reset",
     "db:migrate": "supabase migration up",
     "worker:dev": "pnpm --filter @fusion-leap/worker dev",
+    "report:progress": "node scripts/progress-report/build.mjs",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "db:start": "supabase start",

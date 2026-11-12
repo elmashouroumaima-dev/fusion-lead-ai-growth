@@ -793,3 +793,28 @@ Cible : 51,5 % (plan à 68 jours) | Réel : à valider | Statut : —
 - `message_approve` (owner et admin) ajoutée : point d'entrée de l'approbation humaine avant les écrans J38 et J44 ; l'approbation met le job en file.
 - Objet de l'e-mail dérivé du corps (pas de colonne `subject` avant J40) ; limite de débit provisoire de 100 e-mails par heure et par canal ; `fetch` injecté au lieu de MSW (non installé).
 - Aucun flux n'active encore un canal ou une intégration e-mail : le premier envoi réel attend la validation des identifiants (J32) et le checkpoint C3 ; Postmark reste une hypothèse (Q2).
+
+## J32 — E-mail entrant et statuts (branche `day-32-email-inbound`, NON commité)
+Cible : 52,9 % (plan à 68 jours) | Réel : à valider | Statut : —
+
+### Tâches
+| Tâche | Estimé | Livré | Validée |
+|---|---|---|---|
+| Webhook de statuts | 2 h | oui (adaptateur Postmark, `email_status_apply`, processeur worker, secret de webhook) | oui (adaptateur 32, worker 11, pgTAP 114, API 9, acceptation HTTP réelle) |
+| Réception + rattachement | 2,5 h | oui (canal par adresse destinataire, contact par adresse expéditrice, un fil par contact et canal) | oui |
+| File des cas ambigus | 1,5 h | oui (`inbound_unmatched`, jamais de contact créé, plafonds) | oui |
+
+### Validation du jour
+- **Une réponse est rattachée à la bonne conversation** : celle du contact et du canal désignés par les adresses, déduplication par identifiant du fournisseur, un fil fermé se rouvre (acceptation HTTP réelle).
+- **Un rebond met à jour le message et le contact** : message `bounced`, adresse en `suppressions`, `do_not_contact` inchangé ; une plainte pose aussi `do_not_contact` (décision de la responsable technique).
+
+### Revue sécurité (1 bloquant, 1 majeur, 5 moyens) — corrigés : usurpation d'expéditeur (SPF non aligné sur l'adresse affichée, en-têtes dupliqués), file des cas ambigus sans plafond effectif (corps, expéditeur, entreprise, jamais perdue en silence), texte invalide qui faisait réessayer le fournisseur sans fin, identifiants d'événement hors contrainte, canal choisi par l'en-tête « To » de l'expéditeur, secret de webhook égal au jeton d'envoi, couverture des rebonds (BadEmailAddress), plainte qui écrasait la provenance, réclamation ancienne jamais réconciliée, HTTPS non imposé ; **résiduel accepté** : mot de passe Basic dans chaque requête, écart de temps pour un compte inconnu (J29).
+
+### Tests : domain 654 ✓ · adapters 106 ✓ · permissions 394 ✓ · worker 129 ✓ · web 2523 ✓ · pgTAP 2928 (dont 250_email_inbound : 114) ✓ · API réelle 485 (email-inbound : 9) ✓ · acceptation 185 ✓ (+1 réservé à un serveur sans clé maître) · lint, typecheck, check:leaks verts
+### À surveiller
+- Le test pgTAP `230_conversations_messages` (n° 106) a échoué deux fois de suite puis réussi trois fois sans changement de code : cause non trouvée, à surveiller en CI.
+### Écarts à la spec / plan
+- Pas de rattachement par `Message-ID` / `In-Reply-To` / `References` : un fil par contact et canal (J30), le rattachement se fait par l'adresse expéditrice dans le canal.
+- Secret de webhook fourni par l'administrateur (et non généré par le serveur) ; table `inbound_unmatched` et second secret : amendements de l'ADR 007.
+- Tout ce qui dépend de Postmark reste À CONFIRMER sur un compte sandbox (checkpoint C3) : en-têtes SPF / DKIM des entrants, `Metadata` des événements, codes de rebond.
+- Aucun flux n'active encore un canal e-mail : ni envoi réel ni réception réelle avant ce flux et C3.

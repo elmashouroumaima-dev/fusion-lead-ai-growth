@@ -6,7 +6,7 @@ Migration `20261129100000_webhook_events.sql` (retour arrière : `supabase/rollb
 Un webhook n'a **pas de session**. Le fournisseur est dans l'adresse, l'entreprise est retrouvée par l'identité du **compte fournisseur** (`integrations (provider, external_account_id)`, unicité globale des comptes `email` et `whatsapp`, J28), jamais par un champ libre du payload ; l'authenticité vient de la **signature sur le corps brut**. L'événement est enregistré puis **traité plus tard** par le worker : la réponse est rapide.
 
 ## Pipeline (`packages/adapters/src/webhooks/ingest.ts`, fonction pure)
-1. Fournisseur sans adaptateur enregistré : **404** (aujourd'hui tous : l'e-mail arrive au J32, WhatsApp au J34 et J35).
+1. Fournisseur sans adaptateur enregistré : **404** (WhatsApp : J34 et J35 ; l'**e-mail** a un adaptateur depuis le J32, `docs/api/email-inbound.md`).
 2. Adresse source obligatoire (`TRUSTED_PROXY_HOPS`) : sinon **503** visible (jamais un seau de débit commun à tous les appelants) ; limitation de débit par fournisseur et par adresse (IPv6 agrégée par /64) : **429** + `Retry-After`.
 3. Corps brut lu avec un plafond (`maxBytes` de l'adaptateur, 3 Mo pour WhatsApp) : **413**.
 4. JSON lisible, compte présent : sinon **400**.
@@ -28,7 +28,7 @@ Le handler lit l'événement avec l'entreprise de la **ligne du job**, le confie
 `parse`, `extractAccount`, `extractEventId`, `extractTimestamp?`, `verify`, `maxBytes`. **L'identifiant d'événement doit être tiré de contenu COUVERT par la signature** (jamais d'un en-tête non signé), sinon changer l'en-tête d'une capture valide contournerait la déduplication. Helper `verifyHmacSha256Hex` fourni (WhatsApp : `X-Hub-Signature-256`).
 
 ## Limites connues et décisions à prendre (revue J29)
-- **Quel secret signe ?** Le secret de l'intégration (J28) n'a qu'un emplacement. Pour WhatsApp la clé HMAC est le *App Secret*, pas le jeton d'accès. Avant le J34 : un secret de webhook **distinct et propre à chaque entreprise** (un App Secret partagé entre entreprises permettrait à l'une de signer un événement visant le compte d'une autre).
+- **Quel secret signe ? (résolu au J32)** Le secret de WEBHOOK est un **second emplacement** par intégration (`webhook_secret_ref`, `docs/api/email-inbound.md`), distinct du jeton d'envoi ; la route lit celui-là. (Texte du J29 :) Le secret de l'intégration (J28) n'a qu'un emplacement. Pour WhatsApp la clé HMAC est le *App Secret*, pas le jeton d'accès. Avant le J34 : un secret de webhook **distinct et propre à chaque entreprise** (un App Secret partagé entre entreprises permettrait à l'une de signer un événement visant le compte d'une autre).
 - **Événements bloqués en `received`** si un job meurt (dead letter) : la fenêtre de 7 jours du plafond limite l'effet ; un balayage et le rejeu des dead letters arrivent avec l'exploitation (J39).
 - **Rétention** : le payload (données personnelles) et les lignes `rejected` ne sont pas purgés ; une purge ne doit pas rouvrir une fenêtre de rejeu (J39, J58). Un effacement d'entreprise devra supprimer ses `webhook_events`.
 - **Pas de limite par intégration** après résolution (seulement par adresse) ; les lignes `rejected` sont plafonnées mais un inconnu qui vise un compte connu peut masquer pendant une heure les vrais rejets de ce compte.

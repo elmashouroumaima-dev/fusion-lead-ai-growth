@@ -41,3 +41,6 @@ Sans clé maître (`SECRETS_MASTER_KEY`) : **503**, rien n'est créé. Un secret
 - **Appel direct de la Data API** : un owner ou admin peut écrire un chiffré de format valide mais illisible par ses propres fonctions ; il ne nuit qu'à son entreprise (l'AAD l'empêche d'atteindre une autre). Le worker traitera un secret illisible comme une erreur d'intégration (statut `error`).
 - **Pas de rotation de la clé maître** (re-chiffrement par `key_version` dans un job du worker) : prévue avec les runbooks (J58 et J59). La rotation d'un SECRET (remplacement) est livrée et testée.
 - `service_role` garde le SELECT sur `integrations` (donc peut lire `secret_ref`, un simple identifiant) mais aucun droit sur `private.secrets`.
+
+## Secret de webhook (J32)
+`POST /api/integrations/webhook-secret` `{ integration_id, secret }` : enregistre ou remplace le **secret de webhook** (mot de passe du Basic Auth du fournisseur), distinct du jeton d'envoi ; owner et admin, `Idempotency-Key` obligatoire, réponse `{ replaced: true }` (jamais le secret). Colonne `integrations.webhook_secret_ref` illisible ; seul l'indicateur `has_webhook_secret` l'est ; supprimé à la déconnexion. Le secret de webhook ne peut pas être égal au jeton d'envoi (400, dans les deux sens). Détail : `docs/api/email-inbound.md`, procédure : `docs/runbooks/email-webhooks.md`.

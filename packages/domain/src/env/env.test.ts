@@ -108,6 +108,52 @@ describe("parseServerEnv", () => {
     });
   });
 
+  describe("SECRETS_MASTER_KEY (ADR 004)", () => {
+    const key32 = Buffer.from(Array.from({ length: 32 }, (_, i) => (i * 7 + 3) % 256)).toString("base64");
+
+    it("optionnelle : absente ou vide = désactivée, version 1 par défaut", () => {
+      expect(parseServerEnv(validServer).SECRETS_MASTER_KEY).toBeUndefined();
+      expect(parseServerEnv({ ...validServer, SECRETS_MASTER_KEY: "" }).SECRETS_MASTER_KEY).toBeUndefined();
+      expect(parseServerEnv(validServer).SECRETS_KEY_VERSION).toBe(1);
+    });
+
+    it("accepte exactement 32 octets en base64 et une version entière", () => {
+      const env = parseServerEnv({ ...validServer, SECRETS_MASTER_KEY: key32, SECRETS_KEY_VERSION: "3" });
+      expect(env.SECRETS_MASTER_KEY).toBe(key32);
+      expect(env.SECRETS_KEY_VERSION).toBe(3);
+    });
+
+    it("refuse une clé trop courte, trop longue ou non base64, sans jamais afficher sa valeur", () => {
+      for (const bad of [Buffer.alloc(16).toString("base64"), Buffer.alloc(33).toString("base64"), "pas du base64!!"]) {
+        try {
+          parseServerEnv({ ...validServer, SECRETS_MASTER_KEY: bad });
+          expect.unreachable();
+        } catch (error) {
+          expect(error).toBeInstanceOf(EnvValidationError);
+          expect((error as Error).message).toContain("SECRETS_MASTER_KEY");
+          expect((error as Error).message).not.toContain(bad);
+        }
+      }
+    });
+
+    it("refuse une clé triviale (octets identiques ou peu variés)", () => {
+      for (const bad of [Buffer.alloc(32, 0).toString("base64"), Buffer.alloc(32, 7).toString("base64"), Buffer.from("abcdabcdabcdabcdabcdabcdabcdabcd").toString("base64")]) {
+        expect(() => parseServerEnv({ ...validServer, SECRETS_MASTER_KEY: bad })).toThrow(EnvValidationError);
+      }
+    });
+
+    it("refuse une version invalide", () => {
+      for (const bad of ["0", "-1", "1.5", "abc", "1001"]) {
+        expect(() => parseServerEnv({ ...validServer, SECRETS_KEY_VERSION: bad }), bad).toThrow(EnvValidationError);
+      }
+    });
+
+    it("jamais exposée au client : absente du schéma client et refusée derrière NEXT_PUBLIC_", () => {
+      expect(Object.keys(parseClientEnv(validClient))).not.toContain("SECRETS_MASTER_KEY");
+      expect(findPublicVariableLeaks({ NEXT_PUBLIC_SECRETS_MASTER_KEY: key32 }).length).toBeGreaterThan(0);
+    });
+  });
+
   it("traite une chaîne vide comme manquante", () => {
     expect(() => parseServerEnv({ ...validServer, SUPABASE_SECRET_KEY: "" })).toThrow(
       EnvValidationError,

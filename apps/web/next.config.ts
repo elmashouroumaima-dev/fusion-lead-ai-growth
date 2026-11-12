@@ -12,11 +12,15 @@ loadEnvConfig(root, process.env.NODE_ENV !== "production", console, true);
 
 const nextConfig: NextConfig = {
   // Les packages du monorepo sont consommés en TypeScript source.
-  transpilePackages: ["@fusion-leap/domain", "@fusion-leap/permissions"],
+  transpilePackages: ["@fusion-leap/domain", "@fusion-leap/permissions", "@fusion-leap/adapters"],
   poweredByHeader: false,
   // Développement uniquement : autorise l'accès par 127.0.0.1 (les liens d'e-mail et SITE_URL l'utilisent).
   // Sans cela, Next 16 bloque les ressources de développement et les Server Actions échouent.
   allowedDevOrigins: ["127.0.0.1", "localhost"],
+  async redirects() {
+    // /settings n'a pas de page propre : le menu latéral liste les sections ; on ouvre la première.
+    return [{ source: "/:locale(fr|ar|en)/settings", destination: "/:locale/settings/appearance", permanent: false }];
+  },
   async headers() {
     return [
       {

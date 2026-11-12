@@ -131,6 +131,12 @@ Recopier dans `.env.local` :
 | `PUBLISHABLE_KEY` | `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` |
 | `SECRET_KEY` | `SUPABASE_SECRET_KEY` |
 
+Pour enregistrer un mot de passe SMTP dans Paramétrage, générer aussi une clé de chiffrement locale et la coller dans `SECRETS_MASTER_KEY` :
+
+```bash
+node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
+```
+
 Les autres valeurs de `.env.local` (URL `http://127.0.0.1:54321`, `SITE_URL=http://127.0.0.1:3000`, `APP_ENV=development`, `AI_ALLOW_REAL_DATA=false`) sont déjà bonnes. Laisser `RESEND_API_KEY` vide.
 
 > Ces clés sont des clés **locales de développement** (elles ne servent qu'à votre Supabase Docker). Ne les mettez jamais dans une variable `NEXT_PUBLIC_*` autre que la clé « publishable », et ne les commitez jamais.
@@ -196,6 +202,8 @@ Le worker affiche `job_succeeded`. Détails : `docs/runbooks/jobs-worker.md`.
 ---
 
 ## 9. E-mails de test (facultatif)
+
+> Deux réglages différents : **ce paragraphe** configure le SMTP de Supabase Auth (e-mails d'inscription). La carte **Paramètres SMTP** de l'application (menu *Paramétrage*, compte `shared@seed.test`) enregistre le SMTP de l'application : bouton « Utiliser Mailtrap », puis utilisateur et mot de passe de votre boîte, puis « Envoyer un e-mail de test » (voir `docs/runbooks/smtp-settings.md`).
 
 Sans cette étape tout fonctionne **sauf l'inscription par e-mail** (les comptes du §7 suffisent pour tout essayer). Pour recevoir les e-mails de confirmation :
 

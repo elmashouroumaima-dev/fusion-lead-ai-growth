@@ -3,6 +3,13 @@
 Format : Keep a Changelog. Une entrée par jour de travail.
 
 ## [Non publié]
+### Paramètres SMTP de la plateforme (ADR 004 mise en œuvre, ADR 008 note)
+- Ajout : carte « Paramètres SMTP » du Paramétrage (administrateurs de la plateforme) : serveur, port, sécurité, utilisateur, mot de passe en écriture seule, expéditeur, préréglage Mailtrap, test d'envoi à l'adresse de l'administrateur, suppression.
+- Ajout : chiffrement applicatif AES-256-GCM (`packages/adapters/src/secrets`, clé maître `SECRETS_MASTER_KEY`), table `private.secrets` sans droit d'API, fonctions `set/reset/get_smtp_settings` et `get_smtp_delivery` (service_role) ; migration `20261117100000` et retour arrière.
+- Ajout : garde-fous SSRF du test d'envoi (hôtes internes, résolution DNS contrôlée) ; dépendance `nodemailer`.
+- Ajout : runbook `docs/runbooks/smtp-settings.md`.
+- Modifié : « Paramétrage » devient une liste déroulante du menu latéral avec une page par section (Palette de couleurs, Logotype, Serveur SMTP) ; `/settings` redirige vers la première.
+
 ### J14 — Plans, quotas et administrateurs de la plateforme
 - Ajout : `private.platform_admins` (SQL seulement), plans `trial` / `starter` / `growth` (limites provisoires, forme contrôlée), contrôle atomique des quotas (`assert_within_limit`, `consume_quota`, `get_org_usage`), limite `users` appliquée aux invitations (`quota_exceeded`, 429), administration des abonnements (`admin_list_organizations`, `admin_set_subscription`, audit `subscription.changed`) ; migration `20261116100000` et retour arrière.
 - Ajout : `packages/domain/src/plans` (métriques, `assertWithinLimit`, schémas), carte « Utilisation du plan » (alerte à 80 %) sur le tableau de bord, écran `/admin/organizations` et lien « Administration » (administrateurs de la plateforme), messages fr/ar/en.

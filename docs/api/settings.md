@@ -1,6 +1,6 @@
 # API — Paramétrage (palette de couleurs globale)
 
-Page : `/{locale}/settings/appearance` (owner et admin d'organisation ; les autres utilisateurs sont redirigés vers le tableau de bord). La palette s'applique à toute la plateforme, page de connexion comprise : **un owner/admin la modifie pour tous les clients** (risque assumé, ADR 016).
+Pages : `/{locale}/settings/appearance` (palette) et `/{locale}/settings/logo` (menu latéral déroulant « Paramétrage ») ; `/{locale}/settings/smtp` (serveur SMTP, administrateurs de la plateforme seulement). Palette et logo : (owner et admin d'organisation ; les autres utilisateurs sont redirigés vers le tableau de bord). La palette s'applique à toute la plateforme, page de connexion comprise : **un owner/admin la modifie pour tous les clients** (risque assumé, ADR 016).
 
 ## Server Actions (`apps/web/lib/settings/actions.ts`)
 | Action | Champs | Droit | Effet |

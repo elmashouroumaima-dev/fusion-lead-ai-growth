@@ -18,7 +18,10 @@
       "dashboard": "Dashboard",
       "members": "Members",
       "settings": "Settings",
-      "admin": "Platform admin"
+      "admin": "Platform admin",
+      "settingsPalette": "Color palette",
+      "settingsLogo": "Logo",
+      "settingsSmtp": "SMTP server"
     },
     "sidebar": {
       "toggle": "Show or hide the side menu",
@@ -402,6 +405,59 @@
         "size": "Image too large: 128 KB maximum.",
         "read": "This file could not be read."
       }
+    },
+    "smtp": {
+      "title": "SMTP settings",
+      "description": "The platform's outgoing e-mail server. Platform administrators only; the password is encrypted and never displayed.",
+      "noKey": "The server encryption key (SECRETS_MASTER_KEY) is not configured: you can save the settings, but not the password.",
+      "mailtrap": "Use Mailtrap",
+      "mailtrapHint": "Pre-fills the host, port, security and a default sender (Mailtrap accepts any). Then enter your inbox's username and password.",
+      "host": "SMTP server",
+      "port": "Port",
+      "security": "Security",
+      "username": "Username",
+      "securities": {
+        "tls": "Direct TLS (SSL)",
+        "starttls": "STARTTLS (negotiated encryption)",
+        "none": "None"
+      },
+      "password": "Password",
+      "passwordHint": "Encrypted before it is stored, never sent back.",
+      "passwordSaved": "A password is saved. Leave empty to keep it, enter a new one to replace it.",
+      "fromEmail": "Sender address",
+      "fromName": "Sender name",
+      "save": "Save",
+      "saving": "Saving…",
+      "saved": "SMTP settings saved.",
+      "test": "Send a test e-mail",
+      "testing": "Sending…",
+      "testSent": "Test e-mail sent to your address.",
+      "testHint": "The test sends a message to your account's address using the saved settings.",
+      "reset": "Delete the configuration",
+      "resetDone": "SMTP configuration deleted.",
+      "errors": {
+        "invalid_input": "Invalid settings: check the server, port and sender address.",
+        "forbidden": "You are not allowed to change these settings.",
+        "rate_limited": "Too many attempts. Try again in a moment.",
+        "duplicate_request": "Request already handled.",
+        "idempotency_in_progress": "Request in progress.",
+        "idempotency_conflict": "Request conflict. Reload the page.",
+        "service_unavailable": "Service temporarily unavailable.",
+        "generic": "Something went wrong. Please try again.",
+        "secrets_unavailable": "Secret encryption is not available on the server (encryption key missing or invalid).",
+        "not_configured": "No SMTP configuration saved.",
+        "blocked_host": "This server is not allowed (local or internal address).",
+        "auth_failed": "Credentials rejected by the SMTP server.",
+        "connection_failed": "Could not connect to the SMTP server.",
+        "timeout": "The SMTP server did not answer in time.",
+        "rejected": "The message was rejected by the SMTP server.",
+        "failed": "The test message could not be sent.",
+        "password_required": "The host, port or username changed: enter the password again (the saved one cannot be reused for another destination)."
+      }
+    },
+    "sections": {
+      "palette": "Color palette",
+      "paletteDescription": "Application colors in light and dark mode, preview and contrast."
     }
   },
   "Admin": {

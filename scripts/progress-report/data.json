@@ -5,11 +5,11 @@
   "tests": [
     {
       "label": "Web (application)",
-      "value": 2071
+      "value": 2108
     },
     {
       "label": "Base de données (pgTAP)",
-      "value": 1249
+      "value": 1314
     },
     {
       "label": "Permissions (RBAC)",
@@ -17,15 +17,15 @@
     },
     {
       "label": "Domaine (règles métier)",
-      "value": 400
+      "value": 419
     },
     {
       "label": "RLS via l'API réelle",
-      "value": 300
+      "value": 308
     },
     {
       "label": "Worker et adaptateurs",
-      "value": 34
+      "value": 43
     }
   ],
   "adrCount": 14,
@@ -358,6 +358,12 @@
       "progress": 100,
       "status": "review",
       "note": "start-fusion-lead-ai-growth.md : prérequis, installation, comptes de test, tests."
+    },
+    {
+      "name": "Paramétrage : serveur SMTP (Mailtrap)",
+      "progress": 100,
+      "status": "review",
+      "note": "Mot de passe chiffré (AES-256-GCM), test d'envoi, administrateurs de la plateforme."
     }
   ],
   "controls": "Lint, typecheck, build de production avec l'environnement de la CI, recherche de fuites de secrets dans le bundle navigateur : tous verts. La CI GitHub (2 jobs) exécute le tout à chaque PR.",

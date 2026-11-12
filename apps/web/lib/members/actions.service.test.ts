@@ -78,8 +78,6 @@ beforeEach(() => {
   complete.mockResolvedValue(undefined);
   abandon.mockResolvedValue(undefined);
   rpc.mockResolvedValue({ data: INVITATION, error: null });
-  vi.spyOn(console, "warn").mockImplementation(() => undefined);
-  vi.spyOn(console, "error").mockImplementation(() => undefined);
 });
 
 describe("inviteMemberAction : idempotence obligatoire, aucun secret conservé", () => {

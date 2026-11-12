@@ -5,6 +5,7 @@ import {
   type TenantRole,
 } from "@fusion-leap/domain";
 import type { ServiceErrorCode } from "../service/errors";
+import { logger } from "../service/logger";
 import { mapDbError } from "../service/map-db-error";
 import type { ServerSupabase } from "./identity";
 import { fetchActiveMemberships } from "./memberships";
@@ -20,14 +21,13 @@ export type CreateOrganizationResult =
  *
  * `created` distingue création (true) et rejeu de la même clé d'idempotence (false) : la fonction
  * ne renvoie que l'id, on compare donc aux adhésions connues AVANT l'appel. Aucune donnée
- * saisie, aucun message SQL n'est journalisé : seulement le SQLSTATE et le request_id.
+ * saisie, aucun message SQL n'est journalisé : seulement le SQLSTATE (le request_id vient du contexte de requête du journal).
  */
 export async function createOrganizationForUser(
   supabase: ServerSupabase,
   userId: string,
   input: CreateOrganizationInput,
   creationKey: string,
-  requestId?: string,
 ): Promise<CreateOrganizationResult> {
   try {
     const before = await fetchActiveMemberships(supabase, userId);
@@ -41,7 +41,7 @@ export async function createOrganizationForUser(
     if (error) {
       const code = mapDbError(error);
       if (code === "internal_error") {
-        console.error(JSON.stringify({ event: "org_create_failed", db_code: error.code ?? null, request_id: requestId ?? null }));
+        logger.error("org_create_failed", { db_code: error.code ?? null });
       }
       return { ok: false, code };
     }
@@ -63,7 +63,7 @@ export async function createOrganizationForUser(
       role: membership.role,
     };
   } catch {
-    console.error(JSON.stringify({ event: "org_create_failed", request_id: requestId ?? null }));
+    logger.error("org_create_failed", {});
     return { ok: false, code: "internal_error" };
   }
 }

@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const ORG = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
 const OTHER = "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb";
@@ -37,6 +37,7 @@ vi.mock("../../../lib/service/rate-limit", () => ({
   takeToken: async () => ({ allowed: true, retryAfterSeconds: 0 }),
 }));
 
+import { captureLogs } from "../../../lib/service/log-capture.testkit";
 import { POST } from "./route";
 
 const orgRow = {
@@ -53,12 +54,15 @@ function req(body: unknown, headers: Record<string, string> = {}): Request {
   });
 }
 
+let cap: ReturnType<typeof captureLogs>;
+
 beforeEach(() => {
   vi.clearAllMocks();
   membershipReads.length = 0;
   getClaims.mockResolvedValue({ data: { claims: { sub: USER } }, error: null });
-  vi.spyOn(console, "error").mockImplementation(() => undefined);
+  cap = captureLogs();
 });
+afterEach(() => cap.stop());
 
 describe("POST /api/orgs", () => {
   it("201 : crée, renvoie organisation + rôle, pose le cookie d'organisation active", async () => {
@@ -106,7 +110,7 @@ describe("POST /api/orgs", () => {
     const res = await POST(req({ name: "Acme" }));
     expect(res.status).toBe(403);
     expect((await res.json()).code).toBe("forbidden");
-    expect(console.error).not.toHaveBeenCalled();
+    expect(cap.lines("error")).toHaveLength(0);
     expect(cookieSet).not.toHaveBeenCalled();
   });
 
@@ -185,7 +189,7 @@ describe("POST /api/orgs", () => {
     membershipReads.push([]);
     rpc.mockResolvedValue({ data: null, error: { code: "XX000", message: "secret detail Acme" } });
     await POST(req({ name: "Acme Confidential" }));
-    const logged = vi.mocked(console.error).mock.calls.flat().join(" ");
+    const logged = cap.lines("error").join(" ");
     expect(logged).not.toContain("Acme");
     expect(logged).not.toContain("secret detail");
   });

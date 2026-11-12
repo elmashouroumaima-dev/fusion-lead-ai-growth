@@ -17,8 +17,10 @@ import {
   type IdempotencyAttempt,
   type IdempotencyRef,
 } from "./idempotency";
+import { logger } from "./logger";
 import { takeToken, type RateLimitScope } from "./rate-limit";
 import { REQUEST_ID_HEADER, resolveRequestIds } from "./request-id";
+import { runWithRequestContext, updateRequestContext } from "./request-context";
 
 /*
  * Couche service (J11) : UN pipeline, dans cet ordre fixe, pour toute mutation (route HTTP ou Server Action) :
@@ -181,23 +183,19 @@ const carriesSecret = (body: unknown): boolean =>
   isRecord(body) && SECRET_STATE_FIELDS.some((name) => Object.hasOwn(body, name));
 
 /**
- * Une ligne JSON par échec : {event, code, request_id, client_request_id?, organization_id?, name} et RIEN d'autre
- * (ni e-mail, ni jeton, ni empreinte, ni message d'erreur). Les erreurs attendues (4xx) passent par
- * `warn`, les pannes (5xx) par `error`.
- * Journalisation structurée complète (pino, redaction, actor_id) : J12 (ADR 006 « Logs »).
+ * Une ligne JSON par échec : {event, code, client_request_id?, name} (+ ts, level ; request_id, organization_id et
+ * actor_id viennent du contexte de requête, que l'appelant ne peut pas écraser) et RIEN d'autre (ni e-mail, ni jeton, ni empreinte, ni message d'erreur). Les erreurs attendues (4xx)
+ * passent par `warn`, les pannes (5xx) par `error`. Le journal (logger.ts) expurge en plus par clé et par valeur.
  */
 function logFailure(error: unknown, requestId: string, name: string, trace: Trace): void {
   const { status, body } = normalizeError(error, requestId);
-  const line = JSON.stringify({
-    event: "service_failure",
+  const fields = {
     code: body.code,
-    request_id: requestId,
     ...(trace.clientRequestId ? { client_request_id: trace.clientRequestId } : {}),
-    ...(trace.organizationId ? { organization_id: trace.organizationId } : {}),
     name,
-  });
-  if (status >= 500) console.error(line);
-  else console.warn(line);
+  };
+  if (status >= 500) logger.error("service_failure", fields);
+  else logger.warn("service_failure", fields);
 }
 
 /** Tout ce qui n'est pas une ServiceError (ou une TenantError) est une panne interne. */
@@ -289,6 +287,8 @@ async function execute<T, R>(p: CoreParams<T, R>): Promise<Executed<R>> {
 
   const principal = await authenticate(options.auth, requestId);
   if (principal.organizationId) trace.organizationId = principal.organizationId;
+  // Contexte de requête : organisation et acteur désormais vérifiés (journal JSON + audit en base).
+  updateRequestContext({ actorId: principal.userId, ...(principal.organizationId ? { organizationId: principal.organizationId } : {}) });
   checkOrganizationClaim(principal, input, options.forbidOrganizationId === true);
 
   if (options.permission && principal.tenant) {
@@ -445,8 +445,13 @@ export function withRoute<T>(
 ): (request: Request) => Promise<Response> {
   const run = handler as (ctx: RouteTenantContext | RouteUserContext, input: T) => Promise<RouteResult>;
 
-  return async function route(request: Request): Promise<Response> {
+  return function route(request: Request): Promise<Response> {
     const { requestId, clientRequestId } = resolveRequestIds(request.headers);
+    // Tout le pipeline (y compris le client Supabase créé en cours de route) s'exécute dans le contexte de requête.
+    return runWithRequestContext({ requestId }, () => handleRoute(request, requestId, clientRequestId));
+  };
+
+  async function handleRoute(request: Request, requestId: string, clientRequestId: string | undefined): Promise<Response> {
     const trace: Trace = clientRequestId ? { clientRequestId } : {};
     try {
       // 1-2. Taille et corps (les méthodes sans corps lisent la query string).
@@ -486,7 +491,7 @@ export function withRoute<T>(
       logFailure(service, requestId, options.name, trace);
       return errorResponse(service, requestId);
     }
-  };
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -509,8 +514,12 @@ export function withAction<T, S extends ActionStateLike>(
   registerAction(options);
   const isRedirect = (value: S | ActionRedirect): value is ActionRedirect => Object.hasOwn(value, "redirectTo");
 
-  return async function action(_prev: S, formData: FormData): Promise<S> {
+  return function action(_prev: S, formData: FormData): Promise<S> {
     const requestId = crypto.randomUUID();
+    return runWithRequestContext({ requestId }, () => handleAction(formData, requestId));
+  };
+
+  async function handleAction(formData: FormData, requestId: string): Promise<S> {
     const trace: Trace = {};
     let next: { kind: "state"; state: S } | { kind: "redirect"; url: string };
 
@@ -567,5 +576,5 @@ export function withAction<T, S extends ActionStateLike>(
     // redirect() lève NEXT_REDIRECT : surtout pas dans un try/catch.
     if (next.kind === "redirect") redirect(next.url);
     return next.state;
-  };
+  }
 }

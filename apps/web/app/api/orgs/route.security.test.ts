@@ -22,6 +22,7 @@ vi.mock("../../../lib/service/rate-limit", () => ({
   takeToken: async () => ({ allowed: true, retryAfterSeconds: 0 }),
 }));
 
+import { captureLogs } from "../../../lib/service/log-capture.testkit";
 import { POST } from "./route";
 
 const orgRow = {
@@ -61,14 +62,17 @@ function req(body: unknown, headers: Record<string, string | null> = {}): Reques
   });
 }
 
+let cap: ReturnType<typeof captureLogs>;
+
 beforeEach(() => {
   vi.clearAllMocks();
   membershipReads.length = 0;
   createClient.mockImplementation(async () => client());
   getClaims.mockResolvedValue({ data: { claims: { sub: USER } }, error: null });
-  vi.spyOn(console, "error").mockImplementation(() => undefined);
+  cap = captureLogs();
 });
 afterEach(() => {
+  cap.stop();
   vi.unstubAllEnvs();
 });
 
@@ -181,13 +185,14 @@ describe("POST /api/orgs : erreurs normalisées et request_id", () => {
   });
 
   it("un x-request-id sûr du client n'est JAMAIS repris comme request_id : uuid frais, et client_request_id dans le journal", async () => {
-    const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
     const res = await POST(req({ name: "" }, { "x-request-id": "trace-abc-12345" }));
     const body = await res.json();
     expect(body.request_id).toMatch(UUID_RE);
     expect(body.request_id).not.toBe("trace-abc-12345");
     expect(res.headers.get("x-request-id")).toBe(body.request_id);
-    const line = JSON.parse(String(warn.mock.calls[0]?.[0])) as Record<string, unknown>;
+    const { ts, level, ...line } = cap.parsed("warn")[0] ?? {};
+    expect(ts).toEqual(expect.any(String));
+    expect(level).toBe("warn");
     expect(line).toEqual({
       event: "service_failure",
       code: "validation_failed",
@@ -198,9 +203,8 @@ describe("POST /api/orgs : erreurs normalisées et request_id", () => {
   });
 
   it("sans x-request-id valide : pas de client_request_id dans le journal", async () => {
-    const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
     await POST(req({ name: "" }, { "x-request-id": "bad id" }));
-    const line = JSON.parse(String(warn.mock.calls[0]?.[0])) as Record<string, unknown>;
+    const line = cap.parsed("warn")[0] ?? {};
     expect(line).not.toHaveProperty("client_request_id");
   });
 
@@ -321,7 +325,7 @@ describe("POST /api/orgs : correspondance des erreurs de la base", () => {
     const raw = JSON.stringify(await res.json());
     expect(raw).not.toContain("SUPABASE_SECRET_KEY");
     expect(JSON.parse(raw)).toMatchObject({ code: "internal_error" });
-    expect(vi.mocked(console.error).mock.calls.flat().join(" ")).not.toContain("SUPABASE_SECRET_KEY");
+    expect(cap.lines("error").join(" ")).not.toContain("SUPABASE_SECRET_KEY");
   });
 
   it("le RPC retourne autre chose qu'un uuid -> 500 (pas de cookie)", async () => {
@@ -335,10 +339,9 @@ describe("POST /api/orgs : correspondance des erreurs de la base", () => {
   it("organisation créée mais invisible de l'utilisateur après coup (rejeu après retrait) -> 403 sans journal, pas de cookie", async () => {
     membershipReads.push([], []);
     rpc.mockResolvedValue({ data: ORG, error: null });
-    const errSpy = vi.spyOn(console, "error").mockImplementation(() => undefined);
     const res = await POST(req({ name: "A" }));
     expect(res.status).toBe(403);
-    expect(errSpy).not.toHaveBeenCalled();
+    expect(cap.lines("error")).toHaveLength(0);
     expect(cookieSet).not.toHaveBeenCalled();
   });
 });

@@ -110,7 +110,8 @@ function headersFor(persona: Persona): Record<string, string> {
 /**
  * Appel avec un JWT signé pour un utilisateur ARBITRAIRE (créé à la volée par `createTestUser`),
  * pour les tests qui ont besoin d'un vrai compte auth.users (ex. création d'organisation : FK).
- * `extraClaims` permet de simuler un JWT « forgé » (ex. user_metadata mensonger).
+ * `extraClaims` permet de simuler un JWT « forgé » (ex. user_metadata mensonger) ;
+ * `extraHeaders` ajoute des en-têtes HTTP (ex. `x-request-id`, J12) sans pouvoir remplacer l'authentification.
  */
 export async function apiAsUser<T = unknown>(
   userId: string,
@@ -118,11 +119,13 @@ export async function apiAsUser<T = unknown>(
   restPath: string,
   body?: unknown,
   extraClaims: Record<string, unknown> = {},
+  extraHeaders: Record<string, string> = {},
 ): Promise<ApiResult<T>> {
   const headers: Record<string, string> = {
     apikey: stack.publishableKey,
     "Content-Type": "application/json",
     Prefer: "return=representation",
+    ...extraHeaders,
     Authorization: `Bearer ${signJwt({ ...extraClaims, sub: userId, role: "authenticated" })}`,
   };
   const init: RequestInit = { method, headers };
@@ -167,6 +170,11 @@ export async function createTestUser(
  * n'est pas disponible (ex. CI sans accès au conteneur), le nettoyage est ignoré : les tests sont
  * conçus pour rester corrects sans lui (noms et clés uniques, assertions bornées aux ids créés) et
  * `pnpm db:reset` remet la base à zéro.
+ * J12 : `audit_logs` est append-only (triggers ENABLE ALWAYS) et n'est donc JAMAIS purgé ici. Sous
+ * Les triggers d'audit sont ENABLE ALWAYS : même sous session_replication_role = replica la suppression
+ * des membres écrit des lignes `member.deleted` (acteur système). La clé étrangère RESTRICT, elle, n'est
+ * pas vérifiée en mode replica : les entreprises de test sont supprimées et leurs lignes d'audit restent
+ * orphelines (acceptable en local ; effacées par `pnpm db:reset`).
  */
 export async function cleanupTestUsers(userIds: string[]): Promise<void> {
   if (userIds.length === 0) return;

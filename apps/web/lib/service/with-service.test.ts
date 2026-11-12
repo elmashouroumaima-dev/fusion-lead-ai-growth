@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const ORG = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
 const OTHER_ORG = "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb";
@@ -41,6 +41,8 @@ vi.mock("./idempotency", async (importOriginal) => ({
 
 import { TenantError } from "../tenant/tenant-error";
 import { ServiceError } from "./errors";
+import { captureLogs } from "./log-capture.testkit";
+import { getRequestContext, type RequestContext } from "./request-context";
 import {
   listRegisteredActions,
   withAction,
@@ -113,9 +115,11 @@ beforeEach(() => {
     order.push("handler");
     return { status: 201, body: { ok: true } };
   });
-  vi.spyOn(console, "warn").mockImplementation(() => undefined);
-  vi.spyOn(console, "error").mockImplementation(() => undefined);
+  cap = captureLogs();
 });
+afterEach(() => cap.stop());
+
+let cap: ReturnType<typeof captureLogs>;
 
 const tenantRoute = (over: Record<string, unknown> = {}) =>
   withRoute(
@@ -378,25 +382,25 @@ describe("withRoute : erreurs normalisées, request_id, journaux", () => {
     expect(await res.json()).toEqual({ code: "unauthenticated", message: expect.any(String), request_id: requestId });
   });
 
-  it("une ligne JSON par échec : seulement event, code, request_id, client_request_id, organization_id, name", async () => {
+  it("une ligne JSON par échec : seulement ts, level, event, code, request_id, client_request_id, organization_id, actor_id, name", async () => {
     takeToken.mockResolvedValue({ allowed: false, retryAfterSeconds: 3 });
     await tenantRoute()(req({ name: "Données Secrètes" }, { "idempotency-key": KEY, "x-request-id": "req-12345678" }));
-    const lines = vi.mocked(console.warn).mock.calls.map((c) => String(c[0]));
+    const lines = cap.lines("warn");
     expect(lines).toHaveLength(1);
     const parsed = JSON.parse(lines[0] ?? "{}") as Record<string, unknown>;
-    expect(Object.keys(parsed).sort()).toEqual(["client_request_id", "code", "event", "name", "organization_id", "request_id"]);
+    expect(Object.keys(parsed).sort()).toEqual(["actor_id", "client_request_id", "code", "event", "level", "name", "organization_id", "request_id", "ts"]);
     expect(parsed).toMatchObject({ event: "service_failure", code: "rate_limited", name: "things.create", organization_id: ORG, client_request_id: "req-12345678" });
     expect(parsed.request_id).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/);
     expect(parsed.request_id).not.toBe("req-12345678");
     expect(lines[0]).not.toContain("Secrètes");
     expect(lines[0]).not.toContain(KEY);
-    expect(console.error).not.toHaveBeenCalled();
+    expect(cap.lines("error")).toHaveLength(0);
   });
 
-  it("les pannes (5xx) passent par console.error, sans message d'erreur", async () => {
+  it("les pannes (5xx) passent par le niveau error du logger, sans message d'erreur", async () => {
     handler.mockRejectedValueOnce(new Error("token=abc123 leaked"));
     await tenantRoute()(req({ name: "A" }, { "idempotency-key": KEY }));
-    const logged = vi.mocked(console.error).mock.calls.flat().join(" ");
+    const logged = cap.lines("error").join(" ");
     expect(logged).toContain("internal_error");
     expect(logged).not.toContain("abc123");
   });
@@ -648,7 +652,7 @@ describe("contrat : aucun secret dans une réponse conservée", () => {
     expect(complete).toHaveBeenCalledTimes(1);
     expect(complete.mock.calls[0]?.[1]).toMatchObject({ response: { replayed: true } });
     expect(JSON.stringify(complete.mock.calls)).not.toContain("TOKEN-XYZ");
-    expect(vi.mocked(console.error).mock.calls.flat().join(" ")).toContain("secret_state_not_stored");
+    expect(cap.lines("error").join(" ")).toContain("secret_state_not_stored");
   });
 
   it.each(["token", "secret", "password"])("garde d'exécution : le champ %s n'est jamais conservé non plus", async (name) => {
@@ -726,5 +730,58 @@ describe("withRoute : étape zod unique (corps + en-têtes) avant l'authentifica
   it("le corps ne peut pas forger l'en-tête : un champ `key` du corps n'atteint pas la clé", async () => {
     const res = await userRoute()(req({ name: "A", key: "forged-key-123456" }));
     expect(res.status).toBe(400);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Contexte de requête (J12) : AsyncLocalStorage rempli par le pipeline
+// ---------------------------------------------------------------------------
+
+describe("contexte de requête et journal (J12)", () => {
+  it("route : le handler s'exécute dans un contexte { requestId = en-tête de réponse, organizationId, actorId }", async () => {
+    let seen: RequestContext | undefined;
+    handler.mockImplementationOnce(async (): Promise<RouteResult> => {
+      seen = { ...getRequestContext()! };
+      return { status: 201, body: { ok: true } };
+    });
+    const res = await tenantRoute()(req({ name: "A" }, { "idempotency-key": KEY, "x-request-id": "client-req-12345" }));
+    expect(seen).toEqual({ requestId: res.headers.get("x-request-id"), organizationId: ORG, actorId: USER });
+    expect(seen?.requestId).not.toBe("client-req-12345");
+    expect(getRequestContext()).toBeUndefined();
+  });
+
+  it("action : même contexte, identifiant serveur distinct à chaque appel", async () => {
+    const seen: Array<RequestContext | undefined> = [];
+    actionHandler.mockImplementation(async () => {
+      seen.push(getRequestContext() ? { ...getRequestContext()! } : undefined);
+      return { status: "success" };
+    });
+    await tenantAction()(IDLE, form({ name: "A", idempotency_key: KEY }));
+    await tenantAction()(IDLE, form({ name: "B", idempotency_key: KEY }));
+    expect(seen[0]).toMatchObject({ organizationId: ORG, actorId: USER });
+    expect(seen[0]?.requestId).toMatch(/^[0-9a-f-]{36}$/);
+    expect(seen[1]?.requestId).not.toBe(seen[0]?.requestId);
+  });
+
+  it("deux requêtes concurrentes : chaque handler voit son propre request_id", async () => {
+    const seen: string[] = [];
+    handler.mockImplementation(async (): Promise<RouteResult> => {
+      await new Promise((r) => setTimeout(r, Math.random() * 5));
+      seen.push(getRequestContext()?.requestId ?? "none");
+      return { status: 201, body: {} };
+    });
+    const route = tenantRoute();
+    const responses = await Promise.all(
+      Array.from({ length: 8 }, (_, i) => route(req({ name: `n${i}` }, { "idempotency-key": `0f8fad5b-d9cb-469f-a165-7086772895${String(i).padStart(2, "0")}` }))),
+    );
+    const headers = responses.map((r) => r.headers.get("x-request-id"));
+    expect(new Set(headers).size).toBe(8);
+    expect([...seen].sort()).toEqual([...headers].sort());
+  });
+
+  it("la ligne d'échec porte actor_id (et le même request_id que la réponse)", async () => {
+    takeToken.mockResolvedValue({ allowed: false, retryAfterSeconds: 3 });
+    const res = await tenantRoute()(req({ name: "A" }, { "idempotency-key": KEY }));
+    expect(cap.parsed("warn")[0]).toMatchObject({ actor_id: USER, organization_id: ORG, request_id: res.headers.get("x-request-id") });
   });
 });

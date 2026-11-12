@@ -21,7 +21,12 @@
       "admin": "Platform admin",
       "settingsPalette": "Theme",
       "settingsLogo": "Profile",
-      "settingsSmtp": "SMTP server"
+      "settingsSmtp": "SMTP server",
+      "projects": "Projects",
+      "leads": "Leads",
+      "deals": "Deals",
+      "crmSync": "CRM",
+      "integrations": "Integrations"
     },
     "sidebar": {
       "toggle": "Show or hide the side menu",
@@ -510,7 +515,376 @@
       "generic": "Something went wrong. Please try again."
     }
   },
+  "Projects": {
+    "title": "Projects",
+    "description": "Your projects and their offers: websites, Salla apps and themes, or others.",
+    "list": {
+      "empty": "No project yet.",
+      "emptyArchived": "No archived project.",
+      "new": "New project",
+      "filterLabel": "Filter by status",
+      "active": "Active",
+      "archived": "Archived",
+      "open": "Open",
+      "openNamed": "Open {name}",
+      "readOnlyHint": "Your role lets you view projects, not change them."
+    },
+    "table": {
+      "name": "Name",
+      "type": "Kind",
+      "status": "Status",
+      "updated": "Updated on",
+      "actions": "Manage"
+    },
+    "types": {
+      "website_sales": "Website sales",
+      "salla_app": "Salla app",
+      "salla_theme": "Salla theme",
+      "custom": "Other project"
+    },
+    "typeHints": {
+      "website_sales": "Offers, business models, target market, qualification questions, landing pages.",
+      "salla_app": "Name, problem solved, merchant segments, store link, activation, test pricing, FAQ.",
+      "salla_theme": "Preview link, suitable sectors, features, ad scenarios.",
+      "custom": "Free notes and named fields."
+    },
+    "status": {
+      "active": "Active",
+      "archived": "Archived"
+    },
+    "new": {
+      "title": "New project",
+      "description": "Choose the project type, then fill in its settings.",
+      "submit": "Create project",
+      "creating": "Creating…",
+      "back": "Back to projects"
+    },
+    "form": {
+      "type": "Project type",
+      "typeLocked": "A project type cannot be changed.",
+      "name": "Project name",
+      "nameHint": "120 characters at most.",
+      "settings": "Settings",
+      "optional": "optional",
+      "linesHint": "One item per line.",
+      "add": "Add a row",
+      "remove": "Remove this row",
+      "save": "Save",
+      "saving": "Saving…"
+    },
+    "fields": {
+      "offers": "Offers and packages",
+      "business_models": "Business models",
+      "target_market": "Target market",
+      "qualification_questions": "Qualification questions",
+      "landing_pages": "Landing pages",
+      "landing_page_name": "Name",
+      "landing_page_url": "https address",
+      "app_name": "App name",
+      "problem_solved": "Problem solved",
+      "merchant_segments": "Merchant segments",
+      "store_url": "Store link (https)",
+      "activation_flow": "Activation flow",
+      "test_pricing": "Test pricing",
+      "faqs": "Frequently asked questions",
+      "faq_question": "Question",
+      "faq_answer": "Answer",
+      "preview_url": "Preview link (https)",
+      "sectors": "Suitable sectors",
+      "features": "Features",
+      "ad_scenarios": "Ad scenarios",
+      "notes": "Notes",
+      "custom_fields": "Named fields",
+      "custom_key": "Field name (lowercase, digits, _)",
+      "custom_value": "Value"
+    },
+    "detail": {
+      "back": "Back to projects",
+      "settings": "Project settings",
+      "products": "Products and offers",
+      "archivedNotice": "This project is archived: it is read-only. Reactivate it to edit it.",
+      "archive": "Archive",
+      "reactivate": "Reactivate",
+      "archiveTitle": "Archive this project",
+      "archiveConfirm": "Archive this project? It becomes read-only and no longer counts toward your plan limit.",
+      "confirm": "Confirm",
+      "cancel": "Cancel",
+      "emptySettings": "No setting filled in.",
+      "createdOn": "Created on {date}"
+    },
+    "products": {
+      "empty": "No product for this project.",
+      "add": "Add a product",
+      "edit": "Edit",
+      "editNamed": "Edit {name}",
+      "addTitle": "New product",
+      "editTitle": "Edit product",
+      "kind": "Product kind",
+      "kindHint": "50 characters at most (e.g. showcase site, pack).",
+      "offer": "Offer",
+      "offerHint": "500 characters at most.",
+      "priceHint": "Price hint",
+      "landingUrl": "Landing page (https)",
+      "assets": "Files",
+      "assetsSoon": "Files are managed from the edit window of an existing product.",
+      "assetCount": "{count, plural, one {# file} other {# files}}",
+      "submitAdd": "Add",
+      "submitEdit": "Save",
+      "cancel": "Cancel",
+      "close": "Close"
+    },
+    "success": {
+      "created": "Project created.",
+      "updated": "Project saved.",
+      "archived": "Project archived.",
+      "reactivated": "Project reactivated.",
+      "productCreated": "Product added.",
+      "productUpdated": "Product saved.",
+      "fileUploaded": "File uploaded.",
+      "fileRemoved": "File removed."
+    },
+    "errors": {
+      "invalid_input": "Some values are invalid. Check the fields (short texts, https links to a domain name).",
+      "forbidden": "Your role does not allow this action.",
+      "quota_exceeded": "Your plan's project limit is reached. Contact the platform administrator.",
+      "conflict": "This project is archived: reactivate it before editing.",
+      "not_found": "This project cannot be found.",
+      "rate_limited": "Too many attempts. Try again in a moment.",
+      "duplicate_request": "This request was already processed.",
+      "idempotency_in_progress": "The request is being processed.",
+      "idempotency_conflict": "This request was already sent with other values. Reload the page.",
+      "service_unavailable": "Service temporarily unavailable. Try again later.",
+      "generic": "An error occurred. Please try again.",
+      "file_empty": "This file is empty.",
+      "file_too_large": "This file is larger than 5 MB.",
+      "file_type": "File type not accepted: PNG, JPEG, WebP or PDF only.",
+      "file_missing": "Choose a file to upload.",
+      "too_many_files": "This product already has 50 files."
+    },
+    "files": {
+      "title": "Product files",
+      "empty": "No file.",
+      "choose": "Choose a file",
+      "hint": "PNG, JPEG, WebP or PDF, 5 MB at most.",
+      "upload": "Upload",
+      "uploading": "Uploading…",
+      "remove": "Remove",
+      "removeNamed": "Remove {name}",
+      "open": "Open {name}",
+      "download": "Download {name}",
+      "unavailable": "Link unavailable",
+      "readOnly": "Files can be changed by owners and administrators."
+    }
+  },
   "Footer": {
     "copyright": "© {year} {appName}. All rights reserved."
+  },
+  "Crm": {
+    "leads": {
+      "title": "Leads",
+      "description": "Your prospects: search, filter and follow their progress.",
+      "count": "Results: {count}",
+      "empty": "No leads yet. They arrive through your website form or a CSV import.",
+      "emptyFiltered": "No leads match these filters.",
+      "queue": "Unassigned",
+      "queueActive": "Remove the “unassigned” filter",
+      "export": "Export as CSV",
+      "exportHint": "The export follows the active filters (up to 10,000 rows) and is recorded in the audit log.",
+      "ownOnlyHint": "You only see the leads assigned to you."
+    },
+    "filters": {
+      "label": "Lead filters",
+      "search": "Search",
+      "searchPlaceholder": "Name, email or phone",
+      "project": "Project",
+      "stage": "Stage",
+      "source": "Source",
+      "assignee": "Owner",
+      "all": "All",
+      "unassigned": "Unassigned only",
+      "sort": "Sort",
+      "apply": "Apply",
+      "reset": "Reset"
+    },
+    "sorts": {
+      "created_desc": "Newest first",
+      "created_asc": "Oldest first",
+      "updated_desc": "Recently updated",
+      "name_asc": "Name (A–Z)"
+    },
+    "table": {
+      "contact": "Contact",
+      "email": "Email",
+      "phone": "Phone",
+      "source": "Source",
+      "stage": "Stage",
+      "assignee": "Owner",
+      "created": "Created",
+      "noName": "No name"
+    },
+    "assignee": {
+      "me": "Me",
+      "none": "Unassigned",
+      "member": "Member {id}"
+    },
+    "sources": {
+      "web_form": "Web form",
+      "csv_import": "CSV import",
+      "manual": "Manual entry",
+      "other": "Other"
+    },
+    "stageKinds": {
+      "open": "Open",
+      "won": "Won",
+      "lost": "Lost",
+      "unassigned": "Unassigned"
+    },
+    "pagination": {
+      "label": "Pagination",
+      "previous": "Previous page",
+      "next": "Next page",
+      "status": "Page {page} of {pageCount}"
+    },
+    "deals": {
+      "title": "Deals",
+      "description": "Your opportunities by stage. Drag a card or use its menu to move it.",
+      "empty": "No deals yet.",
+      "columnEmpty": "No deals",
+      "dragHint": "Drag and drop a card onto another column, or pick the stage in the card menu.",
+      "readOnlyHint": "Your role lets you view deals, not move them.",
+      "moveLabel": "Move {name}'s deal to",
+      "moveChoose": "Move to…",
+      "moved": "Deal moved to “{stage}”.",
+      "boardLabel": "Deals board by stage",
+      "columnLabel": "Stage {name}",
+      "project": "Project",
+      "allProjects": "All projects",
+      "filter": "Filter",
+      "limitHint": "Only the {count} most recent deals are shown."
+    },
+    "errors": {
+      "generic": "Something went wrong. Please try again in a moment.",
+      "forbidden": "Your role does not allow this action.",
+      "notFound": "This deal no longer exists or is not available to you.",
+      "conflict": "This move is not possible for this deal.",
+      "rateLimited": "Too many requests. Please wait a moment.",
+      "moveFailed": "The deal could not be moved."
+    }
+  },
+  "CrmSync": {
+    "title": "CRM sync",
+    "description": "CRM integrations, field mapping and the state of the last sync. The internal CRM remains the source of truth.",
+    "empty": "No integrations yet.",
+    "providers": {
+      "csv": "CSV file",
+      "internal": "Internal CRM"
+    },
+    "status": {
+      "label": "Status",
+      "never": "Never synced",
+      "queued": "Queued",
+      "running": "Running",
+      "ok": "Succeeded",
+      "failed": "Failed"
+    },
+    "lastSync": "Last sync",
+    "lastSyncNever": "None",
+    "lastError": "Last error",
+    "errors": {
+      "file_missing": "The sync file could not be found.",
+      "file_malformed": "The file is not a readable CSV (UTF-8, quotes).",
+      "mapping_invalid": "The field mapping is invalid.",
+      "failed": "The sync failed. You can retry it."
+    },
+    "mapping": {
+      "title": "Field mapping",
+      "internal": "Internal field",
+      "external": "Provider field",
+      "truth": "Source of truth",
+      "direction": "Direction",
+      "none": "No mapping defined."
+    },
+    "fields": {
+      "external_id": "External ID",
+      "external_updated_at": "Modified on (provider)",
+      "email": "Email",
+      "phone": "Phone",
+      "name": "Name",
+      "language": "Language",
+      "country": "Country"
+    },
+    "truth": {
+      "internal": "Internal CRM",
+      "external": "Provider"
+    },
+    "directions": {
+      "pull": "Read",
+      "push": "Send",
+      "both": "Read and send"
+    },
+    "rule": "On a conflict (both sides changed), the field's source of truth wins and the loser is recorded in the audit log.",
+    "retry": "Retry",
+    "retryNamed": "Retry the sync for {name}",
+    "retried": "Sync restarted.",
+    "retryNothing": "Nothing to retry.",
+    "retryFailed": "The sync could not be restarted."
+  },
+  "Integrations": {
+    "title": "Integrations",
+    "description": "Providers connected to the company: status, scope and last synchronization. Tokens are encrypted and never displayed.",
+    "encryptionOff": "Secret encryption is not configured on this server: no token can be saved or replaced.",
+    "empty": "No integration yet.",
+    "loadFailed": "Integrations could not be loaded.",
+    "providers": {
+      "csv": "CSV file",
+      "internal": "Internal CRM",
+      "email": "Email",
+      "whatsapp": "WhatsApp"
+    },
+    "status": {
+      "label": "Status",
+      "pending": "Awaiting validation",
+      "active": "Active",
+      "error": "Error",
+      "disconnected": "Disconnected",
+      "disabled": "Disabled"
+    },
+    "account": "Account",
+    "scopes": "Scope",
+    "scopesNone": "No scope declared",
+    "lastSync": "Last synchronization",
+    "lastSyncNever": "None",
+    "lastError": "An error occurred the last time it was used.",
+    "secretStored": "Token saved and encrypted",
+    "secretMissing": "No token saved",
+    "secretNote": "The token cannot be viewed, even by an administrator: you can only replace it.",
+    "channels": "Channels",
+    "channelsNone": "No channel for this integration.",
+    "channelStatus": {
+      "pending": "Pending",
+      "active": "Active",
+      "paused": "Paused",
+      "disconnected": "Disconnected"
+    },
+    "crmLink": "Manage synchronization on the CRM page",
+    "replace": {
+      "title": "Replace the token",
+      "label": "New token",
+      "hint": "The new token replaces the old one immediately. It is never displayed afterwards.",
+      "submit": "Replace",
+      "done": "Token replaced.",
+      "failed": "The token could not be replaced.",
+      "unavailable": "Secret encryption is not configured on this server.",
+      "invalid": "The token is invalid (8 to 4096 characters, no control characters).",
+      "reconnect": "Reconnect"
+    },
+    "disconnect": {
+      "button": "Disconnect",
+      "confirm": "Disconnecting this integration deletes its token and pauses its channels. This cannot be undone.",
+      "confirmButton": "Yes, disconnect",
+      "cancel": "Cancel",
+      "done": "Integration disconnected.",
+      "failed": "The integration could not be disconnected."
+    }
   }
 }

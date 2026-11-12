@@ -1,6 +1,6 @@
 # ADR 008 — Fournisseur e-mail
 
-- **Statut :** Proposed — **dépend de Q2** (hypothèse §14 : un fournisseur, Gmail non requis)
+- **Statut :** Accepted **sous réserve de Q2** (hypothèse §14 appliquée le 2026-11-11 : option A, Postmark ; Gmail non requis)
 - **Date :** 2026-11-11
 - **Section de spec :** §9.2, §11, §13-5, §14 Q2 ; fiche : `docs/integrations/email.md`
 
@@ -32,3 +32,14 @@ Gmail (B) : hors MVP — l'envoi seul serait possible, mais recevoir exige un sc
 ## Note (2026-11-07) — Paramètres SMTP de la plateforme
 Une configuration SMTP générique (option C) est désormais saisissable dans Paramétrage par les administrateurs de la plateforme (boîte de test Mailtrap comprise) : elle sert aux e-mails de la plateforme et aux tests, mais **ne remplace pas** la décision de cet ADR pour l'envoi de campagnes (option A : API avec événements, réception, webhooks). Voir `docs/runbooks/smtp-settings.md`.
 
+## Décision du 2026-11-09
+L'ADR reste **Proposed** : le choix du fournisseur dépend de Q2 (propriétaire du domaine, Gmail ou fournisseur transactionnel), toujours sans réponse, et aucune des alternatives à Postmark n'a été vérifiée. **À trancher au plus tard au début du J31** (compte sandbox ouvert) ; sans réponse à Q2, appliquer l'hypothèse §14 (option A, Postmark) et le noter ici.
+
+## Décision du 2026-11-11 (J31)
+Q2 n'a toujours pas de réponse : en application de la règle du 2026-11-09, l'**hypothèse §14 est retenue** (option A, Postmark) et l'adaptateur `packages/adapters/src/email/postmark.ts` l'implémente derrière l'interface `EmailProvider` (changer de fournisseur ne touche ni le domaine ni le worker). **Aucun compte n'est ouvert et aucun envoi réel n'est fait** avant le checkpoint C3 ; le comportement du fournisseur (codes d'erreur, forfait de réception, limites, sandbox) reste **À CONFIRMER** sur un compte réel (`docs/integrations/email.md`). Si la réponse à Q2 change le fournisseur, seul l'adaptateur est à remplacer. Voir `docs/api/send.md`.
+
+## Note du 2026-11-12 (J32) — authentification des webhooks, entrants
+- **Basic Auth acté** par la responsable technique (plan J32 validé le 2026-11-12) : pas de HMAC chez Postmark ; l'utilisateur est l'identifiant du compte de l'intégration, le mot de passe est un **secret de webhook propre à chaque intégration**, distinct du jeton d'envoi (jamais égal : contrôlé à l'enregistrement). HTTPS exigé en production ; pas de liste d'adresses IP (elles changent). Écart accepté : le secret circule à chaque requête.
+- **Rattachement des réponses** : par l'adresse expéditrice dans le canal désigné par l'adresse destinataire (un fil par contact et canal, J30), pas par `Message-ID` / `In-Reply-To` / `References`. **Anti-usurpation** : le « Pass » SPF doit être aligné sur le domaine de l'adresse « From » (ou DKIM valide du domaine de l'auteur) ; en-têtes dupliqués = non fiable ; sinon file `inbound_unmatched`.
+- **Rebonds et plaintes** : rebond dur (TypeCode 1 ou 100000) : adresse en `suppressions` sans toucher `do_not_contact` ; plainte : `suppressions` et `do_not_contact = true`.
+- Tout reste **À CONFIRMER sur un compte sandbox** (checkpoint C3) : en-têtes réellement ajoutés aux entrants, `Metadata` renvoyées dans les événements, codes de rebond. Voir `docs/api/email-inbound.md` et `docs/runbooks/email-webhooks.md`.

@@ -36,7 +36,7 @@ const tables = ["organizations", ...tenantTables];
 
 describe("T1 · RLS et API : ce que chaque utilisateur peut lire", () => {
   it("la découverte trouve les tables du noyau (garde contre un test vide)", () => {
-    for (const t of ["organization_members", "subscriptions", "usage_counters", "invitations", "audit_logs", "jobs"]) {
+    for (const t of ["organization_members", "subscriptions", "usage_counters", "invitations", "audit_logs", "jobs", "projects", "products"]) {
       expect(tenantTables).toContain(t);
     }
   });

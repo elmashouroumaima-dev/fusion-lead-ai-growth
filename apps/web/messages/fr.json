@@ -21,7 +21,12 @@
       "admin": "Administration",
       "settingsPalette": "Thème",
       "settingsLogo": "Profil",
-      "settingsSmtp": "Serveur SMTP"
+      "settingsSmtp": "Serveur SMTP",
+      "projects": "Projets",
+      "leads": "Leads",
+      "deals": "Deals",
+      "crmSync": "CRM",
+      "integrations": "Intégrations"
     },
     "sidebar": {
       "toggle": "Afficher ou masquer le menu latéral",
@@ -510,7 +515,376 @@
       "generic": "Une erreur est survenue. Veuillez réessayer."
     }
   },
+  "Projects": {
+    "title": "Projets",
+    "description": "Vos projets et leurs offres : sites web, applications et thèmes Salla, ou autres.",
+    "list": {
+      "empty": "Aucun projet pour l'instant.",
+      "emptyArchived": "Aucun projet archivé.",
+      "new": "Nouveau projet",
+      "filterLabel": "Filtrer par statut",
+      "active": "Actifs",
+      "archived": "Archivés",
+      "open": "Ouvrir",
+      "openNamed": "Ouvrir {name}",
+      "readOnlyHint": "Votre rôle permet de consulter les projets, pas de les modifier."
+    },
+    "table": {
+      "name": "Nom",
+      "type": "Type",
+      "status": "Statut",
+      "updated": "Modifié le",
+      "actions": "Gestion"
+    },
+    "types": {
+      "website_sales": "Vente de sites web",
+      "salla_app": "Application Salla",
+      "salla_theme": "Thème Salla",
+      "custom": "Autre projet"
+    },
+    "typeHints": {
+      "website_sales": "Offres, modèles d'affaires, marché cible, questions de qualification, pages d'atterrissage.",
+      "salla_app": "Nom, problème résolu, segments de marchands, lien du store, activation, prix de test, FAQ.",
+      "salla_theme": "Lien d'aperçu, secteurs adaptés, avantages, scénarios publicitaires.",
+      "custom": "Notes libres et champs nommés."
+    },
+    "status": {
+      "active": "Actif",
+      "archived": "Archivé"
+    },
+    "new": {
+      "title": "Nouveau projet",
+      "description": "Choisissez le type de projet, puis renseignez ses réglages.",
+      "submit": "Créer le projet",
+      "creating": "Création…",
+      "back": "Retour aux projets"
+    },
+    "form": {
+      "type": "Type de projet",
+      "typeLocked": "Le type d'un projet ne peut pas être modifié.",
+      "name": "Nom du projet",
+      "nameHint": "120 caractères au maximum.",
+      "settings": "Réglages",
+      "optional": "facultatif",
+      "linesHint": "Un élément par ligne.",
+      "add": "Ajouter une ligne",
+      "remove": "Retirer cette ligne",
+      "save": "Enregistrer",
+      "saving": "Enregistrement…"
+    },
+    "fields": {
+      "offers": "Offres et formules",
+      "business_models": "Modèles d'affaires",
+      "target_market": "Marché cible",
+      "qualification_questions": "Questions de qualification",
+      "landing_pages": "Pages d'atterrissage",
+      "landing_page_name": "Nom",
+      "landing_page_url": "Adresse https",
+      "app_name": "Nom de l'application",
+      "problem_solved": "Problème résolu",
+      "merchant_segments": "Segments de marchands",
+      "store_url": "Lien du store (https)",
+      "activation_flow": "Parcours d'activation",
+      "test_pricing": "Prix de test",
+      "faqs": "Questions fréquentes",
+      "faq_question": "Intitulé de la question",
+      "faq_answer": "Réponse",
+      "preview_url": "Lien d'aperçu (https)",
+      "sectors": "Secteurs adaptés",
+      "features": "Avantages",
+      "ad_scenarios": "Scénarios publicitaires",
+      "notes": "Remarques",
+      "custom_fields": "Champs nommés",
+      "custom_key": "Nom du champ (minuscules, chiffres, _)",
+      "custom_value": "Valeur"
+    },
+    "detail": {
+      "back": "Retour aux projets",
+      "settings": "Réglages du projet",
+      "products": "Produits et offres",
+      "archivedNotice": "Ce projet est archivé : il est en lecture seule. Réactivez-le pour le modifier.",
+      "archive": "Archiver",
+      "reactivate": "Réactiver",
+      "archiveTitle": "Archiver ce projet",
+      "archiveConfirm": "Archiver ce projet ? Il deviendra lecture seule et ne comptera plus dans la limite de votre plan.",
+      "confirm": "Confirmer",
+      "cancel": "Annuler",
+      "emptySettings": "Aucun réglage renseigné.",
+      "createdOn": "Créé le {date}"
+    },
+    "products": {
+      "empty": "Aucun produit pour ce projet.",
+      "add": "Ajouter un produit",
+      "edit": "Modifier",
+      "editNamed": "Modifier {name}",
+      "addTitle": "Nouveau produit",
+      "editTitle": "Modifier le produit",
+      "kind": "Type de produit",
+      "kindHint": "50 caractères au maximum (ex. site vitrine, pack).",
+      "offer": "Offre",
+      "offerHint": "500 caractères au maximum.",
+      "priceHint": "Prix indicatif",
+      "landingUrl": "Page d'atterrissage (https)",
+      "assets": "Fichiers",
+      "assetsSoon": "Les fichiers se gèrent dans la fenêtre de modification d'un produit existant.",
+      "assetCount": "{count, plural, one {# fichier} other {# fichiers}}",
+      "submitAdd": "Ajouter",
+      "submitEdit": "Enregistrer",
+      "cancel": "Annuler",
+      "close": "Fermer"
+    },
+    "success": {
+      "created": "Projet créé.",
+      "updated": "Projet enregistré.",
+      "archived": "Projet archivé.",
+      "reactivated": "Projet réactivé.",
+      "productCreated": "Produit ajouté.",
+      "productUpdated": "Produit enregistré.",
+      "fileUploaded": "Fichier envoyé.",
+      "fileRemoved": "Fichier retiré."
+    },
+    "errors": {
+      "invalid_input": "Certaines valeurs sont invalides. Vérifiez les champs (textes courts, liens en https vers un nom de domaine).",
+      "forbidden": "Votre rôle ne permet pas cette action.",
+      "quota_exceeded": "La limite de projets de votre plan est atteinte. Contactez l'administrateur de la plateforme.",
+      "conflict": "Ce projet est archivé : réactivez-le avant de le modifier.",
+      "not_found": "Ce projet est introuvable.",
+      "rate_limited": "Trop de tentatives. Réessayez dans un instant.",
+      "duplicate_request": "Cette demande a déjà été traitée.",
+      "idempotency_in_progress": "La demande est en cours de traitement.",
+      "idempotency_conflict": "Cette demande a déjà été envoyée avec d'autres valeurs. Rechargez la page.",
+      "service_unavailable": "Service momentanément indisponible. Réessayez plus tard.",
+      "generic": "Une erreur est survenue. Veuillez réessayer.",
+      "file_empty": "Ce fichier est vide.",
+      "file_too_large": "Ce fichier dépasse 5 Mo.",
+      "file_type": "Type de fichier non accepté : PNG, JPEG, WebP ou PDF seulement.",
+      "file_missing": "Choisissez un fichier à envoyer.",
+      "too_many_files": "Ce produit a déjà 50 fichiers."
+    },
+    "files": {
+      "title": "Fichiers du produit",
+      "empty": "Aucun fichier.",
+      "choose": "Choisir un fichier",
+      "hint": "PNG, JPEG, WebP ou PDF, 5 Mo au maximum.",
+      "upload": "Envoyer",
+      "uploading": "Envoi…",
+      "remove": "Retirer",
+      "removeNamed": "Retirer {name}",
+      "open": "Ouvrir {name}",
+      "download": "Télécharger {name}",
+      "unavailable": "Lien indisponible",
+      "readOnly": "Les fichiers sont modifiables par les propriétaires et administrateurs."
+    }
+  },
   "Footer": {
     "copyright": "© {year} {appName}. Tous droits réservés."
+  },
+  "Crm": {
+    "leads": {
+      "title": "Leads",
+      "description": "Vos prospects : recherchez, filtrez et suivez leur avancement.",
+      "count": "Résultats : {count}",
+      "empty": "Aucun lead pour l'instant. Ils arrivent par le formulaire de votre site ou par un import CSV.",
+      "emptyFiltered": "Aucun lead ne correspond à ces filtres.",
+      "queue": "Non assignés",
+      "queueActive": "Retirer le filtre « non assignés »",
+      "export": "Exporter en CSV",
+      "exportHint": "L'export respecte les filtres actifs (10 000 lignes au plus) et est enregistré dans le journal d'audit.",
+      "ownOnlyHint": "Vous voyez uniquement les leads qui vous sont assignés."
+    },
+    "filters": {
+      "label": "Filtres des leads",
+      "search": "Recherche",
+      "searchPlaceholder": "Nom, e-mail ou téléphone",
+      "project": "Projet",
+      "stage": "Étape",
+      "source": "Source",
+      "assignee": "Responsable",
+      "all": "Tous",
+      "unassigned": "Non assignés seulement",
+      "sort": "Tri",
+      "apply": "Appliquer",
+      "reset": "Réinitialiser"
+    },
+    "sorts": {
+      "created_desc": "Plus récents d'abord",
+      "created_asc": "Plus anciens d'abord",
+      "updated_desc": "Modifiés récemment",
+      "name_asc": "Nom (A–Z)"
+    },
+    "table": {
+      "contact": "Contact",
+      "email": "E-mail",
+      "phone": "Téléphone",
+      "source": "Source",
+      "stage": "Étape",
+      "assignee": "Responsable",
+      "created": "Créé le",
+      "noName": "Sans nom"
+    },
+    "assignee": {
+      "me": "Moi",
+      "none": "Non assigné",
+      "member": "Membre {id}"
+    },
+    "sources": {
+      "web_form": "Formulaire web",
+      "csv_import": "Import CSV",
+      "manual": "Saisie manuelle",
+      "other": "Autre"
+    },
+    "stageKinds": {
+      "open": "Ouvert",
+      "won": "Gagné",
+      "lost": "Perdu",
+      "unassigned": "Non assigné"
+    },
+    "pagination": {
+      "label": "Pagination",
+      "previous": "Page précédente",
+      "next": "Page suivante",
+      "status": "Page {page} sur {pageCount}"
+    },
+    "deals": {
+      "title": "Deals",
+      "description": "Vos opportunités par étape. Glissez une carte ou utilisez le menu pour la déplacer.",
+      "empty": "Aucun deal pour l'instant.",
+      "columnEmpty": "Aucun deal",
+      "dragHint": "Glissez-déposez une carte vers une autre colonne, ou choisissez l'étape dans le menu de la carte.",
+      "readOnlyHint": "Votre rôle permet de consulter les deals, pas de les déplacer.",
+      "moveLabel": "Déplacer le deal de {name} vers",
+      "moveChoose": "Déplacer vers…",
+      "moved": "Deal déplacé vers « {stage} ».",
+      "boardLabel": "Tableau des deals par étape",
+      "columnLabel": "Étape {name}",
+      "project": "Projet",
+      "allProjects": "Tous les projets",
+      "filter": "Filtrer",
+      "limitHint": "Seuls les {count} deals les plus récents sont affichés."
+    },
+    "errors": {
+      "generic": "Une erreur est survenue. Réessayez dans un instant.",
+      "forbidden": "Votre rôle ne permet pas cette action.",
+      "notFound": "Ce deal n'existe plus ou ne vous est pas accessible.",
+      "conflict": "Ce déplacement n'est pas possible pour ce deal.",
+      "rateLimited": "Trop de demandes. Patientez un instant.",
+      "moveFailed": "Le deal n'a pas pu être déplacé."
+    }
+  },
+  "CrmSync": {
+    "title": "Synchronisation CRM",
+    "description": "Intégrations CRM, correspondance des champs et état de la dernière synchronisation. Le CRM interne reste la source de vérité.",
+    "empty": "Aucune intégration pour l'instant.",
+    "providers": {
+      "csv": "Fichier CSV",
+      "internal": "CRM interne"
+    },
+    "status": {
+      "label": "État",
+      "never": "Jamais synchronisé",
+      "queued": "En file",
+      "running": "En cours",
+      "ok": "Réussie",
+      "failed": "En échec"
+    },
+    "lastSync": "Dernière synchronisation",
+    "lastSyncNever": "Aucune",
+    "lastError": "Dernière erreur",
+    "errors": {
+      "file_missing": "Le fichier de synchronisation est introuvable.",
+      "file_malformed": "Le fichier n'est pas un CSV lisible (UTF-8, guillemets).",
+      "mapping_invalid": "La correspondance des champs est invalide.",
+      "failed": "La synchronisation a échoué. Vous pouvez la relancer."
+    },
+    "mapping": {
+      "title": "Correspondance des champs",
+      "internal": "Champ interne",
+      "external": "Champ du fournisseur",
+      "truth": "Source de vérité",
+      "direction": "Sens",
+      "none": "Aucune correspondance définie."
+    },
+    "fields": {
+      "external_id": "Identifiant externe",
+      "external_updated_at": "Modifié le (fournisseur)",
+      "email": "E-mail",
+      "phone": "Téléphone",
+      "name": "Nom",
+      "language": "Langue",
+      "country": "Pays"
+    },
+    "truth": {
+      "internal": "CRM interne",
+      "external": "Fournisseur"
+    },
+    "directions": {
+      "pull": "Lecture",
+      "push": "Envoi",
+      "both": "Lecture et envoi"
+    },
+    "rule": "En cas de conflit (les deux côtés ont changé), la source de vérité du champ l'emporte et le perdant est consigné dans le journal d'audit.",
+    "retry": "Réessayer",
+    "retryNamed": "Réessayer la synchronisation de {name}",
+    "retried": "Synchronisation relancée.",
+    "retryNothing": "Rien à relancer.",
+    "retryFailed": "La synchronisation n'a pas pu être relancée."
+  },
+  "Integrations": {
+    "title": "Intégrations",
+    "description": "Fournisseurs connectés à l'entreprise : état, portée et dernière synchronisation. Les jetons sont chiffrés et ne s'affichent jamais.",
+    "encryptionOff": "Le chiffrement des secrets n'est pas configuré sur ce serveur : aucun jeton ne peut être enregistré ou remplacé.",
+    "empty": "Aucune intégration pour l'instant.",
+    "loadFailed": "Les intégrations n'ont pas pu être chargées.",
+    "providers": {
+      "csv": "Fichier CSV",
+      "internal": "CRM interne",
+      "email": "E-mail",
+      "whatsapp": "WhatsApp"
+    },
+    "status": {
+      "label": "État",
+      "pending": "En attente de validation",
+      "active": "Connectée",
+      "error": "En erreur",
+      "disconnected": "Déconnectée",
+      "disabled": "Désactivée"
+    },
+    "account": "Compte",
+    "scopes": "Portée",
+    "scopesNone": "Aucune portée déclarée",
+    "lastSync": "Dernière synchronisation",
+    "lastSyncNever": "Aucune",
+    "lastError": "Une erreur est survenue lors de la dernière utilisation.",
+    "secretStored": "Jeton enregistré et chiffré",
+    "secretMissing": "Aucun jeton enregistré",
+    "secretNote": "Le jeton ne peut pas être consulté, même par un administrateur : vous pouvez seulement le remplacer.",
+    "channels": "Canaux",
+    "channelsNone": "Aucun canal pour cette intégration.",
+    "channelStatus": {
+      "pending": "En attente",
+      "active": "Actif",
+      "paused": "En pause",
+      "disconnected": "Déconnecté"
+    },
+    "crmLink": "Gérer la synchronisation dans la page CRM",
+    "replace": {
+      "title": "Remplacer le jeton",
+      "label": "Nouveau jeton",
+      "hint": "Le nouveau jeton remplace l'ancien immédiatement. Il n'est jamais affiché ensuite.",
+      "submit": "Remplacer",
+      "done": "Jeton remplacé.",
+      "failed": "Le jeton n'a pas pu être remplacé.",
+      "unavailable": "Le chiffrement des secrets n'est pas configuré sur ce serveur.",
+      "invalid": "Le jeton est invalide (8 à 4096 caractères, sans caractère de contrôle).",
+      "reconnect": "Reconnecter"
+    },
+    "disconnect": {
+      "button": "Déconnecter",
+      "confirm": "Déconnecter cette intégration supprime son jeton et met ses canaux en pause. Cette action est irréversible.",
+      "confirmButton": "Oui, déconnecter",
+      "cancel": "Annuler",
+      "done": "Intégration déconnectée.",
+      "failed": "L'intégration n'a pas pu être déconnectée."
+    }
   }
 }

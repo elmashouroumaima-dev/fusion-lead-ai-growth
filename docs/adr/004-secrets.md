@@ -1,6 +1,6 @@
 # ADR 004 — Stockage des secrets (`secret_ref`)
 
-- **Statut :** Proposed — **relecture de sécurité par la responsable technique requise**
+- **Statut :** Accepted (2026-11-09, décision de la responsable technique par délégation, après les audits de conformité C1 et C2). Relecture de sécurité faite ; reste à livrer : module `get / rotate / delete` générique (J28), rotation de clé maître, runbooks `secret-rotation` et `restore`
 - **Date :** 2026-11-10
 - **Section de spec :** §6 (secrets), §7 (`integrations.secret_ref`), §11 (chiffrement, rotation, pas de jeton dans les logs), §2 (Company Admin ne voit pas les secrets bruts)
 
@@ -38,3 +38,9 @@ Première utilisation de l'option B (chiffrement applicatif), avant le J28 :
 - Le mot de passe n'est jamais lisible par l'API : l'administrateur ne reçoit que `has_password` ; le chiffré n'est lu que par `service_role` (`get_smtp_delivery`) et déchiffré dans le serveur Next.js.
 - Reste : module `get / rotate / delete` générique pour les intégrations (J28), re-chiffrement lors d'une rotation de clé maître (tâche worker), runbooks `secret-rotation` et `restore`. L'ADR reste « Proposed » : à relire par la responsable technique.
 
+## Mise en œuvre J28 (2026-11-09) — secrets d'intégration
+- `private.secrets` sert aussi aux secrets des intégrations (`purpose = 'integration'`, `organization_id` renseigné) ; une clé étrangère composite `(organization_id, secret_ref)` lie le secret à l'entreprise de son intégration ; AAD `org:<organization_id>:<secret_id>`.
+- Module `packages/adapters/src/secrets/store.ts` : `sealOrganizationSecret`, `openOrganizationSecret` et `createSecretStore` (`put`, `get`, `rotate`, `delete`) ; lecture côté serveur par `lib/service/integration-secrets.ts` (seul appelant de `get_integration_secret`, réservé à service_role).
+- **Rotation d'un secret** livrée et testée (nouveau secret écrit puis ancien supprimé dans la même transaction) ; **rotation de la clé maître** (re-chiffrement par `key_version` par le worker) non livrée, prévue avec les runbooks J58 et J59 (`docs/runbooks/secret-rotation.md`).
+- Aucune API ne renvoie un secret ; `secret_ref` n'est lisible par personne (SELECT par colonnes) ; le jeton est exclu de l'empreinte d'idempotence (HMAC, clé serveur) et de l'audit.
+- Écarts : un secret fait 4096 octets UTF-8 au plus ; un compte `email` ou `whatsapp` est réservé globalement dès la création (squat possible tant que la validation par le fournisseur n'existe pas : question ouverte pour la responsable technique).

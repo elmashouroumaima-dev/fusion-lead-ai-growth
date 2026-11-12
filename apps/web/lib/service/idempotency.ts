@@ -1,4 +1,4 @@
-import { createHash } from "node:crypto";
+import { createHash, createHmac } from "node:crypto";
 import type { ServerSupabase } from "../tenant/identity";
 import { ServiceError } from "./errors";
 import { mapDbError, type DbErrorLike } from "./map-db-error";
@@ -63,6 +63,20 @@ export function canonicalJson(value: unknown): string {
 }
 
 export type RequestHashInput = { method: string; path: string; body: unknown };
+
+/**
+ * Remplace, AVANT le calcul de l'empreinte, les champs de premier niveau qui portent un secret (jeton, clé d'API) par leur HMAC-SHA256
+ * avec une clé SERVEUR : l'empreinte conservée en base ne permet pas de confirmer une hypothèse sur le secret (il faudrait la clé du
+ * serveur), mais deux secrets différents donnent deux empreintes différentes, donc rejouer la même clé d'idempotence avec un AUTRE
+ * secret est refusé (idempotency_conflict) au lieu d'être pris pour un rejeu qui n'appliquerait pas le nouveau secret (cas d'une
+ * rotation d'urgence).
+ */
+export function fingerprintSecrets(body: unknown, fields: readonly string[] | undefined, key: string): unknown {
+  if (!fields || fields.length === 0 || typeof body !== "object" || body === null || Array.isArray(body)) return body;
+  return Object.fromEntries(
+    Object.entries(body).map(([name, value]) => [name, fields.includes(name) ? `hmac:${createHmac("sha256", key).update(typeof value === "string" ? value : JSON.stringify(value) ?? "", "utf8").digest("hex")}` : value]),
+  );
+}
 
 /** SHA-256 hexadécimal (64 minuscules) sur le JSON canonique de { body, method, path }. */
 export function canonicalRequestHash({ method, path, body }: RequestHashInput): string {

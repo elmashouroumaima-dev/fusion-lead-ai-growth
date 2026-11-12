@@ -84,3 +84,46 @@ export async function takeToken({ organizationId, userId, scope }: TakeTokenInpu
   if (first.allowed && global.allowed) return { allowed: true, retryAfterSeconds: 0 };
   return { allowed: false, retryAfterSeconds: Math.max(first.retryAfterSeconds, global.retryAfterSeconds) };
 }
+
+/**
+ * Limitation de débit des routes PUBLIQUES (J21 : capture de leads), sans session ni organisation connue d'avance : seaux
+ * GLOBAUX par fournisseur (`public_capture`, organisation NULL, ADR 007 G-D9).
+ *  - `capture_ip`  : capacité 20, recharge 1/3 jeton/s (20 en rafale, puis 20 par minute) ;
+ *  - `capture_preflight` : capacité 60, recharge 1 jeton/s (préflight CORS, par adresse) ;
+ *  - `capture_key` : capacité 200, recharge 2 jetons/s (une clé de formulaire ne peut pas saturer la base) ; ce seau n'est ouvert
+ *    que pour une clé qui EXISTE (aucune ligne pour une clé inventée).
+ * La clé de seau est opaque (empreinte, jamais d'adresse IP ni d'e-mail en clair). Défaillance du backend : FERMÉE (503).
+ */
+export const PUBLIC_CAPTURE_PROVIDER = "public_capture";
+export const PUBLIC_LIMITS = {
+  capture_ip: { capacity: 20, refillPerSecond: 1 / 3 },
+  /** Préflight CORS : un par envoi de formulaire, donc un seau à part (il ne consomme pas le budget des envois). */
+  capture_preflight: { capacity: 60, refillPerSecond: 1 },
+  capture_key: { capacity: 200, refillPerSecond: 2 },
+  /** Webhooks entrants (J29), par fournisseur et adresse source : les fournisseurs envoient en rafale depuis peu d'adresses. */
+  webhook_ip: { capacity: 300, refillPerSecond: 10 },
+} as const;
+export type PublicRateLimitScope = keyof typeof PUBLIC_LIMITS;
+
+export async function takePublicToken({ scope, bucketKey }: { scope: PublicRateLimitScope; bucketKey: string }): Promise<TakeTokenResult> {
+  const limit = PUBLIC_LIMITS[scope];
+  let data: unknown;
+  try {
+    const result = await createAdminClient().rpc("rate_limit_take", {
+      p_org: null,
+      p_provider: PUBLIC_CAPTURE_PROVIDER,
+      p_bucket_key: `${scope}:${bucketKey}`,
+      p_capacity: limit.capacity,
+      p_refill_per_second: limit.refillPerSecond,
+      p_cost: 1,
+    });
+    if (result.error) throw new Error("rate_limit_backend_error");
+    data = result.data;
+  } catch {
+    throw new ServiceError("service_unavailable");
+  }
+  if (!isRecord(data) || typeof data.allowed !== "boolean") throw new ServiceError("service_unavailable");
+  if (data.allowed) return { allowed: true, retryAfterSeconds: 0 };
+  const retry = data.retry_after_seconds;
+  return { allowed: false, retryAfterSeconds: typeof retry === "number" && Number.isFinite(retry) && retry >= 1 ? Math.ceil(retry) : 1 };
+}

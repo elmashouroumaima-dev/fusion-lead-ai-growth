@@ -5,6 +5,7 @@
 --   Alpha : shared = company_owner · alpha-admin = company_admin · alpha-marketing =
 --           marketing_manager · alpha-sales = sales_agent · alpha-analyst = analyst
 --   Beta  : beta-owner = company_owner · shared = sales_agent · beta-analyst = analyst
+--   Projets (J16) : 2 par entreprise (Alpha : site vitrine, application Salla ; Beta : boutique, thème Salla).
 --
 -- Tous les comptes de seed partagent le mot de passe de développement défini ci-dessous
 -- (valeur de test, sans lien avec un vrai compte). Domaine réservé « .test » (RFC 2606).
@@ -69,6 +70,20 @@ begin
     (org_beta, '00000000-0000-4000-8000-000000000006', 'company_owner', 'active', null),
     (org_beta, '00000000-0000-4000-8000-000000000001', 'sales_agent', 'active', '00000000-0000-4000-8000-000000000006'),
     (org_beta, '00000000-0000-4000-8000-000000000007', 'analyst', 'active', '00000000-0000-4000-8000-000000000006');
+
+  -- Projets et produits (J16) : deux projets par entreprise, un produit sur le premier (scénario T1, docs/testing/strategy.md).
+  insert into public.projects (id, organization_id, type, name, owner_id, settings) values
+    ('a1000000-0000-4000-8000-000000000001', org_alpha, 'website_sales', 'Site vitrine Alpha', '00000000-0000-4000-8000-000000000001',
+     '{"offers": ["Pack vitrine"], "target_market": "PME marocaines"}'),
+    ('a1000000-0000-4000-8000-000000000002', org_alpha, 'salla_app', 'Application Salla Alpha', '00000000-0000-4000-8000-000000000002',
+     '{"app_name": "Relance panier"}'),
+    ('b1000000-0000-4000-8000-000000000001', org_beta, 'website_sales', 'Boutique en ligne Beta', '00000000-0000-4000-8000-000000000006',
+     '{"offers": ["Pack boutique"]}'),
+    ('b1000000-0000-4000-8000-000000000002', org_beta, 'salla_theme', 'Thème Salla Beta', '00000000-0000-4000-8000-000000000006',
+     '{"sectors": ["mode"]}');
+  insert into public.products (id, organization_id, project_id, kind, offer, price_hint) values
+    ('a2000000-0000-4000-8000-000000000001', org_alpha, 'a1000000-0000-4000-8000-000000000001', 'site vitrine', 'Site vitrine en 5 jours', 'à partir de 2 000 MAD'),
+    ('b2000000-0000-4000-8000-000000000001', org_beta, 'b1000000-0000-4000-8000-000000000001', 'boutique', 'Boutique en ligne clé en main', 'à partir de 6 000 MAD');
 end
 $seed$;
 

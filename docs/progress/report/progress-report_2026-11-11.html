@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Fusion Leap AI Growth — Rapport d'avancement par module (11 novembre 2026)</title>
+<style>
+@font-face {
+  font-family: "SG";
+  src: url("fonts/SpaceGrotesk.ttf");
+  font-weight: 300 700;
+}
+@font-face {
+  font-family: "Plex";
+  src: url("fonts/IBMPlexSans.ttf");
+  font-weight: 100 700;
+}
+@page {
+  size: letter;
+  margin: 0;
+}
+:root {
+  --ink: #17201a;
+  --muted: #6b7569;
+  --line: #e3e8dd;
+  --lime: #d0ff9b;
+  --lime-soft: #eeffd9;
+  --green: #2e7d1e;
+  --green-fill: #8bd43a;
+  --track: #ecefe6;
+  --blue: #cfe6ff;
+  --blue-ink: #14508f;
+  --amber: #ffe9a8;
+  --amber-ink: #7a5600;
+  --grey: #efefef;
+  --grey-ink: #5a5a5a;
+}
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+body {
+  font-family: "Plex", sans-serif;
+  color: var(--ink);
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+.page {
+  width: 8.5in;
+  height: 11in;
+  position: relative;
+  page-break-after: always;
+  overflow: hidden;
+  background: #fff;
+  padding: 0.75in 0.8in 0.9in 0.8in;
+}
+.hero {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3.1in;
+  background: linear-gradient(#d0ff9b, #ffffff);
+}
+h1 {
+  font-family: "SG";
+  font-weight: 600;
+  font-size: 46px;
+  line-height: 1.06;
+  letter-spacing: -0.5px;
+}
+h2 {
+  font-family: "SG";
+  font-weight: 600;
+  font-size: 21px;
+  margin: 0 0 4px 0;
+  letter-spacing: -0.2px;
+}
+h2 small {
+  font-family: "Plex";
+  font-weight: 500;
+  font-size: 11px;
+  color: var(--muted);
+  margin-left: 8px;
+  letter-spacing: 0;
+}
+.sub {
+  font-size: 10.5px;
+  color: var(--muted);
+  margin-bottom: 10px;
+}
+.body {
+  font-size: 11px;
+  line-height: 1.65;
+}
+.body b {
+  font-weight: 600;
+}
+.pill {
+  display: inline-block;
+  background: var(--ink);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 999px;
+  letter-spacing: 0.2px;
+}
+.card {
+  background: var(--lime-soft);
+  border-radius: 16px;
+  padding: 16px 20px;
+  margin: 14px 0;
+}
+.card .ct {
+  font-family: "SG";
+  font-weight: 600;
+  font-size: 16px;
+  margin-bottom: 6px;
+}
+.stats {
+  display: flex;
+  gap: 12px;
+  margin-top: 18px;
+}
+.stat {
+  flex: 1;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 13px 15px;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.02);
+}
+.stat .n {
+  font-family: "SG";
+  font-weight: 700;
+  font-size: 29px;
+  line-height: 1;
+}
+.stat .l {
+  font-size: 9.5px;
+  color: var(--muted);
+  margin-top: 6px;
+  line-height: 1.4;
+}
+.row {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+}
+/* Tableau avec barres de progression */
+table.m {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  margin: 8px 0 4px;
+}
+table.m th {
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--muted);
+  font-weight: 600;
+  text-align: left;
+  padding: 6px 8px;
+  border-bottom: 1.5px solid var(--ink);
+}
+table.m td {
+  font-size: 9.6px;
+  line-height: 1.4;
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--line);
+  vertical-align: middle;
+}
+table.m td.d {
+  font-family: "SG";
+  font-weight: 600;
+  font-size: 10.5px;
+  white-space: nowrap;
+}
+table.m td.n {
+  font-weight: 600;
+}
+.note {
+  color: var(--muted);
+  font-size: 9px;
+}
+.pb {
+  width: 100%;
+  height: 9px;
+  background: var(--track);
+  border-radius: 999px;
+  overflow: hidden;
+}
+.pb i {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #a9e65a, var(--green-fill));
+}
+.pb.w i {
+  background: linear-gradient(90deg, #ffd966, #f5b93a);
+}
+.pcell {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.pcell b {
+  font-family: "SG";
+  font-size: 10px;
+  min-width: 34px;
+  text-align: right;
+}
+.chip {
+  display: inline-block;
+  border-radius: 999px;
+  padding: 2px 9px;
+  font-weight: 600;
+  font-size: 8.6px;
+  white-space: nowrap;
+}
+.done {
+  background: var(--lime);
+  color: #1b3a00;
+}
+.review {
+  background: var(--blue);
+  color: var(--blue-ink);
+}
+.part {
+  background: var(--amber);
+  color: var(--amber-ink);
+}
+.todo {
+  background: var(--grey);
+  color: var(--grey-ink);
+}
+.phase {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-top: 14px;
+}
+.phase .pp {
+  font-family: "SG";
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--green);
+}
+.legend {
+  font-size: 9px;
+  color: var(--muted);
+  margin-top: 6px;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+.two {
+  display: flex;
+  gap: 16px;
+}
+.two > div {
+  flex: 1;
+}
+.ti {
+  position: relative;
+  padding-left: 24px;
+  font-size: 10px;
+  line-height: 1.5;
+  margin-bottom: 7px;
+}
+.ti::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 2px;
+  width: 11px;
+  height: 11px;
+  border: 1.4px solid var(--ink);
+  border-radius: 4px;
+}
+.ti.ok::before {
+  background: var(--green-fill);
+  border-color: var(--green-fill);
+}
+.bar-h {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 6px 0;
+  font-size: 9.6px;
+}
+.bar-h .lb {
+  width: 170px;
+  font-weight: 600;
+}
+.bar-h .tr {
+  flex: 1;
+  height: 12px;
+  background: var(--track);
+  border-radius: 6px;
+  overflow: hidden;
+}
+.bar-h .tr i {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, #a9e65a, var(--green-fill));
+  border-radius: 6px;
+}
+.bar-h .v {
+  width: 44px;
+  text-align: right;
+  font-family: "SG";
+  font-weight: 700;
+}
+.footer {
+  position: absolute;
+  bottom: 0.42in;
+  left: 0.8in;
+  right: 0.8in;
+  display: flex;
+  justify-content: space-between;
+  font-size: 8.6px;
+  color: #9aa297;
+  border-top: 1px solid var(--line);
+  padding-top: 6px;
+}
+code {
+  font-family: Consolas, monospace;
+  font-size: 9px;
+  background: #f2f4ee;
+  padding: 0 3px;
+  border-radius: 3px;
+}
+
+</style>
+</head>
+<body>
+
+<div class="page" style="padding-top:0.6in;">
+  <div class="hero"></div>
+  <div style="position:relative;">
+    <div class="pill">Rapport du 11 novembre 2026</div>
+    <h1 style="margin-top:14px;">Avancement<br>par module</h1>
+    <div class="body" style="max-width:5.1in; margin-top:12px;">Fusion Leap AI Growth : plateforme SaaS multi-tenant de croissance (CRM, canaux, campagnes, agents IA). Les fondations (sécurité, multi-tenant, authentification, membres, couche service, audit, worker, plans et quotas) sont en place ; les modules produit commencent après le jalon G1. Jours <b>J0 à J27</b> réalisés sur 68.</div>
+    <div class="row" style="margin-top:0.35in;">
+      <svg width="170" height="170" viewBox="0 0 140 140">
+        <circle cx="70" cy="70" r="54" fill="none" stroke="#ECEFE6" stroke-width="16"/>
+        <circle cx="70" cy="70" r="54" fill="none" stroke="#8BD43A" stroke-width="16" stroke-linecap="round" stroke-dasharray="159.8 339.3" transform="rotate(-90 70 70)"/>
+        <text x="70" y="68" text-anchor="middle" font-family="SG" font-weight="700" font-size="26" fill="#17201a">47,1 %</text>
+        <text x="70" y="86" text-anchor="middle" font-family="Plex" font-size="9" fill="#6b7569">32 jours sur 68</text>
+      </svg>
+      <div style="flex:1;">
+        <div class="stats" style="margin-top:0;">
+          <div class="stat"><div class="n">32 / 68</div><div class="l">jours réalisés<br>(J0 → J27)</div></div>
+          <div class="stat"><div class="n">7 214</div><div class="l">tests automatisés,<br>tous verts</div></div>
+        </div>
+        <div class="stats" style="margin-top:10px;">
+          <div class="stat"><div class="n">36</div><div class="l">PR créées<br>(7 fusionnées, 29 en revue)</div></div>
+          <div class="stat"><div class="n">14</div><div class="l">ADR rédigés<br>(1 accepté)</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="card" style="margin-top:0.3in;">
+      <div class="ct">En une phrase</div>
+      <div class="body">Phase 1 terminée : l'isolation de deux entreprises est démontrée (jalon G1, GO à valider par la responsable technique) ; le CRM démarre ensuite. S'y ajoutent, hors plan, le français par défaut, une refonte UI complète et un module « Paramétrage » (palette et logo).</div>
+    </div>
+    <div class="legend" style="margin-top:12px;">
+      <span><span class="chip done">Fait</span></span><span><span class="chip review">En revue (PR ouverte)</span></span><span><span class="chip part">À valider</span></span><span><span class="chip todo">À faire</span></span>
+    </div>
+    <h2 style="margin-top:0.35in;">Avancement par phase <small>jours réalisés</small></h2>
+    <div class="bar-h"><span class="lb">Phase 0 · Découverte technique</span><span class="tr"><i style="width:100%"></i></span><span class="v">4 / 4</span></div>
+    <div class="bar-h"><span class="lb">Phase 1 · Fondations</span><span class="tr"><i style="width:100%"></i></span><span class="v">12 / 12</span></div>
+    <div class="bar-h"><span class="lb">Phase 2 · Ventes et CRM</span><span class="tr"><i style="width:100%"></i></span><span class="v">12 / 12</span></div>
+    <div class="bar-h"><span class="lb">Phase 3 · Canaux</span><span class="tr"><i style="width:21%"></i></span><span class="v">4 / 19</span></div>
+    <div class="bar-h"><span class="lb">Phase 4 · Croissance</span><span class="tr"><i style="width:0%"></i></span><span class="v">0 / 12</span></div>
+    <div class="bar-h"><span class="lb">Phase 5 · Pilote SaaS</span><span class="tr"><i style="width:0%"></i></span><span class="v">0 / 9</span></div>
+  </div>
+  <div class="footer"><span>Fusion Leap AI Growth · rapport du 2026-11-11 · commit d5e0ca5</span><span>1</span></div>
+</div>
+
+<div class="page">
+  <div class="phase"><h2>Phase 0 — Découverte technique <small>4 jours</small></h2><div class="pp">100 %</div></div>
+  <table class="m"><tr><th style="width:9%">Jour</th><th style="width:27%">Module</th><th style="width:22%">Avancement</th><th style="width:14%">Statut</th><th>Remarque</th></tr>
+<tr><td class="d">J0</td><td class="n">Analyse de la spec</td><td><div class="pcell"><div class="pb"><i style="width:100%"></i></div><b>100 %</b></div></td><td><span class="chip done">Fait</span></td><td class="note">Lacunes, questions, plan validé.</td></tr>
+<tr><td class="d">J1</td><td class="n">ADR et modèle de données</td><td><div class="pcell"><div class="pb"><i style="width:100%"></i></div><b>100 %</b></div></td><td><span class="chip part">À valider</span></td><td class="note">14 ADR ; seul le 011 est accepté.</td></tr>
+<tr><td class="d">J2</td><td class="n">Intégrations et flux</td><td><div class="pcell"><div class="pb"><i style="width:100%"></i></div><b>100 %</b></div></td><td><span class="chip done">Fait</span></td><td class="note">WhatsApp, Salla, e-mail, CRM.</td></tr>
+<tr><td class="d">J3</td><td class="n">Menaces, tests, backlog</td><td><div class="pcell"><div class="pb"><i style="width:100%"></i></div><b>100 %</b></div></td><td><span class="chip part">À valider</span></td><td class="note">53 menaces STRIDE ; C0 NO-GO provisoire.</td></tr></table>
+  <div style="margin-top:20px;"></div>
+  <div class="phase"><h2>Phase 1 — Fondations <small>12 jours</small></h2><div class="pp">100 %</div></div>
+  <table class="m"><tr><th style="width:9%">Jour</th><th style="width:27%">Module</th><th style="width:22%">Avancement</th><th style="width:14%">Statut</th><th>Livrable</th></tr>
+<tr><td class="d">J4</td><td class="n">Monorepo et CI</td><td><div class="pcell"><div class="pb"><i style="width:100%"></i></div><b>100 %</b></div></td><td><span class="chip done">Fait</span></td><td class="note">pnpm + Turborepo, CI GitHub (2 jobs).</td></tr>
+<tr><td class="d">J5</td><td class="n">Environnements et secrets</td><td><div class="pcell"><div class="pb"><i style="width:100%"></i></div><b>100 %</b></div></td><td><span class="chip done">Fait</span></td><td class="note">Validation zod, garde-fou anti-fuite.</td></tr>
+<tr><td class="d">J6</td><td class="n">Noyau multi-tenant (base)</td><td><div class="pcell"><div class="pb"><i style="width:100%"></i></div><b>100 %</b></div></td><td><span class="chip done">Fait</span></td><td class="note">Organisations, membres, plans, abonnements.</td></tr>
+<tr><td class="d">J7</td><td class="n">RLS et harnais de test</td><td><div class="pcell"><div class="pb"><i style="width:100%"></i></div><b>100 %</b></div></td><td><span class="chip done">Fait</span></td><td class="note">Politiques par opération, tests via l'API.</td></tr>
+<tr><td class="d">J8</td><td class="n">Authentification bilingue</td><td><div class="pcell"><div class="pb"><i style="width:100%"></i></div><b>100 %</b></div></td><td><span class="chip done">Fait</span></td><td class="note">Supabase SSR, sessions, redirections sûres.</td></tr>
+<tr><td class="d">J9</td><td class="n">Organisations et contexte actif</td><td><div class="pcell"><div class="pb"><i style="width:100%"></i></div><b>100 %</b></div></td><td><span class="chip done">Fait</span></td><td class="note">Création atomique, sélecteur d'organisation.</td></tr>
+<tr><td class="d">J10</td><td class="n">Membres, invitations, RBAC</td><td><div class="pcell"><div class="pb"><i style="width:100%"></i></div><b>100 %</b></div></td><td><span class="chip done">Fait</span></td><td class="note">Matrice ADR 014, jetons hachés.</td></tr>
+<tr><td class="d">J11</td><td class="n">Couche service</td><td><div class="pcell"><div class="pb"><i style="width:100%"></i></div><b>100 %</b></div></td><td><span class="chip done">Fait</span></td><td class="note">Idempotence, limitation de débit, erreurs.</td></tr>
+<tr><td class="d">J12</td><td class="n">Audit et journaux</td><td><div class="pcell"><div class="pb"><i style="width:100%"></i></div><b>100 %</b></div></td><td><span class="chip review">En revue</span></td><td class="note">Audit en lecture seule, logger JSON (PR n°8).</td></tr>
+<tr><td class="d">J13</td><td class="n">Jobs et worker</td><td><div class="pcell"><div class="pb"><i style="width:100%"></i></div><b>100 %</b></div></td><td><span class="chip review">En revue</span></td><td class="note">File Postgres, claim, bail, dead letter (PR n°10).</td></tr>
+<tr><td class="d">J14</td><td class="n">Plans et quotas</td><td><div class="pcell"><div class="pb"><i style="width:100%"></i></div><b>100 %</b></div></td><td><span class="chip review">En revue</span></td><td class="note">Quotas atomiques, Platform Admin, écran d'administration.</td></tr>
+<tr><td class="d">J15</td><td class="n">Jalon G1 : isolation</td><td><div class="pcell"><div class="pb"><i style="width:100%"></i></div><b>100 %</b></div></td><td><span class="chip review">En revue</span></td><td class="note">T1 et T5 automatisés (35 tests), audit C1 : GO avec réserves à valider.</td></tr></table>
+  <div class="footer"><span>Fusion Leap AI Growth · rapport du 2026-11-11 · commit d5e0ca5</span><span>2</span></div>
+</div>
+
+<div class="page">
+  <h2>Phases 2 à 5 — Modules produit <small>non commencés ou en cours</small></h2>
+  <div class="sub">Ordre de priorité de la spec : isolation, CRM, inbox, campagnes, IA, rapports. Chaque jalon (G2 à G5) est une porte de qualité.</div>
+  <div class="phase"><h2 style="font-size:15px;">Phase 2 — Ventes et CRM <small>12 jours</small></h2><div class="pp">100 %</div></div>
+  <table class="m"><tr><th style="width:32%">Module</th><th style="width:22%">Avancement</th><th style="width:14%">Statut</th><th>Jalon / remarque</th></tr>
+<tr><td class="n">Projets et produits</td><td><div class="pcell"><div class="pb"><i style="width:100%"></i></div><b>100 %</b></div></td><td><span class="chip review">En revue</span></td><td class="note">J16 : base, quotas, API. J17 : écran complet et fichiers (Storage privé, liens signés), revue sécurité corrigée.</td></tr>
+<tr><td class="n">Contacts, consentement, désabonnement</td><td><div class="pcell"><div class="pb"><i style="width:100%"></i></div><b>100 %</b></div></td><td><span class="chip review">En revue</span></td><td class="note">J18 contacts et consentement, J19 pipelines / leads / deals, J20 activités et chronologie livrés ; désabonnement avec l'e-mail (J31–33).</td></tr>
+<tr><td class="n">Leads, deals, pipelines</td><td><div class="pcell"><div class="pb"><i style="width:100%"></i></div><b>100 %</b></div></td><td><span class="chip review">En revue</span></td><td class="note">Livré aux J19–J20 (pipelines, leads, deals, activités) et J24 (écrans leads, deals et export).</td></tr>
+<tr><td class="n">Capture publique, assignation, import CSV</td><td><div class="pcell"><div class="pb"><i style="width:100%"></i></div><b>100 %</b></div></td><td><span class="chip review">En revue</span></td><td class="note">J21 à J23 livrés (capture publique, assignation automatique et alertes, import CSV avec aperçu et rapport).</td></tr>
+<tr><td class="n">Adaptateur CRM · Gate G2</td><td><div class="pcell"><div class="pb"><i style="width:100%"></i></div><b>100 %</b></div></td><td><span class="chip review">En revue</span></td><td class="note">Adaptateur CRM (J25), tests ventes (J26) et parcours lead → deal gagné avec historique (J27) livrés ; checkpoint C2 rédigé : GO avec réserves proposé, décision de la responsable technique.</td></tr></table>
+  <div class="phase"><h2 style="font-size:15px;">Phase 3 — Canaux <small>19 jours</small></h2><div class="pp">21 %</div></div>
+  <table class="m"><tr><th style="width:32%">Module</th><th style="width:22%">Avancement</th><th style="width:14%">Statut</th><th>Jalon / remarque</th></tr>
+<tr><td class="n">Intégrations et secrets</td><td><div class="pcell"><div class="pb"><i style="width:100%"></i></div><b>100 %</b></div></td><td><span class="chip review">En revue</span></td><td class="note">Intégrations et secrets (J28), pipeline webhook (J29) et modèle de messagerie (J30) livrés ; PR ouvertes, pas encore fusionnées.</td></tr>
+<tr><td class="n">Webhooks et e-mail</td><td><div class="pcell"><div class="pb"><i style="width:33%"></i></div><b>33 %</b></div></td><td><span class="chip part">À valider</span></td><td class="note">J31 : envoi d'e-mail derrière la chaîne de contrôles livré (approbation humaine, contrôle final dans le worker, accepted distinct de delivered) ; J32 (événements du fournisseur, réception) et J33 (désabonnement) à faire.</td></tr>
+<tr><td class="n">WhatsApp Cloud API</td><td><div class="pcell"><div class="pb"><i style="width:0%"></i></div><b>0 %</b></div></td><td><span class="chip todo">À faire</span></td><td class="note">Compte Meta bloquant</td></tr>
+<tr><td class="n">Inbox unifiée · Gate G3</td><td><div class="pcell"><div class="pb"><i style="width:0%"></i></div><b>0 %</b></div></td><td><span class="chip todo">À faire</span></td><td class="note">Envoi, réception, arrêt sûrs</td></tr>
+<tr><td class="n">Écrans CRM : contacts et fiche lead (décision C2)</td><td><div class="pcell"><div class="pb"><i style="width:0%"></i></div><b>0 %</b></div></td><td><span class="chip todo">À faire</span></td><td class="note">Avant le premier envoi (contacts) et avant la boîte de réception (fiche lead)</td></tr>
+<tr><td class="n">Écrans CRM : configuration et import (décision C2)</td><td><div class="pcell"><div class="pb"><i style="width:0%"></i></div><b>0 %</b></div></td><td><span class="chip todo">À faire</span></td><td class="note">Clés de formulaire, règles d'assignation, notifications, import ; avant G3</td></tr></table>
+  <div class="phase"><h2 style="font-size:15px;">Phase 4 — Croissance <small>12 jours</small></h2><div class="pp" style="color:#6b7569;">0 %</div></div>
+  <table class="m"><tr><th style="width:32%">Module</th><th style="width:22%">Avancement</th><th style="width:14%">Statut</th><th>Jalon / remarque</th></tr>
+<tr><td class="n">Campagnes, segments, approbation, UTM</td><td><div class="pcell"><div class="pb"><i style="width:0%"></i></div><b>0 %</b></div></td><td><span class="chip todo">À faire</span></td><td class="note"></td></tr>
+<tr><td class="n">Agents IA (brouillons validés par un humain)</td><td><div class="pcell"><div class="pb"><i style="width:0%"></i></div><b>0 %</b></div></td><td><span class="chip todo">À faire</span></td><td class="note"></td></tr>
+<tr><td class="n">Tableau de bord · Gate G4</td><td><div class="pcell"><div class="pb"><i style="width:0%"></i></div><b>0 %</b></div></td><td><span class="chip todo">À faire</span></td><td class="note">Campagne auditable</td></tr></table>
+  <div class="phase"><h2 style="font-size:15px;">Phase 5 — Pilote SaaS <small>9 jours</small></h2><div class="pp" style="color:#6b7569;">0 %</div></div>
+  <table class="m"><tr><th style="width:32%">Module</th><th style="width:22%">Avancement</th><th style="width:14%">Statut</th><th>Jalon / remarque</th></tr>
+<tr><td class="n">Onboarding, Salla (mode marketing)</td><td><div class="pcell"><div class="pb"><i style="width:0%"></i></div><b>0 %</b></div></td><td><span class="chip todo">À faire</span></td><td class="note"></td></tr>
+<tr><td class="n">Console admin, durcissement, staging</td><td><div class="pcell"><div class="pb"><i style="width:0%"></i></div><b>0 %</b></div></td><td><span class="chip todo">À faire</span></td><td class="note"></td></tr>
+<tr><td class="n">Recette · Gate G5</td><td><div class="pcell"><div class="pb"><i style="width:0%"></i></div><b>0 %</b></div></td><td><span class="chip todo">À faire</span></td><td class="note">10 critères d'acceptation</td></tr></table>
+  <div class="footer"><span>Fusion Leap AI Growth · rapport du 2026-11-11 · commit d5e0ca5</span><span>3</span></div>
+</div>
+
+<div class="page">
+  <h2>Réalisé en plus du plan <small>demandes du propriétaire du produit</small></h2>
+  <table class="m"><tr><th style="width:32%">Module</th><th style="width:22%">Avancement</th><th style="width:14%">Statut</th><th>Contenu</th></tr>
+<tr><td class="n">Français par défaut (fr / ar / en)</td><td><div class="pcell"><div class="pb"><i style="width:100%"></i></div><b>100 %</b></div></td><td><span class="chip done">Fait</span></td><td class="note">Locale française par défaut, arabe (RTL) et anglais ; PR n°5.</td></tr>
+<tr><td class="n">Refonte UI (Tailwind + shadcn)</td><td><div class="pcell"><div class="pb"><i style="width:100%"></i></div><b>100 %</b></div></td><td><span class="chip done">Fait</span></td><td class="note">Coque d'application, thème clair/sombre, accessibilité ; PR n°7.</td></tr>
+<tr><td class="n">E-mails locaux (Mailtrap)</td><td><div class="pcell"><div class="pb"><i style="width:100%"></i></div><b>100 %</b></div></td><td><span class="chip done">Fait</span></td><td class="note">Bac à sable SMTP ; mot de passe à saisir dans supabase/.env.</td></tr>
+<tr><td class="n">Paramétrage : palette de couleurs</td><td><div class="pcell"><div class="pb"><i style="width:100%"></i></div><b>100 %</b></div></td><td><span class="chip review">En revue</span></td><td class="note">Couleurs claires et sombres, aperçu, contraste AA ; PR n°9.</td></tr>
+<tr><td class="n">Paramétrage : logo</td><td><div class="pcell"><div class="pb"><i style="width:100%"></i></div><b>100 %</b></div></td><td><span class="chip review">En revue</span></td><td class="note">PNG, JPEG, WebP ≤ 128 Ko, SVG refusé ; PR n°9.</td></tr>
+<tr><td class="n">Rapport d'avancement automatisé</td><td><div class="pcell"><div class="pb"><i style="width:100%"></i></div><b>100 %</b></div></td><td><span class="chip review">En revue</span></td><td class="note">Généré à chaque commit : pnpm report:progress.</td></tr>
+<tr><td class="n">Guide de démarrage pour un nouveau développeur</td><td><div class="pcell"><div class="pb"><i style="width:100%"></i></div><b>100 %</b></div></td><td><span class="chip review">En revue</span></td><td class="note">start-fusion-lead-ai-growth.md : prérequis, installation, comptes de test, tests.</td></tr>
+<tr><td class="n">Paramétrage : serveur SMTP (Mailtrap)</td><td><div class="pcell"><div class="pb"><i style="width:100%"></i></div><b>100 %</b></div></td><td><span class="chip review">En revue</span></td><td class="note">Mot de passe chiffré (AES-256-GCM), test d'envoi, administrateurs de la plateforme.</td></tr></table>
+  <div class="phase" style="margin-top:18px;"><h2>Qualité mesurée <small>tests automatisés, tous verts</small></h2><div class="pp">7 214</div></div>
+  <div class="bar-h"><span class="lb">Web (application)</span><span class="tr"><i style="width:89%"></i></span><span class="v">2 515</span></div>
+  <div class="bar-h"><span class="lb">Base de données (pgTAP)</span><span class="tr"><i style="width:100%"></i></span><span class="v">2 814</span></div>
+  <div class="bar-h"><span class="lb">Permissions (RBAC)</span><span class="tr"><i style="width:14%"></i></span><span class="v">394</span></div>
+  <div class="bar-h"><span class="lb">Domaine (règles métier)</span><span class="tr"><i style="width:23%"></i></span><span class="v">654</span></div>
+  <div class="bar-h"><span class="lb">RLS via l'API réelle</span><span class="tr"><i style="width:17%"></i></span><span class="v">476</span></div>
+  <div class="bar-h"><span class="lb">Worker et adaptateurs</span><span class="tr"><i style="width:7%"></i></span><span class="v">192</span></div>
+  <div class="bar-h"><span class="lb">Acceptation (T1, T5)</span><span class="tr"><i style="width:6%"></i></span><span class="v">169</span></div>
+  <div class="two" style="margin-top:12px;">
+    <div class="card" style="margin:0;"><div class="ct">Contrôles automatiques</div><div class="body">Lint, typecheck, build de production avec l'environnement de la CI, recherche de fuites de secrets dans le bundle navigateur : tous verts. La CI GitHub (2 jobs) exécute le tout à chaque PR.</div></div>
+    <div class="card" style="margin:0;"><div class="ct">Sécurité</div><div class="body">Chaque jour passe une revue adverse (attaques réelles contre la base locale) puis une re-vérification : isolation entre organisations, journal d'audit non modifiable, quotas atomiques, aucun secret dans les logs. Aucune faille exploitable ouverte.</div></div>
+  </div>
+  <div class="footer"><span>Fusion Leap AI Growth · rapport du 2026-11-11 · commit d5e0ca5</span><span>4</span></div>
+</div>
+
+<div class="page">
+  <h2>Points ouverts et décisions à prendre</h2>
+  <div class="sub">À traiter par la responsable technique ou le propriétaire du produit.</div>
+  <div class="ti">Fusionner dans l'ordre les PR n°8 (J12), n°9 (Paramétrage) et n°10 (J13), puis ouvrir la PR de J14.</div>
+  <div class="ti">Accepter les ADR encore « Proposed » (dont 014 : droits, 015 : kit UI, 016 : palette et logo). C0 reste NO-GO provisoire tant que c'est en attente.</div>
+  <div class="ti">Valider les valeurs des plans (trial, starter, growth) : elles sont provisoires, la spec n'en donne aucune.</div>
+  <div class="ti">Paramétrage global : un owner ou admin de n'importe quelle organisation change les couleurs et le logo de toute la plateforme. À remplacer par le Platform Admin avant de vrais clients.</div>
+  <div class="ti">Abonnement past_due ou fin d'essai dépassée : toujours utilisable (pas d'expiration automatique).</div>
+  <div class="ti">Questions Q1 (CRM), Q2 (domaine e-mail), Q5 (marché / région) toujours sans réponse.</div>
+  <div class="ti">Compte développeur Meta bloqué (« compte trop récent ») : WhatsApp est critique pour J34.</div>
+  <div class="ti">Choisir l'hébergeur (ADR 010) avant J58 et le fournisseur IA (ADR 012) avant J47.</div>
+  <div class="ti">Rétention du journal d'audit et des jobs terminés (J57) : sinon croissance sans limite.</div>
+  <div class="ti">Saisir le mot de passe Mailtrap dans supabase/.env pour recevoir les e-mails d'inscription en local.</div>
+  <h2 style="margin-top:20px;">Prochaines étapes</h2>
+  <table class="m"><tr><th style="width:16%">Quand</th><th>Action</th></tr>
+  <tr><td class="d">Maintenant</td><td>Relecture et fusion des PR ; arbitrage sur les ADR 014 à 016 et sur les valeurs des plans.</td></tr>
+  <tr><td class="d">Après le GO du C1</td><td>Décision GO / NO-GO du C1, puis J16 : projets et produits.</td></tr>
+  <tr><td class="d">J16 à J27</td><td>Ventes et CRM : projets, contacts et consentement, leads et deals, import CSV.</td></tr></table>
+  <div class="card">
+    <div class="ct">Comment lire ce rapport</div>
+    <div class="body">Avancement d'un module = part de ses livrables terminés et vérifiés. <b>100 %</b> = code, tests et documentation livrés ; « En revue » = PR ouverte, pas encore fusionnée. Avancement global = jours réalisés sur 68 (32 ÷ 68 = 47,1 %). Rapport régénéré à chaque commit (<code>pnpm report:progress</code>, branche <code>day-31-email-send</code>). Sources : <code>docs/progress/journal.md</code>, <code>docs/plan/development-plan.md</code>, <code>scripts/progress-report/data.json</code>.</div>
+  </div>
+  <div class="footer"><span>Fusion Leap AI Growth · rapport du 2026-11-11 · commit d5e0ca5</span><span>5</span></div>
+</div>
+</body>
+</html>

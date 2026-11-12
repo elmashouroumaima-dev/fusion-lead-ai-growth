@@ -69,6 +69,18 @@ export const ORG = {
   beta: "b0000000-0000-4000-8000-0000000000b1",
 } as const;
 
+/** Projets et produits du seed (J16) : 2 projets par entreprise, un produit sur le premier. */
+export const PROJECT = {
+  alphaSite: "a1000000-0000-4000-8000-000000000001",
+  alphaApp: "a1000000-0000-4000-8000-000000000002",
+  betaShop: "b1000000-0000-4000-8000-000000000001",
+  betaTheme: "b1000000-0000-4000-8000-000000000002",
+} as const;
+export const PRODUCT = {
+  alpha: "a2000000-0000-4000-8000-000000000001",
+  beta: "b2000000-0000-4000-8000-000000000001",
+} as const;
+
 export const USER = {
   shared: "00000000-0000-4000-8000-000000000001", // owner Alpha, sales_agent Beta
   alphaAdmin: "00000000-0000-4000-8000-000000000002",
@@ -183,6 +195,8 @@ export async function cleanupTestUsers(userIds: string[]): Promise<void> {
   const sql = [
     "set session_replication_role = replica;",
     `create temp table victims as select id from public.organizations where created_by in (${list});`,
+    "delete from public.products where organization_id in (select id from victims);",
+    "delete from public.projects where organization_id in (select id from victims);",
     "delete from public.invitations where organization_id in (select id from victims);",
     "delete from public.idempotency_keys where organization_id in (select id from victims);",
     "delete from public.rate_limit_buckets where organization_id in (select id from victims);",
@@ -244,6 +258,46 @@ export async function api<T = unknown>(
       ? String((parsed as { code: unknown }).code)
       : undefined;
   return { status: response.status, body: parsed as T, code };
+}
+
+export interface StorageResult {
+  status: number;
+  /** Corps JSON si le type le permet, sinon null (le contenu binaire n'est pas lu). */
+  json: Record<string, unknown> | unknown[] | null;
+  contentType: string | null;
+  bytes: number;
+}
+
+/** Appel à l'API Storage (`/storage/v1/...`) avec le JWT d'un persona ; ne lève jamais sur 4xx. */
+export async function storage(
+  persona: Persona,
+  method: "GET" | "POST" | "DELETE",
+  storagePath: string,
+  body?: Uint8Array | object,
+  headers: Record<string, string> = {},
+): Promise<StorageResult> {
+  const base = headersFor(persona);
+  const { Prefer: _prefer, "Content-Type": _contentType, ...auth } = base;
+  void _prefer;
+  void _contentType;
+  const init: RequestInit = { method, headers: { ...auth, ...headers } };
+  if (body instanceof Uint8Array) init.body = body as unknown as NonNullable<RequestInit["body"]>;
+  else if (body !== undefined) {
+    init.body = JSON.stringify(body);
+    (init.headers as Record<string, string>)["Content-Type"] = "application/json";
+  }
+  const response = await fetch(`${stack.apiUrl}/storage/v1/${storagePath}`, init);
+  const contentType = response.headers.get("content-type");
+  const raw = new Uint8Array(await response.arrayBuffer());
+  let json: StorageResult["json"] = null;
+  if (contentType?.includes("json")) {
+    try {
+      json = JSON.parse(new TextDecoder().decode(raw)) as StorageResult["json"];
+    } catch {
+      json = null;
+    }
+  }
+  return { status: response.status, json, contentType, bytes: raw.length };
 }
 
 export const select = <T = Record<string, unknown>>(persona: Persona, restPath: string) =>
@@ -322,4 +376,15 @@ export function psql(sql: string): string {
     encoding: "utf8",
     stdio: ["pipe", "pipe", "pipe"],
   }).trim();
+}
+
+/** Télécharge un objet Storage AVEC LE RÔLE service_role (comme le worker) ; `null` s'il n'existe pas. */
+export async function downloadAsService(bucket: string, objectPath: string): Promise<Uint8Array | null> {
+  const { Prefer: _prefer, "Content-Type": _contentType, ...auth } = headersFor("service");
+  void _prefer;
+  void _contentType;
+  const response = await fetch(`${stack.apiUrl}/storage/v1/object/${bucket}/${objectPath}`, { headers: auth });
+  if (response.status === 404 || response.status === 400) return null;
+  if (!response.ok) throw new Error(`storage_download_failed_${response.status}`);
+  return new Uint8Array(await response.arrayBuffer());
 }

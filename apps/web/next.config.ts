@@ -17,6 +17,9 @@ const nextConfig: NextConfig = {
   // Développement uniquement : autorise l'accès par 127.0.0.1 (les liens d'e-mail et SITE_URL l'utilisent).
   // Sans cela, Next 16 bloque les ressources de développement et les Server Actions échouent.
   allowedDevOrigins: ["127.0.0.1", "localhost"],
+  // Server Actions : corps de 6 Mo au plus (fichiers des produits : 5 Mo + formulaire ; avant le J17 partie 2 : 512 Ko). Un corps
+  // plus gros est refusé par Next AVANT notre pipeline ; les limites métier (taille, type réel) sont contrôlées ensuite.
+  experimental: { serverActions: { bodySizeLimit: "6mb" } },
   async redirects() {
     // /settings n'a pas de page propre : le menu latéral liste les sections ; on ouvre la première.
     return [{ source: "/:locale(fr|ar|en)/settings", destination: "/:locale/settings/appearance", permanent: false }];
@@ -34,6 +37,14 @@ const nextConfig: NextConfig = {
           { key: "Content-Security-Policy", value: "frame-ancestors 'none'" },
           { key: "X-Content-Type-Options", value: "nosniff" },
           { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+        ],
+      },
+      {
+        // La recherche de leads (`?q=`) peut contenir une adresse e-mail ou un téléphone : jamais de Referer sortant ni de cache.
+        source: "/:locale/leads",
+        headers: [
+          { key: "Referrer-Policy", value: "no-referrer" },
+          { key: "Cache-Control", value: "no-store" },
         ],
       },
       {

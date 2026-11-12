@@ -42,3 +42,6 @@ Fournisseur transactionnel en mode sandbox sans domaine propre pour les tests ; 
 
 ## Tests liés
 Fixtures officielles : delivery, bounce, spam complaint, entrant avec/sans `In-Reply-To`, entrant ambigu ; reprise 5xx ; webhook dupliqué ; authentification invalide.
+
+## État au J32
+Adaptateur Postmark : envoi (J31) ; webhooks de statuts et réception (J32) avec les exemples officiels de la documentation comme fixtures (`packages/adapters/src/email/events.test.ts`). Rebond dur = TypeCode 1 (HardBounce) ou 100000 (BadEmailAddress) ; 100002 (désactivation manuelle) et 100006 (blocage du FAI) ne suppriment pas l'adresse. **À CONFIRMER** sur un compte sandbox : `Metadata` renvoyées dans les événements, en-têtes `Received-SPF` / `X-Spam-Tests` des entrants (présence, ordre, forme), limites de débit, forfait de réception. Procédure : `docs/runbooks/email-webhooks.md`.

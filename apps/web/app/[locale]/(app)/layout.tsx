@@ -38,6 +38,10 @@ export default async function AppLayout({ children, params }: Props) {
   // Lien « Membres » : seulement si le rôle de l'organisation active (relu en base) peut lister les membres.
   // Simple commodité d'affichage : la page et les actions revérifient tout. Échec de résolution = pas de lien.
   let showMembers = false;
+  // Leads et deals : tout rôle qui lit les leads (le commercial lit les siens) ; l'analyste n'y a pas accès (PII). Commodité d'affichage.
+  let showCrm = false;
+  // Synchronisation CRM : owner et admin (matrice : état des intégrations). Commodité d'affichage.
+  let showCrmSync = false;
   // Paramétrage (palette globale) : owner / admin d'organisation seulement ; commodité d'affichage.
   const showSettings = await canManagePlatformConfig();
   // Administration de la plateforme (plans, abonnements) : administrateurs de la plateforme seulement.
@@ -46,9 +50,13 @@ export default async function AppLayout({ children, params }: Props) {
   try {
     const active = resolveActiveMembership(switchable, await readActiveOrgCookie());
     showMembers = can(active.role, "list", "members");
+    showCrm = can(active.role, "read", "leads", { isOwnRecord: true });
+    showCrmSync = can(active.role, "view_status", "integrations");
     activeOrganizationName = active.organization.name;
   } catch {
     showMembers = false;
+    showCrm = false;
+    showCrmSync = false;
   }
 
   // Structure stable : la coquille ne dépend que de ces propriétés ; les enfants ne sont pas remontés
@@ -57,6 +65,8 @@ export default async function AppLayout({ children, params }: Props) {
     <AppShell
       email={email}
       showMembers={showMembers}
+      showCrm={showCrm}
+      showCrmSync={showCrmSync}
       showSettings={showSettings}
       showAdmin={showAdmin}
       organizations={switchable.map((m) => ({ id: m.organizationId, name: m.organization.name }))}

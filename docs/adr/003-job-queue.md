@@ -1,6 +1,6 @@
 # ADR 003 — File de jobs : table Postgres + worker
 
-- **Statut :** Proposed
+- **Statut :** Accepted (2026-11-09, décision de la responsable technique par délégation, après les audits de conformité C1 et C2)
 - **Date :** 2026-11-10
 - **Section de spec :** §6 (worker, jobs, lease, retry, dead_letter), §7 (`jobs`), §10 (idempotency_key)
 

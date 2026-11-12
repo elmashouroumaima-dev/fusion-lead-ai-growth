@@ -1,6 +1,6 @@
 # ADR 015 — Kit d'interface : Tailwind CSS v4 + shadcn/ui
 
-- **Statut :** Proposed — **bibliothèques hors stack imposée : accord explicite requis** (l'accord de principe a été donné le 2026-11-07 : « OK, merge #6 puis UI »)
+- **Statut :** Accepted (2026-11-09, décision de la responsable technique par délégation, après les audits de conformité C1 et C2) (accord de principe déjà donné le 2026-11-07)
 - **Date :** 2026-11-07
 - **Section de spec :** §6 (UI Next.js), ADR 011 (RTL/i18n), ADR 001 (versions)
 

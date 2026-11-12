@@ -5,11 +5,11 @@
   "tests": [
     {
       "label": "Web (application)",
-      "value": 2135
+      "value": 2523
     },
     {
       "label": "Base de données (pgTAP)",
-      "value": 1314
+      "value": 2928
     },
     {
       "label": "Permissions (RBAC)",
@@ -17,19 +17,19 @@
     },
     {
       "label": "Domaine (règles métier)",
-      "value": 419
+      "value": 654
     },
     {
       "label": "RLS via l'API réelle",
-      "value": 308
+      "value": 485
     },
     {
       "label": "Worker et adaptateurs",
-      "value": 57
+      "value": 235
     },
     {
       "label": "Acceptation (T1, T5)",
-      "value": 35
+      "value": 185
     }
   ],
   "adrCount": 14,
@@ -183,41 +183,41 @@
           "day": "J16–J17",
           "days": 2,
           "name": "Projets et produits",
-          "progress": 0,
-          "status": "todo",
-          "note": ""
+          "progress": 100,
+          "status": "review",
+          "note": "J16 : base, quotas, API. J17 : écran complet et fichiers (Storage privé, liens signés), revue sécurité corrigée."
         },
         {
           "day": "J18–J20",
           "days": 3,
           "name": "Contacts, consentement, désabonnement",
-          "progress": 0,
-          "status": "todo",
-          "note": ""
+          "progress": 100,
+          "status": "review",
+          "note": "J18 contacts et consentement, J19 pipelines / leads / deals, J20 activités et chronologie livrés ; désabonnement avec l'e-mail (J31–33)."
         },
         {
           "day": "J21–J23",
           "days": 3,
           "name": "Leads, deals, pipelines",
-          "progress": 0,
-          "status": "todo",
-          "note": ""
+          "progress": 100,
+          "status": "review",
+          "note": "Livré aux J19–J20 (pipelines, leads, deals, activités) et J24 (écrans leads, deals et export)."
         },
         {
           "day": "J24–J26",
           "days": 3,
           "name": "Capture publique, assignation, import CSV",
-          "progress": 0,
-          "status": "todo",
-          "note": ""
+          "progress": 100,
+          "status": "review",
+          "note": "J21 à J23 livrés (capture publique, assignation automatique et alertes, import CSV avec aperçu et rapport)."
         },
         {
           "day": "J27",
           "days": 1,
           "name": "Adaptateur CRM · Gate G2",
-          "progress": 0,
-          "status": "todo",
-          "note": "Lead → deal gagné, historique"
+          "progress": 100,
+          "status": "review",
+          "note": "Adaptateur CRM (J25), tests ventes (J26) et parcours lead → deal gagné avec historique (J27) livrés ; checkpoint C2 rédigé : GO avec réserves proposé, décision de la responsable technique."
         }
       ]
     },
@@ -229,17 +229,17 @@
           "day": "J28–J30",
           "days": 3,
           "name": "Intégrations et secrets",
-          "progress": 0,
-          "status": "todo",
-          "note": ""
+          "progress": 100,
+          "status": "review",
+          "note": "Intégrations et secrets (J28), pipeline webhook (J29) et modèle de messagerie (J30) livrés ; PR ouvertes, pas encore fusionnées."
         },
         {
           "day": "J31–J33",
           "days": 3,
           "name": "Webhooks et e-mail",
-          "progress": 0,
-          "status": "todo",
-          "note": ""
+          "progress": 67,
+          "status": "part",
+          "note": "J31 (envoi d'e-mail derrière la chaîne de contrôles) et J32 (statuts du fournisseur, réception, file des cas ambigus) livrés ; J33 (désabonnement) à faire."
         },
         {
           "day": "J34–J37",
@@ -256,6 +256,22 @@
           "progress": 0,
           "status": "todo",
           "note": "Envoi, réception, arrêt sûrs"
+        },
+        {
+          "day": "J30b–J30d",
+          "days": 3,
+          "name": "Écrans CRM : contacts et fiche lead (décision C2)",
+          "progress": 0,
+          "status": "todo",
+          "note": "Avant le premier envoi (contacts) et avant la boîte de réception (fiche lead)"
+        },
+        {
+          "day": "J39b–J39c",
+          "days": 2,
+          "name": "Écrans CRM : configuration et import (décision C2)",
+          "progress": 0,
+          "status": "todo",
+          "note": "Clés de formulaire, règles d'assignation, notifications, import ; avant G3"
         }
       ]
     },

@@ -3,6 +3,157 @@
 Format : Keep a Changelog. Une entrée par jour de travail.
 
 ## [Non publié]
+### J32 — E-mail entrant et statuts
+- Ajout : migration `20261202100000` (et retour arrière) : **second secret par intégration** (`webhook_secret_ref`, illisible par l'API, supprimé à la déconnexion), table `inbound_unmatched` (file des cas ambigus, lecture owner et admin, aucune écriture directe), fonctions service_role `email_status_apply` (delivered, rebond dur, plainte) et `email_inbound_apply` (canal par l'adresse destinataire, contact par l'adresse expéditrice).
+- Ajout : adaptateur de webhook Postmark (Basic Auth : utilisateur = compte de l'intégration, mot de passe = secret de webhook), événements normalisés (`packages/adapters/src/email/events.ts`, fixtures = exemples officiels), processeur `email` du worker, `POST /api/integrations/webhook-secret`, `Metadata` (identifiant de notre message) à l'envoi.
+- Règles : un rebond dur ajoute l'adresse à `suppressions` SANS toucher `do_not_contact` ; une plainte ajoute l'adresse ET pose `do_not_contact` ; un expéditeur inconnu ne crée JAMAIS de contact (file `inbound_unmatched`) ; `delivered` ne vient que d'un événement du fournisseur ; un envoi « résultat inconnu » (J31) est réconcilié par l'événement.
+- Sécurité (revue adverse, 1 bloquant, 1 majeur, 5 moyens corrigés) : anti-usurpation (SPF aligné sur le domaine de « From » ou DKIM de l'auteur, en-têtes dupliqués = non fiable), file bornée (corps 2 000 caractères, 20 par expéditeur, 10 000 par entreprise, jamais perdue en silence), texte nettoyé avant stockage, identifiants d'événement conformes, canal par adresse exacte, HTTPS exigé, secret de webhook jamais égal au jeton d'envoi.
+- Tests modifiés : `handle.test.ts` et `webhooks-flow` (l'e-mail a maintenant un adaptateur).
+- Tests : adaptateur (+32), worker (+11), web (+5), domaine (schéma du secret), pgTAP (+114), API réelle (+9), acceptation (`email-flow`).
+- Documentation : `docs/api/email-inbound.md`, `docs/runbooks/email-webhooks.md`, ADR 007 (amendement), ADR 008 (note), `docs/api/webhooks.md`, `docs/api/integrations.md`, `docs/integrations/email.md`.
+### J31 — Envoi d'e-mail derrière la chaîne de contrôles
+- Ajout : migration `20261201100000` (et retour arrière) : approbation humaine d'un message sortant (`approved_by`, `approved_at`, `approved_purpose`, `approved_recipient`), tentative d'envoi unique (`send_claimed_at`), garde-fous de base (pas d'envoi accepté sans approbation, statuts qui ne reculent pas), table `suppressions` (lecture seule), fonctions `message_approve` (owner et admin, met le job en file) et, pour le worker, `message_send_claim`, `message_mark_accepted`, `message_mark_failed`, `message_release_claim`.
+- Ajout : `packages/domain/src/outbound` (`checkCanSend` / `assertCanSend`, 15 contrôles dans un ordre fixe, échec fermé), `packages/adapters/src/email` (interface `EmailProvider`, fournisseur Postmark), handler worker `send_message` (au plus un envoi par message, `accepted` n'est pas `delivered`).
+- Sécurité (revue adverse, 0 bloquant, 2 majeurs, 5 moyens corrigés) : approbation revalidée à l'envoi (approbateur toujours owner ou admin, moins de 72 h, adresse inchangée, entreprise et abonnement actifs), `approved_by` sans clé étrangère (suppression de compte non bloquée), envoi en cours distingué du résultat inconnu, `accepted` tardif permis, compteur de débit sérialisé par canal, 502 et 504 classés « inconnu » (jamais renvoyés).
+- Test existant modifié : `230_conversations_messages` (un message ne passe plus à `accepted` sans approbation).
+- Tests : domaine (+33), adaptateur (+11), worker (+30), pgTAP (+94), API réelle (+10).
+- Documentation : `docs/api/send.md`, ADR 008 (Accepted sous réserve de Q2).
+### J30 — Conversations et messages
+- Ajout : migration `20261130100000` (et retour arrière) : tables `conversations` (un fil par contact et canal, états `open`, `pending`, `closed`, `to_triage` cohérents avec le responsable par CHECK) et `messages` (clé composite entreprise + conversation + canal, unicité du message fournisseur et de la clé d'envoi, corps de 1 à 100 000 caractères, immuables : organisation, conversation, canal, sens, corps).
+- Ajout : RLS (owner et admin tout, le commercial SES conversations et leurs messages, marketing et analyste rien) ; fonctions `assign_conversation` et `set_conversation_state` (par rôle) ; fonctions service_role `conversation_get_or_create` et `message_record` (idempotentes : rejeu identique = `duplicate`, rejeu contradictoire = `idempotency_conflict`) ; libération des conversations d'un membre qui perd son accès ; audit sans corps de message.
+- Ajout : `packages/domain/src/conversations`, `apps/web/lib/conversations` (liste, détail, messages, assigner, état). Pas d'écran ni de route (inbox au J37).
+- Sécurité (revue adverse) : entrées validées avant insertion (aucun corps dans les erreurs), conflit d'idempotence, verrous dans l'ordre membre puis conversation, plafond de 10 000 messages par conversation, horodatage limité à maintenant + 5 minutes, aucun message sur un canal déconnecté, index alignés sur le tri.
+- Tests : domaine (6), service web (6), pgTAP (126), API réelle (12).
+- Documentation : `docs/api/conversations.md`, addendum ADR 007.
+### J29 — Pipeline webhook
+- Ajout : migration `20261129100000` (et retour arrière) : table `webhook_events` (métadonnées seules lisibles par owner et admin, payload jamais exposé), fonctions service_role `webhook_resolve_integration`, `webhook_record` (événement + job `process_webhook` dans la même transaction, unicité par entreprise, plafond de file sur 7 jours), `webhook_record_rejection` (plafonnée), `webhook_start` et `webhook_finish`.
+- Ajout : `packages/adapters/src/webhooks` : interface `WebhookAdapter`, helper `verifyHmacSha256Hex` (temps constant, corps brut) et pipeline pur `ingestWebhook` (taille, compte, tenant par le COMPTE, signature, fenêtre de 5 minutes, enregistrement idempotent).
+- Ajout : route `POST /api/webhooks/[provider]` (sans session, limitation de débit par fournisseur et adresse, corps borné, ACK rapide ; 404 sans adaptateur) ; handler worker `process_webhook` et passerelle ; registre d'adaptateurs et de processeurs vides (e-mail J32, WhatsApp J34 et J35).
+- Sécurité (revue adverse) : compte inconnu = même 401 qu'une signature invalide (aucun oracle d'existence), seau de débit par adresse agrégée (IPv6 /64) et refus 503 sans adresse source, secret absent refusé, horodatage strict, adaptateur qui lève = requête invalide, sans processeur = `failed` re-jouable, marge de taille du jsonb, plafond de file sur 7 jours.
+- Tests : adapters (19), route (11), magasin (6), worker (12), pgTAP (78), API réelle (6), acceptation (16).
+- Documentation : `docs/api/webhooks.md`, addendum ADR 007.
+### J28 — Intégrations et secrets
+- Ajout : migration `20261128100000` (et retour arrière) : `integrations` étendue (`scopes`, `secret_ref`, `has_secret`, fournisseurs `email` et `whatsapp`, statuts `pending`, `active`, `error`, `disconnected`, `disabled`, unicité globale des comptes e-mail et WhatsApp), table `channels` (ADR 007 E4), fonctions `create_provider_integration`, `set_integration_secret` (rotation et reconnexion), `disconnect_integration`, `create_channel`, `update_channel` (owner et admin) et `get_integration_secret` (service_role seulement).
+- Sécurité : SELECT par colonnes (`secret_ref` illisible, `select *` refusé), `private.secrets` sans droit d'API, clé étrangère composite secret / entreprise, AAD par entreprise ; le jeton n'est jamais renvoyé, journalisé, audité ni stocké dans les clés d'idempotence (HMAC avec une clé serveur : rejouer une clé avec un autre jeton donne 422).
+- Ajout : `packages/adapters/src/secrets/store.ts` (`put`, `get`, `rotate`, `delete`, secrets d'organisation), `packages/domain/src/integrations`, `apps/web/lib/integrations`, `lib/service/integration-secrets.ts` ; routes `GET/POST /api/integrations`, `POST /api/integrations/secret` et `/disconnect` ; écran `/integrations` (fr, ar, en) : statut, portée, canaux, « Remplacer le jeton » (écriture seule), « Reconnecter », « Déconnecter ».
+- Ajout : `withRoute` option `hashOmit` (HMAC des champs secrets dans l'empreinte d'idempotence) ; le service CRM ne liste que les intégrations `csv` et `internal`.
+- CI : le job `e2e` génère une clé maître aléatoire (masquée) pour que l'acceptation des intégrations déchiffre réellement.
+- Revue adverse : identité d'un canal au format e-mail ou E.164, reconnexion d'un compte déconnecté, plafond du secret en octets, `get_integration_secret` limité aux statuts pending, active et error.
+- Tests : adapters (10), domaine (7), service web et idempotence (22), pgTAP (119), API réelle (12), acceptation (9).
+- Documentation : `docs/api/integrations.md`, `docs/runbooks/secret-rotation.md`, addendums ADR 004 et 007.
+### CI — job de bout en bout et couverture (décision C2, option A)
+- Ajout : job `e2e` dans `.github/workflows/ci.yml` : pile Supabase locale (même liste d'exclusions que `database`, Storage conservé), `pnpm db:reset`, variables de l'application tirées de `supabase status`, `pnpm build`, `next start` sur le port 3000 avec attente de `/fr/login`, `pnpm test:e2e`, journal de l'application en cas d'échec.
+- Ajout : étape « Couverture » dans le job `verify` (`test:coverage` de `domain` et `permissions`, seuil 80 %).
+- Aucun code applicatif ni migration. Ferme l'écart 3 du C2 et l'écart 4 du C1.
+### Décisions du 2026-11-09 (ADR, CI, Playwright)
+- Modification : ADR 001 à 006, 014, 015 passés en **Accepted** ; 007 accepté pour les Phases 1 et 2 ; 016 accepté sous condition (écriture restreinte aux administrateurs de la plateforme avant tout client réel, au plus tard J54) ; 008, 010 et 012 restent Proposed ; ADR 005 complété (modèle « lecture par politique, écriture par fonctions »).
+- Modification : `libphonenumber-js` épinglé en `1.13.15`.
+- Décision : job CI de bout en bout (option A) avant J29 ; Playwright décidé au J58. Détail : `docs/checkpoints/C2-decisions.md`.
+### Décision C2 — écrans CRM avant G3
+- Modification : `docs/plan/development-plan.md` (addendum C2) : 5 jours d'écrans insérés (J30b contacts et consentement, J30c et J30d fiche lead, J39b configuration, J39c import) ; le plan passe de 63 à 68 jours ouvrés (408 h) ; G3 lun 18 jan 2027, fin du pilote mar 16 fév 2027 ; dates et cibles de tous les jours et des fiches `docs/backlog/` recalculées sur 68 jours ; fiches J30b, J30c, J30d, J39b, J39c ajoutées ; matrice de traçabilité §13-4 complétée.
+- Modification : `docs/checkpoints/C2.md` et `C2-decisions.md` (décision A enregistrée ; la boîte de réception est J37, pas J38) ; rapport d'avancement : 2 modules « écrans CRM » (5 jours).
+### J27 — Checkpoint C2 / Gate G2
+- Ajout : scénario **G2** (`tests/acceptance/src/g2-lead-to-deal.test.ts`, 9 tests) : formulaire public -> lead -> vrai handler `lead.assign` -> deal créé et déplacé par `/api/deals/move` jusqu'à « gagné » -> historique d'activités lu par chaque rôle (jamais par l'analyste ni l'autre entreprise) -> audit sans valeur ni adresse -> rejeu sans effet ; même parcours chez Beta sans fuite.
+- Ajout : `docs/checkpoints/C2.md` (audit de conformité Phase 2 par un relecteur indépendant : 0 bloquant, 3 majeurs, 9 mineurs ; recommandation GO avec réserves, décision à la responsable technique).
+- Modification : helper `assign-worker.ts` partagé par `t2-sales` et G2. Aucune migration, aucun code applicatif modifié. Tests : acceptation 134 -> 143.
+### J26 — Tests ventes
+- Ajout : scénario **T2** automatisé (`tests/acceptance/src/t2-sales.test.ts`) : `leads-100.csv` par HTTP puis par le vrai handler `import_csv` (65 contacts créés, 17 rattachés, 18 lignes refusées, 67 leads), un job `lead.assign` par lead traité par le VRAI handler du worker (rotation round-robin dans l'ordre de la règle, répartition 22 / 22 / 23, rejeu sans seconde assignation), chiffres affichés sur `/leads` par rôle, rapport CSV sans donnée de contact, rejeu du fichier sans aucun doublon, puis le même fichier chez l'autre entreprise (jeux de contacts séparés, aucune adresse partagée, assignation limitée à ses membres) et un test de contexte forgé (propriétaire de Beta désignant Alpha).
+- Ajout : matrice des rôles du CRM (`crm-roles-matrix.test.ts`) : 13 routes d'API (export, deals, intégrations, mapping, synchro, import complet) et 3 pages x 5 rôles + anonyme ; rôle non autorisé = 403 exact, rôle autorisé = statut exact de la route, anonyme = 401 ; capture publique : une session ne donne aucun droit.
+- Ajout : seuil de couverture de 80 % (`test:coverage`) pour `packages/domain` et `packages/permissions` ; devDependency `@vitest/coverage-v8` 5.1.0 dans `packages/domain`.
+- Modification : passerelle et exécution du job d'import des tests d'acceptation extraites dans `import-worker.ts` (partagées par `import-flow` et `t2-sales`).
+- Aucune migration, aucun code applicatif modifié. Tests : acceptation 106 -> 134.
+### J25 — Adaptateur CRM
+- Ajout : interface `CrmAdapter` (`connect`, `validate`, `send`, `receive`, `refresh`, `disconnect`) et adaptateurs `internal` (source de vérité) et `csv` (lecture et écriture selon le mapping, dates ISO strictes, anti-formule) dans `packages/adapters/src/crm`.
+- Ajout : tables `integrations` (minimale) et `crm_field_mappings` (champ interne, champ externe, `source_of_truth`, `direction`, liste blanche de champs), fonctions `create_integration`, `save_crm_mappings`, `request_crm_sync`, `retry_crm_sync`, `crm_sync_status` (owner et admin) et `crm_sync_*` (service_role) ; migration `20261127100000` et retour arrière ; statut `synced` des lots de fichier.
+- Ajout : moteur de synchro pur (`packages/domain/src/crm-sync`) : conflit seulement si les deux côtés ont changé, `source_of_truth` par champ, perdant consigné dans l'audit sans valeur ; job worker `crm_sync` (contacts : créer, rattacher, mettre à jour ; idempotent par identifiant externe ; identité jamais écrasée ; « ne plus contacter » intact ; aucun consentement).
+- Ajout : routes `/api/crm/integrations`, `/api/crm/mappings`, `/api/crm/sync`, `/api/crm/sync/retry` et écran `/crm` (statut, mapping, « Réessayer ») en français, arabe (RTL) et anglais.
+- Sécurité (revue adverse) : curseur de fin (pas de faux conflit), lot de fichier consommé, colonne d'identifiant absente = échec, cellule vide non destructrice, identifiant externe propre à l'intégration, abonnement vérifié.
+- Tests : domaine (22), adaptateurs (11), worker (21), service web (9), messages (4), pgTAP (107), API réelle (5), acceptation (7).
+- Documentation : `docs/api/crm-sync.md`, `docs/integrations/crm.md`, addendum ADR 007.
+
+### J24 — UI CRM
+- Ajout : page `/leads` (filtres projet, étape, source, responsable, « non assignés » ; recherche nom, e-mail, téléphone ; tri ; pagination serveur) et page `/deals` (tableau par étape, glisser-déposer et menu « Déplacer vers… ») en français, arabe (RTL) et anglais ; liens « Leads » et « Deals » dans la barre latérale (rôles qui lisent les leads).
+- Ajout : `GET /api/leads/export` (owner et admin, mêmes filtres que la liste, 10 000 lignes au plus, **audité** avant l'envoi, protégé contre l'injection de formule, jamais tronqué en silence) et `POST /api/deals/move` (Idempotency-Key obligatoire).
+- Ajout : migration `20261126100000` (extension `pg_trgm`, index de recherche, `search_leads` SECURITY INVOKER, `log_export`) et retour arrière ; `packages/domain/src/crm` ; `apps/web/lib/crm` ; `withRoute` : contexte `request` et réponse texte.
+- Sécurité (revue adverse) : GET d'export inter-sites refusé, export tronqué refusé, paramètre de filtre invalide refusé, formule précédée d'espaces neutralisée, total conservé hors page, `Referrer-Policy: no-referrer` sur `/leads`.
+- Tests : domaine (15), service web (7), messages et CSS logique (14), pgTAP (63), API réelle (6), acceptation HTTP (16).
+- Documentation : `docs/api/crm.md`, addendum ADR 007.
+
+### J23 — Import CSV de leads
+- Ajout : tables `import_batches` et `import_rows`, bucket privé `imports` (10 Mo, owner et admin), fonctions `create_import_batch`, `import_dedup_check`, `confirm_import`, `cancel_import` (owner et admin) et `import_start`, `import_row`, `import_record_error`, `import_finish`, `import_fail` (service_role) ; migration `20261125100000` et retour arrière.
+- Ajout : routes `POST /api/imports` (fichier brut), `/preview`, `/confirm`, `/cancel`, `GET /api/imports` et `/report` (CSV sans donnée de contact) ; assistant en 3 étapes, **rien n'est écrit avant la confirmation**.
+- Ajout : handler worker `import_csv` (même dédup que la capture publique, lead « non assigné » + job `lead.assign` étalé, contact « ne plus contacter » ignoré, aucun consentement créé, rejeu sans doublon) ; `packages/domain/src/imports` (parseur CSV en continu sans dépendance, mapping, normalisation) ; `apps/web/lib/imports` ; fixture `tests/fixtures/leads-100.csv`.
+- Ajout : `withRoute` accepte un corps brut (`readBody`, `request` dans le contexte) et une réponse texte.
+- Sécurité (revue adverse) : rapport lu par blocs de 1000, projet archivé refusé, corps de 10 Mo lu après l'authentification, lot « running » dont le job est mort annulable, fichier retiré à l'annulation, plafond de lots sur 90 jours, jobs d'assignation étalés.
+- Tests : domaine (21), service web (17), worker (12), pgTAP (117), API réelle (10), acceptation (12 : 100 lignes, 65 créés, 17 rattachés, 18 refusés).
+- Documentation : `docs/api/imports.md`, addendum ADR 007.
+
+### J22 — Assignation automatique
+- Ajout : `assignment_rules` (round-robin ou membre fixe, règle par projet ou par défaut, 1 à 50 membres, curseur) et `notifications` (alerte in-app par destinataire, dédupliquée) ; fonctions `create_assignment_rule`, `update_assignment_rule`, `delete_assignment_rule`, `mark_notification_read` ; migration `20261124100000` et retour arrière.
+- Ajout : `auto_assign_lead` et `flag_lead_unassigned` (service_role) : lead verrouillé, membre éligible encore actif choisi à partir du curseur, rejeu sans double assignation ; sans règle ou sans membre, le lead reste « non assigné » et les owner / admin sont alertés.
+- Ajout : handler worker `lead.assign` (remplace le handler provisoire du J21) : entreprise de la ligne du job, alerte à la dernière tentative ; `packages/domain/src/assignment`, `apps/web/lib/assignment` (règles, file « non assignés », notifications). Pas d'écran (J24).
+- Sécurité (revue adverse) : évincement des notifications lues au plafond, plafond de règles sérialisé, réactivation refusée si abonnement suspendu, tableau 2D ou NULL refusé, curseur conservé.
+- Tests : domaine (6), service web (12), worker (5), pgTAP (86), API réelle (8), acceptation (3).
+- Documentation : `docs/api/assignment.md`, addendum ADR 007.
+
+### J21 — Capture publique de leads
+- Ajout : `form_keys` (clé générée par la base, empreinte SHA-256 seule conservée, origines https exactes, 5 clés actives par projet, lecture owner / admin sans l'empreinte), fonctions `create_form_key`, `set_form_key_active`, `set_form_key_origins` ; migration `20261123100000` et retour arrière.
+- Ajout : `capture_lead` (service_role) : clé -> entreprise et projet, origine, contact dédoublonné, lead ouvert réutilisé, consentement (texte, version, page, IP), job `lead.assign`, en une transaction ; `form_origin_allowed` et `form_key_origin_ok` (sans écriture).
+- Ajout : route publique `POST /api/leads` (+ préflight CORS) : clé en en-tête `X-Form-Key`, origine de la clé, limitation de débit par adresse et par clé, corps de 16 Kio, JSON strict, champ piège, réponse identique pour un nouveau contact et un doublon, journaux sans donnée personnelle.
+- Ajout : `packages/domain/src/capture`, `apps/web/lib/forms` (gestion des clés), `apps/web/lib/service/capture-lead.ts`, `deriveServerSecret` (secret dérivé), `TRUSTED_PROXY_HOPS`, handler `lead.assign` provisoire dans le worker (traitement au J22).
+- Sécurité (revue adverse) : pas de re-consentement par la voie publique après une révocation, contact « ne plus contacter » ignoré, finalités limitées à marketing / newsletter ; adresse du visiteur lue à droite de `x-forwarded-for` (port retiré, IPv6 en /64) ; seau par clé ouvert seulement pour une clé existante ; préflight limité par adresse.
+- Tests : domaine (14), service web (30), route (18), pgTAP (137), API réelle (14), acceptation HTTP (11, dont « deux soumissions identiques = un contact »).
+- Documentation : `docs/api/capture.md`, addendum ADR 007 et ADR 010.
+
+### J20 — Activités et chronologie
+- Ajout : table `activities` (enum `activity_type`), contenu par type validé par la base, FK composites, RLS comme les leads (owner / admin / marketing : tout ; commercial : ses leads ; analyste : aucun accès), écriture uniquement par fonctions ; migration `20261122100000` et retour arrière.
+- Ajout : fonctions `create_activity` (note, appel, e-mail en compte rendu, rendez-vous, tâche), `update_task`, `complete_task` ; historique immuable (aucune suppression, seules les tâches évoluent).
+- Ajout : journal automatique par déclencheurs : `stage_change` et `assignment` des leads (libérations automatiques comprises) et `stage_change` des deals.
+- Ajout : `packages/domain/src/activities` (schémas, `nextAction`, `dueTasks`) et `apps/web/lib/activities` (service, chronologie, tâches dues, prochaine action). Pas d'écran (J24).
+- Sécurité (revue adverse) : plafonds séparés (500 activités manuelles, 1000 entrées automatiques par lead) ; contenu validé avant insertion ; tâche confiée à un commercial seulement sur un lead dont il est responsable ; échéance obligatoire à la modification d'une tâche.
+- Tests : domaine (12), service web (17), pgTAP (107), API réelle (14).
+- Documentation : `docs/api/activities.md`, addendum ADR 007.
+
+### J19 — Pipelines, leads et deals
+- Ajout : tables `pipelines`, `pipeline_stages`, `leads`, `deals` (enum `stage_kind`), étapes par défaut dans la langue de l'entreprise (nouvelles et existantes), FK composites, RLS (owner / admin / marketing : tous les leads ; commercial : les siens ; analyste : aucun accès), écriture uniquement par fonctions ; migration `20261121100000` et retour arrière.
+- Ajout : fonctions `create_pipeline`, `rename_pipeline`, `set_default_pipeline`, `create_stage`, `update_stage`, `delete_stage`, `create_lead`, `update_lead`, `assign_lead`, `move_lead_stage`, `create_deal`, `update_deal`, `move_deal_stage` ; un lead « non assigné » n'a pas de responsable ; dates gagné / perdu cohérentes avec l'étape ; libération des leads d'un membre suspendu, retiré ou rétrogradé.
+- Ajout : `packages/domain/src/leads` (schémas, règles d'étapes) et `apps/web/lib/leads` (service, lectures, erreurs). Pas d'écran (J24).
+- Modifié : le commercial lit les contacts et consentements de ses leads et peut révoquer / poser « ne plus contacter » sur eux (promesse du J18).
+- Sécurité (revue adverse) : le marketing ne choisit pas le responsable à la création ; NaN et dates infinies refusés ; un lead ne change pas de pipeline ; libération à la suppression de la ligne du membre et à la rétrogradation ; abonnement actif exigé ; plafonds de 50 leads par contact et de 50 deals par lead ; audit sans réglage de session.
+- Tests : domaine (16), service web (22), pgTAP (182), API réelle (13, dont 12 déplacements simultanés d'un deal).
+- Documentation : `docs/api/leads.md`, addendum ADR 007.
+
+### J18 — Contacts et consentement
+- Ajout : tables `contacts` et `consent_events` (enums `channel_type`, `consent_status`), index uniques partiels (e-mail, téléphone, identifiant externe), RLS en lecture (owner, admin, marketing), historique de consentement append-only ; migration `20261120100000` et retour arrière.
+- Ajout : fonctions `create_contact`, `update_contact`, `record_consent`, `revoke_consent`, `set_do_not_contact` (écriture uniquement par fonctions, quota « contacts » du plan, audit sans donnée personnelle).
+- Ajout : `packages/domain/src/contacts` (normalisation e-mail et E.164 par `libphonenumber-js`, règle de déduplication, schémas zod) et `apps/web/lib/contacts` (service, lectures, erreurs). Nouvelle dépendance : `libphonenumber-js`.
+- Modifié : `current_stock_usage` compte les contacts (quota « contacts »).
+- Sécurité (revue adverse) : l'identité d'un contact « ne plus contacter » ne change plus que par owner / admin ; consentements révoqués quand l'adresse change ; canal cohérent avec l'identifiant ; 50 consentements au plus par contact ; e-mail saisi en ASCII ; attributs sans caractères de contrôle ni de direction.
+- Tests : domaine (49), service web (23), pgTAP (111), API réelle (16, dont 12 créations simultanées pour 1 place).
+- Documentation : `docs/api/contacts.md`, addendum ADR 007.
+
+### J17 partie 2 — Storage : fichiers des produits
+- Ajout : bucket privé `assets` et politiques Storage par entreprise (lecture : membres ; écriture et suppression : owner et admin sur un projet actif ; aucune mise à jour ; rien pour `anon`), chemin `{entreprise}/{projet}/{fichier}/{nom}` imposé ; migration `20261119100000` et retour arrière.
+- Ajout : envoi de fichiers (PNG, JPEG, WebP, PDF, 5 Mo) depuis la fenêtre d'un produit : type RÉEL par les octets, nom d'objet généré par le serveur, envoi avec les droits de l'utilisateur, retrait ; aperçu des images et téléchargement des PDF par liens signés de 60 s ; `packages/domain/src/projects/assets.ts` ; messages fr / ar / en.
+- Modifié : limite des corps de Server Actions de 512 Ko à 6 Mo (`next.config.ts`).
+- Corrigé (revue sécurité) : ajout et retrait de fichiers ATOMIQUES (`append_product_asset`, `remove_product_asset`, verrou du produit) ; `update_product` n'écrit plus `assets` et toute liste venue du client est ignorée ; un objet partagé par un autre produit n'est jamais supprimé ; rattachement d'un fichier déjà utilisé par un autre produit refusé.
+- Tests : pgTAP (45), API Storage réelle (17), unitaires (domaine et service).
+
+### J17 — Écran Projets (partie 1 : sans Storage)
+- Ajout : menu « Projets », pages liste (filtre Actifs / Archivés), création (formulaire dynamique selon le type : site web, application Salla, thème Salla, autre) et détail (réglages, produits en fenêtre, archivage et réactivation avec confirmation) ; lecture pour tous les rôles, écriture owner et admin.
+- Ajout : Server Actions `createProjectAction`, `updateProjectAction`, `setProjectStatusAction`, `createProductAction`, `updateProductAction` (pipeline commun, idempotence, rôles) ; composant `Textarea` ; messages fr / ar / en ; `settings-form` (saisie « une ligne par élément », nettoyage avant envoi).
+- Modifié : `updateProject` conserve le propriétaire quand il n'est pas précisé.
+- Sécurité (revue adverse) : clé `__proto__` et JSON de plus de 6 niveaux refusés dans les champs de formulaire ; corps des Server Actions plafonné à 512 Ko ; les scénarios d'acceptation nettoient les clés d'idempotence et seaux de débit pour ne pas faire échouer `pnpm test:db`.
+- Tests : composants et schémas d'action (web), 11 scénarios HTTP d'acceptation (rôles, isolation Alpha / Beta, 404 identique).
+- À venir (partie 2) : Storage et envoi de fichiers.
+
+### J16 — Projets et produits
+- Ajout : tables `projects` (4 types : site web, application Salla, thème Salla, autre) et `products`, FK composites, RLS en lecture seule, écriture par fonctions `create_project`, `update_project`, `set_project_status`, `create_product`, `update_product` (owner et admin) ; quota « projects » (projets actifs) sous verrou, réactivation comprise ; audit `project.*` et `product.*` ; migration `20261118100000` et retour arrière.
+- Ajout : `packages/domain/src/projects` (réglages stricts par type, textes sûrs, URL https, chemins d'assets), `apps/web/lib/projects` (services, lectures, erreurs) et `POST /api/projects` (Idempotency-Key obligatoire) ; nouveau code d'erreur `conflict` (409, projet archivé).
+- Ajout : seed (2 projets par entreprise et un produit) couvert automatiquement par le scénario T1 ; tests pgTAP (105), RLS via l'API (21, dont 12 créations simultanées pour 5 places) et acceptation HTTP (10).
+- Sécurité (revue adverse) : caractères invisibles et de direction refusés, liens https vers un nom de domaine seulement, réglages contrôlés par la base (clés par type, profondeur), plafond de 100 produits par projet, propriétaire explicite à la modification, `not_found` en 404, propriétaire suspendu ou retiré remis à NULL.
+- Ajout : `docs/api/projects.md`, addendum ADR 007.
+
 ### Menu Paramétrage : libellés
 - Modifié : dans le menu latéral, « Palette de couleurs » devient « Thème » et « Logotype » devient « Profil » (en : Theme, Profile ; ar : المظهر، الملف التعريفي), avec l'icône profil ; les pages et leurs adresses ne changent pas.
 

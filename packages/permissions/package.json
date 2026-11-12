@@ -9,13 +9,15 @@
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
     "@fusion-leap/domain": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "24.19.2",
+    "@vitest/coverage-v8": "5.1.0",
     "typescript": "6.0.3",
     "vitest": "5.1.0"
   }

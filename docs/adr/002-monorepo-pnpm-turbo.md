@@ -1,6 +1,6 @@
 # ADR 002 — Monorepo pnpm + Turborepo
 
-- **Statut :** Proposed
+- **Statut :** Accepted (2026-11-09, décision de la responsable technique par délégation, après les audits de conformité C1 et C2)
 - **Date :** 2026-11-10
 - **Section de spec :** §6 (structure du dépôt)
 

@@ -53,6 +53,7 @@ const ALL_CODES: ServiceErrorCode[] = [
   "rate_limited",
   "payload_too_large",
   "quota_exceeded",
+  "conflict",
   "service_unavailable",
   "internal_error",
 ];
@@ -67,6 +68,7 @@ const STATUS: Record<ServiceErrorCode, number> = {
   rate_limited: 429,
   payload_too_large: 413,
   quota_exceeded: 429,
+  conflict: 409,
   service_unavailable: 503,
   internal_error: 500,
 };

@@ -34,6 +34,14 @@ describe("parseServerEnv", () => {
     expect(env.RESEND_API_KEY).toBeUndefined();
   });
 
+  it("TRUSTED_PROXY_HOPS : 1 par défaut (chaîne vide comprise), 0 à 5 acceptés, le reste refusé", () => {
+    expect(parseServerEnv(validServer).TRUSTED_PROXY_HOPS).toBe(1);
+    expect(parseServerEnv({ ...validServer, TRUSTED_PROXY_HOPS: "" }).TRUSTED_PROXY_HOPS).toBe(1);
+    expect(parseServerEnv({ ...validServer, TRUSTED_PROXY_HOPS: "0" }).TRUSTED_PROXY_HOPS).toBe(0);
+    expect(parseServerEnv({ ...validServer, TRUSTED_PROXY_HOPS: "2" }).TRUSTED_PROXY_HOPS).toBe(2);
+    for (const bad of ["-1", "6", "1.5", "deux"]) expect(() => parseServerEnv({ ...validServer, TRUSTED_PROXY_HOPS: bad }), bad).toThrow();
+  });
+
   it("refuse une variable manquante et la nomme sans afficher de valeur", () => {
     const incomplete = Object.fromEntries(
       Object.entries(validServer).filter(([key]) => key !== "SUPABASE_SECRET_KEY"),

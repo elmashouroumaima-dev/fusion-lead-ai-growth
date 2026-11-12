@@ -1,6 +1,6 @@
 # ADR 016 — Palette de couleurs globale de la plateforme (`platform_config`)
 
-- Statut : **Proposé** (à valider par la responsable technique : nouvelle table absente de la spec, droit d'écriture global accordé aux owner/admin, lecture serveur par `service_role`)
+- **Statut :** Accepted **avec condition** (2026-11-09, décision de la responsable technique par délégation) : la palette et le logo sont aujourd'hui modifiables pour toute la plateforme par n'importe quel owner ou admin d'organisation ; **avant tout client réel (au plus tard J54), l'écriture est restreinte aux administrateurs de la plateforme** (`private.is_platform_admin`)
 - Date : 2026-11-07
 - Sources : spec §6, §11 ; ADR 005 (isolation, §10 Platform Admin), ADR 007 (modèle de données), ADR 014 (RBAC), ADR 015 (kit UI).
 - Historique : (1) `master_config`, palette par organisation : abandonnée avant tout commit, car la page de connexion ne connaît aucune organisation ; (2) palette globale éditée par un « administrateur de la plateforme » (table `platform_admins`) : abandonnée, car le rôle Platform Admin est prévu au J14 dans le schéma `private` (ADR 005 §10) et le propriétaire du produit veut que les owner/admin règlent les couleurs.

@@ -127,7 +127,12 @@ describe("messages fr/ar/en", () => {
   });
 
   it("le français n'est pas une copie de l'anglais et ne contient pas d'arabe", () => {
-    const allowed = new Set(["Meta.title", "Common.appName", "Home.title"]);
+    // Termes identiques dans les deux langues (anglicismes usuels du métier : « Leads », « Deals », « Source », « Contact »).
+    const allowed = new Set([
+      "Meta.title", "Common.appName", "Home.title",
+      "Shell.nav.leads", "Shell.nav.deals", "Crm.leads.title", "Crm.deals.title", "Crm.filters.source", "Crm.table.contact", "Crm.table.source",
+      "Crm.pagination.label", "Integrations.providers.whatsapp",
+    ]);
     const same = [...frFlat].filter(([k, v]) => !allowed.has(k) && enFlat.get(k) === v && /[A-Za-z]{4,}/.test(v));
     expect(same.map(([k]) => k)).toEqual([]);
     expect([...frFlat].filter(([, v]) => /[؀-ۿ]/.test(v)).map(([k]) => k)).toEqual([]);

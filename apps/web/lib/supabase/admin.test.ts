@@ -8,7 +8,7 @@ vi.mock("@supabase/supabase-js", () => ({ createClient: (...args: unknown[]) => 
 vi.mock("../env/server", () => ({ getServerEnv: () => getServerEnv() }));
 
 import { runWithRequestContext } from "../service/request-context";
-import { createAdminClient } from "./admin";
+import { createAdminClient, deriveServerSecret } from "./admin";
 
 beforeEach(() => {
   vi.clearAllMocks();
@@ -37,5 +37,17 @@ describe("createAdminClient", () => {
     });
     expect(() => createAdminClient()).toThrow();
     expect(createClient).not.toHaveBeenCalled();
+  });
+});
+
+describe("deriveServerSecret", () => {
+  it("HMAC de l'usage avec la clé secrète : stable, propre à l'usage, sans la clé en clair", () => {
+    const a = deriveServerSecret("capture-ip-bucket");
+    expect(a).toMatch(/^[0-9a-f]{64}$/);
+    expect(a).toBe(deriveServerSecret("capture-ip-bucket"));
+    expect(a).not.toBe(deriveServerSecret("autre-usage"));
+    expect(a).not.toContain("sb_secret");
+    getServerEnv.mockReturnValue({ SUPABASE_URL: "http://127.0.0.1:54321", SUPABASE_SECRET_KEY: "sb_secret_autrecleautrecleautre" });
+    expect(deriveServerSecret("capture-ip-bucket")).not.toBe(a);
   });
 });

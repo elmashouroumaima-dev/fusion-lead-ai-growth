@@ -1,6 +1,6 @@
 # ADR 014 — Matrice des rôles (RBAC)
 
-- **Statut :** Proposed — **validation de la responsable technique requise** (comble G-R1, G-R2, G-R3 ; la spec ne donne pas de matrice complète)
+- **Statut :** Accepted (2026-11-09, décision de la responsable technique par délégation, après les audits de conformité C1 et C2)
 - **Date :** 2026-11-10
 - **Section de spec :** §2 (rôles), §5.7, §10, §11, §13-2
 

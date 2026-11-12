@@ -388,3 +388,433 @@ Cible : 25,4 % | Réel : à valider | Statut : —
 ### Blocages / à faire
 - Décision de la responsable technique : GO / NO-GO du C1 ; ADR « Proposed » ; branchement de `test:e2e` en CI ; navigateur piloté (téléchargement de binaires).
 ### Demain : J16 (projets et produits), après GO
+
+
+## J16 — mer 2 déc 2026 — Phase 2 (préparé en avance, NON commité, branche `day-16-projects-products`)
+Cible : 27,0 % | Réel : à valider | Statut : — (le C1 attend le GO de la responsable technique)
+
+### Organisation du travail
+Manager + A5 (revue sécurité adverse, attaques réelles sur la base locale). Migration, domaine, application, tests et documentation par le manager.
+
+### Tâches
+| Tâche | Estimé | Livré | Validée |
+|---|---|---|---|
+| Migrations `projects`, `products` + RLS + tests | 2,5 h | oui (lecture seule, écriture par fonctions, FK composites) | oui |
+| Services CRUD avec quota | 2 h | oui (`apps/web/lib/projects`, `POST /api/projects`) | oui |
+| Schémas zod de réglages par type | 1,5 h | oui (4 types stricts) | oui |
+
+### Tests : domain 444 ✓ · web 2144 ✓ · pgTAP 1442 ✓ (110_projects_products : 128) · RLS 332 ✓ (projects : 24, dont 12 créations simultanées pour 5 places : exactement 5) · acceptation 45 ✓ (projects-api : 10) · lint, typecheck verts
+### Constats de sécurité (A5, attaques réelles sur la base locale)
+- Aucune faille bloquante : rôles, JWT forgés, p_org falsifié, identifiants d'une autre entreprise, accès direct aux tables, quota sous concurrence (25 créations parallèles), assets, idempotence : refusés.
+- **Moyennes, corrigées** : caractères invisibles et de direction non filtrés (U+061C, U+2060 à U+206F…) ; la base ne reproduisait pas zod (réglages, liens, hôtes internes, port) ; aucun plafond de produits (100 par projet ajouté).
+- **Faibles** : `update_project` effaçait le propriétaire s'il était omis (corrigé : explicite) ; `not_found` en HTTP 500 (corrigé : PT404, 404) ; membre suspendu restait propriétaire (corrigé : NULL) ; pas de contrôle `Origin` sur les mutations (non traité, valable pour toutes les routes).
+- Reste (documenté) : adresse des liens à revalider (DNS) avant tout chargement serveur.
+### Écarts à la spec / plan
+- Archivage à la place de la suppression (matrice ADR 014 ; ADR 007 disait « delete ») : aucun DELETE.
+- Aucun archivage de produit (la spec ne lui donne pas de statut) : point soumis à la responsable technique.
+- `products.kind` : texte court contrôlé, pas d'énumération (la spec n'en définit pas) ; `salla_theme` : les captures d'écran (Storage) viennent au J17.
+- Nouveau code d'erreur `conflict` (409) pour un projet archivé.
+### Blocages / à faire
+- GO du C1 ; valider les 5 choix du mini-plan J16 ; interface des projets au J17.
+### Demain : J17 (UI projets et Storage)
+
+
+## J17 — jeu 3 déc 2026 — Phase 2, partie 1 (préparé en avance, NON commité, branche `day-17-projects-ui`)
+Cible : 28,6 % | Réel : à valider | Statut : — (le C1 attend le GO de la responsable technique)
+
+### Organisation du travail
+Manager + A5 (revue sécurité adverse : actions appelées directement avec de vraies sessions). Interface, actions, tests et documentation par le manager.
+
+### Tâches
+| Tâche | Estimé | Livré | Validée |
+|---|---|---|---|
+| Liste et création de projets | 2 h | oui (`/projects`, `/projects/new`, filtre Actifs / Archivés) | oui (navigateur) |
+| Formulaires dynamiques par type | 2,5 h | oui (4 types ; listes « une ligne par élément », lignes répétables) | oui |
+| Assets Storage tenant | 1,5 h | **reporté (partie 2)** : bucket privé, politiques, envoi de fichiers | — |
+| Détail, produits, archivage (ajout au plan) | — | oui (fenêtres, confirmation d'archivage) | oui |
+
+### Tests : web 2217 ✓ · acceptation 56 ✓ (projects-pages : 11) · domain 444 · lint, typecheck, `check:leaks` verts · vérifié dans le navigateur : création, produit, archivage
+### Écarts à la spec / plan
+- Storage et envoi de fichiers : partie 2 (le produit affiche « 0 fichier », les fichiers déjà associés sont conservés à la modification).
+- Pas de sélecteur de propriétaire : le créateur est propriétaire (la liste des membres n'a pas d'identité lisible).
+- Les erreurs s'affichent dans la page (règle d'accessibilité de cette pile) ; les notifications rouges sont dans la PR `feat-toast-style`.
+### Constats de sécurité (A5)
+- Aucune faille bloquante ni moyenne : rôles, isolation (identifiants d'une autre entreprise, cookie d'entreprise, organization_id falsifié), idempotence, quota sous concurrence, XSS stocké, CSRF natif de Next : tenus.
+- **Faibles, corrigés** : `__proto__` accepté dans les réglages à la modification ; JSON très profond (erreur interne) ; corps de plus de 1 Mo (plafond 512 Ko).
+- **Documentés** : DNS rebinding des liens (avant tout chargement serveur) ; `X-Forwarded-Host` client (à retirer au reverse proxy) ; identifiants d'URL très longs.
+### Blocages / à faire
+- GO du C1 ; Storage (partie 2) ; décider de la présence des notifications rouges (PR `feat-toast-style`).
+
+
+## J17 partie 2 — Storage et fichiers des produits (préparé en avance, NON commité, branche `day-17-storage`)
+Cible : 28,6 % | Réel : à valider | Statut : — (le C1 attend le GO de la responsable technique)
+
+### Tâches
+| Tâche | Estimé | Livré | Validée |
+|---|---|---|---|
+| Bucket privé `assets` + politiques Storage par entreprise (G-D11) | 1 h | oui (migration `20261119100000`, retour arrière) | oui |
+| Envoi, retrait et lecture des fichiers d'un produit | 1,5 h | oui (Server Actions, octets réels, liens signés 60 s) | oui (navigateur) |
+
+### Revue sécurité (0 bloquant, 5 moyens, 5 faibles) — corrigés : pertes de mises à jour sous concurrence et rattachement d'un fichier à un autre produit (fonctions SQL atomiques `append_product_asset` / `remove_product_asset`, `update_product` n'écrit plus `assets`, liste client ignorée, objet partagé jamais supprimé) ; acceptés et documentés : durée des liens signés, jeton d'envoi signé, plafond par entreprise, purge des orphelins.
+
+### Tests : domain 462 ✓ · web 2238 ✓ (assets : 17) · pgTAP 1487 (dont 120_storage_assets : 45) ✓ · API Storage réelle 17 ✓ (RLS : 349) · acceptation 56 ✓ · lint, typecheck verts · vérifié dans le navigateur : envoi PNG et PDF, refus d'un SVG déguisé en .png et d'un fichier vide, retrait
+### Écarts à la spec / plan
+- 5 Mo pour tous les types (spec : 10 Mo pour un PDF) : limite des corps de Server Actions à 6 Mo ; à relever avec une route dédiée.
+- CSV : au J23 (import des leads).
+- Purge des objets non rattachés : à prévoir avec le worker (runbook `storage-assets.md`).
+
+## J18 — Contacts et consentement (branche `day-18-contacts`, NON commité)
+Cible : 30,2 % | Réel : à valider | Statut : — (le C1 attend le GO de la responsable technique)
+
+### Tâches
+| Tâche | Estimé | Livré | Validée |
+|---|---|---|---|
+| `contacts` + `consent_events` + RLS | 2 h | oui (migration `20261120100000`, retour arrière, écriture par fonctions, quota) | oui (pgTAP, API réelle) |
+| Normalisation e-mail / E.164 (libphonenumber) | 1,5 h | oui (`packages/domain/src/contacts`) | oui (téléphones marocains et saoudiens) |
+| Déduplication intra-entreprise | 1,5 h | oui (règle `findDuplicate` + index uniques partiels) | oui (12 créations simultanées : 1 contact) |
+| Tests | 1 h | oui | oui |
+
+### Validation du jour
+- Même e-mail dans deux entreprises -> deux contacts (pgTAP + API réelle) ; même e-mail dans la même entreprise -> refusé.
+- `06 12 34 56 78` (MA) -> `+212612345678` ; `050 123 4567` (SA) -> `+966501234567`.
+
+### Revue sécurité (1 bloquant, 3 moyens, 3 faibles) — corrigés : contournement de « ne plus contacter » par échange d'identifiants, consentement lié à l'adresse, canal cohérent, plafond de 50 consentements, e-mail ASCII, caractères dans les attributs ; documentés : journaux Postgres, fonction `can_contact` et table de suppression d'identifiants (décisions pour la responsable technique).
+
+### Tests : domain 511 ✓ · web 2288 ✓ (contacts : 23) · pgTAP 1598 (dont 130_contacts_consent : 111) ✓ · API réelle 365 ✓ (contacts : 16) · acceptation 56 ✓ · lint, typecheck, check:leaks verts
+### Écarts à la spec / plan
+- Le commercial (« own ») et l'analyste n'ont aucun accès aux contacts au J18 (le commercial l'obtient avec les leads, J19).
+- Pas d'écran (le plan n'en prévoit pas au J18).
+- Conflit e-mail / téléphone : refus `conflict`, pas de table de file de revue (non prévue par la spec ni un ADR).
+- `suppressions` et désinscription : avec l'e-mail (J31–33), comme dans le plan validé (le prompt parlait de « J18–20 désabonnement »).
+
+## J19 — Pipelines, leads et deals (branche `day-19-leads`, NON commité)
+Cible : 31,7 % | Réel : à valider | Statut : — (le C1 attend le GO de la responsable technique)
+
+### Tâches
+| Tâche | Estimé | Livré | Validée |
+|---|---|---|---|
+| `pipelines` / `pipeline_stages` (E1) | 1,5 h | oui (migration `20261121100000`, étapes par défaut par langue, étape système) | oui (pgTAP, API réelle) |
+| `leads` | 1,5 h | oui (FK composites, responsable, étape cohérente, UTM, score) | oui |
+| `deals` | 2 h | oui (won / lost cohérents avec l'étape, devise, valeur) | oui |
+| Tests RLS | 1 h | oui | oui |
+
+### Validation du jour
+- Un lead ne peut référencer qu'un projet et un contact de **son** entreprise (FK composites ; refus testé en base et par l'API).
+- Les étapes sont configurables par entreprise (création, renommage, repositionnement, suppression contrôlée, pipeline par défaut).
+
+### Revue sécurité (0 bloquant, 3 moyens, 6 faibles) — corrigés : marketing ne choisit plus le responsable à la création, NaN et dates infinies, lead qui change de pipeline, libération des leads à la suppression de la ligne et à la rétrogradation, verrou sur le membre assigné, abonnement actif exigé, plafonds de leads et deals, audit sans réglage de session, erreurs NOT NULL ; documenté : idempotence au niveau des routes.
+
+### Tests : domain 527 ✓ · web 2310 ✓ (leads : 22) · pgTAP 1780 (dont 140_leads_pipelines_deals : 182) ✓ · API réelle 379 ✓ (leads : 13) · acceptation 56 ✓ · lint, typecheck, check:leaks verts
+### Écarts à la spec / plan
+- Le commercial ne crée pas de lead au J19 (il ne voit pas les contacts non assignés) : avec la capture et l'assignation (J21–22).
+- `campaign_id` sans clé étrangère jusqu'au J42 ; pas d'unicité (contact, projet) avant le J21.
+- Pas d'écran (le plan prévoit l'UI CRM au J24) ; l'historique des changements d'étape est l'audit jusqu'au J20 (`activities`).
+
+## J20 — Activités et chronologie (branche `day-20-activities`, commité, PR ouverte)
+Cible : 33,3 % | Réel : à valider | Statut : — (le C1 attend le GO de la responsable technique)
+
+### Tâches
+| Tâche | Estimé | Livré | Validée |
+|---|---|---|---|
+| `activities` (note, appel, e-mail, tâche — E2) | 1,5 h | oui (migration `20261122100000`, contenu par type, historique immuable) | oui (pgTAP, API réelle) |
+| Journal automatique des changements d'étape | 1,5 h | oui (déclencheurs lead et deal, assignation comprise) | oui |
+| Chronologie du lead | 2 h | oui (service : chronologie paginée, sans écran : J24) | oui |
+| Tâches dues | 1 h | oui (service : tâches dues, prochaine action) | oui |
+
+### Validation du jour
+- Statut (étape), responsable et prochaine action d'un lead lisibles : `leads.stage_id`, `leads.assignee_id` et `nextAction` des tâches.
+- Un commercial ne voit et ne modifie que les activités de **ses** leads assignés (RLS, API réelle).
+
+### Revue sécurité (0 bloquant, 1 moyen, 5 faibles) — corrigés : plafond atteignable par les entrées automatiques (plafonds séparés), contenu validé avant insertion, tâche confiée seulement à un commercial responsable du lead, échéance obligatoire à la modification ; documentés : auteur effacé après suppression d'un membre, débit d'audit, interblocage rare ; à confirmer : le marketing lit toutes les activités.
+
+### Tests : domain 539 ✓ · web 2327 ✓ (activities : 17) · pgTAP 1887 (dont 150_activities : 107) ✓ · API réelle 393 ✓ (activities : 14) · acceptation 56 ✓ · lint, typecheck, check:leaks verts
+### Écarts à la spec / plan
+- Contenu des activités dans `metadata` (pas de colonne texte dans l'ADR).
+- Pas d'écran (le plan prévoit l'UI CRM au J24) ; pas de rappels d'échéance (worker avec les canaux) ; pas d'activité sans lead.
+- Bug trouvé en test et corrigé : supprimer la ligne d'un membre échouait quand il avait écrit une entrée de chronologie (clé étrangère « set null » bloquée par l'immutabilité).
+
+## J21 — Capture publique (branche `day-21-capture`, commité, PR ouverte)
+Cible : 34,9 % | Réel : à valider | Statut : — (le C1 attend le GO de la responsable technique)
+
+### Tâches
+| Tâche | Estimé | Livré | Validée |
+|---|---|---|---|
+| Clés de formulaire par projet | 1 h | oui (migration `20261123100000`, empreinte, origines, plafond) | oui (pgTAP, API réelle) |
+| `POST /api/leads` (origine, rate limit, honeypot, zod) | 2 h | oui (route publique + préflight CORS) | oui (HTTP réel) |
+| Transaction contact + lead + consent + job d'assignation | 2 h | oui (`capture_lead`) | oui (12 soumissions simultanées : 1 contact) |
+| Tests | 1 h | oui | oui |
+
+### Validation du jour
+- Deux soumissions identiques → **un contact** (§13-3) : HTTP réel, 8 et 12 soumissions simultanées.
+- Source, UTM, `landing_page_id`, texte et version du consentement stockés ; **organisation déduite de la clé**, jamais du corps (un corps qui nomme une entreprise ou un projet est refusé).
+
+### Revue sécurité (1 bloquant, 4 moyens, 3 faibles) — corrigés : réactivation d'un contact désinscrit par la voie publique (bloquant), adresse du visiteur et proxys de confiance, seau de débit par clé inventée, préflight limité, finalités ; **soumis à la responsable technique** : double opt-in avant le premier envoi, défi anti-robot ou quota de captures publiques, oracle au quota plein, planification de `rate_limit_purge`, un usage de plus de `service_role`.
+
+### Tests : domain 553 ✓ · web 2377 ✓ (capture : 48) · worker 34 ✓ · pgTAP 2024 (dont 160_capture : 137) ✓ · API réelle 407 ✓ (capture : 14) · acceptation 68 ✓ (capture : 12) · lint, typecheck, check:leaks verts
+### Écarts à la spec / plan
+- Colonne `key_prefix` ajoutée à `form_keys` (non secrète).
+- Le traitement du job `lead.assign` est le J22 (handler provisoire sans effet).
+- Pas de double opt-in (spec muette) : consentement non vérifié ; à traiter avant tout envoi marketing.
+- Pas d'écran de gestion des clés (J24).
+
+## J22 — Assignation (branche `day-22-assignment`, commité, PR ouverte)
+Cible : 36,5 % | Réel : à valider | Statut : — (le C1 attend le GO de la responsable technique)
+
+### Tâches
+| Tâche | Estimé | Livré | Validée |
+|---|---|---|---|
+| `assignment_rules` (E8) round-robin et par projet | 2 h | oui (migration `20261124100000`, règle projet / défaut) | oui (pgTAP, API réelle) |
+| Handler worker `lead.assign` idempotent | 1,5 h | oui (`auto_assign_lead` + handler, dernier essai = alerte) | oui (unitaires, acceptation) |
+| File « non assignés » + alerte manager | 1,5 h | oui (`notifications`, `listUnassignedLeads`) | oui |
+| Tests | 1 h | oui | oui |
+
+### Validation du jour
+- Échec d'assignation → le lead reste dans la file « non assignés » et chaque owner / admin reçoit **une** alerte.
+- Rejeu du job : aucune double assignation, aucune double alerte (acceptation HTTP : capture → job → assignation → rejeu).
+
+### Revue sécurité (0 bloquant, 2 moyens, 7 faibles) — corrigés : évincement des notifications lues au plafond, plafond de règles sérialisé, réactivation refusée si abonnement suspendu, tableau 2D / NULL, curseur, motif ; **soumis à la responsable technique** : leads libérés sans nouveau job, membre ré-ajouté, projet archivé, délai dépassé, abonnement des jobs en vol.
+
+### Tests : domain 559 ✓ · web 2389 ✓ (assignment : 12) · worker 39 ✓ · pgTAP 2110 (dont 170_assignment : 86) ✓ · API réelle 415 ✓ (assignment : 8) · acceptation 71 ✓ (assignation : 3) · lint, typecheck, check:leaks verts
+### Écarts à la spec / plan
+- Table `notifications` créée au J22 (l'ADR 007 J14 la renvoyait au J39) : nécessaire à l'alerte du plan.
+- Vue « Leads non assignés » = UI (J24) ; le J22 livre le service et l'API.
+- Un lead créé à la main (J19) ne passe pas par la règle (la spec ne le prévoit que pour la capture) ; le commercial ne crée toujours pas de lead.
+
+## J23 — Import CSV (branche `day-23-import`, commité, PR ouverte)
+Cible : 38,1 % | Réel : à valider | Statut : — (le C1 attend le GO de la responsable technique)
+
+### Tâches
+| Tâche | Estimé | Livré | Validée |
+|---|---|---|---|
+| Envoi + analyse en continu | 1,5 h | oui (route `POST /api/imports`, parseur CSV sans dépendance, bucket privé `imports`) | oui (unitaires, Storage réel) |
+| Mapping + aperçu 20 lignes | 2 h | oui (`/api/imports/preview`, n'écrit rien) | oui (HTTP réel) |
+| Rapport de dédup | 1 h | oui (nouveaux, connus, doublons, erreurs par ligne ; rapport CSV téléchargeable) | oui |
+| Commit via job | 1,5 h | oui (`/api/imports/confirm` -> job `import_csv`, handler worker idempotent) | oui |
+
+### Validation du jour
+- **Rien n'est écrit avant la confirmation** (HTTP réel : après l'envoi et l'aperçu, aucun contact, lead ni job).
+- `leads-100.csv` : **65 contacts créés, 17 rattachés, 18 lignes refusées**, un job d'assignation par lead (67), **aucun consentement** ; rejeu du job sans doublon ; rapport sans donnée de contact.
+
+### Revue sécurité (0 bloquant, 6 moyens, 6 faibles) — corrigés : rapport lu par blocs (plus de troncature à 1000), projet archivé, corps lu après l'authentification, lot « running » annulable si son job est mort, fichier retiré à l'annulation, plafond de lots sur 90 jours, jobs d'assignation étalés ; **soumis à la responsable technique** : purge du Storage, écart avec l'ADR 014 (owner et admin seulement), hash du fichier, double opt-in.
+
+### Tests : domain 574 ✓ · web 2406 ✓ (imports : 17) · worker 56 ✓ (import_csv : 12) · pgTAP 2227 (dont 180_imports : 117) ✓ · API réelle 425 ✓ (imports : 10) · acceptation 83 ✓ (import : 12) · lint, typecheck, check:leaks verts
+### Écarts à la spec / plan
+- Tables `import_batches` / `import_rows` et bucket `imports` : ajouts (addendum ADR 007).
+- Import réservé à owner et admin (l'ADR 014 y ajoute marketing et commercial « assigné à soi »).
+- Pas d'écran (J24) ; pas de purge du Storage (à planifier avec le worker).
+- Numéros du rapport = numéros d'enregistrement (lignes vides ignorées).
+
+## J24 — UI CRM (branche `day-24-crm-ui`, commité, PR ouverte)
+Cible : 39,7 % | Réel : à valider | Statut : — (le C1 attend le GO de la responsable technique)
+
+### Tâches
+| Tâche | Estimé | Livré | Validée |
+|---|---|---|---|
+| Liste + filtres + recherche | 2,5 h | oui (`/leads`, `search_leads`, pagination serveur) | oui (pgTAP, API réelle, HTTP réel, vérification visuelle fr / ar / en) |
+| Kanban des deals | 2,5 h | oui (`/deals`, glisser-déposer + menu clavier, `POST /api/deals/move`) | oui (HTTP réel, déplacement vérifié en base) |
+| Export CSV | 1 h | oui (`GET /api/leads/export`, audité, sans troncature, anti-formule) | oui |
+
+### Validation du jour
+- Recherche et export limités à l'entreprise active **et au rôle** : le commercial ne voit que ses leads, l'analyste est renvoyé au tableau de bord, Beta ne voit rien d'Alpha (HTTP réel).
+- Export **journalisé** (`export.created` : nombre de lignes et noms de filtres) avant l'envoi du fichier.
+
+### Revue sécurité (0 bloquant, 2 moyens, 7 faibles) — corrigés : GET d'export inter-sites refusé, export tronqué refusé (413), paramètre invalide refusé (400), formule précédée d'espaces, total conservé hors page, `no-referrer` sur `/leads` ; **soumis à la responsable technique** : « export » comme barrière de lecture, lecture en volume par `rpc/search_leads`, Playwright, recherche sans accents.
+
+### Tests : domain 589 ✓ · web 2452 ✓ (crm : 7 + messages 14) · worker 56 ✓ · pgTAP 2290 (dont 190_crm_search : 63) ✓ · API réelle 431 ✓ (crm : 6) · acceptation 99 ✓ (crm : 16) · lint, typecheck, check:leaks verts
+### Écarts à la spec / plan
+- Pas de Playwright (non installé) : acceptation HTTP + vérification visuelle dans le navigateur intégré (fr, ar, en).
+- Glisser-déposer natif (aucune bibliothèque) + menu « Déplacer vers… » ; extension `pg_trgm`.
+- Pas de fiche détaillée d'un lead ; responsable affiché par un identifiant court.
+
+## J25 — Adaptateur CRM (branche `day-25-crm-adapter`, commité, PR ouverte)
+Cible : 41,3 % | Réel : à valider | Statut : — (le C1 attend le GO de la responsable technique)
+
+### Tâches
+| Tâche | Estimé | Livré | Validée |
+|---|---|---|---|
+| Interface `CrmAdapter` | 1,5 h | oui (`packages/adapters/src/crm`) | oui (contrat commun testé) |
+| Adaptateur interne + CSV | 2 h | oui (`internal`, `csv` aller-retour, dates ISO strictes) | oui |
+| `crm_field_mappings` + `source_of_truth` | 1,5 h | oui (migration `20261127100000`, moteur de conflit) | oui (pgTAP, domaine) |
+| Statut de synchro | 1 h | oui (`/crm`, API, « Réessayer ») | oui (HTTP réel, vérification visuelle fr / ar) |
+
+### Validation du jour
+- **Aucune synchro bidirectionnelle sans règle de conflit** : conflit seulement si les deux côtés ont changé, `source_of_truth` par champ, perdant dans l'audit.
+- **Échec visible et rejouable sans doublon** : statut « En échec » + code d'erreur, « Réessayer » rejoue le même job (acceptation HTTP + navigateur).
+
+### Revue sécurité (0 bloquant, 2 moyens, 8 faibles) — corrigés : faux conflits (curseur de fin), lot de fichier consommé (`synced`), colonne d'identifiant absente, dates ISO strictes, cellule vide, source propre à l'intégration, abonnement ; **soumis à la responsable technique** : documentation du CRM Fusion Leap, équité du worker pour les gros fichiers, `external_id` libre pour le marketing.
+
+### Tests : domain 608 ✓ · adapters 34 ✓ · worker 76 ✓ (crm_sync : 21) · web 2469 ✓ · pgTAP 2397 (dont 200_crm_sync : 107) ✓ · API réelle 436 ✓ (crm-sync : 5) · acceptation 106 ✓ (crm-sync : 7) · lint, typecheck, check:leaks verts
+### Écarts à la spec / plan
+- **Pas de squelette du CRM Fusion Leap** (API non documentée, Q1) ; adaptateurs `internal` et `csv` seulement.
+- Table `integrations` créée ici en version minimale (le J28 l'étend avec les secrets).
+- Synchro de contacts seulement ; pas d'historique dédié (état = job).
+
+## J26 — Tests ventes (branche `day-26-sales-tests`, commité, PR ouverte)
+Cible : 42,9 % | Réel : à valider | Statut : — (le C1 attend le GO de la responsable technique)
+
+### Tâches
+| Tâche | Estimé | Livré | Validée |
+|---|---|---|---|
+| T2 automatisé | 2,5 h | oui (`t2-sales.test.ts`, 11 tests) | oui (vert, HTTP réel + vrais handlers `import_csv` et `lead.assign`) |
+| Dédup inter-entreprises | 1 h | oui (même fichier chez Alpha puis Beta ; formulaire public déjà couvert par `capture-api`) | oui |
+| Rôles sur le CRM | 1,5 h | oui (`crm-roles-matrix.test.ts`, 17 tests : 13 routes + capture publique + 3 pages x 5 rôles + anonyme) | oui |
+| Couverture | 1 h | oui (seuil 80 % appliqué ; domain 97,9 % / 94,8 %, permissions 98,4 % / 98,4 %) | oui |
+
+### Validation du jour
+- **T2 vert** : 100 lignes -> 65 créés, 17 rattachés (15 doublons du fichier + 2 déjà connus), 18 refusées ; 67 leads assignés en round-robin (écart maximal 1) ; rejeu = 0 doublon ; totaux affichés cohérents avec la base et le rapport.
+- **§13-3 démontré** : même fichier chez deux entreprises = deux jeux de contacts séparés ; deux envois identiques du formulaire dans une entreprise = un contact (`capture-api`, 8 soumissions simultanées).
+- **§13-2** : matrice des rôles du CRM sans trou sur les routes et pages existantes ; Analyst ne déplace pas un deal, commercial ne touche ni l'intégration ni l'export, ni un lead non assigné.
+- Constat : la recherche par domaine retrouve 66 leads sur 67 (le contact créé avec un téléphone seul n'a pas d'e-mail) : le test distingue les deux nombres.
+
+### Tests : domain 608 ✓ · adapters 34 ✓ · permissions 394 ✓ · worker 76 ✓ · web 2469 ✓ · pgTAP 2397 ✓ · API réelle 436 ✓ · acceptation 134 ✓ (+28 : t2-sales 11, crm-roles-matrix 17) · lint, typecheck, check:leaks verts
+### Revue adverse (0 bloquant) — corrigés : matrice incomplète (import, mapping, capture publique ajoutés), statuts exacts au lieu de « pas 403 », vrai handler `lead.assign`, ordre de rotation vérifié, totaux Beta stricts, aucun doublon intra-entreprise, contexte forgé, rapport CSV lu par colonne, chemins Storage lus en base. **Non corrigé, à décider** : la couverture n'est pas exécutée en CI (commande manuelle `test:coverage`) ; suppression des règles d'assignation par projet dans les nettoyages (le seed n'en a pas).
+### Écarts à la spec / plan
+- Aucun code applicatif ni migration : le jour ne contient que des tests.
+- Constat : `POST /api/imports` valide le type de contenu avant le rôle (un marketing avec un type refusé reçoit 400, pas 403) ; sans conséquence (rien n'est écrit), signalé.
+- `@vitest/coverage-v8` ajouté en devDependency de `packages/domain` (validé au mini-plan) ; déjà présent pour `packages/permissions`.
+
+## J27 — Checkpoint C2 / Gate G2 (branche `day-27-checkpoint-c2`, commité, PR ouverte)
+Cible : 44,4 % | Réel : à valider | Statut : GO du C2 donné par la responsable technique (9 nov 2026) ; écrans, ADR et job CI restent à décider
+
+### Tâches
+| Tâche | Estimé | Livré | Validée |
+|---|---|---|---|
+| E2E formulaire -> lead -> assignation -> deal gagné | 2,5 h | oui (`g2-lead-to-deal.test.ts`, 9 tests, HTTP réel + vrai handler `lead.assign`) | oui (vert, 3 exécutions de suite) |
+| Corrections | 2 h | aucune correction applicative nécessaire | — |
+| Audit de conformité Phase 2 | 1,5 h | oui (relecteur indépendant, sans code ; 0 bloquant, 3 majeurs, 9 mineurs) | oui |
+| `docs/checkpoints/C2.md` | — | oui (GO avec réserves proposé) | à valider |
+
+### Validation du jour
+- **§13-4** : lead capturé -> assigné -> deal créé -> gagné, avec l'historique d'activités (assignation, sortie de « non assigné », appel, changements d'étape du deal) lu à l'identique par les rôles autorisés et jamais par l'analyste ni l'autre entreprise ; échec de synchro CRM rejoué sans doublon (`crm-sync-flow`, relancé).
+- **Réserve principale (écart 1 du C2)** : le parcours n'est démontré qu'au niveau service, API et base : aucun écran ne crée un lead ou un deal, ne note une activité, ni n'affiche la chronologie ; le test crée le deal par la fonction SQL et la clé de formulaire et la règle d'assignation par SQL.
+- Observation : l'assignation et la sortie de l'étape « non assigné » ont le même horodatage (même transaction) ; leur ordre dans la chronologie n'est pas défini.
+
+### Revue adverse : l'audit Phase 2 tient lieu de revue du jour (tests seulement ce jour-là) ; correction documentaire : en-têtes J20 à J26 du journal (« NON commité » devenu « commité, PR ouverte »).
+
+### Tests : domain 608 ✓ · adapters 34 ✓ · permissions 394 ✓ · worker 76 ✓ · web 2469 ✓ · pgTAP 2397 ✓ · API réelle 436 ✓ · acceptation 143 ✓ (+9 : g2-lead-to-deal) · lint, typecheck, check:leaks verts
+### Écarts à la spec / plan
+- Aucun code applicatif ni migration. Helper `assign-worker.ts` extrait (partagé par `t2-sales` et G2).
+- Pas de Playwright (HTTP réel, comme T1 et T2) : réserve C1 n°2 maintenue.
+
+### Décision C2 du 9 nov 2026 (suite du J27)
+- GO du C2 donné par la responsable technique. Écrans CRM : **option A** (avant G3), mise en œuvre dans le plan : J30b contacts et consentement, J30c et J30d fiche lead, J39b configuration, J39c import. Plan : 68 jours, G3 le lun 18 jan 2027, fin le mar 16 fév 2027. Cibles de tous les jours recalculées sur 68 jours (les cibles citées plus haut sont celles de l'ancien plan à 63 jours).
+- Restent à décider : relecture et acceptation des ADR (004 et 008 avant J28 ; 007 pour les 8 tables de la Phase 2), job CI de bout en bout.
+
+### Décisions du 2026-11-09 (ADR, CI, Playwright)
+- ADR acceptés par délégation de la responsable technique : 001 à 006, 014, 015 ; 007 pour les Phases 1 et 2 ; 016 sous condition (avant J54). Restent Proposed : 008 (Q2, à trancher au début de J31), 010 (Q5), 012 (avant J47). Job CI e2e (option A) avant J29 ; Playwright décidé au J58 ; `libphonenumber-js` épinglé. Q1 reste ouverte ; fusion des PR #8 à #31 en attente de l'ordre de la responsable technique.
+
+### Job CI de bout en bout (9 nov 2026, branche `ci-e2e-job`)
+- `.github/workflows/ci.yml` : job `e2e` (Supabase local, build, `next start`, `pnpm test:e2e`) et étape de couverture 80 % dans `verify`. Ferme l'écart 3 du C2 (réserve C1 n°4). Aucun code applicatif ni migration.
+
+## J28 — Intégrations et secrets (branche `day-28-integrations`, NON commité)
+Cible : 42,6 % (plan à 68 jours) | Réel : à valider | Statut : —
+
+### Tâches
+| Tâche | Estimé | Livré | Validée |
+|---|---|---|---|
+| `integrations` + `channels` + RLS | 2 h | oui (migration `20261128100000`, SELECT par colonnes, fonctions owner / admin) | oui (pgTAP 119, API réelle 12) |
+| Stockage chiffré `secret_ref` (ADR 004) | 2 h | oui (`store.ts`, rotation, reconnexion, lecture service_role) | oui (adapters 10, acceptation avec déchiffrement réel) |
+| Écran « Intégrations » sans secret brut | 2 h | oui (`/integrations` fr / ar / en, écriture seule) | oui (HTTP réel ; la vérification visuelle dans un navigateur reste à faire) |
+
+### Validation du jour
+- **Aucun jeton lisible** via la Data API ni par un Company Admin : `secret_ref` et `select *` refusés, `private.secrets` sans droit, `get_integration_secret` réservé à service_role ; le jeton n'apparaît ni dans les réponses, ni dans les pages, ni dans l'audit, ni dans `idempotency_keys`.
+- **Rotation testée** : remplacer le jeton supprime l'ancien secret dans la même transaction ; reconnexion et déconnexion testées ; isolation Alpha / Beta (AAD et clé composite).
+
+### Revue sécurité (0 bloquant, 3 majeurs, 4 moyens) — corrigés : identité de canal (format), compte déconnecté verrouillé (reconnexion), rejeu d'une clé d'idempotence avec un autre jeton (HMAC), plafond en octets, statuts servis par `get_integration_secret`, tests renforcés ; **soumis à la responsable technique** : squat et énumération du compte global (valider le jeton auprès du fournisseur avant de réserver ? libérer un `pending` après un délai ?), unicité globale des expéditeurs de canal, fonctions d'écriture appelables directement par la Data API avec un chiffré arbitraire.
+
+### Tests : domain 615 ✓ · adapters 44 ✓ · permissions 394 ✓ · worker 76 ✓ · web 2492 ✓ · pgTAP 2516 (dont 210_integrations_secrets : 119) ✓ · API réelle 448 (integrations-secrets : 12) ✓ · acceptation 153 ✓ (+1 test réservé à un serveur sans clé maître ; integrations-flow : 9) · couverture domain 97,9 % · lint, typecheck, check:leaks verts
+### Écarts à la spec / plan
+- Pas de formulaire de création dans l'écran (chaque fournisseur a ses champs : J31 e-mail, J34 WhatsApp) : création par l'API seulement ; l'écran liste, remplace, reconnecte et déconnecte.
+- Pas de rotation de la clé maître (J58 et J59, `docs/runbooks/secret-rotation.md`).
+- Aucune validation par un fournisseur réel : toute intégration reste `pending`.
+
+## J29 — Pipeline webhook (branche `day-29-webhooks`, NON commité)
+Cible : 44,1 % (plan à 68 jours) | Réel : à valider | Statut : —
+
+### Tâches
+| Tâche | Estimé | Livré | Validée |
+|---|---|---|---|
+| `webhook_events` + unicité | 1,5 h | oui (migration `20261129100000`, unicité par entreprise) | oui (pgTAP 78, API réelle 6) |
+| Route `/api/webhooks/[provider]` | 2,5 h | oui (taille, signature, tenant par le compte, limitation de débit) | oui (route 11, acceptation 16) |
+| ACK rapide + job | 1 h | oui (job `process_webhook` dans la même transaction, handler worker) | oui (worker 12, acceptation) |
+| Tests | 1 h | oui | oui |
+
+### Validation du jour
+- **Signature invalide rejetée et journalisée** : 401, ligne `rejected` sans payload ; **rejeu traité une seule fois** (8 envois simultanés : un événement, un job) ; **payload trop gros** : 413 ; **compte inconnu** : même 401 que la signature invalide (aucun oracle) ; **tenant forgé dans le payload** : l'événement reste à l'entreprise du compte.
+- Réserve : aucun adaptateur de production n'existe (e-mail J32, WhatsApp J34 et J35) : la route répond 404 pour tous les fournisseurs et les scénarios de signature tournent avec un adaptateur de test injecté sur les vraies fonctions SQL (pas de test HTTP de signature avant J32).
+
+### Revue sécurité (0 bloquant, 2 majeurs, 5 moyens) — corrigés : oracle d'existence d'un compte (même réponse et même travail), seau de débit (IPv6 /64 et adresse inconnue), secret absent, horodatage strict, adaptateur qui lève, sans processeur = `failed` re-jouable, marge de taille et caractère nul du jsonb, plafond de file sur 7 jours, tests (magasin, réponses identiques) ; **à décider avant le J34** : secret de webhook distinct et propre à chaque entreprise (App Secret WhatsApp), identifiant d'événement dérivé de contenu signé ; **avec l'exploitation (J39)** : balayage des événements bloqués, rétention du payload et des rejets, limite par intégration.
+
+### Tests : domain 615 ✓ · adapters 63 ✓ · permissions 394 ✓ · worker 88 ✓ · web 2509 ✓ · pgTAP 2594 (dont 220_webhook_events : 78) ✓ · API réelle 454 (webhooks : 6) ✓ · acceptation 169 ✓ (+1 test réservé à un serveur sans clé maître ; webhooks-flow : 16) · couverture domain 97,9 % · lint, typecheck, check:leaks verts
+### Écarts à la spec / plan
+- Unicité `(organization_id, provider, external_event_id)` au lieu de `(provider, external_event_id)` (ADR 007 mis à jour).
+- Pas de purge du payload ni des rejets (J39, J58) ; pas de limite par intégration.
+
+## J30 — Conversations et messages (branche `day-30-conversations`, NON commité)
+Cible : 45,6 % (plan à 68 jours) | Réel : à valider | Statut : —
+
+### Tâches
+| Tâche | Estimé | Livré | Validée |
+|---|---|---|---|
+| Tables + RLS | 2 h | oui (migration `20261130100000`, lecture par rôle, aucune écriture directe) | oui (pgTAP 126, API réelle 12) |
+| Cohérence d'entreprise des messages | 1 h | oui (clé composite + déclencheurs d'immuabilité) | oui |
+| Unicité `provider_message_id` | 1 h | oui (+ clé d'idempotence, conflit si rejeu contradictoire) | oui (8 envois simultanés = 1 message) |
+| Services d'état et d'assignation | 2 h | oui (fonctions SQL par rôle + service web) | oui |
+
+### Validation du jour
+- **Un message ne peut porter une autre `organization_id`** (ni un autre canal) que sa conversation : refusé par la base, y compris en insertion forgée.
+- **Le commercial ne lit que SES conversations** (et leurs messages) ; la file `to_triage`, marketing, analyste, l'autre entreprise et l'anonyme : rien.
+
+### Revue sécurité (0 bloquant, 2 majeurs, 5 moyens) — corrigés : rejeu contradictoire (autre conversation ou autre corps) devenu un conflit d'idempotence, corps de message dans le DETAIL des erreurs de contrainte (validation avant insertion), `pending` sans responsable et CHECK état / responsable, ordre des verrous (membre puis conversation), index du tri, plafond de messages par conversation, horodatage clampé, canal déconnecté, tests renforcés (PATCH vacuous, erreurs précises) ; **à noter** : un message sortant naît `queued` sans approbation (le worker d'envoi J31 doit exiger la chaîne de contrôle), `handled_by` et verrou sans écrivain avant J38, effacement RGPD d'un contact avec messages (anonymisation à définir), pas de quota `messages_per_month`.
+
+### Tests : domain 621 ✓ · adapters 63 ✓ · permissions 394 ✓ · worker 88 ✓ · web 2515 ✓ · pgTAP 2720 (dont 230_conversations_messages : 126) ✓ · API réelle 466 (conversations : 12) ✓ · acceptation 169 ✓ (+1 test réservé à un serveur sans clé maître) · lint, typecheck, check:leaks verts
+### Écarts à la spec / plan
+- Statut de message `received` ajouté (entrants seulement) ; états par `CHECK` et non par enum.
+- Pas de route ni d'écran (J37) ; pas d'envoi ni de réception réels (J31, J32, J35).
+
+## J31 — Envoi d'e-mail derrière la chaîne de contrôles (branche `day-31-email-send`, NON commité)
+Cible : 51,5 % (plan à 68 jours) | Réel : à valider | Statut : —
+
+### Tâches
+| Tâche | Estimé | Livré | Validée |
+|---|---|---|---|
+| `assertCanSend` (chaîne de contrôles) | 2 h | oui (`packages/domain/src/outbound`, 15 refus typés, échec fermé) | oui (33 tests) |
+| Adaptateur e-mail (ADR 008) | 2,5 h | oui (interface + Postmark, `fetch` injecté) | oui (11 tests, aucun appel réel) |
+| Handler `send_message` | 1,5 h | oui (+ migration, approbation, tentative unique) | oui (worker 30 tests, pgTAP 94, API 10) |
+
+### Validation du jour
+- **Contrôle final dans le worker juste avant l'appel** : l'état est relu dans une transaction verrouillée (`message_send_claim`) puis `checkCanSend` décide ; aucune route HTTP n'envoie.
+- **`accepted` n'est pas `delivered`** : le worker s'arrête à `accepted` ; la base interdit `queued` vers `delivered` et tout envoi accepté sans approbation.
+
+### Revue sécurité (0 bloquant, 2 majeurs, 5 moyens) — corrigés : entreprise suspendue ou abonnement inactif ignorés, clé étrangère de `approved_by` qui bloquait la suppression d'un compte, approbation jamais revalidée (approbateur rétrogradé, durée), adresse du contact modifiable après approbation, `accepted` perdu après une panne base ou un second worker, 502 / 504 classés « renvoyable » ; mineurs traités : compteur de débit sérialisé, secret mal formé refusé avant l'appel ; **à noter** : lien de désabonnement (J33), annulation d'un message approuvé (J38), quota `messages_per_month` (J39).
+
+### Tests : domain 654 ✓ · adapters 74 ✓ · permissions 394 ✓ · worker 118 ✓ · web 2515 ✓ · pgTAP 2814 (dont 240_send_chain : 94) ✓ · API réelle 476 (send-chain : 10) ✓ · lint, typecheck, check:leaks verts · acceptation 169 ✓ (+1 réservé à un serveur sans clé maître)
+### Écarts à la spec / plan
+- `message_approve` (owner et admin) ajoutée : point d'entrée de l'approbation humaine avant les écrans J38 et J44 ; l'approbation met le job en file.
+- Objet de l'e-mail dérivé du corps (pas de colonne `subject` avant J40) ; limite de débit provisoire de 100 e-mails par heure et par canal ; `fetch` injecté au lieu de MSW (non installé).
+- Aucun flux n'active encore un canal ou une intégration e-mail : le premier envoi réel attend la validation des identifiants (J32) et le checkpoint C3 ; Postmark reste une hypothèse (Q2).
+
+## J32 — E-mail entrant et statuts (branche `day-32-email-inbound`, NON commité)
+Cible : 52,9 % (plan à 68 jours) | Réel : à valider | Statut : —
+
+### Tâches
+| Tâche | Estimé | Livré | Validée |
+|---|---|---|---|
+| Webhook de statuts | 2 h | oui (adaptateur Postmark, `email_status_apply`, processeur worker, secret de webhook) | oui (adaptateur 32, worker 11, pgTAP 114, API 9, acceptation HTTP réelle) |
+| Réception + rattachement | 2,5 h | oui (canal par adresse destinataire, contact par adresse expéditrice, un fil par contact et canal) | oui |
+| File des cas ambigus | 1,5 h | oui (`inbound_unmatched`, jamais de contact créé, plafonds) | oui |
+
+### Validation du jour
+- **Une réponse est rattachée à la bonne conversation** : celle du contact et du canal désignés par les adresses, déduplication par identifiant du fournisseur, un fil fermé se rouvre (acceptation HTTP réelle).
+- **Un rebond met à jour le message et le contact** : message `bounced`, adresse en `suppressions`, `do_not_contact` inchangé ; une plainte pose aussi `do_not_contact` (décision de la responsable technique).
+
+### Revue sécurité (1 bloquant, 1 majeur, 5 moyens) — corrigés : usurpation d'expéditeur (SPF non aligné sur l'adresse affichée, en-têtes dupliqués), file des cas ambigus sans plafond effectif (corps, expéditeur, entreprise, jamais perdue en silence), texte invalide qui faisait réessayer le fournisseur sans fin, identifiants d'événement hors contrainte, canal choisi par l'en-tête « To » de l'expéditeur, secret de webhook égal au jeton d'envoi, couverture des rebonds (BadEmailAddress), plainte qui écrasait la provenance, réclamation ancienne jamais réconciliée, HTTPS non imposé ; **résiduel accepté** : mot de passe Basic dans chaque requête, écart de temps pour un compte inconnu (J29).
+
+### Tests : domain 654 ✓ · adapters 106 ✓ · permissions 394 ✓ · worker 129 ✓ · web 2523 ✓ · pgTAP 2928 (dont 250_email_inbound : 114) ✓ · API réelle 485 (email-inbound : 9) ✓ · acceptation 185 ✓ (+1 réservé à un serveur sans clé maître) · lint, typecheck, check:leaks verts
+### À surveiller
+- Le test pgTAP `230_conversations_messages` (n° 106) a échoué deux fois de suite puis réussi trois fois sans changement de code : cause non trouvée, à surveiller en CI.
+### Écarts à la spec / plan
+- Pas de rattachement par `Message-ID` / `In-Reply-To` / `References` : un fil par contact et canal (J30), le rattachement se fait par l'adresse expéditrice dans le canal.
+- Secret de webhook fourni par l'administrateur (et non généré par le serveur) ; table `inbound_unmatched` et second secret : amendements de l'ADR 007.
+- Tout ce qui dépend de Postmark reste À CONFIRMER sur un compte sandbox (checkpoint C3) : en-têtes SPF / DKIM des entrants, `Metadata` des événements, codes de rebond.
+- Aucun flux n'active encore un canal e-mail : ni envoi réel ni réception réelle avant ce flux et C3.

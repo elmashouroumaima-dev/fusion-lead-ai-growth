@@ -1,6 +1,6 @@
 # ADR 001 — Stack technique
 
-- **Statut :** Proposed (passage à Accepted prévu à la gate G0', J3)
+- **Statut :** Accepted (2026-11-09, décision de la responsable technique par délégation, après les audits de conformité C1 et C2)
 - **Date :** 2026-11-10
 - **Section de spec :** §6 (architecture), §15 (références)
 

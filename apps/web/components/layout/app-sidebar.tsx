@@ -3,11 +3,16 @@
 import {
   ChevronDownIcon,
   CircleUserIcon,
+  FolderKanbanIcon,
+  KanbanSquareIcon,
+  PlugIcon,
   LayoutDashboardIcon,
   MailIcon,
   PaletteIcon,
+  RefreshCwIcon,
   ShieldIcon,
   SlidersHorizontalIcon,
+  TargetIcon,
   UsersIcon,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -30,8 +35,8 @@ import {
 import { Link, usePathname } from "../../i18n/navigation";
 
 type NavItem = {
-  href: "/dashboard" | "/members" | "/admin/organizations";
-  labelKey: "dashboard" | "members" | "admin";
+  href: "/dashboard" | "/projects" | "/leads" | "/deals" | "/crm" | "/members" | "/admin/organizations" | "/integrations";
+  labelKey: "dashboard" | "projects" | "leads" | "deals" | "crmSync" | "members" | "admin" | "integrations";
   icon: typeof UsersIcon;
 };
 
@@ -52,10 +57,16 @@ const isCurrent = (pathname: string, href: string): boolean =>
  */
 export function AppSidebar({
   showMembers,
+  showCrm = false,
+  showCrmSync = false,
   showSettings = false,
   showAdmin = false,
 }: {
   showMembers: boolean;
+  /** « Leads » et « Deals » : rôles qui peuvent lire les leads (commodité d'affichage ; les pages et la RLS décident). */
+  showCrm?: boolean;
+  /** « CRM » (synchronisation) et « Intégrations » : owner et admin (commodité d'affichage ; la page et la base décident). */
+  showCrmSync?: boolean;
   showSettings?: boolean;
   showAdmin?: boolean;
 }) {
@@ -64,6 +75,19 @@ export function AppSidebar({
 
   const items: NavItem[] = [
     { href: "/dashboard", labelKey: "dashboard", icon: LayoutDashboardIcon },
+    { href: "/projects", labelKey: "projects", icon: FolderKanbanIcon },
+    ...(showCrm
+      ? [
+          { href: "/leads", labelKey: "leads", icon: TargetIcon } satisfies NavItem,
+          { href: "/deals", labelKey: "deals", icon: KanbanSquareIcon } satisfies NavItem,
+        ]
+      : []),
+    ...(showCrmSync
+      ? [
+          { href: "/crm", labelKey: "crmSync", icon: RefreshCwIcon } satisfies NavItem,
+          { href: "/integrations", labelKey: "integrations", icon: PlugIcon } satisfies NavItem,
+        ]
+      : []),
     ...(showMembers
       ? [{ href: "/members", labelKey: "members", icon: UsersIcon } satisfies NavItem]
       : []),

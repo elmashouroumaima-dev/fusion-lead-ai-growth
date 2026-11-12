@@ -309,3 +309,30 @@ Manager + agents : A2 base de données, A3 logger et contexte de requête, A5 s�
 ### Blocages / à faire
 - Politique de rétention de l'audit ; écran de consultation éventuel ; valider ADR 015 (UI) et ADR 014.
 ### Demain : J13 (jobs et worker)
+
+## J13 — ven 27 nov 2026 — Phase 1 (préparé en avance, NON commité, branche `day-13-jobs-worker`)
+Cible : 22,2 % | Réel : à valider | Statut : —
+
+### Organisation du travail
+Manager + A5 (revue sécurité adverse, lecture seule et attaques réelles sur la base locale). Fonctions SQL, worker, tests et documentation par le manager.
+
+### Tâches
+| Tâche | Estimé | Livré | Validée |
+|---|---|---|---|
+| Table `jobs` + fonctions (`enqueue`, `claim` `SKIP LOCKED`, bail, `heartbeat`, `complete`, `fail`, `cancel`, `replay`) | 2 h | oui (migration + retour arrière) | oui |
+| Claim, bail, heartbeat, reprise des baux expirés | 2 h | oui (SQL + `Runner`) | oui |
+| Retry exponentiel avec jitter + `dead_letter` | 1,5 h | oui | oui |
+| Job `noop` + registre de handlers typés | 0,5 h | oui (le fallback du plan n'a pas été nécessaire) | oui |
+
+### Tests : domain 388 ✓ · permissions 394 ✓ · web 2045 ✓ · worker 33 ✓ · adapters 1 · pgTAP 1174 ✓ (080_jobs : 75) · RLS 291 ✓ (jobs : 8, dont 8 requêtes simultanées sur 60 jobs, 3 exécutions consécutives identiques) · lint et typecheck verts
+Démonstration locale : worker lancé sur la base locale, job `noop` → `succeeded`, type inconnu → `dead_letter` (`unknown_kind`).
+### Écarts à la spec / plan
+- Aucun écart. Décision validée : accès du worker par RPC Supabase avec `service_role` (pas de client `pg` direct). Le test d'arrêt SIGTERM est unitaire (Windows ne transmet pas les signaux).
+### Constats de sécurité (A5)
+- Aucune faille critique ou élevée : droits (anon, authenticated, service_role sans accès direct), isolation entre organisations (JWT forgés, `user_metadata`), claim exclusif sous 8 sessions parallèles, baux expirés (100 par passe), validation de la charge utile, `p_run_at` extrême.
+- Corrigés : `last_error` réduit à l'alphabet `[A-Za-z0-9_.:-]` (bidi, zéro-largeur) ; délai maximal par handler ; aucune tentative consommée à l'arrêt forcé ; succès non enregistré ne déclenche plus d'échec.
+- Restent (documentés, ADR 003 et runbook) : acteur « système » et `p_org` non vérifié pour `cancel_job` / `replay_dead_letter` (à compléter par `p_actor` avant exposition à l'interface, J39) ; validation de charge utile heuristique ; exécution « au moins une fois » (handlers idempotents) ; pas de purge ni de quota par organisation (J14 / J57).
+### Blocages / à faire
+- Branche empilée sur `feat-settings-colors` (PR n°9) elle-même sur `day-12-audit-logs` (PR n°8) : fusionner dans l'ordre.
+### Demain : J14 (plans et quotas, rôle Platform Admin)
+

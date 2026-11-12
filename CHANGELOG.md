@@ -3,6 +3,11 @@
 Format : Keep a Changelog. Une entrée par jour de travail.
 
 ## [Non publié]
+### J13 — Jobs et worker
+- Ajout : table `jobs` (RLS owner/admin, aucune écriture directe), enum `job_status`, fonctions `enqueue_job`, `claim_jobs` (`SKIP LOCKED`, bail), `heartbeat_job`, `complete_job`, `fail_job` (backoff exponentiel + jitter, `dead_letter`), `cancel_job`, `replay_dead_letter`, reprise des baux expirés ; migration `20261115100000` et retour arrière ; audit `job.dead_lettered` / `job.replayed` / `job.cancelled`.
+- Ajout : worker (`apps/worker`) : `Runner` (concurrence, heartbeat, arrêt propre SIGTERM), registre de handlers typés, handler `noop`, journal JSON sans charge utile ; dépendances `@supabase/supabase-js` et `zod`.
+- Ajout : runbook `docs/runbooks/jobs-worker.md` ; ADR 003 (mise en œuvre).
+
 ### Paramétrage — palette de couleurs globale de la plateforme (ADR 016, proposé)
 - Ajout : table `platform_config` (palette globale, données non tenant), migration `20261114100000` et retour arrière ; écriture par `set_platform_config` / `reset_platform_config` réservée aux owner / admin d'organisation, lecture serveur par `get_platform_config` (service_role).
 - Ajout : page `/settings/appearance` (owner / admin) : palettes prêtes à l'emploi, sélecteur de couleurs clair/sombre, aperçu, contrôle de contraste WCAG AA, réinitialisation.

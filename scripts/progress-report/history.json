@@ -1,0 +1,44 @@
+[
+  {
+    "date": "2026-11-07",
+    "percent": 25.4,
+    "days": 16,
+    "totalDays": 63,
+    "tests": 4655
+  },
+  {
+    "date": "2026-11-08",
+    "percent": 43.8,
+    "days": 27.6,
+    "totalDays": 63,
+    "tests": 6520
+  },
+  {
+    "date": "2026-11-09",
+    "percent": 42.6,
+    "days": 29,
+    "totalDays": 68,
+    "tests": 6738
+  },
+  {
+    "date": "2026-11-10",
+    "percent": 45.6,
+    "days": 31,
+    "totalDays": 68,
+    "tests": 7036
+  },
+  {
+    "date": "2026-11-11",
+    "percent": 47.1,
+    "days": 32,
+    "totalDays": 68,
+    "tests": 7214
+  },
+  {
+    "date": "2026-11-12",
+    "percent": 48.5,
+    "days": 33,
+    "totalDays": 68,
+    "tests": 7404
+  }
+]

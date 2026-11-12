@@ -1,6 +1,6 @@
 import { ShieldCheckIcon, UserCheckIcon, ZapIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { LogoMark } from "@/components/brand/logo";
+import { OfficialLogo } from "@/components/brand/official-logo";
 import { cn } from "@/lib/utils";
 
 const FEATURES = [
@@ -36,10 +36,7 @@ export function BrandPanel({ className }: { className?: string }) {
   const th = useTranslations("Home");
   return (
     <section aria-label={tc("appName")} className={cn("grid max-w-xl gap-4 text-white lg:gap-6", className)}>
-      <div className="flex items-center gap-3">
-        <LogoMark className="size-10 lg:size-14" />
-        <p className="text-xl font-semibold tracking-tight lg:text-3xl">{tc("appName")}</p>
-      </div>
+      <OfficialLogo alt={tc("appName")} priority className="w-56 lg:w-80" />
       <p className="text-sm leading-relaxed text-white/95 lg:text-lg">{th("tagline")}</p>
       <FeatureChips className="hidden sm:flex" />
     </section>

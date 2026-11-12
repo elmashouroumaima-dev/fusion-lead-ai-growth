@@ -2,7 +2,7 @@
 
 import {
   ChevronDownIcon,
-  ImageIcon,
+  CircleUserIcon,
   LayoutDashboardIcon,
   MailIcon,
   PaletteIcon,
@@ -74,7 +74,7 @@ export function AppSidebar({
 
   const settingsLinks: SettingsLink[] = [
     { href: "/settings/appearance", labelKey: "settingsPalette", icon: PaletteIcon },
-    { href: "/settings/logo", labelKey: "settingsLogo", icon: ImageIcon },
+    { href: "/settings/logo", labelKey: "settingsLogo", icon: CircleUserIcon },
     ...(showAdmin
       ? [
           {

@@ -92,7 +92,7 @@ export function LogoEditor({ currentSrc }: Props) {
         : null;
 
   return (
-    <div className="grid gap-4">
+    <div className="bg-card text-card-foreground flex flex-col gap-6 rounded-xl border py-6 shadow-sm px-6">
         <div className="flex flex-wrap items-center gap-4">
           <div className="bg-muted flex size-20 items-center justify-center overflow-hidden rounded-lg border">
             {shown ? (

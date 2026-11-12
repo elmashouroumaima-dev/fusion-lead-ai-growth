@@ -64,7 +64,7 @@ export function SmtpCard({ initial, secretsAvailable }: Props) {
   const lastError = [saveState, resetState, testState].find((s) => s.status === "error");
 
   return (
-    <div className="grid gap-4">
+    <div className="bg-card text-card-foreground flex flex-col gap-6 rounded-xl border py-6 shadow-sm px-6">
         {!secretsAvailable ? (
           <Alert role="status">
             <p className="text-sm">{t("noKey")}</p>

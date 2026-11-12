@@ -10,6 +10,13 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..")
 // suivant renvoie le cache et les fichiers de la racine du dépôt ne sont jamais lus.
 loadEnvConfig(root, process.env.NODE_ENV !== "production", console, true);
 
+// Développement (Turbopack) : les processus Node qui évaluent le CSS (PostCSS + Tailwind) doivent pouvoir charger un module ES depuis du code
+// CommonJS. Sans cette option, `pnpm dev` échoue sur `magic-string` (erreur ERR_REQUIRE_ESM) au premier fichier CSS, par exemple
+// `app/fonts/cairo.module.css`. Sans effet sur le build de production ni sur les versions de Node qui l'activent déjà.
+if (!/--experimental-require-module/.test(process.env.NODE_OPTIONS ?? "")) {
+  process.env.NODE_OPTIONS = [process.env.NODE_OPTIONS, "--experimental-require-module"].filter(Boolean).join(" ");
+}
+
 const nextConfig: NextConfig = {
   // Les packages du monorepo sont consommés en TypeScript source.
   transpilePackages: ["@fusion-leap/domain", "@fusion-leap/permissions", "@fusion-leap/adapters"],

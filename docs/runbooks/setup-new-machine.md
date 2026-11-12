@@ -6,7 +6,7 @@ Objectif : cloner le dépôt et faire tourner l'application, le worker et les te
 | Outil | Version | Remarque |
 |---|---|---|
 | Git | récent | |
-| Node.js | **22.12 ou plus** (`engines` du `package.json` ; 24 recommandé) | une version plus ancienne fait échouer `pnpm dev` (erreur `require() of ES Module` sur `magic-string` / Tailwind) |
+| Node.js | **22.12 ou plus** (`engines` du `package.json` ; 24 recommandé) | version exigée par le dépôt (`engines`) |
 | pnpm | via Corepack (`corepack enable`) | la version est fixée par le dépôt (`packageManager`) |
 | Docker Desktop | récent, **démarré** | prévoir quelques Go de mémoire pour Docker (la pile Supabase locale en utilise environ 2 Go) |
 
@@ -83,7 +83,7 @@ pnpm db:reset       # repart d'une base propre (migrations + données de test)
 |---|---|
 | `docker ps` ou `supabase status` : « 500 Internal Server Error » | le moteur Docker Desktop est bloqué : le redémarrer (Troubleshoot > Restart), au besoin `wsl --shutdown` puis rouvrir Docker Desktop |
 | `supabase_db ... is not ready: starting` | attendre quelques secondes que la base soit « healthy », puis relancer la commande |
-| `require() of ES Module ... magic-string` au `pnpm dev` | Node trop ancien : installer Node 22.12 ou plus |
+| `require() of ES Module ... magic-string` au `pnpm dev` | corrigé dans `apps/web/next.config.ts` (option `--experimental-require-module` pour les processus de Turbopack) : mettre à jour la branche depuis `main`. Ce n'était pas une question de version de Node |
 | L'application refuse de démarrer (variable manquante) | `.env.local` incomplet : la validation zod au démarrage nomme la variable manquante |
 | Port 3000 déjà utilisé | arrêter l'ancien processus (`next start` ou `next dev`) avant de relancer |
 

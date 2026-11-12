@@ -259,13 +259,21 @@ describe("traitement différé par le worker", () => {
 });
 
 describe("route HTTP /api/webhooks/[provider]", () => {
-  it("sans adaptateur enregistré en production (avant J32 et J34), tout fournisseur répond 404, corps lu ou non", async () => {
-    for (const provider of ["whatsapp", "email", "salla", "inconnu", "..%2Fetc"]) {
+  it("sans adaptateur enregistré en production (WhatsApp : J34 et J35), tout fournisseur sauf l'e-mail répond 404, corps lu ou non", async () => {
+    for (const provider of ["whatsapp", "salla", "inconnu", "..%2Fetc"]) {
       const response = await fetch(`${BASE_URL}/api/webhooks/${provider}`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ account: ACCOUNT_A, event: "x" }) });
       expect(response.status, provider).toBe(404);
       const body = (await response.json()) as { code?: string };
       expect(body.code, provider).toBe("not_found");
     }
+    expect(events(`external_event_id = 'x'`)).toBe(0);
+  });
+
+  it("l'e-mail (J32) a un adaptateur : un corps qui n'est pas un événement du fournisseur est refusé 400, sans rien enregistrer (le flux complet est dans email-flow)", async () => {
+    const response = await fetch(`${BASE_URL}/api/webhooks/email`, {
+      method: "POST", headers: { "content-type": "application/json", "x-forwarded-for": "203.0.113.29" }, body: JSON.stringify({ account: ACCOUNT_A, event: "x" }),
+    });
+    expect(response.status).toBe(400);
     expect(events(`external_event_id = 'x'`)).toBe(0);
   });
 

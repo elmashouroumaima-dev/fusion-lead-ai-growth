@@ -6,6 +6,7 @@ import {
   integrationRowSchema,
   integrationSecretSchema,
   replaceIntegrationSecretSchema,
+  replaceWebhookSecretSchema,
   updateChannelSchema,
 } from "./schemas";
 
@@ -50,6 +51,16 @@ describe("autres schémas d'entrée", () => {
   it("remplacement et déconnexion : identifiant valide, aucun champ de plus", () => {
     expect(replaceIntegrationSecretSchema.safeParse({ integration_id: ID, secret: "nouveau-jeton-1" }).success).toBe(true);
     expect(replaceIntegrationSecretSchema.safeParse({ integration_id: "x", secret: "nouveau-jeton-1" }).success).toBe(false);
+    // secret de webhook (J32) : 32 à 200 caractères ASCII imprimables sans espace
+    const WEBHOOK = "w".repeat(32);
+    expect(replaceWebhookSecretSchema.safeParse({ integration_id: ID, secret: WEBHOOK }).success).toBe(true);
+    expect(replaceWebhookSecretSchema.safeParse({ integration_id: ID, secret: "w".repeat(200) }).success).toBe(true);
+    for (const secret of ["w".repeat(31), "w".repeat(201), `${"w".repeat(32)} espace`, `${"w".repeat(31)}é`, `${"w".repeat(31)}
+`, "", 5]) {
+      expect(replaceWebhookSecretSchema.safeParse({ integration_id: ID, secret }).success, String(secret)).toBe(false);
+    }
+    expect(replaceWebhookSecretSchema.safeParse({ integration_id: "x", secret: WEBHOOK }).success).toBe(false);
+    expect(replaceWebhookSecretSchema.safeParse({ integration_id: ID, secret: WEBHOOK, organization_id: ID }).success).toBe(false);
     expect(replaceIntegrationSecretSchema.safeParse({ integration_id: ID, secret: "nouveau-jeton-1", organization_id: ORG }).success).toBe(false);
     expect(disconnectIntegrationSchema.safeParse({ integration_id: ID }).success).toBe(true);
     expect(disconnectIntegrationSchema.safeParse({ integration_id: ID, force: true }).success).toBe(false);

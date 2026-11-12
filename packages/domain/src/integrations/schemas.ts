@@ -44,6 +44,15 @@ export const createProviderIntegrationSchema = z
   .refine((value) => new Set(value.scopes).size === value.scopes.length, { path: ["scopes"] });
 export type CreateProviderIntegrationInput = z.infer<typeof createProviderIntegrationSchema>;
 
+/**
+ * Secret de webhook (J32) : mot de passe du Basic Auth que le fournisseur envoie à chaque événement. 32 à 200 caractères ASCII imprimables sans
+ * espace (il se colle dans l'adresse du webhook du fournisseur). Distinct du jeton d'envoi. Jamais renvoyé, jamais journalisé.
+ */
+export const integrationWebhookSecretSchema = z.string().regex(/^[!-~]{32,200}$/);
+
+export const replaceWebhookSecretSchema = z.object({ integration_id: uuidSchema, secret: integrationWebhookSecretSchema }).strict();
+export type ReplaceWebhookSecretInput = z.infer<typeof replaceWebhookSecretSchema>;
+
 export const replaceIntegrationSecretSchema = z.object({ integration_id: uuidSchema, secret: integrationSecretSchema }).strict();
 export type ReplaceIntegrationSecretInput = z.infer<typeof replaceIntegrationSecretSchema>;
 
@@ -76,6 +85,7 @@ export const integrationRowSchema = z.object({
   external_account_id: z.string(),
   scopes: z.array(z.string()),
   has_secret: z.boolean(),
+  has_webhook_secret: z.boolean().default(false),
   last_sync_at: z.string().nullable(),
   last_sync_finished_at: z.string().nullable(),
   last_error: z.string().nullable(),

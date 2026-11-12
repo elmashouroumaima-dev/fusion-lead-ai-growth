@@ -27,13 +27,21 @@ export type PostmarkOptions = {
   timeoutMs?: number;
 };
 
+/** Métadonnées : 10 paires au plus, clés et valeurs imprimables et courtes (le fournisseur les renvoie telles quelles). */
+function validMetadata(metadata: Record<string, string> | undefined): boolean {
+  if (metadata === undefined) return true;
+  const entries = Object.entries(metadata);
+  return entries.length <= 10 && entries.every(([key, value]) => /^[a-z_]{1,40}$/.test(key) && /^[A-Za-z0-9._:-]{1,100}$/.test(value));
+}
+
 function validInput(input: EmailSendInput, secret: string): boolean {
   return (
     secret.length > 0 && secret.length <= 200 && !hasControlChar(secret) && !/[^ -~]/.test(secret) &&
     ADDRESS.test(input.from) && !hasControlChar(input.from) && input.from.length <= 320 &&
     ADDRESS.test(input.to) && !hasControlChar(input.to) && input.to.length <= 320 &&
     input.subject.length >= 1 && input.subject.length <= 200 && !hasControlChar(input.subject) &&
-    input.textBody.length >= 1 && input.textBody.length <= 100_000
+    input.textBody.length >= 1 && input.textBody.length <= 100_000 &&
+    validMetadata(input.metadata)
   );
 }
 
@@ -77,7 +85,10 @@ export function createPostmarkProvider(options: PostmarkOptions = {}): EmailProv
             "Content-Type": "application/json",
             "X-Postmark-Server-Token": secret,
           },
-          body: JSON.stringify({ From: input.from, To: input.to, Subject: input.subject, TextBody: input.textBody, MessageStream: "outbound" }),
+          body: JSON.stringify({
+            From: input.from, To: input.to, Subject: input.subject, TextBody: input.textBody, MessageStream: "outbound",
+            ...(input.metadata ? { Metadata: input.metadata } : {}),
+          }),
           signal: AbortSignal.timeout(timeoutMs),
         });
       } catch {

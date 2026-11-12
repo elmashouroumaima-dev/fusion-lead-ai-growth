@@ -509,5 +509,8 @@
       "service_unavailable": "Service temporarily unavailable.",
       "generic": "Something went wrong. Please try again."
     }
+  },
+  "Footer": {
+    "copyright": "© {year} {appName}. All rights reserved."
   }
 }

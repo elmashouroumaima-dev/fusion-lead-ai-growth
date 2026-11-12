@@ -16,7 +16,8 @@
     "nav": {
       "label": "Main navigation",
       "dashboard": "Dashboard",
-      "members": "Members"
+      "members": "Members",
+      "settings": "Settings"
     },
     "sidebar": {
       "toggle": "Show or hide the side menu",
@@ -303,5 +304,88 @@
       "invitation_invalid": "This invitation is invalid, has expired, or belongs to a different account. Ask the person who invited you for a new link."
     },
     "hint": "Make sure you are signed in with the invited email address."
+  },
+  "Settings": {
+    "title": "Settings",
+    "description": "Customize the colors of the whole platform (login included). Owners and administrators only; the change applies to every user.",
+    "save": "Save palette",
+    "saving": "Saving…",
+    "saved": "Palette saved.",
+    "reset": "Restore default colors",
+    "resetDone": "Default colors restored.",
+    "modes": {
+      "light": "Light mode",
+      "dark": "Dark mode"
+    },
+    "tokens": {
+      "primary": "Primary color",
+      "primary_foreground": "Text on primary",
+      "secondary": "Secondary color",
+      "secondary_foreground": "Text on secondary",
+      "background": "Background",
+      "foreground": "Text",
+      "accent": "Accent",
+      "accent_foreground": "Text on accent",
+      "destructive": "Danger",
+      "destructive_foreground": "Text on danger"
+    },
+    "preview": {
+      "title": "Preview",
+      "description": "The preview updates as you pick colors.",
+      "mode": "Preview mode",
+      "sample": {
+        "heading": "Sample heading",
+        "text": "Sample text to check readability.",
+        "link": "Sample link",
+        "primary": "Primary",
+        "secondary": "Secondary",
+        "accent": "Accent",
+        "destructive": "Danger"
+      }
+    },
+    "contrast": {
+      "title": "Contrast too low: saving is blocked.",
+      "issue": "{mode}: “{text}” on “{background}” (ratio {ratio}, minimum 4.5)."
+    },
+    "errors": {
+      "invalid_input": "Invalid palette.",
+      "forbidden": "You are not allowed to change these settings.",
+      "rate_limited": "Too many attempts. Try again in a moment.",
+      "duplicate_request": "Request already handled.",
+      "idempotency_in_progress": "Request in progress.",
+      "idempotency_conflict": "Request conflict. Reload the page.",
+      "service_unavailable": "Service temporarily unavailable.",
+      "generic": "Something went wrong. Please try again."
+    },
+    "picker": {
+      "palette": "Color palette",
+      "custom": "Custom color",
+      "hex": "Hex code"
+    },
+    "presets": {
+      "title": "Ready-made palettes",
+      "description": "Pick a starting point, then fine-tune each color.",
+      "green": "Green",
+      "blue": "Blue",
+      "violet": "Violet",
+      "orange": "Orange"
+    },
+    "logo": {
+      "title": "Logo",
+      "description": "The logo is shown across the platform (login, menu). It is shared by every user.",
+      "choose": "Choose an image",
+      "hint": "PNG, JPEG or WebP, 128 KB maximum. SVG is not accepted.",
+      "default": "Default logo",
+      "previewAlt": "Logo preview",
+      "save": "Save logo",
+      "saved": "Logo saved.",
+      "reset": "Restore default logo",
+      "resetDone": "Default logo restored.",
+      "errors": {
+        "type": "Unsupported format: choose a PNG, JPEG or WebP.",
+        "size": "Image too large: 128 KB maximum.",
+        "read": "This file could not be read."
+      }
+    }
   }
 }

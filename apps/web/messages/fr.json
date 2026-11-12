@@ -16,7 +16,8 @@
     "nav": {
       "label": "Navigation principale",
       "dashboard": "Tableau de bord",
-      "members": "Membres"
+      "members": "Membres",
+      "settings": "Paramétrage"
     },
     "sidebar": {
       "toggle": "Afficher ou masquer le menu latéral",
@@ -303,5 +304,88 @@
       "invitation_invalid": "Cette invitation est invalide, a expiré ou est associée à un autre compte. Demandez un nouveau lien à la personne qui vous a invité."
     },
     "hint": "Assurez-vous d’être connecté avec l’adresse e-mail invitée."
+  },
+  "Settings": {
+    "title": "Paramétrage",
+    "description": "Personnalisez les couleurs de toute la plateforme (connexion comprise). Réservé aux propriétaires et administrateurs ; le changement s’applique à tous les utilisateurs.",
+    "save": "Enregistrer la palette",
+    "saving": "Enregistrement…",
+    "saved": "Palette enregistrée.",
+    "reset": "Rétablir les couleurs par défaut",
+    "resetDone": "Couleurs par défaut rétablies.",
+    "modes": {
+      "light": "Mode clair",
+      "dark": "Mode sombre"
+    },
+    "tokens": {
+      "primary": "Couleur principale",
+      "primary_foreground": "Texte sur la couleur principale",
+      "secondary": "Couleur secondaire",
+      "secondary_foreground": "Texte sur la couleur secondaire",
+      "background": "Fond",
+      "foreground": "Texte",
+      "accent": "Couleur d’accent",
+      "accent_foreground": "Texte sur l’accent",
+      "destructive": "Couleur de danger",
+      "destructive_foreground": "Texte sur le danger"
+    },
+    "preview": {
+      "title": "Aperçu",
+      "description": "Le rendu se met à jour pendant que vous choisissez.",
+      "mode": "Mode de l’aperçu",
+      "sample": {
+        "heading": "Titre d’exemple",
+        "text": "Voici un texte d’exemple pour vérifier la lisibilité.",
+        "link": "Lien d’exemple",
+        "primary": "Principale",
+        "secondary": "Secondaire",
+        "accent": "Mise en avant",
+        "destructive": "Alerte"
+      }
+    },
+    "contrast": {
+      "title": "Contraste insuffisant : l’enregistrement est bloqué.",
+      "issue": "{mode} : « {text} » sur « {background} » (rapport {ratio}, minimum 4,5)."
+    },
+    "errors": {
+      "invalid_input": "Palette invalide.",
+      "forbidden": "Vous n’avez pas le droit de modifier ces paramètres.",
+      "rate_limited": "Trop de tentatives. Réessayez dans un instant.",
+      "duplicate_request": "Demande déjà traitée.",
+      "idempotency_in_progress": "Demande en cours de traitement.",
+      "idempotency_conflict": "Conflit de requête. Rechargez la page.",
+      "service_unavailable": "Service momentanément indisponible.",
+      "generic": "Une erreur est survenue. Veuillez réessayer."
+    },
+    "picker": {
+      "palette": "Palette de couleurs",
+      "custom": "Couleur personnalisée",
+      "hex": "Code hex"
+    },
+    "presets": {
+      "title": "Palettes prêtes à l’emploi",
+      "description": "Choisissez un point de départ, puis ajustez chaque couleur.",
+      "green": "Vert",
+      "blue": "Bleu",
+      "violet": "Mauve",
+      "orange": "Orangé"
+    },
+    "logo": {
+      "title": "Logo de la plateforme",
+      "description": "Le logo s’affiche sur toute la plateforme (connexion, menu). Il est partagé par tous les utilisateurs.",
+      "choose": "Choisir une image",
+      "hint": "PNG, JPEG ou WebP, 128 Ko maximum. Le SVG n’est pas accepté.",
+      "default": "Logo par défaut",
+      "previewAlt": "Aperçu du logo",
+      "save": "Enregistrer le logo",
+      "saved": "Logo enregistré.",
+      "reset": "Rétablir le logo par défaut",
+      "resetDone": "Logo par défaut rétabli.",
+      "errors": {
+        "type": "Format non accepté : choisissez un PNG, un JPEG ou un WebP.",
+        "size": "Image trop lourde : 128 Ko maximum.",
+        "read": "Impossible de lire ce fichier."
+      }
+    }
   }
 }

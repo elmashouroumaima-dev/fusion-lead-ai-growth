@@ -365,3 +365,26 @@ Manager + A5 (revue sécurité adverse, attaques réelles sur la base locale). M
 - Valider les valeurs des plans ; décider du comportement `past_due` / fin d'essai ; piles de PR : #8 → #9 → #10 → J14.
 ### Demain : J15 (jalon C1 / gate G1 : isolation de deux entreprises)
 
+
+## J15 — mar 1 déc 2026 — Phase 1, checkpoint C1 / gate G1 (préparé en avance, branche `day-15-checkpoint-g1`)
+Cible : 25,4 % | Réel : à valider | Statut : —
+
+### Tâches
+| Tâche | Estimé | Livré | Validée |
+|---|---|---|---|
+| Scénario T1 automatisé (RLS / API, worker, pages) | 2 h | oui (`tests/acceptance/src/t1-isolation.test.ts`) | oui |
+| Scénario T5 (changement d'entreprise, lien profond) | 1 h | oui (`t5-org-switch.test.ts`) | oui |
+| Corrections (créneau tampon) | 2 h | aucune fuite trouvée ; 2 corrections de tests | oui |
+| Audit de conformité Phase 1 | 1 h | oui (`docs/checkpoints/C1.md`) | à valider |
+
+### Tests : acceptation 35 ✓ · domain 419 ✓ · permissions 394 ✓ · web 2108 ✓ · worker 33 ✓ · adapters 10 ✓ · pgTAP 1314 ✓ · RLS 308 ✓ · lint, typecheck, `check:leaks` verts
+### Écarts à la spec / plan
+- Pas de table `projects` avant J16 : T1 couvre les tables existantes et couvrira les projets automatiquement (découverte du catalogue) quand le seed en contiendra.
+- Couche « UI » testée par HTTP (vraie session), sans navigateur piloté ; worker testé au niveau de la file.
+- `pnpm test:e2e` n'est pas branché sur la CI (il demande l'application démarrée).
+### Constats
+- Aucune fuite d'une entreprise vers l'autre (lecture, écriture, file de jobs, pages) ; l'autorisation est revérifiée à chaque requête (révocation en cours de session prouvée).
+- Les tests pgTAP de `050_service_layer` échouent si `idempotency_keys` et `rate_limit_buckets` contiennent des lignes laissées par l'usage manuel de l'application : vider ces tables ou `pnpm db:reset`.
+### Blocages / à faire
+- Décision de la responsable technique : GO / NO-GO du C1 ; ADR « Proposed » ; branchement de `test:e2e` en CI ; navigateur piloté (téléchargement de binaires).
+### Demain : J16 (projets et produits), après GO

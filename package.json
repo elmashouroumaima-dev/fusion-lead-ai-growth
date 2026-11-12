@@ -14,7 +14,7 @@
     "typecheck": "turbo run typecheck",
     "test": "turbo run test",
     "test:rls": "pnpm --filter @fusion-leap/rls-tests test:rls",
-    "test:e2e": "node scripts/not-yet.mjs test:e2e J15",
+    "test:e2e": "pnpm --filter @fusion-leap/acceptance-tests test:acceptance",
     "db:reset": "supabase db reset",
     "db:migrate": "supabase migration up",
     "worker:dev": "pnpm --filter @fusion-leap/worker dev",

@@ -51,10 +51,15 @@ export function LogoEditor({ currentSrc }: Props) {
 
   useEffect(() => {
     if (saveState.status === "success") toast.success(t("logo.saved"));
+    if (saveState.status === "error") toast.error(t(`errors.${saveState.code ?? "generic"}`));
   }, [saveState, t]);
   useEffect(() => {
     if (resetState.status === "success") toast.success(t("logo.resetDone"));
+    if (resetState.status === "error") toast.error(t(`errors.${resetState.code ?? "generic"}`));
   }, [resetState, t]);
+  useEffect(() => {
+    if (localError) toast.error(t(`logo.errors.${localError}`));
+  }, [localError, t]);
 
   const onFile = async (file: File | undefined) => {
     setLocalError(null);

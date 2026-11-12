@@ -153,7 +153,7 @@ const testSmtp = withAction(
     const to = userData.user?.email;
     if (userError || !to) return { status: "error", code: "forbidden" };
 
-    const result = await sendSmtpTest({ delivery, password, to, allowInternalHosts: allowInternalHosts() });
+    const result = await sendSmtpTest({ delivery, password, to, allowInternalHosts: allowInternalHosts(), locale: uiLocaleOf(ctx.formData) });
     logger.info("smtp_test", { ok: result.ok, ...(result.ok ? {} : { code: result.code }) });
     return result.ok ? { status: "success" } : { status: "error", code: result.code };
   },

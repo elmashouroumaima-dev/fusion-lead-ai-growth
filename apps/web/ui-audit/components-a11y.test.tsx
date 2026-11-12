@@ -356,9 +356,10 @@ describe("langue et direction du document", () => {
 });
 
 describe("annonces et noms d'organisation", () => {
-  it("un message d'erreur n'est annoncé que par UN canal : aucune notification d'erreur (toast.error) ; la région live suffit", () => {
+  it("une erreur est une notification rouge (toast.error) ET reste écrite dans la page : le texte persiste après la disparition de la notification", () => {
     for (const file of filesUnder("components").filter((f) => f.endsWith(".tsx") && !f.endsWith(".test.tsx"))) {
-      expect(read(file), file).not.toMatch(/toast\.error\(/);
+      const src = read(file);
+      if (/toast\.error\(/.test(src)) expect(src, `${file} : message d'erreur dans la page absent`).toMatch(/text-destructive-text|<ActionFeedback/);
     }
   });
 

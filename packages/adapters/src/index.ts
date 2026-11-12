@@ -2,3 +2,4 @@
 export const PACKAGE_NAME = "@fusion-leap/adapters" as const;
 
 export * from "./secrets";
+export * from "./email";

@@ -51,7 +51,8 @@ export async function signUpAction(
     email,
     password,
     // URL serveur uniquement ; doit figurer dans additional_redirect_urls (config.toml).
-    options: { emailRedirectTo: `${getSiteUrl()}/auth/confirm` },
+    // `locale` : langue des e-mails d'authentification (choix du texte seulement, jamais une autorisation).
+    options: { emailRedirectTo: `${getSiteUrl()}/auth/confirm`, data: { locale: parsed.data.locale } },
   });
   // E-mail déjà inscrit : Supabase ne renvoie pas d'erreur (anti-énumération) → même succès.
   if (error) return fail(mapAuthError(error));
@@ -73,8 +74,18 @@ export async function signInAction(
   const { email, password, locale, next } = parsed.data;
 
   const supabase = await createClient();
-  const { error } = await supabase.auth.signInWithPassword({ email, password });
+  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
   if (error) return fail(mapAuthError(error));
+
+  // Les e-mails d'authentification (ex. mot de passe oublié) suivent la langue de la dernière connexion. Au mieux :
+  // un échec ne bloque pas la connexion.
+  if (data?.user && data.user.user_metadata?.locale !== locale) {
+    try {
+      await supabase.auth.updateUser({ data: { locale } });
+    } catch {
+      // préférence de langue non enregistrée : sans conséquence
+    }
+  }
 
   // redirect() lève NEXT_REDIRECT : surtout pas dans un try/catch.
   redirect(safeNext(next, home(locale)));

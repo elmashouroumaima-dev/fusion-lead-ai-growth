@@ -3,6 +3,12 @@
 Format : Keep a Changelog. Une entrée par jour de travail.
 
 ## [Non publié]
+### J35 — Réception WhatsApp
+- Ajout : migration `20261205100000` (et retour arrière) : `whatsapp_inbound_apply` et `whatsapp_status_apply` (service_role seulement) ; la garde `messages_guard` accepte un `failed` de Meta suivi de `delivered` ou `read`.
+- Ajout : normalisation des événements Meta à la lecture (`packages/adapters/src/whatsapp/events.ts` : messages, boutons, réponses interactives, statuts ; ni profils ni médias), processeur `whatsapp` du worker.
+- Modification : le webhook WhatsApp conserve la forme normalisée (plus le corps brut) et déduplique chaque message par son `wamid`.
+- Tests : pgTAP 280 (44), adaptateurs +13, worker +8, acceptation HTTP `whatsapp-flow` (7).
+- Documentation : `docs/api/whatsapp-inbound.md`.
 ### J34 — Connexion WhatsApp
 - Ajout : migration `20261204100000` (et retour arrière) : `integration_set_validation` (service_role seulement), codes de validation ajoutés à `integrations_error_valid`.
 - Ajout : adaptateur de webhook WhatsApp (signature `X-Hub-Signature-256`, compte = numéro, déduplication par empreinte du corps), poignée de main GET avec `WHATSAPP_VERIFY_TOKEN`, client de validation de l'API Graph (adresse fixe, codes courts).

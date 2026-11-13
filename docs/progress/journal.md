@@ -922,3 +922,17 @@ Cible : 58,8 % (plan à 68 jours) | Réel : à valider | Statut : —
 - Les fonctions `message_approve`, `message_send_claim`, `whatsapp_status_apply` et la garde `messages_guard` sont reprises dans la migration (J31, J35) avec des ajouts ; le retour arrière les recrée dans leur version d'avant.
 - Pas de route HTTP ni d'écran pour rattacher un modèle ou approuver (fonctions, comme l'approbation e-mail du J31) : J37 et J38.
 
+## J36b — Retrait de consentement WhatsApp par mot d'arrêt (branche `day-36b-whatsapp-optout`, hors plan)
+Prérequis relevé par les revues J35 et J36 avant tout envoi marketing WhatsApp réel (spec §9.3 : une demande d'arrêt met à jour le consentement immédiatement et arrête les jobs en attente). Aucune journée du plan : s'ajoute au J36.
+
+### Livré
+- `is_stop_keyword` (normalisation NFKC, marques invisibles, ponctuation, émojis, espaces ; liste CTIA + libellés Meta + français + arabe), `whatsapp_opt_out` (consentement WhatsApp révoqué, numéro supprimé, envois en file annulés avec leurs jobs, audit conditionnel), retrait du numéro seul pour un expéditeur inconnu, rattrapage des « STOP » déjà reçus.
+- Version de l'API Graph alignée sur celle de l'app Meta de test (v25.0), une seule constante.
+
+### Revue sécurité (0 bloquant, 1 majeur, 2 moyens) — corrigés : mots d'arrêt manqués (marques bidi, ponctuation, émojis, formes décomposées, mots CTIA et libellés de boutons Meta absents), STOP perdu quand le message n'est pas rattaché à un contact, STOP déjà reçu avant la migration, audit répété sans changement. Documenté : retrait en texte libre (humain, J37), pas de réabonnement.
+
+### Tests : domain 656 ✓ · adapters 153 ✓ · permissions 394 ✓ · worker 149 ✓ · web 2566 ✓ · pgTAP 3154 (dont 300_whatsapp_optout : 53) ✓ · API réelle 485 ✓ · acceptation HTTP réelle (whatsapp-flow : 8) · lint, typecheck ✓
+### À surveiller
+- Vérifier la version de l'API Graph (v25.0) avant les premiers envois réels (C3).
+- Écrire les libellés de boutons de désinscription des modèles (« Stop promotions ») dans les modèles soumis à Meta.
+

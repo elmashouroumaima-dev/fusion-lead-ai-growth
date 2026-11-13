@@ -22,7 +22,7 @@ Avant l'approbation, sur un message sortant en file non réclamé : le modèle d
 - **Statut devançant l'envoi** : `whatsapp_status_apply` lève `retry_later` pendant 5 minutes après une réclamation de l'intégration, le job est rejoué (au lieu de perdre le statut).
 
 ## Limites connues (revue de sécurité J36)
-- **Désinscription WhatsApp** : aucune écriture dans `suppressions` pour WhatsApp et un « STOP » reçu ne révoque rien (le texte est enregistré, les boutons gardent leur libellé, J35). Prérequis avant un envoi marketing WhatsApp réel : traitement du retrait de consentement (écrans contacts J30b, boîte J37).
+- **Désinscription WhatsApp** : traitée depuis le J36b (`docs/api/whatsapp-inbound.md`, mot d'arrêt → consentement révoqué et numéro supprimé). Reste à faire : retrait en texte libre (humain, boîte J37) et réabonnement (écran contacts J30b).
 - **Résultat inconnu** : si Meta a livré mais que la réponse s'est perdue, le message reste `failed` (`send_outcome_unknown`) car l'identifiant `wamid` est inconnu : ne pas proposer « renvoyer » sans vérification (doublon possible).
 - **`waba_id`** : fourni à chaque synchronisation et non vérifié (un jeton qui voit plusieurs comptes peut importer les modèles d'un autre compte sur ce canal) ; à enregistrer à la connexion et à vérifier contre le numéro (`/{waba}/phone_numbers`).
 - Un modèle supprimé chez Meta n'est pas marqué (aucune notification de statut de modèle) ; pas de pagination au-delà de 200 modèles ; les boutons et cartes des modèles ne sont pas conservés ; le nombre de variables n'est pas comparé aux emplacements `{{n}}` (Meta refuse : `template_invalid`).

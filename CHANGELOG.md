@@ -3,6 +3,11 @@
 Format : Keep a Changelog. Une entrée par jour de travail.
 
 ## [Non publié]
+### J36b — Retrait de consentement WhatsApp (hors plan)
+- Ajout : migration `20261207100000` (et retour arrière) : un mot d'arrêt reçu d'un contact révoque ses consentements WhatsApp, supprime son numéro, annule ses envois WhatsApp en file ; numéro seul supprimé pour un expéditeur inconnu ; rattrapage des « STOP » déjà reçus.
+- Modification : version de l'API Graph v25.0 (une constante pour toutes les requêtes sortantes).
+- Tests : pgTAP 300 (53), acceptation HTTP `whatsapp-flow` (+1).
+- Documentation : `docs/api/whatsapp-inbound.md` (retrait par mot d'arrêt), `docs/api/whatsapp-send.md`.
 ### J36 — Envoi WhatsApp conforme
 - Ajout : migration `20261206100000` (et retour arrière qui recrée les fonctions d'avant) : table `message_templates` (ADR 007 E5, versions, RLS), `messages.template_id` / `template_variables` / `template_text`, `message_attach_template`, `message_templates_sync` (service_role) ; `message_approve`, `message_send_claim`, `whatsapp_status_apply` et `messages_guard` étendus (numéro pour WhatsApp, fenêtre de 24 h, modèle, statut devançant l'envoi réessayé).
 - Ajout : envoi WhatsApp par l'API Cloud (`packages/adapters/src/whatsapp/send.ts`, résultats accepté / refusé / réessayable / inconnu), liste et réduction des modèles de Meta (`templates.ts`), envoi par le worker avec le contrôle final (modèle obligatoire hors fenêtre), `POST /api/integrations/templates/sync`.

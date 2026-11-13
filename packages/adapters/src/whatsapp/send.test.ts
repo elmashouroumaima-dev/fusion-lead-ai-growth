@@ -130,7 +130,7 @@ describe("modèles de message (liste Meta)", () => {
   it("appelle l'adresse fixe de Meta avec le jeton en en-tête", async () => {
     const f = fake(list([tpl()]));
     await createWhatsAppTemplateClient({ fetch: f.fetch }).list({ wabaId: WABA, accessToken: TOKEN });
-    expect(f.calls[0]?.url.startsWith(`https://graph.facebook.com/v21.0/${WABA}/message_templates?`)).toBe(true);
+    expect(f.calls[0]?.url.startsWith(`https://graph.facebook.com/v25.0/${WABA}/message_templates?`)).toBe(true);
     expect(f.calls[0]?.url).not.toContain(TOKEN);
     expect(((f.calls[0]?.init as RequestInit).headers as Record<string, string>).Authorization).toBe(`Bearer ${TOKEN}`);
   });

@@ -96,6 +96,8 @@ const cleanup = () => {
     set local session_replication_role = replica;
     delete from public.inbound_unmatched where integration_id in (select id from public.integrations where external_account_id = '${PHONE}');
     delete from public.webhook_events where integration_id in (select id from public.integrations where external_account_id = '${PHONE}');
+    delete from public.suppressions where value_normalized in ('${CONTACT_PHONE}', '${UNKNOWN_PHONE}');
+    delete from public.consent_events where contact_id in (select id from public.contacts where email_normalized like '%@wf${run}.test');
     delete from public.messages where conversation_id in (select id from public.conversations where contact_id in (select id from public.contacts where email_normalized like '%@wf${run}.test'));
     delete from public.conversations where contact_id in (select id from public.contacts where email_normalized like '%@wf${run}.test');
     delete from public.channels where integration_id in (select id from public.integrations where external_account_id = '${PHONE}');
@@ -180,6 +182,22 @@ describe.skipIf(!MASTER)("réception WhatsApp", () => {
     expect(Number(psql(`select count(*) from public.contacts where phone_e164 = '${UNKNOWN_PHONE}'`))).toBe(0);
     expect(Number(psql(`select count(*) from public.inbound_unmatched where integration_id = '${integration}' and provider_message_id = 'wamid.IN-${run}-3' and reason = 'unknown_sender'`))).toBe(1);
     expect(inbound()).toBe(2);
+  });
+
+  it("un mot d'arrêt (STOP) d'un contact connu : consentement WhatsApp révoqué, numéro supprimé, envoi en file annulé ; une phrase qui contient « stop » ne retire rien", async () => {
+    psql(`insert into public.consent_events (organization_id, contact_id, channel, purpose, source) values ('${ORG.alpha}', '${contact}', 'whatsapp', 'marketing', 'form')`);
+    const conv = psql(`select id from public.conversations where contact_id = '${contact}'`);
+    const queued = (await rpc<{ message_id: string }>("message_record", { p_org: ORG.alpha, p_conversation: conv, p_direction: "outbound", p_provider_message_id: null, p_body: "Offre à annuler", p_idempotency_key: `acc35-${run}-queued`, p_event_at: null })).body.message_id;
+    const active = () => Number(psql(`select count(*) from public.consent_events where contact_id = '${contact}' and channel = 'whatsapp' and revoked_at is null`));
+    expect((await hook(wrap({ messages: [message(`wamid.IN-${run}-4`, CONTACT_PHONE, "please stop sending offers")] }))).status).toBe(200);
+    await processEvents();
+    expect(active()).toBe(1);
+    expect((await hook(wrap({ messages: [message(`wamid.IN-${run}-5`, CONTACT_PHONE, "STOP")] }))).status).toBe(200);
+    await processEvents();
+    expect(active()).toBe(0);
+    expect(psql(`select reason from public.suppressions where organization_id = '${ORG.alpha}' and channel = 'whatsapp' and value_normalized = '${CONTACT_PHONE}'`)).toBe("unsubscribe");
+    expect(psql(`select status from public.messages where id = '${queued}'`)).toBe("cancelled");
+    expect(psql(`select do_not_contact from public.contacts where id = '${contact}'`)).toBe("f");
   });
 
   it("le contenu des messages n'apparaît dans aucun journal d'audit", () => {

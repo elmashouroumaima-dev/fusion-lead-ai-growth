@@ -3,6 +3,11 @@
 Format : Keep a Changelog. Une entrée par jour de travail.
 
 ## [Non publié]
+### J36 — Envoi WhatsApp conforme
+- Ajout : migration `20261206100000` (et retour arrière qui recrée les fonctions d'avant) : table `message_templates` (ADR 007 E5, versions, RLS), `messages.template_id` / `template_variables` / `template_text`, `message_attach_template`, `message_templates_sync` (service_role) ; `message_approve`, `message_send_claim`, `whatsapp_status_apply` et `messages_guard` étendus (numéro pour WhatsApp, fenêtre de 24 h, modèle, statut devançant l'envoi réessayé).
+- Ajout : envoi WhatsApp par l'API Cloud (`packages/adapters/src/whatsapp/send.ts`, résultats accepté / refusé / réessayable / inconnu), liste et réduction des modèles de Meta (`templates.ts`), envoi par le worker avec le contrôle final (modèle obligatoire hors fenêtre), `POST /api/integrations/templates/sync`.
+- Tests : pgTAP 290 (57), adaptateurs +24, worker +9, web +6, acceptation HTTP `whatsapp-send` (9).
+- Documentation : `docs/api/whatsapp-send.md`.
 ### J35 — Réception WhatsApp
 - Ajout : migration `20261205100000` (et retour arrière) : `whatsapp_inbound_apply` et `whatsapp_status_apply` (service_role seulement) ; la garde `messages_guard` accepte un `failed` de Meta suivi de `delivered` ou `read`.
 - Ajout : normalisation des événements Meta à la lecture (`packages/adapters/src/whatsapp/events.ts` : messages, boutons, réponses interactives, statuts ; ni profils ni médias), processeur `whatsapp` du worker.

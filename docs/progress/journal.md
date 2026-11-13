@@ -896,3 +896,29 @@ Cible : 57,4 % (plan à 68 jours) | Réel : à valider | Statut : —
 ### Écarts à la spec / plan
 - La garde `messages_guard` (J31) est reprise dans la migration avec une transition de plus (`failed` de Meta → `delivered` ou `read`) ; le retour arrière demande de rejouer la fonction du J31.
 
+## J36 — Envoi WhatsApp conforme (branche `day-36-whatsapp-send`)
+Cible : 58,8 % (plan à 68 jours) | Réel : à valider | Statut : —
+⚠ Aucun compte Meta réel : fixtures (plan B), test réel à C3.
+
+### Tâches
+| Tâche | Estimé | Livré | Validée |
+|---|---|---|---|
+| `message_templates` (E5) + synchronisation | 2 h | oui (table, versions, `message_templates_sync`, route de synchronisation, liste Meta) | oui (pgTAP 57, adaptateurs 153, web 2566) |
+| Fenêtre de conversation | 2 h | oui (24 h dans la réclamation, modèle obligatoire hors fenêtre) | oui |
+| Envoi via la chaîne | 1,5 h | oui (approbation par numéro, contrôle final, envoi texte ou modèle, résultats de Meta) | oui (worker 149) |
+| Tests | 0,5 h | oui | oui (acceptation HTTP 9) |
+
+### Validation du jour
+- **Hors fenêtre sans modèle approuvé : bloqué** (`template_missing`, aucun appel à Meta) ; avec un modèle approuvé : envoyé ; modèle remplacé par une version plus récente : refusé.
+- **`template_id`, version, langue enregistrés** : le modèle (donc nom, langue et version), ses variables et le texte rendu sont fixés avant l'approbation et immuables ensuite.
+
+### Revue sécurité (0 bloquant, 2 majeurs, 7 moyens) — corrigés : version approuvée remplacée par une version plus récente (ce qui partait n'était plus ce qui avait été relu), rollback qui laissait la base cassée (recréé avec les fonctions d'avant, vérifié dans une transaction annulée), texte rendu non relu par l'approbateur, erreurs 5xx et codes 1 et 2 réessayés à l'aveugle (désormais « résultat inconnu »), plafond de lignes de modèles incomplet, taille des composants mesurée autrement qu'en base, retours à la ligne dans les variables. Documentés, non corrigés : aucune désinscription WhatsApp (prérequis avant un envoi marketing réel), résultat inconnu non réconciliable, `waba_id` non vérifié, modèles supprimés chez Meta non marqués.
+
+### Tests : domain 656 ✓ · adapters 153 ✓ · permissions 394 ✓ · worker 149 ✓ · web 2566 ✓ · pgTAP 3101 (dont 290_whatsapp_send : 57) ✓ · API réelle 485 ✓ · acceptation HTTP réelle (whatsapp-send : 9) · lint, typecheck ✓
+### À surveiller
+- **Avant tout envoi marketing WhatsApp réel** : retrait de consentement par « STOP » et suppression par numéro (écrans contacts J30b, boîte J37).
+- `waba_id` à enregistrer et vérifier à la connexion ; limite de 100 envois par heure à fixer avec le palier de messagerie de Meta.
+### Écarts à la spec / plan
+- Les fonctions `message_approve`, `message_send_claim`, `whatsapp_status_apply` et la garde `messages_guard` sont reprises dans la migration (J31, J35) avec des ajouts ; le retour arrière les recrée dans leur version d'avant.
+- Pas de route HTTP ni d'écran pour rattacher un modèle ou approuver (fonctions, comme l'approbation e-mail du J31) : J37 et J38.
+

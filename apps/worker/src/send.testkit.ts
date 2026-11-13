@@ -1,4 +1,4 @@
-import type { EmailProvider, EmailSendInput, EmailSendOutcome } from "@fusion-leap/adapters";
+import { createKeyRing, type EmailProvider, type EmailSendInput, type EmailSendOutcome } from "@fusion-leap/adapters";
 import type { SendClaim, SendGateway } from "./send";
 import type { SendDeps } from "./handlers";
 
@@ -71,5 +71,11 @@ export class FakeEmailProvider implements EmailProvider {
 
 /** Dépendances d'envoi par défaut des tests qui n'envoient rien. */
 export function noSend(): SendDeps {
-  return { gateway: new MemorySend(), readSecret: async () => "tok-test-0123456789", provider: new FakeEmailProvider() };
+  return { gateway: new MemorySend(), readSecret: async () => "tok-test-0123456789", provider: new FakeEmailProvider(), unsubscribe: testUnsubscribe() };
+}
+
+/** Trousseau de test (clé fixe, jamais utilisée hors tests) et site de test pour le lien de désabonnement. */
+export const TEST_SITE_URL = "https://app.acme.test";
+export function testUnsubscribe(): SendDeps["unsubscribe"] {
+  return { keyRing: createKeyRing(1, { 1: Buffer.alloc(32, 7).toString("base64") }), siteUrl: TEST_SITE_URL };
 }

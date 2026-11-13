@@ -101,8 +101,8 @@ describe("transport sécurisé (J32)", () => {
 });
 
 describe("fournisseur", () => {
-  it("registre de production : seul l'e-mail (J32) a un adaptateur ; WhatsApp (J34 et J35) et tout autre fournisseur répondent 404", () => {
-    expect(getWebhookAdapter("whatsapp")).toBeNull();
+  it("registre de production : e-mail (J32) et WhatsApp (J34) ont un adaptateur ; tout autre fournisseur répond 404", () => {
+    expect(getWebhookAdapter("whatsapp")?.provider).toBe("whatsapp");
     expect(getWebhookAdapter("email")?.provider).toBe("email");
     expect(getWebhookAdapter("salla")).toBeNull();
     expect(getWebhookAdapter("__proto__")).toBeNull();

@@ -9,7 +9,8 @@
  *  - `provider_unavailable`  : panne, limite ou délai dépassé (réessayer) ;
  *  - `provider_unreadable`   : réponse inexploitable.
  */
-export const WHATSAPP_GRAPH_BASE = "https://graph.facebook.com/v21.0";
+/** Version de l'API Graph : celle affichée par Meta for Developers pour l'app de test (v25.0, 13 nov. 2026) ; une seule constante pour toutes les requêtes sortantes. */
+export const WHATSAPP_GRAPH_BASE = "https://graph.facebook.com/v25.0";
 const TIMEOUT_MS = 10_000;
 const MAX_RESPONSE_BYTES = 65_536;
 const PHONE_NUMBER_ID = /^[0-9]{5,30}$/;

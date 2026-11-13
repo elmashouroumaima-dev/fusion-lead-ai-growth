@@ -10,7 +10,7 @@
     },
     {
       "label": "Base de données (pgTAP)",
-      "value": 3000,
+      "value": 3044,
       "note": "Tables, droits et règles de la base de données"
     },
     {
@@ -30,12 +30,12 @@
     },
     {
       "label": "Worker et adaptateurs",
-      "value": 261,
+      "value": 282,
       "note": "Tâches de fond et adaptateurs de fournisseurs"
     },
     {
       "label": "Acceptation (T1, T5)",
-      "value": 203,
+      "value": 210,
       "note": "Parcours complets en HTTP réel sur l'application construite"
     }
   ],
@@ -252,9 +252,9 @@
           "day": "J34–J37",
           "days": 4,
           "name": "WhatsApp Cloud API",
-          "progress": 25,
+          "progress": 50,
           "status": "review",
-          "note": "J34 connexion et webhook signé fait (fixtures, aucun compte Meta) ; J35 réception, J36 envoi, J37 boîte de réception à faire."
+          "note": "J34 connexion et J35 réception (fixtures, aucun compte Meta) faits ; J36 envoi et J37 boîte de réception à faire."
         },
         {
           "day": "J38–J41",
@@ -527,20 +527,6 @@
   ],
   "recent": [
     {
-      "day": "J30",
-      "title": "Conversations et messages",
-      "items": [
-        "Un fil par contact et canal ; un message ne peut pas porter une autre entreprise que son fil.",
-        "Lecture par rôle : le commercial ne lit que ses conversations."
-      ],
-      "proof": "126 tests de base, 12 tests API",
-      "review": {
-        "blocking": 0,
-        "major": 2,
-        "medium": 5
-      }
-    },
-    {
       "day": "J31",
       "title": "Envoi d'e-mail sous contrôles",
       "items": [
@@ -595,15 +581,29 @@
         "major": 0,
         "medium": 4
       }
+    },
+    {
+      "day": "J35",
+      "title": "Réception WhatsApp",
+      "items": [
+        "Les messages reçus sont rattachés au contact par son numéro ; un expéditeur inconnu va dans une file de tri, jamais dans un contact ; un même message n'est jamais enregistré deux fois.",
+        "Les statuts de nos messages (envoyé, livré, lu, échec) n'avancent que dans l'ordre, même si Meta les envoie dans le désordre."
+      ],
+      "proof": "44 tests de base, 7 tests d'acceptation HTTP réelle, adaptateurs et worker (aucun compte Meta réel)",
+      "review": {
+        "blocking": 0,
+        "major": 1,
+        "medium": 5
+      }
     }
   ],
   "capabilities": {
     "ready": [
-      "Connecter une intégration e-mail, avec secrets chiffrés et jamais renvoyés.",
       "Préparer un envoi : approbation humaine, 15 contrôles juste avant l'appel.",
       "Recevoir les statuts du fournisseur et les réponses, rattachés à la bonne conversation.",
       "Se désabonner par un lien signé : consentement révoqué, adresse supprimée, envois en attente annulés.",
-      "Connecter un numéro WhatsApp et recevoir des événements signés de Meta (essayé sur des fixtures, pas sur un compte réel)."
+      "Connecter un numéro WhatsApp et recevoir des événements signés de Meta (essayé sur des fixtures, pas sur un compte réel).",
+      "Recevoir des messages WhatsApp et leurs statuts, rattachés au bon contact (essayé sur des fixtures)."
     ],
     "notYet": [
       "Envoyer ou recevoir un vrai e-mail : il manque l'activation d'un canal et un compte d'essai (C3).",
@@ -617,26 +617,26 @@
     "intro": "Le travail du jour raconté étape par étape : ce qui a été fait, les vérifications menées et le volume de code touché.",
     "steps": [
       {
-        "sentence": "J'ai ajouté en base la fonction qui active une intégration (réservée au serveur) et les codes d'erreur de validation.",
+        "sentence": "J'ai ajouté en base la réception des messages WhatsApp et de leurs statuts, avec la file de tri et l'ordre des statuts.",
         "actions": [
           "Migration et retour arrière écrits",
           "Tests pgTAP lancés"
         ],
-        "grep": "feat\\(db\\).*J34"
+        "grep": "feat\\(db\\).*J35"
       },
       {
-        "sentence": "J'ai écrit l'adaptateur de webhook WhatsApp (signature, compte, déduplication), la poignée de main de Meta et le client de validation de l'API Graph.",
+        "sentence": "J'ai écrit la normalisation des événements de Meta : seuls les messages et les statuts utiles sont conservés, sans profils ni médias.",
         "actions": [
           "Cas de Meta rejoués sur des fixtures"
         ],
-        "grep": "feat\\(adapters\\).*J34"
+        "grep": "feat\\(adapters\\).*J35"
       },
       {
-        "sentence": "J'ai ajouté la route de vérification de connexion, la poignée de main GET et l'écran « Connecter un numéro WhatsApp » en trois langues.",
+        "sentence": "J'ai branché le processeur WhatsApp du worker, rejouable sans danger.",
         "actions": [
-          "Écran branché sur les routes"
+          "Tests du worker lancés"
         ],
-        "grep": "feat\\(web\\).*J34"
+        "grep": "feat\\(worker\\).*J35"
       },
       {
         "sentence": "J'ai écrit les tests pgTAP et d'acceptation HTTP, puis fait attaquer le tout par une revue de sécurité indépendante.",
@@ -644,14 +644,14 @@
           "Suite complète lancée",
           "Failles corrigées avec un test"
         ],
-        "grep": "test:.*J34"
+        "grep": "test:.*J35"
       },
       {
-        "sentence": "J'ai documenté l'API, le runbook de configuration Meta, la note de l'ADR 007, le journal et le CHANGELOG.",
+        "sentence": "J'ai documenté l'API de réception, le journal et le CHANGELOG.",
         "actions": [
           "Documentation mise à jour"
         ],
-        "grep": "docs: J34"
+        "grep": "docs: J35"
       }
     ]
   }

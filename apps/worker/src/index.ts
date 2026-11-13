@@ -8,6 +8,7 @@ import { createSupabaseCrmSyncGateway } from "./crm-sync";
 import { createSupabaseImportGateway } from "./imports";
 import { createSupabaseSecretReader, createSupabaseSendGateway } from "./send";
 import { createEmailWebhookProcessor, createSupabaseEmailEventGateway } from "./email-webhook";
+import { createSupabaseWhatsAppEventGateway, createWhatsAppWebhookProcessor } from "./whatsapp-webhook";
 import { createSupabaseWebhookGateway, type WebhookProcessors } from "./webhooks";
 import { createDefaultRegistry } from "./handlers";
 import { WORKER_NAME } from "./info";
@@ -36,8 +37,8 @@ const logger: WorkerLogger = {
 try {
   const env = loadWorkerEnv();
   const workerId = `${hostname().replace(/[^A-Za-z0-9._-]/g, "-").slice(0, 60)}:${process.pid}:${randomBytes(4).toString("hex")}`;
-  // processeurs de webhooks par fournisseur : e-mail (J32) ; WhatsApp s'enregistre au J35. Sans processeur, un événement est marqué `failed` (`no_processor`), re-jouable.
-  const webhookProcessors: WebhookProcessors = new Map([["email", createEmailWebhookProcessor(createSupabaseEmailEventGateway(env))]]);
+  // processeurs de webhooks par fournisseur : e-mail (J32) et WhatsApp (J35). Sans processeur, un événement est marqué `failed` (`no_processor`), re-jouable.
+  const webhookProcessors: WebhookProcessors = new Map([["email", createEmailWebhookProcessor(createSupabaseEmailEventGateway(env))], ["whatsapp", createWhatsAppWebhookProcessor(createSupabaseWhatsAppEventGateway(env))]]);
   const runner = new Runner({
     store: createSupabaseJobStore(env),
     registry: createDefaultRegistry({ assigner: createSupabaseLeadAssigner(env), imports: createSupabaseImportGateway(env), crm: createSupabaseCrmSyncGateway(env), send: { gateway: createSupabaseSendGateway(env), readSecret: createSupabaseSecretReader(env), provider: createPostmarkProvider(), unsubscribe: { keyRing: unsubscribeKeyRing(env), siteUrl: env.SITE_URL } }, webhooks: { gateway: createSupabaseWebhookGateway(env), processors: webhookProcessors } }),

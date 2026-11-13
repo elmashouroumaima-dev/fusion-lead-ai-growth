@@ -34,6 +34,16 @@ function validMetadata(metadata: Record<string, string> | undefined): boolean {
   return entries.length <= 10 && entries.every(([key, value]) => /^[a-z_]{1,40}$/.test(key) && /^[A-Za-z0-9._:-]{1,100}$/.test(value));
 }
 
+/** En-têtes : liste blanche (désabonnement seulement), valeurs imprimables sur une ligne, 4 au plus. */
+const ALLOWED_HEADERS = new Set(["List-Unsubscribe", "List-Unsubscribe-Post"]);
+function validHeaders(headers: EmailSendInput["headers"]): boolean {
+  if (headers === undefined) return true;
+  return (
+    headers.length <= 4 &&
+    headers.every((h) => ALLOWED_HEADERS.has(h.name) && h.value.length >= 1 && h.value.length <= 1000 && !hasControlChar(h.value) && !/[^ -~]/.test(h.value))
+  );
+}
+
 function validInput(input: EmailSendInput, secret: string): boolean {
   return (
     secret.length > 0 && secret.length <= 200 && !hasControlChar(secret) && !/[^ -~]/.test(secret) &&
@@ -41,7 +51,7 @@ function validInput(input: EmailSendInput, secret: string): boolean {
     ADDRESS.test(input.to) && !hasControlChar(input.to) && input.to.length <= 320 &&
     input.subject.length >= 1 && input.subject.length <= 200 && !hasControlChar(input.subject) &&
     input.textBody.length >= 1 && input.textBody.length <= 100_000 &&
-    validMetadata(input.metadata)
+    validMetadata(input.metadata) && validHeaders(input.headers)
   );
 }
 
@@ -88,6 +98,7 @@ export function createPostmarkProvider(options: PostmarkOptions = {}): EmailProv
           body: JSON.stringify({
             From: input.from, To: input.to, Subject: input.subject, TextBody: input.textBody, MessageStream: "outbound",
             ...(input.metadata ? { Metadata: input.metadata } : {}),
+            ...(input.headers && input.headers.length > 0 ? { Headers: input.headers.map((h) => ({ Name: h.name, Value: h.value })) } : {}),
           }),
           signal: AbortSignal.timeout(timeoutMs),
         });

@@ -35,6 +35,22 @@ describe("fournisseur Postmark", () => {
     expect(JSON.parse(String(init.body))).toEqual({ From: input.from, To: input.to, Subject: input.subject, TextBody: input.textBody, MessageStream: "outbound" });
   });
 
+  it("transmet les en-têtes de désabonnement sous la forme attendue par Postmark", async () => {
+    const f = fake(json(200, { ErrorCode: 0, MessageID: "id-1" }));
+    const headers = [{ name: "List-Unsubscribe", value: "<https://app.acme.test/unsubscribe/t>" }, { name: "List-Unsubscribe-Post", value: "List-Unsubscribe=One-Click" }];
+    await createPostmarkProvider({ fetch: f.fetch }).send({ ...input, headers }, TOKEN);
+    const sent = JSON.parse(String((f.calls[0]?.init as RequestInit).body)) as { Headers?: unknown };
+    expect(sent.Headers).toEqual([{ Name: "List-Unsubscribe", Value: "<https://app.acme.test/unsubscribe/t>" }, { Name: "List-Unsubscribe-Post", Value: "List-Unsubscribe=One-Click" }]);
+  });
+
+  it("refuse un en-tête hors liste blanche ou avec saut de ligne, sans appel réseau", async () => {
+    for (const headers of [[{ name: "Bcc", value: "x@y.test" }], [{ name: "List-Unsubscribe", value: "<a>\r\nBcc: x@y.test" }]]) {
+      const f = fake(json(200, { ErrorCode: 0, MessageID: "id-1" }));
+      expect(await createPostmarkProvider({ fetch: f.fetch }).send({ ...input, headers }, TOKEN)).toEqual({ kind: "rejected", code: "invalid_input" });
+      expect(f.calls).toHaveLength(0);
+    }
+  });
+
   it("refus définitifs : jeton, adresse inactive, adresse invalide, autre refus", async () => {
     const run = async (r: Response) => createPostmarkProvider({ fetch: fake(r).fetch }).send(input, TOKEN);
     expect(await run(json(401, { ErrorCode: 10, Message: "Bad token" }))).toEqual({ kind: "rejected", code: "provider_auth" });

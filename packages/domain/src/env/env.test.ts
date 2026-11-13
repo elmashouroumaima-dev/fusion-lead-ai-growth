@@ -116,6 +116,19 @@ describe("parseServerEnv", () => {
     });
   });
 
+  describe("WHATSAPP_VERIFY_TOKEN (J34)", () => {
+    it("optionnel : absent ou vide = non configuré", () => {
+      expect(parseServerEnv(validServer).WHATSAPP_VERIFY_TOKEN).toBeUndefined();
+      expect(parseServerEnv({ ...validServer, WHATSAPP_VERIFY_TOKEN: "" }).WHATSAPP_VERIFY_TOKEN).toBeUndefined();
+    });
+    it("16 à 200 caractères ASCII imprimables sans espace", () => {
+      expect(parseServerEnv({ ...validServer, WHATSAPP_VERIFY_TOKEN: "jeton-plateforme-0123" }).WHATSAPP_VERIFY_TOKEN).toBe("jeton-plateforme-0123");
+      for (const bad of ["court", "a".repeat(201), "avec des espaces dedans ok", "accentué-0123456789abc"]) {
+        expect(() => parseServerEnv({ ...validServer, WHATSAPP_VERIFY_TOKEN: bad })).toThrow();
+      }
+    });
+  });
+
   describe("SECRETS_MASTER_KEY (ADR 004)", () => {
     const key32 = Buffer.from(Array.from({ length: 32 }, (_, i) => (i * 7 + 3) % 256)).toString("base64");
 

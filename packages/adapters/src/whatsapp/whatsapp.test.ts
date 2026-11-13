@@ -10,35 +10,38 @@ const body = (phone = PHONE, extra: Record<string, unknown> = {}) => ({
   entry: [{ id: "102290129340398", changes: [{ field: "messages", value: { messaging_product: "whatsapp", metadata: { display_phone_number: "15550783881", phone_number_id: phone }, ...extra } }] }],
 });
 const raw = (value: unknown) => new TextEncoder().encode(JSON.stringify(value));
+const norm = (value: unknown) => adapter.parse(raw(value));
+const msg = (id: string) => ({ from: "212600000000", id, timestamp: "1700000000", text: { body: "Bonjour" }, type: "text" });
 
 describe("adaptateur de webhook WhatsApp", () => {
   it("lit le corps JSON ; un corps illisible ou non UTF-8 donne null, sans exception", () => {
-    expect(adapter.parse(raw(body()))).toEqual(body());
+    // la forme conservée est la forme NORMALISÉE (pas le corps brut)
+    expect(adapter.parse(raw(body()))).toEqual({ object: "whatsapp_business_account", phoneNumberIds: [PHONE], events: [], skipped: 0 });
     expect(adapter.parse(new TextEncoder().encode("pas du json"))).toBeNull();
     expect(adapter.parse(new Uint8Array([0xff, 0xfe, 0x7b]))).toBeNull();
   });
 
   it("le compte est l'identifiant du numéro ; formes invalides, objet inattendu ou numéros mélangés : null", () => {
-    expect(adapter.extractAccount(body(), {})).toBe(PHONE);
-    expect(adapter.extractAccount(body("abc"), {})).toBeNull();
-    expect(adapter.extractAccount(body("1234"), {})).toBeNull();
-    expect(adapter.extractAccount({ ...body(), object: "page" }, {})).toBeNull();
-    expect(adapter.extractAccount({ object: "whatsapp_business_account", entry: [] }, {})).toBeNull();
+    expect(adapter.extractAccount(norm(body()), {})).toBe(PHONE);
+    expect(adapter.extractAccount(norm(body("abc")), {})).toBeNull();
+    expect(adapter.extractAccount(norm(body("1234")), {})).toBeNull();
+    expect(adapter.extractAccount(norm({ ...body(), object: "page" }), {})).toBeNull();
+    expect(adapter.extractAccount(norm({ object: "whatsapp_business_account", entry: [] }), {})).toBeNull();
     // notification sans numéro (état du compte) : acceptée si un autre changement désigne le numéro ; seule, elle ne désigne rien
     const status = { field: "account_update", value: { event: "VERIFIED_ACCOUNT" } };
-    expect(adapter.extractAccount({ object: "whatsapp_business_account", entry: [{ id: "1", changes: [status, body().entry[0]?.changes[0]] }] }, {})).toBe(PHONE);
-    expect(adapter.extractAccount({ object: "whatsapp_business_account", entry: [{ id: "1", changes: [status] }] }, {})).toBeNull();
+    expect(adapter.extractAccount(norm({ object: "whatsapp_business_account", entry: [{ id: "1", changes: [status, body().entry[0]?.changes[0]] }] }), {})).toBe(PHONE);
+    expect(adapter.extractAccount(norm({ object: "whatsapp_business_account", entry: [{ id: "1", changes: [status] }] }), {})).toBeNull();
     expect(adapter.extractAccount(null, {})).toBeNull();
     const mixed = { object: "whatsapp_business_account", entry: [body().entry[0], body("999999999999").entry[0]] };
-    expect(adapter.extractAccount(mixed, {})).toBeNull();
+    expect(adapter.extractAccount(norm(mixed), {})).toBeNull();
   });
 
   it("l'identifiant d'événement est stable pour un même corps (nouvel essai de Meta) et différent pour un autre", () => {
-    const a = adapter.extractEventId(body(PHONE, { messages: [{ id: "wamid.A" }] }), {});
+    const a = adapter.extractEventId(norm(body(PHONE, { messages: [msg("wamid.A")] })), {});
     expect(a).toMatch(/^wa:[0-9a-f]{40}$/);
-    expect(adapter.extractEventId(body(PHONE, { messages: [{ id: "wamid.A" }] }), {})).toBe(a);
-    expect(adapter.extractEventId(body(PHONE, { messages: [{ id: "wamid.B" }] }), {})).not.toBe(a);
-    expect(adapter.extractEventId({ object: "x" }, {})).toBeNull();
+    expect(adapter.extractEventId(norm(body(PHONE, { messages: [msg("wamid.A")] })), {})).toBe(a);
+    expect(adapter.extractEventId(norm(body(PHONE, { messages: [msg("wamid.B")] })), {})).not.toBe(a);
+    expect(adapter.extractEventId(norm({ object: "x" }), {})).toBeNull();
   });
 
   it("la signature X-Hub-Signature-256 est vérifiée sur le corps BRUT avec le secret de l'intégration", () => {

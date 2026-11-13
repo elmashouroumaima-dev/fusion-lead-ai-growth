@@ -1,0 +1,40 @@
+# Réception WhatsApp : messages et statuts (J35)
+
+Migration `20261205100000_whatsapp_inbound.sql` (retour arrière : `supabase/rollbacks/20261205100000_whatsapp_inbound.sql`, la garde des messages se rejoue depuis `20261201100000`). Spec §9.3 et §13-6, ADR 007. Aucun compte Meta réel : fixtures seulement (test réel à C3).
+
+## Flux
+1. Meta envoie `POST /api/webhooks/whatsapp` (J34 : signature `X-Hub-Signature-256`, compte = numéro). `parse` **normalise** le corps (`packages/adapters/src/whatsapp/events.ts`) : seule la forme réduite est conservée dans `webhook_events.payload`.
+2. Le job `process_webhook` du worker relit cette forme (`readWhatsAppPayload`) et applique chaque événement par les fonctions SQL service_role `whatsapp_inbound_apply` et `whatsapp_status_apply` (processeur `apps/worker/src/whatsapp-webhook.ts`). L'entreprise et l'intégration sont celles de la **ligne** du job, jamais du contenu.
+
+## Forme conservée (normalisation)
+- **Messages reçus** : `from` (chiffres → `+<chiffres>`), type, texte (4096 points de code au plus, NUL retirés, surrogates isolés remplacés). Un **bouton** et une **réponse interactive** (bouton, liste) gardent leur libellé (un « STOP » tapé sur un bouton ne se perd pas) ; un média (image, audio, document...) garde **seulement son type** (`[image]`), sans média ni légende. Les **réactions** et événements **système** sont écartés (pas de message, le fil n'est pas rouvert).
+- **Statuts** de nos messages : `sent`, `delivered`, `read`, `failed` (avec le code d'erreur **numérique** de Meta, jamais son texte).
+- Jamais conservés : profils des contacts, médias, boutons bruts, objet complet de Meta. Éléments mal formés ou au-delà de 1000 par liste : écartés et comptés (`skipped`) ; une requête qui dépasse 1000 événements au total ou dont la structure n'est pas celle d'un webhook WhatsApp est refusée (400). Un horodatage hors bornes (plus de 10 chiffres, année > 2286) devient « absent » : il ferait échouer tout le lot.
+
+## `whatsapp_inbound_apply` (service_role seulement)
+- Intégration `whatsapp` de l'entreprise (statuts `pending`, `active`, `error`), sinon `not_found` (PT404) ; entrées invalides : 22023.
+- **Canal** : le canal WhatsApp non déconnecté de l'intégration. Aucun : `no_channel` ; plusieurs : `ambiguous_channel` (jamais de choix au hasard).
+- **Contact** : par le numéro **exact** `contacts.phone_e164 = from` **dans l'entreprise** (index unique par entreprise : pas d'ambiguïté, le même numéro dans deux entreprises est isolé). Inconnu : file `inbound_unmatched` (raison `unknown_sender`) et **aucun contact n'est créé**.
+- **Déduplication** par identifiant du message chez Meta (`wamid`) : même identifiant et même corps → `duplicate` ; même identifiant avec un autre corps (ou identifiant d'un message sortant) → `id_conflict` dans la file de tri.
+- **Fil** : un par contact et canal (J30) ; un fil fermé se rouvre ; fil plein → file de tri (`conversation_full`). Horodatage jamais dans le futur.
+- Résultats : `recorded`, `duplicate`, `unmatched` (+ raison), `dropped` (+ `queue_full` = file de tri à 10 000, ou `sender_limit` = 20 par expéditeur).
+- Audit : jamais de corps ni de numéro.
+
+## `whatsapp_status_apply` (service_role seulement)
+- Le message est cherché dans l'entreprise **et** l'intégration authentifiées (jamais celui d'une autre intégration, même de la même entreprise), par l'identifiant de Meta ; introuvable : `ignored` (`message_not_found`).
+- Les statuts n'avancent que dans l'ordre `accepted < sent < delivered < read` : hors ordre (`out_of_order`) ou rejoué (`already_applied`) : ignoré.
+- `failed` : accepté tant que le message n'est pas délivré ; l'`error_code` est `wa_<code>` (entier de Meta). Meta ne garantit pas l'ordre : un `failed` de Meta suivi d'un vrai `delivered` ou `read` est **corrigé** (`error_code` effacé ; la garde `messages_guard` autorise cette seule transition, jamais pour un échec posé par la chaîne d'envoi).
+- **Limite (prérequis du J36)** : un statut reçu **avant** l'enregistrement de l'envoi (l'identifiant Meta n'est pas encore dans `messages`) est ignoré. Le J36 doit **réclamer l'envoi avant l'appel** et réconcilier comme l'e-mail (J31, J32) pour ne perdre aucun statut.
+
+## Worker (`createWhatsAppWebhookProcessor`)
+- Applique chaque événement dans l'ordre ; rejouer une requête est sans danger (tout est dédupliqué, les statuts n'avancent que dans l'ordre).
+- File de tri pleine : les **autres** événements de la requête sont traités, puis échec définitif visible (`unmatched_queue_full`, rejouable après le tri) ; `sender_limit` : ignoré.
+- Intégration disparue (PT404) ou valeur refusée (22023) : échec **définitif** (`integration_gone`, `invalid_event`) ; les autres erreurs sont réessayées. Aucun texte de message, numéro ni identifiant dans les erreurs ou les journaux.
+
+## Limites connues
+- **Numéros non canoniques** : WhatsApp rapporte certains numéros sous une forme différente de l'E.164 saisi (Mexique `521…`, Argentine `549…`, variantes brésiliennes du 9ᵉ chiffre) : ils tombent dans `unknown_sender` (aucune fuite ; pas de correspondance approximative). Des alias par pays seront ajoutés plus tard, jamais un rapprochement flou.
+- **Désinscription par texte** : un « STOP » est enregistré comme message ; il ne pose pas encore `do_not_contact` (traitement du consentement par les écrans J30b et la boîte J37).
+- Les cas ignorés (`out_of_order`, `status_conflict`) ne laissent pas de trace dédiée (observabilité à voir au J39).
+
+## Tests
+pgTAP `280_whatsapp_inbound` (44), adaptateurs (événements : 11), worker (8), acceptation HTTP `whatsapp-flow` (7).

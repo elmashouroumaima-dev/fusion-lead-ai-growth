@@ -870,3 +870,29 @@ Cible : 55,9 % (plan à 68 jours) | Réel : à valider | Statut : —
 - Nouvelle variable serveur optionnelle `WHATSAPP_VERIFY_TOKEN` (jeton de la plateforme : la poignée de main GET ne porte aucun compte) ; décision d'architecture à valider.
 - Pas de traitement des événements WhatsApp avant le J35 : sans processeur, un événement passe `failed` (`no_processor`) et reste rejouable.
 
+## J35 — Réception WhatsApp (branche `day-35-whatsapp-inbound`)
+Cible : 57,4 % (plan à 68 jours) | Réel : à valider | Statut : —
+⚠ Aucun compte Meta réel : fixtures (plan B), test réel à C3.
+
+### Tâches
+| Tâche | Estimé | Livré | Validée |
+|---|---|---|---|
+| Parsing des entrants | 2,5 h | oui (normalisation à la lecture, `whatsapp_inbound_apply`, file de tri, processeur du worker) | oui (adaptateurs 142, worker 140, pgTAP 44) |
+| Statuts | 1,5 h | oui (`whatsapp_status_apply` : ordre, `failed` corrigeable, code numérique) | oui |
+| Déduplication `external_message_id` | 1 h | oui (par `wamid`, `id_conflict` en file de tri) | oui (acceptation HTTP 7) |
+| Tests | 1 h | oui | oui |
+
+### Validation du jour
+- **Webhook dupliqué → un seul message** : rejeu de la requête (doublon à la route), retraitement de l'événement et requête qui se recoupe : un message de plus seulement.
+- **Statuts hors ordre gérés** : `read` puis `delivered` tardif reste `read` ; un `failed` de Meta suivi d'un vrai `delivered` est corrigé.
+- **Expéditeur inconnu** : file de tri, aucun contact créé.
+
+### Revue sécurité (0 bloquant, 1 majeur, 5 moyens) — corrigés : horodatage de 12 chiffres qui faisait échouer tout le lot, `failed` puis `delivered` hors ordre, boutons et réponses interactives perdus (un « STOP » devenait `[button]`), réactions et événements système qui rouvraient le fil, échec définitif pour intégration disparue, éléments tronqués non comptés. Le majeur (un statut reçu avant l'enregistrement de l'envoi est perdu) est un **prérequis du J36**, documenté ; les numéros non canoniques (Mexique, Argentine, Brésil) restent sans correspondance (documenté).
+
+### Tests : domain 656 ✓ · adapters 142 ✓ · permissions 394 ✓ · worker 140 ✓ · web 2560 ✓ · pgTAP 3044 (dont 280_whatsapp_inbound : 44) ✓ · API réelle 485 ✓ · acceptation HTTP réelle (whatsapp-flow : 7) · lint, typecheck ✓
+### À surveiller
+- **J36** : réclamer l'envoi avant l'appel à Meta et réconcilier les statuts arrivés avant l'enregistrement (sinon un `failed` ou `delivered` se perd).
+- Numéros WhatsApp non canoniques : alias par pays à prévoir ; un « STOP » par texte ne pose pas encore `do_not_contact`.
+### Écarts à la spec / plan
+- La garde `messages_guard` (J31) est reprise dans la migration avec une transition de plus (`failed` de Meta → `delivered` ou `read`) ; le retour arrière demande de rejouer la fonction du J31.
+

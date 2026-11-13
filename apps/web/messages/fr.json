@@ -886,5 +886,25 @@
       "done": "Intégration déconnectée.",
       "failed": "L'intégration n'a pas pu être déconnectée."
     }
+  },
+  "Unsubscribe": {
+    "confirm": {
+      "title": "Se désabonner",
+      "description": "Confirmez pour ne plus recevoir d'e-mails de cet expéditeur.",
+      "submit": "Me désabonner"
+    },
+    "done": {
+      "title": "Vous êtes désabonné(e)",
+      "description": "Vous ne recevrez plus d'e-mails de cet expéditeur."
+    },
+    "invalid": {
+      "title": "Lien invalide",
+      "description": "Ce lien de désabonnement n'est pas valide. Utilisez le lien du dernier e-mail reçu."
+    },
+    "error": {
+      "title": "Un problème est survenu",
+      "description": "Votre demande n'a pas pu être traitée. Réessayez dans un instant.",
+      "retry": "Réessayer"
+    }
   }
 }

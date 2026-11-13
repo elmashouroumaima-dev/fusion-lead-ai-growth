@@ -3,6 +3,12 @@
 Format : Keep a Changelog. Une entrée par jour de travail.
 
 ## [Non publié]
+### J33 — Désabonnement
+- Ajout : migration `20261203100000` (et retour arrière) : `unsubscribe_apply` (service_role seulement) révoque les consentements e-mail du contact, supprime l'adresse (`suppressions`, raison `unsubscribe`), annule les messages en file non réclamés et leurs jobs, audite sans donnée personnelle ; idempotente.
+- Ajout : lien signé (`packages/adapters/src/email/unsubscribe.ts`, HMAC-SHA256, clé dérivée du trousseau, rotation sans casser les anciens liens), en-têtes `List-Unsubscribe` / One-Click et pied de page dans chaque e-mail ; le worker refuse d'envoyer sans clé de signature ; l'adaptateur Postmark transmet les en-têtes (liste blanche).
+- Ajout : `GET` et `POST /api/unsubscribe/[token]`, page publique `/{fr,ar,en}/unsubscribe/[token]` (confirmation, jamais de désabonnement à l'ouverture), limite par adresse, textes génériques.
+- Tests : pgTAP 260 (42), adaptateurs +10, worker +3, web +22, acceptation HTTP.
+- Documentation : `docs/api/unsubscribe.md`, ADR 008 (note J33).
 ### Hors plan — guide de tests et rapport d'avancement
 - Ajout : guide de tests fonctionnels des phases 2 et 3 (`docs/testing/phase2-3-functional-tests.md` et PDF) : 107 cas (interface : projets, leads, deals, intégrations ; technique : capture, assignation, import, synchro CRM, secrets, webhooks e-mail, conversations, envoi sous contrôles), fiche de résultats, données de démonstration (`docs/testing/fixtures/`), outils `pnpm test:call` et `pnpm test:guide`.
 - Ajout : page « journal du jour » du rapport (`journal` dans `scripts/progress-report/data.json` : phrase, activités, vignettes dans `docs/progress/report/journal/`, compteurs de lignes calculés par `git log --numstat` sur les commits du jour).

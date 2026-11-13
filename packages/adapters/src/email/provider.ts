@@ -18,6 +18,8 @@ export type EmailSendInput = {
   textBody: string;
   /** Métadonnées renvoyées telles quelles dans les événements du fournisseur (J32) : identifiant de NOTRE message, pour retrouver un envoi dont la réponse s'est perdue. */
   metadata?: Record<string, string>;
+  /** En-têtes ajoutés par NOTRE code (désabonnement, J33) : jamais une valeur saisie par un utilisateur. */
+  headers?: { name: string; value: string }[];
 };
 
 export type EmailSendOutcome =

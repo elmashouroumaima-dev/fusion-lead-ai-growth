@@ -350,7 +350,7 @@ page(
 page(
   "Livré récemment",
   `
-  <h2>Livré récemment <small>J28 à J32 : le socle des canaux e-mail</small></h2>
+  <h2>Livré récemment <small>J29 à J33 : le socle des canaux e-mail</small></h2>
   <div class="sub">Chaque journée est validée par des tests, puis attaquée par une revue de sécurité indépendante avant la fusion.</div>
   ${data.recent
     .map(

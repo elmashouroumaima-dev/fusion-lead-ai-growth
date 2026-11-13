@@ -1,21 +1,58 @@
 import { describe, expect, it } from "vitest";
 import { createSendMessageHandler, type JobContext } from "./handlers";
-import { claimedOk, FakeEmailProvider, MemorySend, SEND_INTEGRATION, SEND_MESSAGE, SEND_ORG } from "./send.testkit";
+import { createKeyRing, verifyUnsubscribeToken } from "@fusion-leap/adapters";
+import { claimedOk, FakeEmailProvider, MemorySend, SEND_INTEGRATION, SEND_MESSAGE, SEND_ORG, TEST_SITE_URL, testUnsubscribe } from "./send.testkit";
 
 const ctx = (patch: Partial<JobContext> = {}): JobContext => ({
   jobId: "44444444-4444-4444-8444-444444444444", organizationId: SEND_ORG, idempotencyKey: "send-message:x", attempt: 1, maxAttempts: 5, signal: new AbortController().signal, ...patch,
 });
 
-function setup(readSecret: (org: string, integration: string) => Promise<string | null> = async () => "tok-SECRET-0123456789") {
+function setup(readSecret: (org: string, integration: string) => Promise<string | null> = async () => "tok-SECRET-0123456789", unsubscribe = testUnsubscribe()) {
   const gateway = new MemorySend();
   const provider = new FakeEmailProvider();
   const secrets: Array<[string, string]> = [];
   const handler = createSendMessageHandler({
-    gateway, provider, readSecret: async (org, integration) => { secrets.push([org, integration]); return readSecret(org, integration); },
+    gateway, provider, readSecret: async (org, integration) => { secrets.push([org, integration]); return readSecret(org, integration); }, unsubscribe,
   });
   const run = (patch: Partial<JobContext> = {}) => handler.run(ctx(patch), { message_id: SEND_MESSAGE });
   return { gateway, provider, handler, run, secrets };
 }
+
+describe("send_message : désabonnement (J33)", () => {
+  it("chaque e-mail porte un lien signé : pied de page, List-Unsubscribe et One-Click, jeton lié à l'entreprise et au message", async () => {
+    const { provider, run } = setup();
+    await run();
+    const input = provider.sent[0]?.input;
+    const url = /Se désabonner : (\S+)$/.exec(input?.textBody ?? "")?.[1] ?? "";
+    expect(url.startsWith(`${TEST_SITE_URL}/api/unsubscribe/v1.1.`)).toBe(true);
+    expect(input?.headers).toEqual([
+      { name: "List-Unsubscribe", value: `<${url}>` },
+      { name: "List-Unsubscribe-Post", value: "List-Unsubscribe=One-Click" },
+    ]);
+    const token = url.slice(`${TEST_SITE_URL}/api/unsubscribe/`.length);
+    const ring = testUnsubscribe().keyRing;
+    expect(ring).not.toBeNull();
+    expect(verifyUnsubscribeToken(ring as NonNullable<typeof ring>, token)).toEqual({ organizationId: SEND_ORG, messageId: SEND_MESSAGE });
+    // un autre trousseau ne valide pas ce lien
+    expect(verifyUnsubscribeToken(createKeyRing(1, { 1: Buffer.alloc(32, 9).toString("base64") }), token)).toBeNull();
+  });
+
+  it("sans clé de signature : échec AVANT la réclamation, rien ne part, aucun appel à la base", async () => {
+    const { gateway, provider, run } = setup(undefined, { keyRing: null, siteUrl: TEST_SITE_URL });
+    await expect(run()).rejects.toThrow("unsubscribe_unavailable");
+    expect(provider.sent).toHaveLength(0);
+    expect(gateway.calls).toEqual([]);
+    expect(gateway.accepted).toEqual([]);
+  });
+
+  it("adresse désabonnée (suppression) : le contrôle final refuse, rien ne part", async () => {
+    const { gateway, provider, run } = setup();
+    gateway.claimResult = claimedOk({ suppressed: true });
+    await run();
+    expect(provider.sent).toHaveLength(0);
+    expect(gateway.failed).toEqual([{ code: "refused_suppressed" }]);
+  });
+});
 
 describe("send_message : charge utile", () => {
   it("n'accepte que l'identifiant du message (strict)", () => {
@@ -34,7 +71,8 @@ describe("send_message : chemin nominal", () => {
     await run();
     expect(provider.sent).toHaveLength(1);
     const call = provider.sent[0];
-    expect(call?.input).toEqual({ from: "ventes@acme.test", to: "karim@example.test", subject: "Bonjour Karim", textBody: "Bonjour Karim\nVoici notre offre.", metadata: { fusion_message_id: SEND_MESSAGE } });
+    expect(call?.input).toMatchObject({ from: "ventes@acme.test", to: "karim@example.test", subject: "Bonjour Karim", metadata: { fusion_message_id: SEND_MESSAGE } });
+    expect(call?.input.textBody.startsWith("Bonjour Karim\nVoici notre offre.\n\n--\nSe désabonner : ")).toBe(true);
     expect(call?.secret).toBe("tok-SECRET-0123456789");
     expect(gateway.accepted).toEqual([{ providerMessageId: "pm-123" }]);
     expect(gateway.calls.filter((c) => c.startsWith("failed"))).toEqual([]);
@@ -55,7 +93,7 @@ describe("send_message : chemin nominal", () => {
     const provider = new FakeEmailProvider();
     const send = provider.send.bind(provider);
     provider.send = async (i, s) => { order.push("provider"); return send(i, s); };
-    const handler = createSendMessageHandler({ gateway, provider, readSecret: async () => { order.push("secret"); return "tok-0123456789"; } });
+    const handler = createSendMessageHandler({ gateway, provider, readSecret: async () => { order.push("secret"); return "tok-0123456789"; }, unsubscribe: testUnsubscribe() });
     await handler.run(ctx(), { message_id: SEND_MESSAGE });
     expect(order).toEqual(["claim", "secret", "provider"]);
   });

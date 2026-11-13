@@ -1,4 +1,4 @@
-import { createPostmarkProvider } from "@fusion-leap/adapters";
+import { createKeyRing, createPostmarkProvider } from "@fusion-leap/adapters";
 import { EnvValidationError } from "@fusion-leap/domain";
 import { hostname } from "node:os";
 import { randomBytes } from "node:crypto";
@@ -16,6 +16,16 @@ import { installShutdown } from "./shutdown";
 import { createSupabaseJobStore } from "./store";
 
 
+/** Trousseau du lien de désabonnement : `null` si la clé maître manque ou est invalide (le worker démarre, seuls les envois échouent). */
+function unsubscribeKeyRing(env: ReturnType<typeof loadWorkerEnv>) {
+  if (!env.SECRETS_MASTER_KEY) return null;
+  try {
+    return createKeyRing(env.SECRETS_KEY_VERSION, { [env.SECRETS_KEY_VERSION]: env.SECRETS_MASTER_KEY });
+  } catch {
+    return null;
+  }
+}
+
 /** Journal JSON sur stdout : un événement par ligne, champs scalaires seulement. */
 const logger: WorkerLogger = {
   info: (event, fields) => console.info(JSON.stringify({ level: "info", worker: WORKER_NAME, event, ...fields })),
@@ -30,7 +40,7 @@ try {
   const webhookProcessors: WebhookProcessors = new Map([["email", createEmailWebhookProcessor(createSupabaseEmailEventGateway(env))]]);
   const runner = new Runner({
     store: createSupabaseJobStore(env),
-    registry: createDefaultRegistry({ assigner: createSupabaseLeadAssigner(env), imports: createSupabaseImportGateway(env), crm: createSupabaseCrmSyncGateway(env), send: { gateway: createSupabaseSendGateway(env), readSecret: createSupabaseSecretReader(env), provider: createPostmarkProvider() }, webhooks: { gateway: createSupabaseWebhookGateway(env), processors: webhookProcessors } }),
+    registry: createDefaultRegistry({ assigner: createSupabaseLeadAssigner(env), imports: createSupabaseImportGateway(env), crm: createSupabaseCrmSyncGateway(env), send: { gateway: createSupabaseSendGateway(env), readSecret: createSupabaseSecretReader(env), provider: createPostmarkProvider(), unsubscribe: { keyRing: unsubscribeKeyRing(env), siteUrl: env.SITE_URL } }, webhooks: { gateway: createSupabaseWebhookGateway(env), processors: webhookProcessors } }),
     workerId,
     logger,
   });

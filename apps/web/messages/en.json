@@ -886,5 +886,25 @@
       "done": "Integration disconnected.",
       "failed": "The integration could not be disconnected."
     }
+  },
+  "Unsubscribe": {
+    "confirm": {
+      "title": "Unsubscribe",
+      "description": "Confirm to stop receiving emails from this sender.",
+      "submit": "Unsubscribe me"
+    },
+    "done": {
+      "title": "You are unsubscribed",
+      "description": "You will no longer receive emails from this sender."
+    },
+    "invalid": {
+      "title": "Invalid link",
+      "description": "This unsubscribe link is not valid. Use the link in the latest email you received."
+    },
+    "error": {
+      "title": "Something went wrong",
+      "description": "Your request could not be processed. Please try again in a moment.",
+      "retry": "Try again"
+    }
   }
 }

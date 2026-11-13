@@ -1,3 +1,4 @@
+import { answerWhatsAppChallenge } from "@fusion-leap/adapters";
 import { getServerEnv } from "../../../../lib/env/server";
 import { clientIp, ipBucketKey } from "../../../../lib/service/capture-lead";
 import { readIntegrationWebhookSecret } from "../../../../lib/service/integration-secrets";
@@ -49,4 +50,33 @@ export async function POST(request: Request, context: { params: Promise<{ provid
       log: (event, fields) => logger.info(event, fields),
     }),
   );
+}
+
+/**
+ * GET /api/webhooks/whatsapp (J34) : poignée de main d'abonnement de Meta (`hub.mode`, `hub.verify_token`, `hub.challenge`). Le jeton est celui de la
+ * PLATEFORME (`WHATSAPP_VERIFY_TOKEN`) : la requête ne porte aucun compte. Répond le défi en texte brut, sinon 403 ; 404 pour tout autre fournisseur
+ * ou quand le jeton n'est pas configuré. Limitée par adresse comme les webhooks ; n'écrit rien.
+ */
+export async function GET(request: Request, context: { params: Promise<{ provider: string }> }): Promise<Response> {
+  const { requestId } = resolveRequestIds(request.headers);
+  const { provider } = await context.params;
+  const headers = { "cache-control": "no-store", "content-type": "text/plain; charset=utf-8", "x-content-type-options": "nosniff" };
+  if (provider !== "whatsapp") return new Response(null, { status: 404, headers });
+  let expected: string | undefined;
+  try {
+    expected = getServerEnv().WHATSAPP_VERIFY_TOKEN;
+  } catch {
+    expected = undefined;
+  }
+  if (!expected) return new Response(null, { status: 404, headers });
+  return runWithRequestContext({ requestId }, async () => {
+    try {
+      const limit = await takePublicToken({ scope: "webhook_ip", bucketKey: `${provider}:${ipBucketKey(clientIp(request.headers) ?? "unknown")}` });
+      if (!limit.allowed) return new Response(null, { status: 429, headers: { ...headers, "retry-after": String(limit.retryAfterSeconds) } });
+    } catch {
+      return new Response(null, { status: 503, headers });
+    }
+    const challenge = answerWhatsAppChallenge(new URL(request.url).searchParams, expected);
+    return challenge === null ? new Response(null, { status: 403, headers }) : new Response(challenge, { status: 200, headers });
+  });
 }

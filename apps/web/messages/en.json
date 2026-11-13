@@ -885,6 +885,30 @@
       "cancel": "Cancel",
       "done": "Integration disconnected.",
       "failed": "The integration could not be disconnected."
+    },
+    "whatsapp": {
+      "connect": {
+        "title": "Connect a WhatsApp number",
+        "description": "WhatsApp Business Platform (Meta's official API). The token and the secret are encrypted, written once and never displayed.",
+        "phoneId": "Phone number ID",
+        "token": "Access token",
+        "appSecret": "Meta app secret",
+        "appSecretHint": "Used to verify the signature of events received from Meta (at least 32 characters, no spaces).",
+        "submit": "Connect and verify",
+        "duplicate": "This number is already connected.",
+        "invalid": "Invalid ID or token.",
+        "secretInvalid": "Invalid app secret (32 to 200 characters, no spaces). The number is created: replace the secret then verify.",
+        "failed": "The connection failed. Please try again in a moment."
+      },
+      "verify": {
+        "button": "Verify connection",
+        "ok": "Connection verified: the integration is active.",
+        "auth": "Token refused or expired by Meta.",
+        "account": "Number not found or not allowed for this token.",
+        "unreadable": "Unreadable response from Meta.",
+        "unavailable": "Meta is unavailable. Please try again in a moment.",
+        "failed": "The verification failed."
+      }
     }
   },
   "Unsubscribe": {

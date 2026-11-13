@@ -885,6 +885,30 @@
       "cancel": "Annuler",
       "done": "Intégration déconnectée.",
       "failed": "L'intégration n'a pas pu être déconnectée."
+    },
+    "whatsapp": {
+      "connect": {
+        "title": "Connecter un numéro WhatsApp",
+        "description": "WhatsApp Business Platform (API officielle de Meta). Le jeton et le secret sont chiffrés, écrits une seule fois et ne s'affichent jamais.",
+        "phoneId": "Identifiant du numéro (Phone number ID)",
+        "token": "Jeton d'accès",
+        "appSecret": "Secret de l'app Meta",
+        "appSecretHint": "Sert à vérifier la signature des événements reçus de Meta (32 caractères au moins, sans espace).",
+        "submit": "Connecter et vérifier",
+        "duplicate": "Ce numéro est déjà connecté.",
+        "invalid": "Identifiant ou jeton invalide.",
+        "secretInvalid": "Secret de l'app invalide (32 à 200 caractères, sans espace). Le numéro est créé : remplacez le secret puis vérifiez.",
+        "failed": "La connexion a échoué. Réessayez dans un instant."
+      },
+      "verify": {
+        "button": "Vérifier la connexion",
+        "ok": "Connexion vérifiée : l'intégration est active.",
+        "auth": "Jeton refusé ou expiré par Meta.",
+        "account": "Numéro introuvable ou non autorisé pour ce jeton.",
+        "unreadable": "Réponse de Meta inexploitable.",
+        "unavailable": "Meta est indisponible. Réessayez dans un instant.",
+        "failed": "La vérification a échoué."
+      }
     }
   },
   "Unsubscribe": {

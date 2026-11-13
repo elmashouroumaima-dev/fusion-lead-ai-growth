@@ -252,3 +252,10 @@ Tables créées : `plans` (catalogue global ; ligne `trial` sans limites, valeur
 - **Ajout `inbound_unmatched`** (amendement) : `organization_id`, `integration_id`, `channel_id` (nul si le canal est introuvable), `provider_message_id`, `from_normalized`, `subject`, `body` (2 000 caractères au plus), `reason` (`unknown_sender`, `sender_unverified`, `no_channel`, `ambiguous_channel`, `spam`, `conversation_full`, `id_conflict`), `status` (`pending`, `attached`, `discarded`), unique `(organization_id, integration_id, provider_message_id)`. Lecture owner et admin ; aucune écriture directe ; alimentée par `email_inbound_apply`. Un expéditeur inconnu ne crée jamais de contact.
 - **Ajout `integrations.webhook_secret_ref` / `has_webhook_secret`** (amendement) : second secret par intégration (ADR 004), illisible par l'API, supprimé à la déconnexion.
 - **`suppressions` (G-D5) reçoit ses premiers écrivains** (fonction `email_status_apply`) : `bounce` (rebond dur, sans toucher `do_not_contact`) et `complaint` (avec `do_not_contact = true`). `unsubscribe` et `manual` arrivent avec le J33.
+
+## Notes J34 (2026-11-13) — connexion WhatsApp
+- `integration_set_validation` (service_role seulement) : seul le serveur, après avoir essayé le jeton auprès de Meta, peut passer une intégration à `active` ou `error` ; `integrations.last_error` reçoit un code d'une liste fermée (`provider_auth`, `provider_account`, `provider_unavailable`, `provider_unreadable`, ajoutés à ceux de J25), jamais un texte du fournisseur.
+- Webhook WhatsApp : signature HMAC-SHA256 avec le secret de l'app stocké dans l'emplacement du secret de webhook (J32) ; identifiant de déduplication = empreinte du corps signé (Meta n'a pas d'identifiant unique par événement).
+- Poignée de main GET : jeton de vérification **de la plateforme** (`WHATSAPP_VERIFY_TOKEN`, nouvelle variable serveur optionnelle) car la requête ne porte aucun compte.
+- À confirmer à C3 sur un compte Meta réel : version de l'API Graph, forme des payloads, nouvel essai de Meta.
+

@@ -844,3 +844,29 @@ Cible : 54,4 % (plan à 68 jours) | Réel : à valider | Statut : —
 ### Écarts à la spec / plan
 - Pas de suppression de l'adresse courante si l'e-mail du contact a changé depuis l'approbation (l'adresse supprimée est celle où le message est parti).
 - Hypothèse à confirmer à C3 : Postmark transmet tels quels les en-têtes `List-Unsubscribe` de `Headers`.
+
+## J34 — Connexion WhatsApp Cloud API (branche `day-34-whatsapp-connect`)
+Cible : 55,9 % (plan à 68 jours) | Réel : à valider | Statut : —
+⚠ Chemin critique externe : aucun compte Meta réel ; développement contre des fixtures (plan B), test réel à C3.
+
+### Tâches
+| Tâche | Estimé | Livré | Validée |
+|---|---|---|---|
+| connect/validate | 2,5 h | oui (`integration_set_validation`, client Graph à adresse fixe, route `POST /api/integrations/validate`) | oui (pgTAP 30, adaptateurs 129, web 2560) |
+| Vérification du webhook + signature | 2 h | oui (adaptateur `X-Hub-Signature-256`, poignée de main GET, `WHATSAPP_VERIFY_TOKEN`) | oui (acceptation HTTP 9) |
+| Écran de connexion | 1,5 h | oui (« Connecter un numéro WhatsApp », « Vérifier la connexion », fr / ar / en) | partiel (écran vérifié par les tests, pas visuellement dans un navigateur) |
+
+### Validation du jour
+- **Signature** : événement signé accepté et dédupliqué ; signature fausse, absente, sans préfixe ou corps modifié : 401 ; numéro inconnu : le même 401.
+- **Activation** : seul le serveur, après essai du jeton auprès de Meta, peut passer une intégration à `active` (fonction service_role) ; une panne de Meta n'écrit rien.
+
+### Revue sécurité (0 bloquant, 0 majeur, 4 moyens) — corrigés : notifications Meta sans numéro refusées à tort (400, risque de désactivation de l'abonnement), limites de débit de Graph prises pour une erreur de compte, acteur absent de l'audit, activation possible sans secret d'app, identifiant de numéro non numérique accepté. Non corrigé (documenté) : numéro réservable par une intégration jamais validée, fenêtre de remplacement du jeton, trace des refus sans purge.
+
+### Tests : domain 656 ✓ · adapters 129 ✓ · permissions 394 ✓ · worker 132 ✓ · web 2560 ✓ · pgTAP 3000 (dont 270_integration_validation : 30) ✓ · API réelle 485 ✓ · acceptation HTTP réelle (whatsapp-connect : 9) · lint, typecheck ✓
+### À surveiller
+- Tout ce qui touche Meta est une hypothèse à confirmer à C3 (version Graph v21.0, forme des payloads, nouvel essai).
+- Le J35 doit dédupliquer par identifiant de message et de statut (le webhook ne dédoublonne qu'au niveau du corps).
+### Écarts à la spec / plan
+- Nouvelle variable serveur optionnelle `WHATSAPP_VERIFY_TOKEN` (jeton de la plateforme : la poignée de main GET ne porte aucun compte) ; décision d'architecture à valider.
+- Pas de traitement des événements WhatsApp avant le J35 : sans processeur, un événement passe `failed` (`no_processor`) et reste rejouable.
+

@@ -5,12 +5,12 @@
   "tests": [
     {
       "label": "Web (application)",
-      "value": 2560,
+      "value": 2566,
       "note": "Écrans, routes HTTP et services de l'application"
     },
     {
       "label": "Base de données (pgTAP)",
-      "value": 3044,
+      "value": 3101,
       "note": "Tables, droits et règles de la base de données"
     },
     {
@@ -30,12 +30,12 @@
     },
     {
       "label": "Worker et adaptateurs",
-      "value": 282,
+      "value": 302,
       "note": "Tâches de fond et adaptateurs de fournisseurs"
     },
     {
       "label": "Acceptation (T1, T5)",
-      "value": 210,
+      "value": 219,
       "note": "Parcours complets en HTTP réel sur l'application construite"
     }
   ],
@@ -252,9 +252,9 @@
           "day": "J34–J37",
           "days": 4,
           "name": "WhatsApp Cloud API",
-          "progress": 50,
+          "progress": 75,
           "status": "review",
-          "note": "J34 connexion et J35 réception (fixtures, aucun compte Meta) faits ; J36 envoi et J37 boîte de réception à faire."
+          "note": "J34 connexion, J35 réception et J36 envoi conforme faits (fixtures, aucun compte Meta) ; J37 boîte de réception à faire."
         },
         {
           "day": "J38–J41",
@@ -467,6 +467,11 @@
       "text": "Numéro WhatsApp réservable par une intégration jamais validée, et variable serveur WHATSAPP_VERIFY_TOKEN : valider ces deux choix avant la production.",
       "owner": "Responsable technique",
       "urgency": "Avant C3"
+    },
+    {
+      "text": "Désinscription WhatsApp (« STOP », suppression par numéro) à traiter avant tout envoi marketing WhatsApp réel ; waba_id à enregistrer et vérifier à la connexion.",
+      "owner": "Équipe",
+      "urgency": "Avant le premier envoi"
     }
   ],
   "nextSteps": [
@@ -527,20 +532,6 @@
   ],
   "recent": [
     {
-      "day": "J31",
-      "title": "Envoi d'e-mail sous contrôles",
-      "items": [
-        "Approbation humaine obligatoire, contrôle final juste avant l'appel dans le worker.",
-        "Au plus un envoi par message ; « accepté » n'est pas « livré »."
-      ],
-      "proof": "94 tests de base, 10 tests API, 30 tests worker",
-      "review": {
-        "blocking": 0,
-        "major": 2,
-        "medium": 5
-      }
-    },
-    {
       "day": "J32",
       "title": "Statuts et réception d'e-mail",
       "items": [
@@ -595,21 +586,36 @@
         "major": 1,
         "medium": 5
       }
+    },
+    {
+      "day": "J36",
+      "title": "Envoi WhatsApp conforme",
+      "items": [
+        "Hors de la fenêtre de 24 h, un message WhatsApp ne part qu'avec un modèle approuvé ; le modèle, ses variables et le texte rendu sont fixés avant l'approbation humaine.",
+        "Un modèle remplacé par une version plus récente est refusé ; une erreur de Meta incertaine n'est jamais renvoyée à l'aveugle."
+      ],
+      "proof": "57 tests de base, 9 tests d'acceptation HTTP réelle, adaptateurs, worker et web (aucun compte Meta réel)",
+      "review": {
+        "blocking": 0,
+        "major": 2,
+        "medium": 7
+      }
     }
   ],
   "capabilities": {
     "ready": [
-      "Préparer un envoi : approbation humaine, 15 contrôles juste avant l'appel.",
       "Recevoir les statuts du fournisseur et les réponses, rattachés à la bonne conversation.",
       "Se désabonner par un lien signé : consentement révoqué, adresse supprimée, envois en attente annulés.",
       "Connecter un numéro WhatsApp et recevoir des événements signés de Meta (essayé sur des fixtures, pas sur un compte réel).",
-      "Recevoir des messages WhatsApp et leurs statuts, rattachés au bon contact (essayé sur des fixtures)."
+      "Recevoir des messages WhatsApp et leurs statuts, rattachés au bon contact (essayé sur des fixtures).",
+      "Préparer un message WhatsApp sous contrôles : approbation humaine, fenêtre de 24 h, modèle approuvé (essayé sur des fixtures)."
     ],
     "notYet": [
       "Envoyer ou recevoir un vrai e-mail : il manque l'activation d'un canal et un compte d'essai (C3).",
       "Se réabonner : aucune action pour lever une désinscription (écran contacts, J30b).",
       "Gérer les contacts et le consentement à l'écran (J30b) et lire les conversations (boîte de réception, J37).",
-      "WhatsApp (J34 à J37) : en attente du compte Meta."
+      "WhatsApp (J34 à J37) : en attente du compte Meta.",
+      "Envoyer un message WhatsApp marketing : il manque le retrait de consentement par « STOP » (J30b, J37)."
     ]
   },
   "journal": {
@@ -617,41 +623,48 @@
     "intro": "Le travail du jour raconté étape par étape : ce qui a été fait, les vérifications menées et le volume de code touché.",
     "steps": [
       {
-        "sentence": "J'ai ajouté en base la réception des messages WhatsApp et de leurs statuts, avec la file de tri et l'ordre des statuts.",
+        "sentence": "J'ai ajouté en base les modèles de message (versionnés), la fenêtre de 24 h dans la réclamation et l'approbation par numéro pour WhatsApp.",
         "actions": [
-          "Migration et retour arrière écrits",
+          "Migration, retour arrière vérifié",
           "Tests pgTAP lancés"
         ],
-        "grep": "feat\\(db\\).*J35"
+        "grep": "feat\\(db\\).*J36"
       },
       {
-        "sentence": "J'ai écrit la normalisation des événements de Meta : seuls les messages et les statuts utiles sont conservés, sans profils ni médias.",
+        "sentence": "J'ai écrit l'envoi WhatsApp (texte ou modèle) et la lecture de la liste des modèles de Meta, avec des résultats qui ne renvoient jamais à l'aveugle.",
         "actions": [
           "Cas de Meta rejoués sur des fixtures"
         ],
-        "grep": "feat\\(adapters\\).*J35"
+        "grep": "feat\\(adapters\\).*J36"
       },
       {
-        "sentence": "J'ai branché le processeur WhatsApp du worker, rejouable sans danger.",
+        "sentence": "J'ai branché l'envoi WhatsApp dans le worker, derrière le même contrôle final que l'e-mail.",
         "actions": [
           "Tests du worker lancés"
         ],
-        "grep": "feat\\(worker\\).*J35"
+        "grep": "feat\\(worker\\).*J36"
       },
       {
-        "sentence": "J'ai écrit les tests pgTAP et d'acceptation HTTP, puis fait attaquer le tout par une revue de sécurité indépendante.",
+        "sentence": "J'ai ajouté la route de synchronisation des modèles (owner et admin).",
+        "actions": [
+          "Rôles et cloisonnement testés"
+        ],
+        "grep": "feat\\(web\\).*J36"
+      },
+      {
+        "sentence": "J'ai écrit les tests pgTAP et d'acceptation, puis fait attaquer le tout par une revue de sécurité indépendante.",
         "actions": [
           "Suite complète lancée",
           "Failles corrigées avec un test"
         ],
-        "grep": "test:.*J35"
+        "grep": "test:.*J36"
       },
       {
-        "sentence": "J'ai documenté l'API de réception, le journal et le CHANGELOG.",
+        "sentence": "J'ai documenté l'API d'envoi, le journal et le CHANGELOG.",
         "actions": [
           "Documentation mise à jour"
         ],
-        "grep": "docs: J35"
+        "grep": "docs: J36"
       }
     ]
   }

@@ -892,3 +892,58 @@ Le pas « note ou appel » est démontré à J30c ; la vue du commercial (SA pro
 - Aucun écart de livrable. Ajout léger : l'étape du lead (pas seulement celle du deal) est modifiable depuis la fiche.
 - Le parcours est joué avec le compte propriétaire (qui peut tout faire) ; le test automatique `g2-lead-to-deal` crée toujours le deal par la fonction SQL (il n'appelle pas les Server Actions : leur identifiant change à chaque compilation).
 - Pas de « Add lead » (création manuelle) : hors plan.
+
+## J37 — Boîte de réception unifiée (branche `day-37-inbox`)
+Cible : 60,3 % (plan à 68 jours) | Réel : à valider | Statut : —
+⚠ Les journées J33 à J36b (désabonnement, WhatsApp) sont dans des PR encore ouvertes (#42 à #45), pas dans `main` : la boîte de réception est indépendante du canal.
+
+### Tâches
+| Tâche | Estimé | Livré | Validée |
+|---|---|---|---|
+| Liste + filtres | 2 h | oui (`/inbox`, `search_conversations`, aperçu de 140 caractères) | pgTAP 31, acceptation HTTP 7, navigateur |
+| Vue fil | 2 h | oui (`/inbox/[id]`, lecture, messages par pages) | acceptation HTTP, navigateur |
+| Assignation et états | 1,5 h | oui (`inbox.assign`, `inbox.state.set`) | Vitest 9, navigateur |
+| Actualisation filtrée | 0,5 h | oui (ADR 013 : polling de 15 s) | navigateur : message inséré pendant que la page est ouverte, visible sans recharger |
+
+### Validation du jour
+- E-mail et WhatsApp dans une même liste : démontré par l'acceptation HTTP (canaux e-mail et WhatsApp créés en base) et par le jeu de démonstration.
+- Actualisation sans fuite inter-entreprise : par construction (la page serveur est redessinée sous la RLS de l'appelant) ; l'acceptation vérifie qu'une autre entreprise ne voit RIEN d'Alpha, ni dans la liste ni dans le fil (404), et que le commercial ne lit que ses conversations.
+
+### Écarts à la spec / plan
+- Une migration (`search_conversations`) : le plan n'en prévoyait pas ; le commercial ne lisant ni `channels` ni les contacts sans lead, la liste ne peut pas passer par la RLS des tables.
+- ADR 013 rédigé (il n'existait pas) : polling, statut **Proposed**, à valider par la responsable technique.
+- Pas de composeur ni de verrou humain / IA (J38).
+
+### À surveiller
+- Un message dont la transaction partage le même `created_at` (import en bloc) peut s'afficher dans un autre ordre : les messages réels arrivent dans des transactions séparées.
+- Cinq tests `test:rls` (jobs, imports, webhooks, chaîne d'envoi) échouent tant que le worker de développement tourne ; sans lien avec J37.
+
+## J38 — Réponses et verrou humain / IA (branche `day-38-replies`)
+Cible : 61,8 % (plan à 68 jours) | Réel : à valider | Statut : —
+⚠ Branche empilée sur `day-37-inbox` (PR #50) ; la PR de J38 vise `day-37-inbox` puis sera retargetée vers `main`.
+
+### Tâches
+| Tâche | Estimé | Livré | Validée |
+|---|---|---|---|
+| SQL : réponse + verrou humain / IA | 2 h | oui (`20261210100000_replies_lock.sql`) | pgTAP 46 |
+| API `POST /api/conversations/:id/replies` | 1 h | oui (202 queued, clé obligatoire) | acceptation HTTP |
+| UI : composeur, bandeau de verrou, battement de cœur | 2 h | oui (`reply-composer.tsx`) | acceptation HTTP (composeur présent) ; essai en navigateur à faire par l'utilisateur |
+| Tests + démonstration (worker avec fournisseur de test) | 1 h | oui (`replies-flow.test.ts`) | acceptation 11 |
+
+### Validation du jour
+- Réponse envoyée par le worker : démontré (statut « accepté », un seul appel au fournisseur, bon destinataire / expéditeur / texte ; un second passage n'envoie rien).
+- Pas de réponse simultanée IA + humain : démontré en SQL (pgTAP) et par HTTP (409 pendant le bail d'un autre membre ou pendant que l'IA tient la conversation ; « Reprendre la main » rend la réponse possible).
+- Contrôle final : un contact « ne pas contacter » reçoit un message mis en file mais le worker refuse de l'envoyer.
+
+### Écarts à la spec / plan
+- `message_send_claim` (J31) est remplacée : un commercial approuve sa propre réponse sur sa conversation, et le consentement conversationnel (30 jours) couvre la finalité `reply`. Décision « option B » validée avec l'utilisateur ; **à faire valider par la responsable technique** (changement d'une règle d'envoi).
+- E-mail seulement : la réponse WhatsApp arrive avec J36 (non fusionnée).
+
+### À surveiller
+- Fusion avec la migration WhatsApp (J36) : les deux remplacent `message_send_claim` ; garder une seule version qui contient les changements des deux.
+- Le battement de cœur du bail (2 minutes) dépend du navigateur ouvert ; sinon le bail expire seul au bout de 5 minutes.
+- Cinq tests `test:rls` (jobs, imports, webhooks, chaîne d'envoi) échouent tant que le worker de développement tourne ; sans lien avec J38 (`replies-flow` neutralise ce worker pour ses propres messages).
+
+## Correctif J37 — lint L10 (branche `day-38-replies`)
+`public.search_conversations` (J37) était SECURITY DEFINER dans `public` : le lint L10 échouait (`030` test 8, `900` test 10). Nouvelle migration `20261210110000_inbox_search_private.sql` : corps dans `private`, enveloppe SECURITY INVOKER dans `public` ; rollback fourni. Vérifié : pgTAP 030 et 900 verts, 260 inchangé, acceptation `inbox-pages` (7) et `replies-flow` (11) verts, lint, typecheck, Vitest verts.
+⚠ Restent hors périmètre : `050` test 162 (une ligne résiduelle dans `rate_limit_buckets` laissée par les tests d'acceptation) et `190_crm_search` (plan incomplet, données de démonstration).

@@ -32,6 +32,10 @@ const CONFLICTS = [
   "too_many_channels",
   "idempotency_conflict",
   "too_many_messages",
+  "conversation_locked",
+  "channel_unsupported",
+  "channel_inactive",
+  "message_not_approvable",
 ] as const;
 
 export function mapLeadsDbError(error: DbError): ServiceErrorCode {

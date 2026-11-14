@@ -3,6 +3,7 @@
 import {
   ChevronDownIcon,
   CircleUserIcon,
+  InboxIcon,
   ContactRoundIcon,
   FolderKanbanIcon,
   KanbanSquareIcon,
@@ -36,8 +37,8 @@ import {
 import { Link, usePathname } from "../../i18n/navigation";
 
 type NavItem = {
-  href: "/dashboard" | "/projects" | "/leads" | "/contacts" | "/deals" | "/crm" | "/members" | "/admin/organizations" | "/integrations";
-  labelKey: "dashboard" | "projects" | "leads" | "contacts" | "deals" | "crmSync" | "members" | "admin" | "integrations";
+  href: "/dashboard" | "/projects" | "/leads" | "/contacts" | "/inbox" | "/deals" | "/crm" | "/members" | "/admin/organizations" | "/integrations";
+  labelKey: "dashboard" | "projects" | "leads" | "contacts" | "inbox" | "deals" | "crmSync" | "members" | "admin" | "integrations";
   icon: typeof UsersIcon;
 };
 
@@ -60,6 +61,7 @@ export function AppSidebar({
   showMembers,
   showCrm = false,
   showContacts = false,
+  showInbox = false,
   showCrmSync = false,
   showSettings = false,
   showAdmin = false,
@@ -69,6 +71,8 @@ export function AppSidebar({
   showCrm?: boolean;
   /** « Contacts » : owner, admin et marketing (commodité d'affichage ; la page et la RLS décident). */
   showContacts?: boolean;
+  /** « Boîte de réception » : owner, admin et commercial (commodité d'affichage ; la page et la RLS décident). */
+  showInbox?: boolean;
   /** « CRM » (synchronisation) et « Intégrations » : owner et admin (commodité d'affichage ; la page et la base décident). */
   showCrmSync?: boolean;
   showSettings?: boolean;
@@ -80,6 +84,7 @@ export function AppSidebar({
   const items: NavItem[] = [
     { href: "/dashboard", labelKey: "dashboard", icon: LayoutDashboardIcon },
     { href: "/projects", labelKey: "projects", icon: FolderKanbanIcon },
+    ...(showInbox ? [{ href: "/inbox", labelKey: "inbox", icon: InboxIcon } satisfies NavItem] : []),
     ...(showCrm
       ? [
           { href: "/leads", labelKey: "leads", icon: TargetIcon } satisfies NavItem,

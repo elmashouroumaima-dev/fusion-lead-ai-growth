@@ -27,7 +27,8 @@
       "deals": "Deals",
       "crmSync": "CRM",
       "integrations": "Integrations",
-      "contacts": "Contacts"
+      "contacts": "Contacts",
+      "inbox": "Inbox"
     },
     "sidebar": {
       "toggle": "Show or hide the side menu",
@@ -1065,6 +1066,130 @@
       "service_unavailable": "Service temporarily unavailable. Try again later.",
       "generic": "An error occurred. Please try again.",
       "load": "The contacts could not be loaded. Try again."
+    }
+  },
+  "Inbox": {
+    "title": "Inbox",
+    "description": "E-mail and WhatsApp conversations in one list, the most recently active first. The list refreshes by itself every 15 seconds.",
+    "ownOnlyHint": "You only see the conversations assigned to you.",
+    "filters": {
+      "label": "Filter conversations",
+      "search": "Search",
+      "searchPlaceholder": "Contact name, e-mail or phone",
+      "state": "State",
+      "channel": "Channel",
+      "assignee": "Assignee",
+      "all": "All",
+      "mine": "Assigned to me",
+      "unassigned": "Unassigned",
+      "apply": "Apply",
+      "reset": "Reset"
+    },
+    "states": {
+      "open": "Open",
+      "pending": "Pending",
+      "closed": "Closed",
+      "to_triage": "To triage"
+    },
+    "channels": {
+      "email": "E-mail",
+      "whatsapp": "WhatsApp"
+    },
+    "count": "Results: {count}",
+    "empty": "No conversation yet.",
+    "emptyFiltered": "No conversation matches these filters.",
+    "row": {
+      "unnamed": "Unknown contact",
+      "openNamed": "Open the conversation with {name}",
+      "you": "You:",
+      "noMessage": "No message yet."
+    },
+    "pagination": {
+      "label": "Pagination",
+      "previous": "Previous page",
+      "next": "Next page",
+      "status": "Page {page} of {pageCount}"
+    },
+    "thread": {
+      "back": "Back to the inbox",
+      "summary": "Conversation",
+      "channel": "Channel",
+      "stateLabel": "State",
+      "assigneeLabel": "Assignee",
+      "email": "E-mail",
+      "phone": "Phone",
+      "openContact": "Open the contact record",
+      "messages": "Messages",
+      "empty": "No message in this conversation.",
+      "older": "Older messages",
+      "newer": "Newer messages",
+      "sent": "Sent",
+      "received": "Received",
+      "saving": "Saving…",
+      "assign": {
+        "label": "Assignee",
+        "none": "No assignee (back to triage)",
+        "submit": "Assign"
+      },
+      "state": {
+        "label": "State",
+        "submit": "Change state"
+      }
+    },
+    "status": {
+      "queued": "Queued",
+      "accepted": "Accepted",
+      "sent": "Sent",
+      "delivered": "Delivered",
+      "read": "Read",
+      "failed": "Failed",
+      "bounced": "Bounced",
+      "cancelled": "Cancelled",
+      "received": "Received"
+    },
+    "success": {
+      "assigned": "Conversation assigned.",
+      "unassigned": "Assignee removed.",
+      "stateChanged": "State changed."
+    },
+    "errors": {
+      "invalid_input": "Some values are invalid. Check the fields.",
+      "forbidden": "Your role does not allow this action on this conversation.",
+      "conflict": "This change is not possible (for example the state does not match the assignee).",
+      "not_found": "This conversation cannot be found.",
+      "rate_limited": "Too many attempts. Try again in a moment.",
+      "duplicate_request": "This request was already processed.",
+      "idempotency_in_progress": "The request is being processed.",
+      "idempotency_conflict": "This request was already sent with other values. Reload the page.",
+      "service_unavailable": "Service temporarily unavailable. Try again later.",
+      "generic": "An error occurred. Please try again.",
+      "load": "The conversations could not be loaded. Try again."
+    },
+    "reply": {
+      "label": "Your reply",
+      "placeholder": "Write your reply by e-mail…",
+      "hint": "{count} / {max} characters",
+      "send": "Send reply",
+      "sending": "Queuing…",
+      "lock": {
+        "other": "Another member is replying to this conversation. You can reply once they are done.",
+        "ai": "The AI assistant is handling this conversation. Take over to reply yourself.",
+        "takeOver": "Take over"
+      },
+      "unsupported": "Replying on WhatsApp is not available yet: reply from the e-mail channel.",
+      "readOnly": "Read-only: you cannot reply to this conversation.",
+      "info": "The reply is sent by e-mail after a final check (consent, do not contact, sender). It first appears as “queued”.",
+      "success": {
+        "queued": "Reply queued: it will be sent in a moment."
+      },
+      "errors": {
+        "conflict": "Cannot reply: the conversation is held by another member or by the AI, or the channel is not available.",
+        "forbidden": "Your role does not allow replying to this conversation.",
+        "not_found": "This conversation cannot be found.",
+        "rate_limited": "Too many attempts. Try again in a moment.",
+        "invalid_input": "The reply is empty, too long or contains disallowed characters.",
+        "generic": "An error occurred. Please try again."
+      }
     }
   },
   "Lead": {

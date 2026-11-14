@@ -1066,5 +1066,114 @@
       "generic": "An error occurred. Please try again.",
       "load": "The contacts could not be loaded. Try again."
     }
+  },
+  "Lead": {
+    "back": "Back to leads",
+    "summary": {
+      "title": "Summary",
+      "stage": "Stage",
+      "assignee": "Assignee",
+      "source": "Source",
+      "project": "Project",
+      "created": "Created on"
+    },
+    "contact": {
+      "title": "Contact",
+      "email": "E-mail",
+      "phone": "Phone",
+      "open": "Open the contact record",
+      "unavailable": "The contact details are not available to your role.",
+      "unnamed": "No name"
+    },
+    "next": {
+      "title": "Next action",
+      "none": "No open task for this lead.",
+      "noDue": "No due date",
+      "untitled": "Untitled task"
+    },
+    "deals": {
+      "title": "Deals",
+      "none": "No deal for this lead yet."
+    },
+    "form": {
+      "title": "Add to the timeline",
+      "description": "Log a note, a call or a task. Entries are kept as they are: only tasks can change afterwards.",
+      "type": "Type of entry",
+      "kinds": {
+        "note": "Note",
+        "call": "Call",
+        "task": "Task"
+      },
+      "noteText": "Note",
+      "optionalText": "Details (optional)",
+      "outcome": "Outcome",
+      "duration": "Duration (minutes)",
+      "taskTitle": "Task",
+      "dueDate": "Due date",
+      "submit": {
+        "note": "Add the note",
+        "call": "Log the call",
+        "task": "Add the task"
+      },
+      "saving": "Saving…"
+    },
+    "outcomes": {
+      "answered": "Answered",
+      "no_answer": "No answer",
+      "voicemail": "Voicemail",
+      "busy": "Busy",
+      "wrong_number": "Wrong number"
+    },
+    "entry": {
+      "note": "Note",
+      "call": "Call",
+      "email": "E-mail",
+      "meeting": "Meeting",
+      "task": "Task",
+      "stage_change": "Stage changed",
+      "assignment": "Assignee changed"
+    },
+    "task": {
+      "open": "To do",
+      "doneOn": "Done on {date}",
+      "markDone": "Mark as done",
+      "reopen": "Reopen"
+    },
+    "timeline": {
+      "title": "Timeline",
+      "description": "Most recent first. Stage and assignee changes are recorded automatically.",
+      "empty": "Nothing recorded for this lead yet.",
+      "automatic": "Automatic",
+      "system": "System",
+      "by": "by {who}",
+      "minutes": "{minutes} min",
+      "due": "Due {date}",
+      "to": "to",
+      "dealPrefix": "Deal:",
+      "unknownStage": "Unknown stage",
+      "latest": "Showing the {count} most recent entries."
+    },
+    "readOnly": "Your role can read this lead but not change it.",
+    "success": {
+      "noteAdded": "Note added.",
+      "callAdded": "Call logged.",
+      "taskAdded": "Task added.",
+      "taskDone": "Task marked as done.",
+      "taskReopened": "Task reopened."
+    },
+    "errors": {
+      "invalid_input": "Some values are invalid. Check the fields.",
+      "forbidden": "Your role does not allow this action on this lead.",
+      "quota_exceeded": "Your plan does not allow this right now. Contact the platform administrator.",
+      "conflict": "This lead cannot be changed (archived project or too many entries).",
+      "not_found": "This lead cannot be found.",
+      "rate_limited": "Too many attempts. Try again in a moment.",
+      "duplicate_request": "This request was already processed.",
+      "idempotency_in_progress": "The request is being processed.",
+      "idempotency_conflict": "This request was already sent with other values. Reload the page.",
+      "service_unavailable": "Service temporarily unavailable. Try again later.",
+      "generic": "An error occurred. Please try again.",
+      "load": "The lead could not be loaded. Try again."
+    }
   }
 }

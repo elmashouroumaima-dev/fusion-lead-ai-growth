@@ -1066,5 +1066,114 @@
       "generic": "Une erreur est survenue. Veuillez réessayer.",
       "load": "Les contacts n’ont pas pu être chargés. Réessayez."
     }
+  },
+  "Lead": {
+    "back": "Retour aux leads",
+    "summary": {
+      "title": "Résumé",
+      "stage": "Étape",
+      "assignee": "Responsable",
+      "source": "Source",
+      "project": "Projet",
+      "created": "Créé le"
+    },
+    "contact": {
+      "title": "Contact",
+      "email": "E-mail",
+      "phone": "Téléphone",
+      "open": "Ouvrir la fiche du contact",
+      "unavailable": "Les coordonnées ne sont pas accessibles à votre rôle.",
+      "unnamed": "Sans nom"
+    },
+    "next": {
+      "title": "Prochaine action",
+      "none": "Aucune tâche ouverte pour ce lead.",
+      "noDue": "Sans échéance",
+      "untitled": "Tâche sans titre"
+    },
+    "deals": {
+      "title": "Deals",
+      "none": "Aucun deal pour ce lead."
+    },
+    "form": {
+      "title": "Ajouter à la chronologie",
+      "description": "Enregistrez une note, un appel ou une tâche. Les entrées sont conservées telles quelles : seules les tâches évoluent ensuite.",
+      "type": "Type d’entrée",
+      "kinds": {
+        "note": "Note",
+        "call": "Appel",
+        "task": "Tâche"
+      },
+      "noteText": "Note",
+      "optionalText": "Détails (facultatif)",
+      "outcome": "Résultat",
+      "duration": "Durée (minutes)",
+      "taskTitle": "Tâche",
+      "dueDate": "Échéance",
+      "submit": {
+        "note": "Ajouter la note",
+        "call": "Enregistrer l’appel",
+        "task": "Ajouter la tâche"
+      },
+      "saving": "Enregistrement…"
+    },
+    "outcomes": {
+      "answered": "Répondu",
+      "no_answer": "Sans réponse",
+      "voicemail": "Messagerie",
+      "busy": "Occupé",
+      "wrong_number": "Mauvais numéro"
+    },
+    "entry": {
+      "note": "Note",
+      "call": "Appel",
+      "email": "E-mail",
+      "meeting": "Rendez-vous",
+      "task": "Tâche",
+      "stage_change": "Changement d’étape",
+      "assignment": "Changement de responsable"
+    },
+    "task": {
+      "open": "À faire",
+      "doneOn": "Faite le {date}",
+      "markDone": "Marquer comme faite",
+      "reopen": "Rouvrir"
+    },
+    "timeline": {
+      "title": "Chronologie",
+      "description": "La plus récente d’abord. Les changements d’étape et de responsable sont enregistrés automatiquement.",
+      "empty": "Rien d’enregistré pour ce lead pour l’instant.",
+      "automatic": "Automatique",
+      "system": "Système",
+      "by": "par {who}",
+      "minutes": "{minutes} min",
+      "due": "Échéance : {date}",
+      "to": "vers",
+      "dealPrefix": "Deal :",
+      "unknownStage": "Étape inconnue",
+      "latest": "Affichage des {count} entrées les plus récentes."
+    },
+    "readOnly": "Votre rôle peut lire ce lead mais pas le modifier.",
+    "success": {
+      "noteAdded": "Note ajoutée.",
+      "callAdded": "Appel enregistré.",
+      "taskAdded": "Tâche ajoutée.",
+      "taskDone": "Tâche marquée comme faite.",
+      "taskReopened": "Tâche rouverte."
+    },
+    "errors": {
+      "invalid_input": "Certaines valeurs sont invalides. Vérifiez les champs.",
+      "forbidden": "Votre rôle ne permet pas cette action sur ce lead.",
+      "quota_exceeded": "Votre abonnement ne le permet pas pour le moment. Contactez l’administrateur de la plateforme.",
+      "conflict": "Ce lead ne peut pas être modifié (projet archivé ou trop d’entrées).",
+      "not_found": "Ce lead est introuvable.",
+      "rate_limited": "Trop de tentatives. Réessayez dans un instant.",
+      "duplicate_request": "Cette demande a déjà été traitée.",
+      "idempotency_in_progress": "La demande est en cours de traitement.",
+      "idempotency_conflict": "Cette demande a déjà été envoyée avec d’autres valeurs. Rechargez la page.",
+      "service_unavailable": "Service momentanément indisponible. Réessayez plus tard.",
+      "generic": "Une erreur est survenue. Veuillez réessayer.",
+      "load": "Le lead n’a pas pu être chargé. Réessayez."
+    }
   }
 }

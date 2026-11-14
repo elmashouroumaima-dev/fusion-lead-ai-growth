@@ -39,3 +39,10 @@ export const setConversationStateFormSchema: ServiceSchema<SetConversationStateI
 
 export const INBOX_ASSIGN_FIELDS = ["conversation_id", "assignee_id"] as const;
 export const INBOX_STATE_FIELDS = ["conversation_id", "state"] as const;
+
+/** Actions de verrou (J38) : la seule entrée est la conversation. */
+export const lockFormSchema: ServiceSchema<{ conversation_id: string }> = through(
+  (r) => ({ conversation_id: r.conversation_id }),
+  setConversationStateSchema.pick({ conversation_id: true }),
+);
+export const INBOX_LOCK_FIELDS = ["conversation_id"] as const;

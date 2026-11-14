@@ -5,6 +5,7 @@ import {
   type ConversationRow,
   type ListConversationsInput,
   type MessageRow,
+  type ReplyInput,
   type SetConversationStateInput,
 } from "@fusion-leap/domain";
 import { mapLeadsDbError } from "../leads/map-error";
@@ -92,5 +93,63 @@ export async function assignConversation(supabase: ServerSupabase, organizationI
 /** Changer l'état : owner et admin sur toute conversation, commercial sur les siennes. */
 export async function setConversationState(supabase: ServerSupabase, organizationId: string, input: SetConversationStateInput): Promise<ConversationsResult<true>> {
   const { error } = await supabase.rpc("set_conversation_state", { p_org: organizationId, p_id: input.conversation_id, p_state: input.state });
+  return error ? fail(mapLeadsDbError(error)) : { ok: true, value: true };
+}
+
+export type ReplyResult = { message_id: string; duplicate: boolean };
+export type LockState = { handled_by: "human" | "ai_suggest"; lock: "none" | "mine" | "other" };
+export type LockAcquire = { status: "acquired" | "held_by_other" | "ai"; expires_at: string | null };
+
+function isObject(v: unknown): v is Record<string, unknown> {
+  return typeof v === "object" && v !== null;
+}
+
+/**
+ * Répondre (J38) : le message est créé ET approuvé par son auteur dans une transaction (owner et admin sur toute conversation, le
+ * commercial sur les siennes), puis mis en file pour le worker. `idempotencyKey` rend l'appel rejouable. Le corps n'est ni journalisé ni audité.
+ */
+export async function replyToConversation(
+  supabase: ServerSupabase,
+  organizationId: string,
+  conversationId: string,
+  input: ReplyInput,
+  idempotencyKey: string,
+): Promise<ConversationsResult<ReplyResult>> {
+  const { data, error } = await supabase.rpc("conversation_reply", {
+    p_org: organizationId,
+    p_conversation: conversationId,
+    p_body: input.body,
+    p_idempotency_key: idempotencyKey,
+  });
+  if (error) return fail(mapLeadsDbError(error));
+  if (!isObject(data) || typeof data.message_id !== "string") return fail("internal_error");
+  return { ok: true, value: { message_id: data.message_id, duplicate: data.duplicate === true } };
+}
+
+/** Qui tient la conversation : l'IA ou un humain, et le bail est-il à moi, à un autre ou absent (jamais l'identité de l'autre). */
+export async function getConversationLock(supabase: ServerSupabase, organizationId: string, conversationId: string): Promise<ConversationsResult<LockState>> {
+  const { data, error } = await supabase.rpc("conversation_lock_status", { p_org: organizationId, p_conversation: conversationId });
+  if (error) return fail(mapLeadsDbError(error));
+  if (!isObject(data) || (data.handled_by !== "human" && data.handled_by !== "ai_suggest")) return fail("internal_error");
+  const lock = data.lock === "mine" || data.lock === "other" ? data.lock : "none";
+  return { ok: true, value: { handled_by: data.handled_by, lock } };
+}
+
+/** Prend ou renouvelle le bail de 5 minutes (le battement de cœur du composeur appelle de nouveau). */
+export async function acquireConversationLock(supabase: ServerSupabase, organizationId: string, conversationId: string): Promise<ConversationsResult<LockAcquire>> {
+  const { data, error } = await supabase.rpc("conversation_lock_acquire", { p_org: organizationId, p_conversation: conversationId });
+  if (error) return fail(mapLeadsDbError(error));
+  if (!isObject(data) || (data.status !== "acquired" && data.status !== "held_by_other" && data.status !== "ai")) return fail("internal_error");
+  return { ok: true, value: { status: data.status, expires_at: typeof data.expires_at === "string" ? data.expires_at : null } };
+}
+
+export async function releaseConversationLock(supabase: ServerSupabase, organizationId: string, conversationId: string): Promise<ConversationsResult<true>> {
+  const { error } = await supabase.rpc("conversation_lock_release", { p_org: organizationId, p_conversation: conversationId });
+  return error ? fail(mapLeadsDbError(error)) : { ok: true, value: true };
+}
+
+/** Reprendre la main sur l'IA (verrou humain). */
+export async function takeOverConversation(supabase: ServerSupabase, organizationId: string, conversationId: string): Promise<ConversationsResult<true>> {
+  const { error } = await supabase.rpc("conversation_take_over", { p_org: organizationId, p_conversation: conversationId });
   return error ? fail(mapLeadsDbError(error)) : { ok: true, value: true };
 }

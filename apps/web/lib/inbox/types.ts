@@ -23,3 +23,13 @@ export type InboxActionState = {
   /** Clé de la phrase de succès (`Inbox.success.*`). */
   success?: "assigned" | "unassigned" | "stateChanged";
 };
+
+/** Résultat des actions de verrou (J38) : jamais l'identité de l'autre membre, seulement « à moi », « à un autre » ou « à l'IA ». */
+export type LockActionState = {
+  status: "idle" | "error" | "success";
+  code?: InboxActionErrorCode;
+  /** `mine` : bail pris ou renouvelé ; `other` : un autre membre rédige ; `ai` : l'IA tient la conversation ; `released` : bail libéré. */
+  lock?: "mine" | "other" | "ai" | "released" | "taken_over";
+  /** Fin du bail (ISO), seulement quand `lock` vaut `mine`. */
+  expiresAt?: string;
+};

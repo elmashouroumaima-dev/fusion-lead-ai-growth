@@ -863,3 +863,32 @@ Décision C2 : écrans avant G3, fiche lead avant la boîte de réception J37.
 - Aucun écart de livrable. Ajout léger : marquer une tâche faite ou à refaire (le service existait). Deals du lead affichés en lecture (création = J30d).
 - Question ouverte J20 maintenue : le marketing lit toutes les notes (l'ADR 014 n'a pas de ligne « activités »).
 - Pas de « Add lead » (création manuelle) : hors plan.
+
+## J30d — Fiche lead, 2e partie (branche `day-30d-lead-actions`, décision C2)
+Cible : 50,0 % (plan à 68 jours) | Réel : à valider | Statut : —
+Décision C2 : écrans avant G3, fiche lead avant la boîte de réception J37.
+
+### Tâches
+| Tâche | Estimé | Livré | Validée |
+|---|---|---|---|
+| Création du deal depuis la fiche | 1,5 h | oui (valeur, devise, clôture prévue, étape de départ) | Vitest, acceptation HTTP, navigateur |
+| Déplacement d'étape et « gagné / perdu » | 1,5 h | oui (menu + boutons ; étape du lead en plus) | Vitest, navigateur |
+| Assignation manuelle (owner, admin) | 1 h | oui (« Moi / Membre 0000XX · rôle ») | acceptation HTTP, navigateur |
+| Parcours G2 rejoué par l'interface | 2 h | oui, dans le navigateur | voir ci-dessous |
+
+### Parcours G2 par l'interface (navigateur, compte propriétaire d'Alpha, données de démonstration)
+| Étape | Action à l'écran | Résultat |
+|---|---|---|
+| 1 | `/leads/…` d'un lead non assigné (Lina Fassi) -> « Assignee » = Member 000004 · Sales agent -> **Assign** | « Lead assigned. » ; étape « New » ; deux entrées automatiques dans la chronologie |
+| 2 | « New deal » : valeur 5000, devise MAD, clôture 2027-01-31 -> **Create the deal** | « Deal created. » ; « MAD 5,000.00 », étape New |
+| 3 | Bouton **Won** du deal | deal « Won » ; entrée « Deal : New -> Won » en tête de la chronologie |
+| 4 | Audit | `lead.assigned`, `deal.created` (devise, étape), `deal.won` : **aucune valeur de deal** |
+Le pas « note ou appel » est démontré à J30c ; la vue du commercial (SA propre fiche, 404 sur celle d'un autre) et celle de l'analyste sont couvertes par l'acceptation HTTP `lead-page` ; la capture publique et l'assignation automatique par le worker restent couvertes par `g2-lead-to-deal` (HTTP).
+
+### Validation du jour
+- Un lead est amené jusqu'au deal gagné **sans accès à la base**, historique visible dans la chronologie.
+
+### Écarts à la spec / plan
+- Aucun écart de livrable. Ajout léger : l'étape du lead (pas seulement celle du deal) est modifiable depuis la fiche.
+- Le parcours est joué avec le compte propriétaire (qui peut tout faire) ; le test automatique `g2-lead-to-deal` crée toujours le deal par la fonction SQL (il n'appelle pas les Server Actions : leur identifiant change à chaque compilation).
+- Pas de « Add lead » (création manuelle) : hors plan.

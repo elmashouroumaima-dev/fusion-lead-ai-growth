@@ -123,6 +123,30 @@ describe("fiche lead : rôles et isolation", () => {
   });
 });
 
+describe("gestion du lead (J30d) : deal, étape, assignation", () => {
+  it("owner et admin : étape, assignation et création de deal ; le commercial sur son lead : étape et deal, SANS assignation", async () => {
+    for (const who of ["shared", "alpha-admin"]) {
+      const text = visibleText(await page(who, `/fr/leads/${ids.Mine}`));
+      expect(text, who).toContain("Gérer ce lead");
+      expect(text, who).toContain("Changer d’étape");
+      expect(text, who).toContain("Assigner");
+      expect(text, who).toContain("Créer le deal");
+    }
+    const sales = visibleText(await page("alpha-sales", `/fr/leads/${ids.Mine}`));
+    expect(sales).toContain("Gérer ce lead");
+    expect(sales).toContain("Changer d’étape");
+    expect(sales).toContain("Créer le deal");
+    expect(sales).not.toContain("Assigner");
+  });
+
+  it("le marketing lit sans rien pouvoir modifier : ni gestion, ni création de deal", async () => {
+    const text = visibleText(await page("alpha-marketing", `/fr/leads/${ids.Mine}`));
+    expect(text).not.toContain("Gérer ce lead");
+    expect(text).not.toContain("Créer le deal");
+    expect(text).not.toContain("Assigner");
+  });
+});
+
 describe("chronologie", () => {
   it("notes, appels et tâches sont lisibles, et la prochaine action est la tâche ouverte", async () => {
     const text = visibleText(await page("shared", `/fr/leads/${ids.Mine}`));

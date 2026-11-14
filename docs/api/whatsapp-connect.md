@@ -21,9 +21,10 @@ Même pipeline que l'e-mail (J29) avec l'adaptateur `whatsappWebhookAdapter` (`p
 - **signature** `X-Hub-Signature-256: sha256=<hex>` : HMAC-SHA256 du corps **brut** avec le secret de l'app de l'intégration, comparaison à temps constant ; préfixe obligatoire ;
 - **compte** = `phone_number_id` du payload (non authentifié : il ne sert qu'à retrouver l'intégration et son secret). Une requête qui mélange **plusieurs numéros** est refusée (400). Compte inconnu = le **même 401** qu'une signature fausse ;
 - les notifications de Meta **sans numéro** (état du compte, qualité du numéro, état d'un modèle) sont acceptées (200) tant qu'un autre changement de la requête désigne le numéro ; une requête sans aucun numéro ou avec deux numéros différents est refusée (400) ;
-- **déduplication** : Meta n'envoie pas d'identifiant unique par événement (un corps contient une liste de messages et de statuts) ; l'identifiant est l'empreinte (SHA-256, 40 hex) du contenu signé : un nouvel essai de Meta (même corps) donne le même identifiant ;
+- **forme conservée** : depuis le J35 `parse` normalise le corps (messages reçus et statuts de nos messages seulement, sans profils ni médias : voir `docs/api/whatsapp-inbound.md`) ;
+- **déduplication** : Meta n'envoie pas d'identifiant unique par événement (un corps contient une liste de messages et de statuts) ; l'identifiant de la **requête** est l'empreinte (SHA-256, 40 hex) de la forme normalisée : un nouvel essai de Meta (même corps) donne le même identifiant ; chaque **message** est dédupliqué au traitement par son `wamid` (J35) ;
 - 3 Mo au plus, HTTPS obligatoire en staging et production, limite par adresse (300 en rafale, 10 par seconde), ACK rapide : l'événement est enregistré, le traitement est différé.
-- **Pas encore de traitement** : sans processeur `whatsapp` dans le worker, l'événement passe `failed` (`no_processor`) et reste rejouable ; les entrants et les statuts sont traités au J35.
+- **Traitement** (J35) : le worker applique les messages et les statuts (`docs/api/whatsapp-inbound.md`).
 
 ## Poignée de main d'abonnement `GET /api/webhooks/whatsapp`
 Meta appelle `?hub.mode=subscribe&hub.verify_token=…&hub.challenge=…` une seule fois à la configuration de l'app. Le jeton de vérification est celui de la **plateforme** (variable serveur `WHATSAPP_VERIFY_TOKEN`) : la requête ne porte aucun compte. `200` + défi en texte brut (caractères `A-Za-z0-9_-`, 200 au plus), `403` sinon, `404` si le jeton n'est pas configuré ou pour un autre fournisseur, `429` au-delà de la limite. Comparaison à temps constant ; n'écrit rien.
@@ -32,7 +33,7 @@ Meta appelle `?hub.mode=subscribe&hub.verify_token=…&hub.challenge=…` une se
 - **Numéro « squatté »** : un numéro n'est réservé qu'à la création (index unique global) et la preuve de propriété vient de la vérification par Meta ; une entreprise malveillante pourrait créer une intégration `pending` sur le numéro d'une autre (disponibilité seulement : elle ne reçoit jamais ses données, la signature échouerait). À traiter avant la production (libérer les intégrations jamais validées après un délai, ou ne résoudre que les intégrations `active`).
 - **Jeton remplacé pendant une vérification** : la validation de l'ancien jeton peut marquer `active` le nouveau (fenêtre étroite, nécessite l'owner lui-même).
 - **Refus tracés** : jusqu'à 200 lignes `rejected` par heure et par intégration (sans contenu), sans purge ; un appelant peut remplir cette trace pour une intégration connue (la traiter avec la purge du J39).
-- **Déduplication au niveau du corps** : deux envois de Meta qui se recouvrent ont des empreintes différentes. **Le J35 DOIT dédupliquer par `messages[].id` et par `statuses[].id` + statut** ; il n'y a pas de fenêtre de rejeu (un corps signé capturé est rejoué indéfiniment, dédupliqué tant que sa ligne existe : à garder en tête avant toute purge).
+- **Déduplication de la requête au niveau du corps** : deux envois de Meta qui se recouvrent ont des empreintes différentes ; **traité au J35** (chaque message est dédupliqué par `wamid`). Il n'y a pas de fenêtre de rejeu (un corps signé capturé est rejoué indéfiniment, dédupliqué tant que sa ligne existe : sans danger depuis le J35 grâce à la déduplication par `wamid`).
 - **Poignée de main sans adresse source** : seau commun « inconnu » (négligeable).
 
 ## Tests

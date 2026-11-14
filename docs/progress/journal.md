@@ -841,3 +841,25 @@ Décision C2 : écrans avant G3, contacts et consentement avant le premier envoi
 ### Écarts à la spec / plan
 - Une migration (`search_contacts`) : le plan n'en prévoyait pas, la recherche partielle avec total en demande une (même schéma que `search_leads`).
 - Pas de création de contact ni de lead : hors plan J30b, à traiter avec J30c et J30d.
+
+## J30c — Fiche lead, 1re partie (branche `day-30c-lead-page`, décision C2)
+Cible : 48,5 % (plan à 68 jours) | Réel : à valider | Statut : —
+Décision C2 : écrans avant G3, fiche lead avant la boîte de réception J37.
+
+### Tâches
+| Tâche | Estimé | Livré | Validée |
+|---|---|---|---|
+| Page de détail `/leads/[id]` (contact, statut, responsable, prochaine action) | 2 h | oui (+ deals du lead en lecture) | acceptation HTTP, navigateur |
+| Chronologie des activités | 2 h | oui (entrées saisies et automatiques, la plus récente d'abord) | acceptation HTTP (ordre), navigateur |
+| Ajout de note, appel et tâche | 1,5 h | oui (+ marquer une tâche faite ou à refaire) | Vitest 25, navigateur |
+| Tests | 0,5 h | oui | acceptation HTTP 6 ✓ |
+
+### Validation du jour
+- Un commercial ne voit que la fiche de ses leads : celle d'un autre lead est introuvable (404) ; l'analyste est renvoyé au tableau de bord ; le marketing lit sans formulaire.
+- La chronologie affiche l'assignation, les changements d'étape et les notes dans l'ordre (le plus récent d'abord).
+- Démontré dans le navigateur : tâche ajoutée, « prochaine action » mise à jour, tâche marquée faite, audit `activity.created` / `activity.completed` sans contenu.
+
+### Écarts à la spec / plan
+- Aucun écart de livrable. Ajout léger : marquer une tâche faite ou à refaire (le service existait). Deals du lead affichés en lecture (création = J30d).
+- Question ouverte J20 maintenue : le marketing lit toutes les notes (l'ADR 014 n'a pas de ligne « activités »).
+- Pas de « Add lead » (création manuelle) : hors plan.

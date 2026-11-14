@@ -3,6 +3,12 @@
 Format : Keep a Changelog. Une entrée par jour de travail.
 
 ## [Non publié]
+### J37 — Boîte de réception unifiée (branche `day-37-inbox`)
+- Ajout : pages `/inbox` (e-mail et WhatsApp dans une même liste, filtres état / canal / responsable, recherche, aperçu de 140 caractères du dernier message) et `/inbox/[id]` (fil en lecture, assigner, changer l'état), lien « Boîte de réception » dans le menu pour owner, admin et commercial ; actualisation automatique toutes les 15 s ; messages fr / ar / en.
+- Ajout : migration `20261209100000_inbox.sql` (et retour arrière) : `search_conversations` (SECURITY DEFINER qui réapplique les droits de lecture des conversations ; nom du contact, type du canal et aperçu tronqué) ; Server Actions `inbox.assign` et `inbox.state.set` (idempotence obligatoire, droits ADR 014) ; ADR 013 (polling, **Proposed**).
+- Règles : le commercial ne lit que SES conversations (404 sinon) ; marketing et analyste renvoyés au tableau de bord ; le corps complet d'un message n'est affiché que dans le fil ; l'audit ne contient jamais le corps.
+- Tests : pgTAP `260_inbox` (31), Vitest `lib/inbox/inbox.test.ts` (9), acceptation HTTP `inbox-pages.test.ts` (7), navigateur (assignation, état, message arrivé pendant que la page est ouverte) ; jeu de démonstration `docs/testing/fixtures/inbox-demo-data.sql`.
+- Écart au plan : une migration (liste) ; le composeur et le verrou humain / IA sont J38. WhatsApp (J34 à J36b) n'est pas encore dans `main` : la liste est indépendante du canal et affiche WhatsApp dès que ces conversations existent (test avec un canal WhatsApp créé en base).
 ### J30b — Écran contacts et consentement (branche `day-30b-contacts`)
 - Ajout : pages `/contacts` (liste, recherche par nom, e-mail ou téléphone, pagination côté serveur) et `/contacts/[id]` (coordonnées, statut, historique du consentement avec la preuve, enregistrer ou retirer un consentement, poser ou lever « ne plus contacter »), lien « Contacts » dans le menu pour owner, admin et marketing ; messages fr / ar / en.
 - Ajout : migration `20261208100000_contacts_search.sql` (et retour arrière) : `search_contacts` (SECURITY INVOKER, saisie échappée) ; Server Actions `contacts.consent.record`, `contacts.consent.revoke`, `contacts.do_not_contact.set` (idempotence obligatoire, droits ADR 014, base revérifiant le rôle).

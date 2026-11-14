@@ -841,3 +841,28 @@ Décision C2 : écrans avant G3, contacts et consentement avant le premier envoi
 ### Écarts à la spec / plan
 - Une migration (`search_contacts`) : le plan n'en prévoyait pas, la recherche partielle avec total en demande une (même schéma que `search_leads`).
 - Pas de création de contact ni de lead : hors plan J30b, à traiter avec J30c et J30d.
+
+## J37 — Boîte de réception unifiée (branche `day-37-inbox`)
+Cible : 60,3 % (plan à 68 jours) | Réel : à valider | Statut : —
+⚠ Les journées J33 à J36b (désabonnement, WhatsApp) sont dans des PR encore ouvertes (#42 à #45), pas dans `main` : la boîte de réception est indépendante du canal.
+
+### Tâches
+| Tâche | Estimé | Livré | Validée |
+|---|---|---|---|
+| Liste + filtres | 2 h | oui (`/inbox`, `search_conversations`, aperçu de 140 caractères) | pgTAP 31, acceptation HTTP 7, navigateur |
+| Vue fil | 2 h | oui (`/inbox/[id]`, lecture, messages par pages) | acceptation HTTP, navigateur |
+| Assignation et états | 1,5 h | oui (`inbox.assign`, `inbox.state.set`) | Vitest 9, navigateur |
+| Actualisation filtrée | 0,5 h | oui (ADR 013 : polling de 15 s) | navigateur : message inséré pendant que la page est ouverte, visible sans recharger |
+
+### Validation du jour
+- E-mail et WhatsApp dans une même liste : démontré par l'acceptation HTTP (canaux e-mail et WhatsApp créés en base) et par le jeu de démonstration.
+- Actualisation sans fuite inter-entreprise : par construction (la page serveur est redessinée sous la RLS de l'appelant) ; l'acceptation vérifie qu'une autre entreprise ne voit RIEN d'Alpha, ni dans la liste ni dans le fil (404), et que le commercial ne lit que ses conversations.
+
+### Écarts à la spec / plan
+- Une migration (`search_conversations`) : le plan n'en prévoyait pas ; le commercial ne lisant ni `channels` ni les contacts sans lead, la liste ne peut pas passer par la RLS des tables.
+- ADR 013 rédigé (il n'existait pas) : polling, statut **Proposed**, à valider par la responsable technique.
+- Pas de composeur ni de verrou humain / IA (J38).
+
+### À surveiller
+- Un message dont la transaction partage le même `created_at` (import en bloc) peut s'afficher dans un autre ordre : les messages réels arrivent dans des transactions séparées.
+- Cinq tests `test:rls` (jobs, imports, webhooks, chaîne d'envoi) échouent tant que le worker de développement tourne ; sans lien avec J37.

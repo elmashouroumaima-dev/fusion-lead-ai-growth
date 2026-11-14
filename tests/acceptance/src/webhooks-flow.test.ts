@@ -259,8 +259,8 @@ describe("traitement différé par le worker", () => {
 });
 
 describe("route HTTP /api/webhooks/[provider]", () => {
-  it("sans adaptateur enregistré en production (WhatsApp : J34 et J35), tout fournisseur sauf l'e-mail répond 404, corps lu ou non", async () => {
-    for (const provider of ["whatsapp", "salla", "inconnu", "..%2Fetc"]) {
+  it("sans adaptateur enregistré en production, tout fournisseur sauf l'e-mail et WhatsApp (J34) répond 404, corps lu ou non", async () => {
+    for (const provider of ["salla", "inconnu", "..%2Fetc"]) {
       const response = await fetch(`${BASE_URL}/api/webhooks/${provider}`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ account: ACCOUNT_A, event: "x" }) });
       expect(response.status, provider).toBe(404);
       const body = (await response.json()) as { code?: string };
@@ -277,8 +277,20 @@ describe("route HTTP /api/webhooks/[provider]", () => {
     expect(events(`external_event_id = 'x'`)).toBe(0);
   });
 
-  it("la méthode GET n'est pas acceptée", async () => {
-    const response = await fetch(`${BASE_URL}/api/webhooks/whatsapp`);
-    expect(response.status).toBe(405);
+  it("WhatsApp (J34) a un adaptateur : un corps qui n'est pas un événement de Meta est refusé 400, sans rien enregistrer (le flux complet est dans whatsapp-connect)", async () => {
+    const response = await fetch(`${BASE_URL}/api/webhooks/whatsapp`, {
+      method: "POST", headers: { "content-type": "application/json", "x-forwarded-for": "203.0.113.30" }, body: JSON.stringify({ account: ACCOUNT_A, event: "x" }),
+    });
+    expect(response.status).toBe(400);
+    expect(events(`external_event_id = 'x'`)).toBe(0);
+  });
+
+  it("la méthode GET n'est acceptée que pour la poignée de main WhatsApp (J34) : 404 sans jeton de plateforme configuré, 404 pour les autres fournisseurs", async () => {
+    // le jeton de vérification n'est pas configuré dans l'environnement d'acceptation : jamais de défi renvoyé
+    const whatsapp = await fetch(`${BASE_URL}/api/webhooks/whatsapp?hub.mode=subscribe&hub.verify_token=x&hub.challenge=123`);
+    expect([403, 404]).toContain(whatsapp.status);
+    expect(await whatsapp.text()).not.toContain("123");
+    expect((await fetch(`${BASE_URL}/api/webhooks/email`)).status).toBe(404);
+    expect((await fetch(`${BASE_URL}/api/webhooks/salla`)).status).toBe(404);
   });
 });

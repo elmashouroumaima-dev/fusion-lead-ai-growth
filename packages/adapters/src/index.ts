@@ -6,3 +6,4 @@ export * from "./email";
 
 export * from "./crm";
 export * from "./webhooks";
+export * from "./whatsapp";

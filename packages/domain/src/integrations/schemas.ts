@@ -41,7 +41,9 @@ export const createProviderIntegrationSchema = z
     secret: integrationSecretSchema,
   })
   .strict()
-  .refine((value) => new Set(value.scopes).size === value.scopes.length, { path: ["scopes"] });
+  .refine((value) => new Set(value.scopes).size === value.scopes.length, { path: ["scopes"] })
+  // l'identifiant d'un numéro WhatsApp est numérique (5 à 30 chiffres) : toute autre forme ne pourrait jamais correspondre à un webhook
+  .refine((value) => value.provider !== "whatsapp" || /^[0-9]{5,30}$/.test(value.external_account_id), { path: ["external_account_id"] });
 export type CreateProviderIntegrationInput = z.infer<typeof createProviderIntegrationSchema>;
 
 /**
@@ -55,6 +57,10 @@ export type ReplaceWebhookSecretInput = z.infer<typeof replaceWebhookSecretSchem
 
 export const replaceIntegrationSecretSchema = z.object({ integration_id: uuidSchema, secret: integrationSecretSchema }).strict();
 export type ReplaceIntegrationSecretInput = z.infer<typeof replaceIntegrationSecretSchema>;
+
+/** Vérification d'une connexion (J34) : l'entreprise vient du contexte vérifié, jamais du corps. */
+export const validateIntegrationSchema = z.object({ integration_id: uuidSchema }).strict();
+export type ValidateIntegrationInput = z.infer<typeof validateIntegrationSchema>;
 
 export const disconnectIntegrationSchema = z.object({ integration_id: uuidSchema }).strict();
 export type DisconnectIntegrationInput = z.infer<typeof disconnectIntegrationSchema>;

@@ -57,6 +57,12 @@ export const serverEnvSchema = z
       .refine((v) => new Set(Buffer.from(v, "base64")).size >= 16, { message: "clé trop prévisible" })
       .optional(),
   ),
+  /**
+   * Jeton de vérification du webhook WhatsApp (J34) : Meta le renvoie dans la poignée de main d'abonnement (GET), qui ne porte aucun compte ;
+   * il est donc celui de la PLATEFORME, pas d'une entreprise. Serveur uniquement, 16 à 200 caractères ASCII imprimables sans espace. Optionnel :
+   * sans lui, la poignée de main est refusée (404). Chaîne vide = absente.
+   */
+  WHATSAPP_VERIFY_TOKEN: z.preprocess((value) => (value === "" ? undefined : value), z.string().regex(/^[!-~]{16,200}$/).optional()),
   /** Version de la clé maître courante (rotation, ADR 004). */
   SECRETS_KEY_VERSION: z.coerce.number().int().min(1).max(1000).default(1),
   /**

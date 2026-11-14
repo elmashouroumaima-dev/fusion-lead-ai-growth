@@ -3,6 +3,12 @@
 Format : Keep a Changelog. Une entrée par jour de travail.
 
 ## [Non publié]
+### J34 — Connexion WhatsApp
+- Ajout : migration `20261204100000` (et retour arrière) : `integration_set_validation` (service_role seulement), codes de validation ajoutés à `integrations_error_valid`.
+- Ajout : adaptateur de webhook WhatsApp (signature `X-Hub-Signature-256`, compte = numéro, déduplication par empreinte du corps), poignée de main GET avec `WHATSAPP_VERIFY_TOKEN`, client de validation de l'API Graph (adresse fixe, codes courts).
+- Ajout : `POST /api/integrations/validate`, composants « Connecter un numéro WhatsApp » et « Vérifier la connexion » (fr, ar, en).
+- Tests : pgTAP 270 (30), adaptateurs +13, web +17, domaine +2, acceptation HTTP `whatsapp-connect` (9).
+- Documentation : `docs/api/whatsapp-connect.md`, `docs/runbooks/whatsapp-setup.md`, ADR 007 (notes J34).
 ### J33 — Désabonnement
 - Ajout : migration `20261203100000` (et retour arrière) : `unsubscribe_apply` (service_role seulement) révoque les consentements e-mail du contact, supprime l'adresse (`suppressions`, raison `unsubscribe`), annule les messages en file non réclamés et leurs jobs, audite sans donnée personnelle ; idempotente.
 - Ajout : lien signé (`packages/adapters/src/email/unsubscribe.ts`, HMAC-SHA256, clé dérivée du trousseau, rotation sans casser les anciens liens), en-têtes `List-Unsubscribe` / One-Click et pied de page dans chaque e-mail ; le worker refuse d'envoyer sans clé de signature ; l'adaptateur Postmark transmet les en-têtes (liste blanche).

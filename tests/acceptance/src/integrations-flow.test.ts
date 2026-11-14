@@ -11,7 +11,8 @@ import { BASE_URL, getPage, postJson, redirectPath, signIn, visibleText, type Se
  * celle de l'application, par exemple dans le job CI e2e) : sans elle, seul le refus 503 « chiffrement non configuré » est vérifié.
  */
 const run = `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
-const ACCOUNT = `acc28${run}`;
+// numéro WhatsApp : numérique (5 à 30 chiffres) depuis le J34
+const ACCOUNT = `8${String(Date.now()).slice(-10)}${Math.floor(Math.random() * 1000).toString().padStart(3, "0")}`;
 const KEY_PREFIX = `acc28${run}`;
 const TOKEN_1 = `EAAB-jeton-un-${run}-0123456789`;
 const TOKEN_2 = `EAAB-jeton-deux-${run}-0123456789`;

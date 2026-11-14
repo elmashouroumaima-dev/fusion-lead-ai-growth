@@ -7,6 +7,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { IntegrationActions } from "../../../../components/integrations/integration-actions";
+import { ConnectWhatsApp, VerifyConnection } from "../../../../components/integrations/whatsapp-connect";
 import { requireLocale } from "../../../../i18n/require-locale";
 import { requireClaims } from "../../../../lib/auth/require-claims";
 import { isEncryptionConfigured, listIntegrationViews } from "../../../../lib/integrations/service";
@@ -51,6 +52,8 @@ export default async function IntegrationsPage({ params }: { params: Promise<{ l
           <AlertDescription>{t("encryptionOff")}</AlertDescription>
         </Alert>
       ) : null}
+
+      <ConnectWhatsApp encryptionConfigured={encryptionConfigured} />
 
       {views === null ? (
         <Alert variant="destructive" role="alert">
@@ -124,6 +127,7 @@ export default async function IntegrationsPage({ params }: { params: Promise<{ l
                         </ul>
                       )}
                     </div>
+                    {integration.provider === "whatsapp" && integration.status !== "disconnected" && integration.has_secret ? <VerifyConnection integrationId={integration.id} /> : null}
                     <IntegrationActions integrationId={integration.id} encryptionConfigured={encryptionConfigured} disconnected={integration.status === "disconnected"} />
                   </>
                 ) : (

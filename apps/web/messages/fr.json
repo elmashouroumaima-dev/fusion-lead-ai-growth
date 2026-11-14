@@ -123,8 +123,6 @@
   },
   "Dashboard": {
     "title": "Tableau de bord",
-    "signedInAs": "Connecté en tant que",
-    "unknownUser": "Utilisateur inconnu",
     "subtitle": "Vue d’ensemble de votre organisation et de votre accès.",
     "organization": {
       "title": "Organisation",
@@ -132,8 +130,7 @@
       "slug": "Identifiant"
     },
     "role": {
-      "title": "Votre rôle",
-      "description": "Ce rôle détermine ce que vous pouvez faire dans cette organisation."
+      "title": "Votre rôle"
     },
     "preferences": {
       "title": "Langue et fuseau horaire",
@@ -147,10 +144,27 @@
     },
     "start": {
       "title": "Pour commencer",
-      "description": "Voici les prochaines étapes pour mettre votre équipe en place.",
-      "members": "Gérer les membres",
-      "membersHint": "Invitez des personnes et attribuez-leur un rôle.",
-      "noMembers": "La gestion des membres est réservée aux propriétaires et aux administrateurs."
+      "progress": "{done} étape(s) sur {total} terminée(s)",
+      "done": "Terminée",
+      "todo": "À faire",
+      "steps": {
+        "project": {
+          "title": "Créez votre premier projet",
+          "hint": "Un projet regroupe vos offres, leads et campagnes."
+        },
+        "lead": {
+          "title": "Ajoutez votre premier lead",
+          "hint": "Enregistrez un contact et commencez à le suivre."
+        },
+        "member": {
+          "title": "Invitez votre équipe",
+          "hint": "Attribuez un rôle à chaque personne."
+        },
+        "integration": {
+          "title": "Connectez un canal",
+          "hint": "E-mail ou WhatsApp, pour échanger avec vos leads."
+        }
+      }
     },
     "usage": {
       "title": "Utilisation du plan",
@@ -165,6 +179,30 @@
         "ai_runs": "Exécutions IA ce mois-ci",
         "integrations": "Intégrations"
       }
+    },
+    "greeting": {
+      "morning": "Bonjour",
+      "afternoon": "Bon après-midi",
+      "evening": "Bonsoir"
+    },
+    "stats": {
+      "title": "Chiffres clés",
+      "projects": "Projets",
+      "projectsHint": "Espaces de travail actifs",
+      "leads": "Prospects",
+      "leadsHint": "Personnes que vous suivez",
+      "dealsOpen": "Deals ouverts",
+      "dealsOpenHint": "Encore en cours",
+      "dealsWon": "Deals gagnés",
+      "dealsWonHint": "Conclus avec succès"
+    },
+    "quick": {
+      "title": "Actions rapides",
+      "description": "Accédez directement à ce que vous faites le plus.",
+      "project": "Nouveau projet",
+      "lead": "Voir les leads",
+      "member": "Inviter un membre",
+      "integration": "Connecter un canal"
     }
   },
   "Org": {
@@ -557,7 +595,8 @@
       "description": "Choisissez le type de projet, puis renseignez ses réglages.",
       "submit": "Créer le projet",
       "creating": "Création…",
-      "back": "Retour aux projets"
+      "back": "Retour aux projets",
+      "cancel": "Annuler"
     },
     "form": {
       "type": "Type de projet",

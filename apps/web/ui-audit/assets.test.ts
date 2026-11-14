@@ -46,7 +46,7 @@ describe("polices locales (next/font/local)", () => {
     }
   });
 
-  it.each(["Poppins-Regular.woff2", "Poppins-Medium.woff2", "Poppins-SemiBold.woff2", "Poppins-Bold.woff2", "Cairo-Variable.woff2"])(
+  it.each(["Inter-Regular.woff2", "Inter-Medium.woff2", "Inter-SemiBold.woff2", "Inter-Bold.woff2", "Cairo-Variable.woff2"])(
     "%s est référencé par fonts.ts ou cairo.ts",
     (name) => {
       expect(referenced).toContain(name);
@@ -60,7 +60,7 @@ describe("polices locales (next/font/local)", () => {
     expect(name.endsWith(".woff2"), name).toBe(true);
     expect(bytes.subarray(0, 4).toString("latin1"), `${name} : signature WOFF2`).toBe("wOF2");
     expect(bytes.length).toBeGreaterThan(2_000);
-    // Sous-ensemble : Poppins complet pèse ~160 Ko par graisse, Cairo complet ~600 Ko.
+    // Sous-ensemble : Inter complet pèse ~160 Ko par graisse, Cairo complet ~600 Ko.
     expect(bytes.length, `${name} n'est pas sous-ensemblé`).toBeLessThan(name.startsWith("Cairo") ? 150_000 : 30_000);
   });
 
@@ -70,7 +70,7 @@ describe("polices locales (next/font/local)", () => {
   });
 
   it.each([
-    ["OFL-Poppins.txt", "Poppins"],
+    ["OFL-Inter.txt", "Inter"],
     ["OFL-Cairo.txt", "Cairo"],
   ])("la licence %s est présente et est bien la SIL Open Font License 1.1 (%s)", (file, family) => {
     const full = path.join(WEB_ROOT, "app/fonts", file);
@@ -82,16 +82,16 @@ describe("polices locales (next/font/local)", () => {
   });
 
   it("les deux familles sont branchées : variables CSS, --font-app, classe de <html>", () => {
-    expect(fontsSource).toContain('variable: "--font-poppins"');
+    expect(fontsSource).toContain('variable: "--font-inter"');
     expect(cairoSource).toContain('variable: "--font-cairo"');
     const css = read("app/globals.css");
-    // fr / en : Poppins seul (Cairo n'y est pas chargé) ; ar : Cairo d'abord, Poppins ensuite
-    expect(css).toMatch(/--font-app:\s*var\(--font-poppins\),\s*system-ui/);
-    expect(css).toMatch(/:root:lang\(ar\)\s*\{[^}]*--font-app:[^;]*var\(--font-cairo\)[^;]*var\(--font-poppins\)/);
+    // fr / en : Inter seul (Cairo n'y est pas chargé) ; ar : Cairo d'abord, Inter ensuite
+    expect(css).toMatch(/--font-app:\s*var\(--font-inter\),\s*system-ui/);
+    expect(css).toMatch(/:root:lang\(ar\)\s*\{[^}]*--font-app:[^;]*var\(--font-cairo\)[^;]*var\(--font-inter\)/);
     expect(css).toMatch(/:root:lang\(ar\)\s*\{[^}]*--font-app:\s*var\(--font-cairo\)/);
     expect(css).toMatch(/--font-sans:\s*var\(--font-app\)/);
     const layout = read("app/[locale]/layout.tsx");
-    expect(layout).toContain("poppins.variable");
+    expect(layout).toContain("inter.variable");
     expect(layout).toContain("cairo.variable");
   });
 

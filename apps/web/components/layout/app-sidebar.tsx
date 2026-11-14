@@ -184,7 +184,7 @@ export function AppSidebar({
                               <SidebarMenuSubButton
                                 asChild
                                 isActive={active}
-                                className="text-muted-foreground hover:text-foreground data-[active=true]:bg-primary/10 data-[active=true]:text-primary-text relative h-9 translate-x-0 gap-2.5 rounded-md px-3 text-sm font-normal data-[active=true]:font-medium data-[active=true]:before:absolute data-[active=true]:before:-start-[9px] data-[active=true]:before:inset-y-1.5 data-[active=true]:before:w-0.5 data-[active=true]:before:rounded-full data-[active=true]:before:bg-primary data-[active=true]:before:content-['']"
+                                className="text-muted-foreground hover:text-foreground data-[active=true]:bg-brand/15 data-[active=true]:text-primary-text relative h-9 translate-x-0 gap-2.5 rounded-md px-3 text-sm font-normal data-[active=true]:font-medium data-[active=true]:before:absolute data-[active=true]:before:-start-[9px] data-[active=true]:before:inset-y-1.5 data-[active=true]:before:w-0.5 data-[active=true]:before:rounded-full data-[active=true]:before:bg-brand data-[active=true]:before:content-['']"
                               >
                                 <Link href={link.href} aria-current={active ? "page" : undefined}>
                                   <link.icon aria-hidden="true" />

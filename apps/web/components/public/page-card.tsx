@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 export function PageCard({ className, children, ...props }: ComponentProps<typeof Card>) {
   return (
     <Card className={cn("w-full max-w-md gap-0 overflow-hidden pt-0 shadow-xl", className)} {...props}>
-      <div aria-hidden="true" className="h-1.5 w-full bg-linear-to-r from-primary to-secondary rtl:bg-linear-to-l" />
+      <div aria-hidden="true" className="h-1.5 w-full bg-brand" />
       {children}
     </Card>
   );

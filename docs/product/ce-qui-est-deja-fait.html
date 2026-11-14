@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>شنو تدار ديجا فـ Fusion Leap AI Growth</title>
+<style>
+@page { size: A4; margin: 16mm 15mm; }
+:root { --ink:#17201a; --mut:#5d6a5c; --line:#d9dfd0; --brand:#2e7d1e; --soft:#f3f6ec; --acc:#8bd43a; }
+* { box-sizing: border-box; }
+body { margin:0; font-family: "Segoe UI", Tahoma, Arial, sans-serif; color:var(--ink); font-size:11pt; line-height:1.7; }
+header { background:linear-gradient(135deg,#eaf6d8,#fff); border:1px solid var(--line); border-radius:14px; padding:16px 22px; margin-bottom:12px; }
+.pill { display:inline-block; font-size:9pt; background:var(--acc); color:#10200a; border-radius:20px; padding:1px 12px; font-weight:600; }
+h1 { font-size:22pt; margin:8px 0 4px; line-height:1.3; }
+.lead { color:var(--mut); margin:0; }
+h2 { font-size:14pt; margin:16px 0 6px; color:var(--brand); border-inline-start:5px solid var(--acc); padding-inline-start:10px; break-after:avoid; }
+p { margin:4px 0 8px; }
+ul { margin:4px 0 8px; padding-inline-start:22px; }
+li { margin:2px 0; }
+table { width:100%; border-collapse:collapse; margin:6px 0 10px; font-size:10pt; break-inside:avoid; }
+th, td { border:1px solid var(--line); padding:4px 9px; text-align:start; vertical-align:top; }
+th { background:var(--soft); }
+td.n { text-align:center; font-weight:700; white-space:nowrap; direction:ltr; }
+code { font-family: Consolas, monospace; direction:ltr; unicode-bidi:isolate; background:var(--soft); padding:0 4px; border-radius:3px; font-size:9pt; }
+.kpis { display:flex; gap:8px; margin:8px 0; }
+.kpi { flex:1; border:1px solid var(--line); border-radius:10px; padding:8px 10px; text-align:center; background:var(--soft); }
+.kpi b { display:block; font-size:16pt; color:var(--brand); direction:ltr; }
+.kpi span { font-size:9pt; color:var(--mut); }
+.box { border:1px solid var(--line); border-radius:10px; padding:8px 14px; margin:8px 0; break-inside:avoid; }
+.ok { background:#f1f9ea; border-color:#cfe5b8; }
+.ck::before { content:"✔ "; color:var(--brand); font-weight:700; }
+footer { margin-top:14px; color:var(--mut); font-size:9pt; border-top:1px solid var(--line); padding-top:6px; }
+</style>
+</head>
+<body>
+<header>
+  <span class="pill">الحالة ديال 12 نونبر 2026 · J0 → J32</span>
+  <h1>شنو تدار ديجا، ومعاه الاختبارات</h1>
+  <p class="lead">ملخص ديال الخدمة المنجزة فـ Fusion Leap AI Growth، وكيفاش تثبت بالاختبارات الآلية. كل شي كايتخدم بمعطيات اختبار فقط، وما كاين حتى إيميل حقيقي كايتصيفط.</p>
+</header>
+
+<div class="kpis">
+  <div class="kpi"><b>48,5 %</b><span>33 يوم من 68</span></div>
+  <div class="kpi"><b>7 404</b><span>اختبار آلي، كلهم خضر</span></div>
+  <div class="kpi"><b>40</b><span>PR مدمجة فـ main</span></div>
+  <div class="kpi"><b>3</b><span>CI jobs فـ كل PR</span></div>
+</div>
+
+<h2>1. الاختبارات الآلية (7 404)</h2>
+<table>
+<tr><th>الفئة</th><th>شنو كاتغطي</th><th style="width:13%">العدد</th></tr>
+<tr><td>قاعدة البيانات (pgTAP)</td><td>الجداول، الصلاحيات، وقواعد القاعدة</td><td class="n">2 928</td></tr>
+<tr><td>التطبيق (Web)</td><td>الشاشات، المسارات HTTP، والخدمات</td><td class="n">2 523</td></tr>
+<tr><td>الدومين</td><td>القواعد المهنية (فحوصات الإرسال، الـ consentement...)</td><td class="n">654</td></tr>
+<tr><td>RLS عبر API الحقيقي</td><td>العزل بين الشركات، مأكد بالـ API الحقيقي</td><td class="n">485</td></tr>
+<tr><td>الصلاحيات (RBAC)</td><td>شكون عندو الحق فـ شنو، دور بدور</td><td class="n">394</td></tr>
+<tr><td>Worker والـ adapters</td><td>المهام الخلفية وموصلات المزودين</td><td class="n">235</td></tr>
+<tr><td>القبول (Acceptance)</td><td>مسارات كاملة فـ HTTP حقيقي على التطبيق المبني</td><td class="n">185</td></tr>
+</table>
+<p>كل PR كاتدوز على: <code>lint</code> و <code>typecheck</code> و الاختبارات، pgTAP + RLS + فحص المخطط، واختبارات القبول. كاين كذلك <code>build</code> ديال production وفحص تسريب الأسرار فـ bundle ديال المتصفح.</p>
+
+<h2>2. المرحلة 0: الاكتشاف التقني (J0–J3)</h2>
+<ul>
+<li class="ck">تحليل المواصفات، الأسئلة والثغرات، وخطة مصادق عليها.</li>
+<li class="ck">قرارات الهندسة (ADR) ونموذج البيانات، وتدفقات التكاملات (واتساب، سلة، إيميل، CRM).</li>
+<li class="ck">53 تهديد STRIDE، خطة الاختبارات، والـ backlog.</li>
+</ul>
+
+<h2>3. المرحلة 1: الأساسات (J4–J15، 100 %)</h2>
+<table>
+<tr><th style="width:26%">الجزء</th><th>شنو تدار</th></tr>
+<tr><td>Monorepo وCI</td><td>pnpm + Turborepo، وCI على GitHub.</td></tr>
+<tr><td>البيئات والأسرار</td><td>تحقق zod، وحارس ضد تسريب الأسرار.</td></tr>
+<tr><td>النواة multi-tenant</td><td>الشركات، الأعضاء، الخطط، الاشتراكات.</td></tr>
+<tr><td>RLS</td><td>سياسات لكل عملية، واختبارات عبر الـ API.</td></tr>
+<tr><td>المصادقة</td><td>Supabase SSR، جلسات، تحويلات آمنة، بلغات ar / fr / en.</td></tr>
+<tr><td>الشركات والعضوية</td><td>إنشاء ذري، اختيار الشركة النشطة، دعوات برموز مجزأة (hash)، وRBAC.</td></tr>
+<tr><td>طبقة الخدمة</td><td>idempotence، تحديد المعدل، أخطاء موحدة.</td></tr>
+<tr><td>التدقيق والـ logs</td><td>سجل تدقيق للقراءة فقط، وlogs بصيغة JSON.</td></tr>
+<tr><td>Jobs والـ worker</td><td>طابور Postgres، claim، lease، وdead letter.</td></tr>
+<tr><td>الخطط والحصص</td><td>حصص ذرية وشاشة إدارة Platform Admin.</td></tr>
+<tr><td>بوابة G1 (العزل)</td><td>اختبارات T1 وT5 آلية، وتدقيق C1.</td></tr>
+</table>
+
+<h2>4. المرحلة 2: المبيعات والـ CRM (J16–J27، 100 %)</h2>
+<ul>
+<li class="ck">المشاريع والمنتجات: الحصص، الـ API، شاشة كاملة، وملفات فـ تخزين خاص بروابط موقعة.</li>
+<li class="ck">Contacts مع الـ consentement، pipelines، leads، deals، والأنشطة مع الخط الزمني.</li>
+<li class="ck">الالتقاط العمومي (مفتاح فورم ومضاد إساءة)، الإسناد التلقائي مع تنبيهات، واستيراد CSV مع معاينة وتقرير.</li>
+<li class="ck">شاشات leads وdeals، تصدير مدقق، وadapter CRM بالملفات.</li>
+<li class="ck">اختبارات أدوار المبيعات، ومسار كامل من lead حتى صفقة رابحة مع السجل (بوابة G2).</li>
+</ul>
+
+<h2>5. المرحلة 3: القنوات (J28–J32، منجزة، وJ33 مازال)</h2>
+<table>
+<tr><th style="width:22%">اليوم</th><th>شنو تدار</th><th style="width:30%">الدليل</th></tr>
+<tr><td>J28 التكاملات والأسرار</td><td>تكاملات إيميل وواتساب، وقنوات؛ أسرار مشفرة ما كاتنقرا وما كاترجع؛ تدوير؛ والفصل كايمسح السر.</td><td>pgTAP، API حقيقي، قبول HTTP</td></tr>
+<tr><td>J29 استقبال الـ webhooks</td><td>مسار عمومي بلا جلسة؛ الشركة كاتتعرف من حساب المزود، ماشي من المحتوى؛ إزالة التكرار؛ رفض مسجل بلا محتوى؛ معالجة مؤجلة بالـ worker.</td><td>pipeline نقي مختبر، قبول HTTP</td></tr>
+<tr><td>J30 المحادثات والرسائل</td><td>خيط لكل contact وقناة؛ الرسالة ما كاتحملش شركة أخرى؛ البائع كايقرا محادثاته فقط.</td><td>126 اختبار قاعدة، 12 اختبار API</td></tr>
+<tr><td>J31 الإرسال تحت المراقبة</td><td>موافقة بشرية إلزامية؛ فحص نهائي (15 شرط) قبل النداء فـ الـ worker؛ إرسال واحد على الأكثر لكل رسالة؛ "مقبول" ماشي "مسلّم".</td><td>94 اختبار قاعدة، 10 API، 30 worker</td></tr>
+<tr><td>J32 الحالات والاستقبال</td><td>تسليم، rebond صعب (العنوان كايتمنع)، وشكاية (كايتمنع + "ما تتصلش بيا")؛ الرد كايتربط بالمحادثة؛ المرسل المجهول أو المزوّر كايمشي لطابور الفرز، عمرو ما كايتحول لـ contact.</td><td>114 اختبار قاعدة، 9 API، قبول HTTP حقيقي</td></tr>
+</table>
+
+<h2>6. الأمان وكيفاش تتحقق</h2>
+<div class="box ok">
+<ul style="margin:0">
+<li class="ck">كل يوم كاتدوز مراجعة معادية مستقلة (هجمات حقيقية على القاعدة المحلية + قراءة نقدية للكود) ثم إعادة تحقق.</li>
+<li class="ck">آخر 3 مراجعات (J30–J32): 1 bloquant، 5 majeurs، و15 moyens. <b>كلهم تصلحو قبل الدمج</b>، كل واحد باختبار كايعاود الفشل.</li>
+<li class="ck">العزل بين الشركات، سجل تدقيق ما كايتبدلش، أسرار مشفرة ما كاترجعش، ونصوص الرسائل ما كاتبانش فـ logs.</li>
+<li class="ck">ما كاين حتى ثغرة مستغلة مفتوحة معروفة.</li>
+</ul>
+</div>
+
+<h2>7. شنو زدنا برا الخطة</h2>
+<ul>
+<li class="ck">الفرنسية افتراضية مع ar وen، وإعادة تصميم الواجهة (Tailwind + shadcn).</li>
+<li class="ck">إيميلات محلية عبر Mailtrap، وإعدادات التطبيق: الألوان، اللوغو، وSMTP.</li>
+<li class="ck">تقرير تقدم آلي (8 صفحات)، دليل لمطور جديد، ودليل اختبارات المرحلتين 2 و3 (107 حالة).</li>
+</ul>
+
+<h2>8. فين وقفنا</h2>
+<div class="box">كل ما ذكرنا خدام ومدمج فـ <code>main</code>. الجاي: إلغاء الاشتراك (J33)، شاشة contacts والـ consentement، واتساب، الصندوق الموحد، الحملات، وكلاء AI، التقارير. الإرسال الحقيقي ما كاينش دابا، وPostmark مازال فرضية كاتنتظر تجربة فـ sandbox.</div>
+
+<footer>Fusion Leap AI Growth · المصدر: rapport d'avancement du 2026-11-12 (scripts/progress-report/data.json) · الأرقام ديال الاختبارات هي ديال هاد التاريخ.</footer>
+</body>
+</html>

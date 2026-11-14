@@ -1,0 +1,198 @@
+<!doctype html><html lang="fr"><head><meta charset="utf-8"><title>Guide de démonstration, écran par écran</title>
+<style>
+@page{size:A4;margin:16mm 15mm}
+body{font-family:Segoe UI,Arial,sans-serif;color:#1a1a1a;font-size:11.5px;line-height:1.5}
+h1{font-size:28px;color:#4f46e5;margin:0 0 4px}
+h2{font-size:17px;color:#4f46e5;border-bottom:2px solid #4f46e5;padding-bottom:3px;margin-top:22px;page-break-after:avoid}
+h3{font-size:12.5px;margin:10px 0 3px;page-break-after:avoid}
+table{border-collapse:collapse;width:100%;margin:6px 0}
+tr{page-break-inside:avoid}
+td,th{border:1px solid #c9ced8;padding:5px 7px;text-align:left;vertical-align:top}
+th{background:#eef0ff}
+code{background:#f1f3f7;padding:0 3px;border-radius:3px;font-size:10.5px}
+.cover{text-align:center;padding:120px 0 0;page-break-after:always}
+.sub{font-size:15px;color:#555}
+.box{background:#f6f6fd;border-left:4px solid #4f46e5;padding:7px 11px;margin:8px 0}
+.say{background:#f0fdf4;border-left:4px solid #15803d;padding:7px 11px;margin:8px 0}
+.warn{background:#fffbeb;border-left:4px solid #d97706;padding:7px 11px;margin:8px 0}
+ul,ol{margin:3px 0 3px 18px;padding:0}
+.screen{page-break-inside:avoid}
+</style></head><body>
+
+<div class="cover">
+<h1>Fusion Leap AI Growth</h1>
+<div class="sub">Guide de démonstration et de test, écran par écran<br>Pour tester l'application et expliquer comment elle fonctionne</div>
+<p style="margin-top:40px;color:#444">État du projet : J36b terminé (e-mail et WhatsApp côté serveur), interface jusqu'au CRM, aux intégrations et aux projets.</p>
+</div>
+
+<h2>0. Avant de commencer</h2>
+<table><tr><th>Étape</th><th>Commande ou action</th></tr>
+<tr><td>Démarrer la base et l'application</td><td><code>pnpm db:start</code>, <code>pnpm db:reset</code>, <code>pnpm dev</code> (dans un second terminal : <code>pnpm worker:dev</code>)</td></tr>
+<tr><td>Charger les données de démonstration</td><td>voir <code>docs/testing/phase2-3-functional-tests.md</code> §0.3 (8 leads, 4 deals, 2 projets)</td></tr>
+<tr><td>Adresse à utiliser</td><td><code>http://localhost:3000</code> (ne jamais mélanger avec 127.0.0.1 : sessions séparées)</td></tr>
+<tr><td>Deux utilisateurs en même temps</td><td>une fenêtre de navigation privée pour le second</td></tr>
+</table>
+<h3>Comptes de test (mot de passe : constante <code>dev_password</code> en tête de <code>supabase/seed.sql</code>)</h3>
+<table><tr><th>Compte</th><th>Rôle</th><th>Pour montrer</th></tr>
+<tr><td><code>shared@seed.test</code></td><td>Propriétaire d'Alpha, Commercial chez Beta, administrateur de la plateforme</td><td>tout, y compris le changement d'entreprise et l'administration</td></tr>
+<tr><td><code>alpha-admin@seed.test</code></td><td>Administrateur d'Alpha</td><td>droits réduits par rapport au propriétaire</td></tr>
+<tr><td><code>alpha-marketing@seed.test</code></td><td>Responsable marketing</td><td>voit tous les leads, ne peut pas modifier</td></tr>
+<tr><td><code>alpha-sales@seed.test</code></td><td>Commercial</td><td>ne voit que ses leads</td></tr>
+<tr><td><code>alpha-analyst@seed.test</code></td><td>Analyste</td><td>lecture seule, pas de leads ni de deals</td></tr>
+<tr><td><code>beta-owner@seed.test</code></td><td>Propriétaire de Beta</td><td>isolation : ne voit rien d'Alpha</td></tr>
+</table>
+<div class="say"><b>L'idée à retenir pour expliquer :</b> l'application est multi-entreprises. Chaque entreprise est isolée des autres ; ce que chaque personne voit et fait dépend de son <b>rôle</b>. Ce contrôle est appliqué deux fois : dans l'application et dans la base de données.</div>
+
+<h2>1. Connexion, inscription, mot de passe oublié</h2>
+<div class="screen">
+<p><b>À quoi ça sert :</b> entrer dans l'application de façon sûre. Les messages d'erreur sont volontairement vagues (« adresse ou mot de passe incorrect ») pour ne pas révéler si un compte existe.</p>
+<table><tr><th>Quoi faire</th><th>Ce que vous devez voir</th></tr>
+<tr><td>Ouvrir <code>/fr</code>, cliquer <b>Se connecter</b>, saisir un mauvais mot de passe</td><td>Notification rouge, pas de connexion</td></tr>
+<tr><td>Se connecter avec <code>alpha-admin@seed.test</code></td><td>Arrivée sur le Tableau de bord</td></tr>
+<tr><td>Se déconnecter, puis taper directement <code>/fr/members</code></td><td>Retour à la connexion, puis à la page demandée après connexion</td></tr>
+<tr><td><b>Mot de passe oublié</b> avec une adresse inexistante</td><td>Même message de succès qu'avec une vraie adresse</td></tr>
+</table>
+<div class="box"><b>Point à montrer :</b> les e-mails (confirmation, réinitialisation) arrivent dans Mailtrap, pas chez de vrais clients.</div>
+</div>
+
+<h2>2. Choix de l'organisation et création</h2>
+<div class="screen">
+<p><b>À quoi ça sert :</b> un utilisateur peut appartenir à plusieurs entreprises avec des rôles différents. L'entreprise active est vérifiée à chaque requête.</p>
+<table><tr><th>Quoi faire</th><th>Ce que vous devez voir</th></tr>
+<tr><td>Se connecter avec <code>shared@seed.test</code></td><td>Page « Choisir une organisation » : <b>Alpha (Propriétaire)</b> et <b>Beta (Commercial)</b></td></tr>
+<tr><td>Ouvrir Alpha, puis utiliser le sélecteur en haut pour passer à Beta</td><td>Le nom dans le fil d'Ariane et le rôle changent ; les données changent aussi</td></tr>
+<tr><td>Avec un compte sans entreprise : <b>Créer votre organisation</b> (nom, fuseau, langue)</td><td>Redirection vers le tableau de bord, rôle <b>Propriétaire</b>. Un double clic ne crée qu'une seule organisation</td></tr>
+</table>
+</div>
+
+<h2>3. Tableau de bord (nouveau design)</h2>
+<div class="screen">
+<p><b>À quoi ça sert :</b> la vue d'ensemble de l'entreprise active : salutation selon l'heure, chiffres clés, usage du plan, démarrage et raccourcis.</p>
+<table><tr><th>Zone</th><th>Comment elle fonctionne</th><th>Quoi vérifier</th></tr>
+<tr><td>En-tête</td><td>Salutation (matin, après-midi, soir) selon le fuseau de l'entreprise, date, rôle</td><td>Change de langue : le texte et la date suivent</td></tr>
+<tr><td>4 cartes de chiffres</td><td>Projets, Leads, Deals ouverts, Deals gagnés. Valeurs lues en base avec les droits de la personne. Chaque carte mène à son écran</td><td>Alpha : 2 projets, 8 leads si les données de démo sont chargées. Compte <code>alpha-analyst</code> : cartes leads et deals <b>absentes</b> (pas de faux zéro)</td></tr>
+<tr><td>Utilisation du plan</td><td>Barres par limite du plan (utilisateurs, projets, contacts, messages, IA). Vert, puis orange dès 70 %, rouge dès 90 %. Réservé au propriétaire et à l'administrateur</td><td>Avec <code>alpha-sales</code> : la carte n'apparaît pas</td></tr>
+<tr><td>Pour commencer</td><td>Étapes à faire (projet, lead, équipe, canal) avec progression ; disparaît quand tout est fait</td><td>Les étapes non permises au rôle ne sont pas listées</td></tr>
+<tr><td>Actions rapides</td><td>Raccourcis seulement pour ce que le rôle peut faire</td><td>Comparer propriétaire et commercial</td></tr>
+</table>
+</div>
+
+<h2>4. Projets</h2>
+<div class="screen">
+<p><b>À quoi ça sert :</b> un projet regroupe une offre : vente de sites web, application Salla, thème Salla ou autre. Lecture pour tous les rôles ; création et modification pour propriétaire et administrateur.</p>
+<table><tr><th>Quoi faire</th><th>Ce que vous devez voir</th></tr>
+<tr><td>Ouvrir <b>Projets</b></td><td>Cartes <b>Site vitrine Alpha</b> et <b>Application Salla Alpha</b>, filtre <b>Active / Archived</b></td></tr>
+<tr><td><b>New project</b> : choisir un type (4 cartes), saisir un nom, remplir les réglages du type, <b>Create project</b></td><td>Notification verte « Projet créé », la carte apparaît</td></tr>
+<tr><td>Laisser le nom vide, ou une adresse sans https</td><td>Refus avec message, rien n'est créé</td></tr>
+<tr><td>Ouvrir un projet : modifier, ajouter un produit, envoyer un PNG ou PDF (5 Mo max)</td><td>Enregistrements confirmés ; un .txt ou un fichier trop gros est refusé. Le type d'un projet ne se change jamais</td></tr>
+<tr><td><b>Archiver</b> puis <b>Réactiver</b></td><td>Archivé = lecture seule et ne compte plus dans la limite du plan</td></tr>
+<tr><td>Avec <code>alpha-sales</code></td><td>Liste visible, mais pas de bouton de création ; l'adresse <code>/projects/new</code> renvoie à la liste</td></tr>
+</table>
+<div class="box"><b>Point à montrer :</b> la limite du plan. Dans Administration, passer Alpha en plan <b>Essai</b> : créer un projet est refusé (« limite de projets atteinte »). Remettre <b>Croissance</b> ensuite.</div>
+</div>
+
+<h2>5. Leads</h2>
+<div class="screen">
+<p><b>À quoi ça sert :</b> la liste des prospects, avec recherche, filtres et export. Un commercial ne voit que ses leads, le marketing voit tous les leads, l'analyste n'y a pas accès.</p>
+<table><tr><th>Quoi faire</th><th>Ce que vous devez voir</th></tr>
+<tr><td>Ouvrir <b>Leads</b> (propriétaire)</td><td>« Résultats : 8 », colonnes contact, e-mail, téléphone, source, étape, responsable</td></tr>
+<tr><td>Rechercher <code>nadia</code>, puis <code>xyz</code></td><td>1 résultat, puis « Aucun lead ne correspond »</td></tr>
+<tr><td>Filtrer par <b>Étape = Unassigned</b> ou bouton <b>Non assignés</b></td><td>2 leads sans responsable</td></tr>
+<tr><td>Filtrer par source (import CSV, formulaire web, saisie manuelle)</td><td>2, 4 et 2 leads</td></tr>
+<tr><td><b>Exporter en CSV</b></td><td>Fichier avec les filtres actifs ; l'export est enregistré dans le journal d'audit (nombre de lignes, jamais les coordonnées)</td></tr>
+<tr><td>Se connecter avec <code>alpha-sales</code>, puis <code>alpha-marketing</code>, puis <code>alpha-analyst</code></td><td>Commercial : 6 leads, pas d'export. Marketing : 8 leads. Analyste : renvoyé au tableau de bord</td></tr>
+</table>
+</div>
+
+<h2>6. Deals</h2>
+<div class="screen">
+<p><b>À quoi ça sert :</b> le pipeline de ventes en colonnes (New, Qualified, Proposal, Won, Lost) avec le montant de chaque deal.</p>
+<table><tr><th>Quoi faire</th><th>Ce que vous devez voir</th></tr>
+<tr><td>Ouvrir <b>Deals</b></td><td>4 cartes : Nadia 2 000 MAD (New), Karim 6 500 (Qualified), Salma 12 000 (Proposal), Youssef 3 200 (Won)</td></tr>
+<tr><td>Menu <b>Déplacer vers…</b> sur une carte, ou glisser-déposer</td><td>Notification « Deal déplacé », compteurs des colonnes mis à jour, conservé au rechargement</td></tr>
+<tr><td>Filtrer par projet</td><td>Seuls les deals du projet choisi</td></tr>
+<tr><td>Avec <code>alpha-marketing</code></td><td>Deals visibles mais aucun déplacement possible (message de rôle)</td></tr>
+</table>
+</div>
+
+<h2>7. CRM (synchronisation)</h2>
+<div class="screen">
+<p><b>À quoi ça sert :</b> relier le CRM interne à un CRM externe. <b>Le CRM interne reste la source de vérité.</b> Pour chaque champ on choisit qui a raison (interne ou externe) et le sens (tirer ou pousser).</p>
+<table><tr><th>Quoi faire</th><th>Ce que vous devez voir</th></tr>
+<tr><td>Ouvrir <b>CRM</b> (propriétaire ou administrateur)</td><td>Liste des intégrations CRM avec dernier état de synchro (jamais, en file, en cours, réussie, échouée) et tableau de correspondance des champs</td></tr>
+<tr><td>Si une synchro a échoué</td><td>Bouton pour la relancer, sans créer de doublon</td></tr>
+<tr><td>Avec un commercial, marketing ou analyste</td><td>Renvoyé au tableau de bord</td></tr>
+</table>
+<div class="warn">La création d'une intégration CRM et le lancement d'une synchro se font aujourd'hui par commande (<code>pnpm test:call</code>), voir <code>docs/testing/phase2-3-functional-tests.md</code> partie T4. L'écran sert à lire l'état et à relancer.</div>
+</div>
+
+<h2>8. Intégrations (e-mail, WhatsApp, etc.)</h2>
+<div class="screen">
+<p><b>À quoi ça sert :</b> gérer les connexions aux fournisseurs. <b>Le secret (jeton) est chiffré et ne peut plus jamais être relu</b>, même par un administrateur : on peut seulement le remplacer.</p>
+<table><tr><th>Quoi faire</th><th>Ce que vous devez voir</th></tr>
+<tr><td>Créer une intégration de démonstration (commande du guide phase 2-3, partie D), puis ouvrir <b>Intégrations</b></td><td>« E-mail (demo-ui-mail) », état « En attente de validation », « Jeton enregistré et chiffré »</td></tr>
+<tr><td>Afficher le code source de la page et chercher le jeton</td><td>Introuvable : la page et l'API ne montrent que « jeton présent »</td></tr>
+<tr><td><b>Remplacer le jeton</b> avec un texte trop court, puis un valide</td><td>Refus, puis « Jeton remplacé », jamais affiché</td></tr>
+<tr><td><b>Déconnecter</b></td><td>Confirmation (irréversible), état « Déconnectée », jeton supprimé</td></tr>
+<tr><td>Se connecter avec <code>beta-owner</code></td><td>« Aucune intégration » : jamais celles d'Alpha</td></tr>
+</table>
+</div>
+
+<h2>9. Membres et invitations</h2>
+<div class="screen">
+<p><b>À quoi ça sert :</b> inviter des personnes et leur donner un rôle. L'administrateur ne peut pas toucher au propriétaire ; le dernier propriétaire ne peut jamais être retiré.</p>
+<table><tr><th>Quoi faire</th><th>Ce que vous devez voir</th></tr>
+<tr><td>Ouvrir <b>Membres</b></td><td>Les membres d'Alpha seulement, avec rôle et statut</td></tr>
+<tr><td><b>Inviter un membre</b> (e-mail, rôle)</td><td>Un lien d'invitation affiché <b>une seule fois</b> (à copier) ; l'invitation apparaît en attente</td></tr>
+<tr><td>Ouvrir le lien avec un autre compte que le destinataire</td><td>Message générique « invalide, expirée ou associée à un autre compte »</td></tr>
+<tr><td>Modifier un rôle, retirer un membre, <b>Révoquer</b> une invitation</td><td>Notifications de confirmation ; un lien révoqué ne marche plus</td></tr>
+<tr><td>Retirer ou rétrograder le dernier propriétaire</td><td>Refus avec explication</td></tr>
+<tr><td>Atteindre la limite d'utilisateurs du plan (plan Essai)</td><td>Invitation refusée avec message clair</td></tr>
+</table>
+</div>
+
+<h2>10. Paramétrage : thème, profil, SMTP</h2>
+<div class="screen">
+<table><tr><th>Écran</th><th>Quoi faire</th><th>Ce que vous devez voir</th></tr>
+<tr><td><b>Thème</b></td><td>Choisir une palette prête, <b>Enregistrer</b> ; essayer une combinaison illisible ; <b>Rétablir les couleurs par défaut</b></td><td>Les couleurs changent partout, même sur la page de connexion ; un contraste insuffisant bloque l'enregistrement</td></tr>
+<tr><td><b>Profil (logo)</b></td><td>Envoyer un PNG de moins de 128 Ko ; essayer un SVG ou un fichier trop gros</td><td>Logo dans le menu latéral ; SVG et gros fichiers refusés ; la page de connexion garde le logo officiel</td></tr>
+<tr><td><b>Serveur SMTP</b> (administrateur de la plateforme seulement)</td><td>Utiliser Mailtrap, saisir les identifiants, <b>Envoyer un e-mail de test</b></td><td>E-mail reçu dans Mailtrap ; le mot de passe n'est jamais réaffiché ; de faux identifiants donnent « Identifiants refusés »</td></tr>
+</table>
+<div class="warn"><b>Attention :</b> la palette est enregistrée en base. Si vous voyez encore l'ancien rouge (par exemple le badge « Owner »), faites <b>Thème, puis Rétablir les couleurs par défaut</b> pour obtenir le nouveau thème indigo.</div>
+</div>
+
+<h2>11. Administration de la plateforme</h2>
+<div class="screen">
+<p><b>À quoi ça sert :</b> réservé à l'équipe qui gère le SaaS (compte <code>shared@seed.test</code>). On y active le plan de chaque entreprise à la main, avec un motif, et la décision est journalisée.</p>
+<table><tr><th>Quoi faire</th><th>Ce que vous devez voir</th></tr>
+<tr><td>Ouvrir <b>Platform admin</b></td><td>Liste des entreprises, plan, statut, nombre de membres actifs</td></tr>
+<tr><td>Ouvrir Alpha, choisir <b>Essai</b>, saisir un motif, <b>Enregistrer l'abonnement</b></td><td>« Abonnement enregistré ». Les limites d'Alpha changent aussitôt (utilisateurs 3, projets 1)</td></tr>
+<tr><td>Se connecter avec un autre compte</td><td>Le menu Administration n'existe pas</td></tr>
+</table>
+</div>
+
+<h2>12. Langues, sens de lecture et mode sombre</h2>
+<ul>
+<li>Changer la langue en haut (français, anglais, <b>arabe</b>). En arabe l'écran passe de droite à gauche : menu à droite, flèches inversées.</li>
+<li>Basculer le mode sombre (icône soleil/lune) : tout reste lisible (le contraste est vérifié automatiquement).</li>
+<li>Réduire la fenêtre : le menu latéral devient un tiroir.</li>
+</ul>
+
+<h2>13. Ce qui existe sans écran (à expliquer, pas à cliquer)</h2>
+<table><tr><th>Fonction</th><th>État</th><th>Comment le voir</th></tr>
+<tr><td>Capture de leads (formulaire public), import CSV, assignation automatique</td><td>Fait (côté serveur)</td><td>Guide phase 2-3, parties T1 à T3</td></tr>
+<tr><td>E-mail sortant et entrant, statuts, désabonnement</td><td>Fait (côté serveur ; pas d'envoi réel tant qu'il n'y a pas de compte fournisseur)</td><td>Guide phase 2-3, T6 à T8</td></tr>
+<tr><td>WhatsApp : réception, envoi avec modèles, mot « STOP »</td><td>Fait (côté serveur, avec des fichiers d'essai, pas de vrai compte Meta)</td><td>Tests automatiques ; test réel prévu au checkpoint C3</td></tr>
+<tr><td>Boîte de réception unifiée (e-mail + WhatsApp)</td><td><b>Pas encore d'écran</b> : prévue en J37</td><td>-</td></tr>
+<tr><td>Réponses, campagnes, agents IA, tableaux de bord métier</td><td>Pas encore faits (phases suivantes)</td><td>-</td></tr>
+</table>
+<div class="say"><b>Phrase simple pour expliquer l'avancement :</b> la base de la plateforme (comptes, entreprises isolées, rôles, plans, projets, leads, deals, intégrations, envoi et réception d'e-mails et de messages WhatsApp côté serveur) est terminée et testée. Il reste surtout les écrans de conversation, les campagnes et l'IA.</div>
+
+<h2>14. Si quelque chose ne marche pas</h2>
+<ul>
+<li>Page blanche ou erreur : vérifier que <code>pnpm dev</code> tourne ; « Another next dev server is already running » veut dire qu'un serveur tourne déjà sur le port 3000.</li>
+<li>Données abîmées : <code>pnpm db:reset</code> remet la base à l'état de départ.</li>
+<li>Pour chaque anomalie : noter l'écran, le compte utilisé, ce que vous attendiez, ce que vous avez vu, et joindre une capture.</li>
+<li>Guides complets : <code>docs/testing/phase1-functional-tests.md</code> et <code>docs/testing/phase2-3-functional-tests.md</code>.</li>
+</ul>
+</body></html>

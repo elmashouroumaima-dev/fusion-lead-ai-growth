@@ -232,10 +232,13 @@ describe("contraste : cas d'usage dérivés du code", () => {
     expect(raw).toBeLessThan(TEXT);
   });
 
-  it("le vert de marque brut (--primary) n'est PAS utilisable en texte sur fond sombre : d'où --primary-text-color", () => {
-    const rawOnDark = contrast(effectiveDark.get("--primary") as string, effectiveDark.get("--background") as string);
-    expect(rawOnDark).toBeLessThan(TEXT);
-    expect(contrast(effectiveDark.get("--primary-text-color") as string, effectiveDark.get("--background") as string)).toBeGreaterThanOrEqual(TEXT);
+  it("le vert de marque brut (--brand) n'est PAS utilisable en texte sur fond clair : d'où --primary-text-color, lisible dans les deux thèmes", () => {
+    const rawOnLight = contrast(root.get("--brand") as string, root.get("--background") as string);
+    expect(rawOnLight).toBeLessThan(TEXT);
+    for (const values of [root, effectiveDark]) {
+      expect(contrast(values.get("--primary-text-color") as string, values.get("--background") as string)).toBeGreaterThanOrEqual(TEXT);
+      expect(contrast(values.get("--brand-foreground") as string, values.get("--brand") as string)).toBeGreaterThanOrEqual(TEXT);
+    }
   });
 });
 

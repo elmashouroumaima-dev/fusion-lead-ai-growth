@@ -3,6 +3,8 @@
 Format : Keep a Changelog. Une entrée par jour de travail.
 
 ## [Non publié]
+### Fusion J36 × J38 — `message_send_claim` (branche `day-36-whatsapp-send`)
+- Modifié : migration `20261210120000_message_send_claim_merge.sql` (et retour arrière) : version unique de `private.message_send_claim` qui contient les changements WhatsApp de J36 (destinataire par canal, fenêtre de 24 h, modèle, compte) ET ceux de J38 (un commercial approuve sa réponse sur sa conversation ; consentement conversationnel de 30 jours pour la finalité `reply`). Sans elle, la migration J38 (postérieure) effaçait les changements de J36. Les migrations déjà appliquées ne sont pas modifiées.
 ### J36 — Envoi WhatsApp conforme
 - Ajout : migration `20261206100000` (et retour arrière qui recrée les fonctions d'avant) : table `message_templates` (ADR 007 E5, versions, RLS), `messages.template_id` / `template_variables` / `template_text`, `message_attach_template`, `message_templates_sync` (service_role) ; `message_approve`, `message_send_claim`, `whatsapp_status_apply` et `messages_guard` étendus (numéro pour WhatsApp, fenêtre de 24 h, modèle, statut devançant l'envoi réessayé).
 - Ajout : envoi WhatsApp par l'API Cloud (`packages/adapters/src/whatsapp/send.ts`, résultats accepté / refusé / réessayable / inconnu), liste et réduction des modèles de Meta (`templates.ts`), envoi par le worker avec le contrôle final (modèle obligatoire hors fenêtre), `POST /api/integrations/templates/sync`.

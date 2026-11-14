@@ -1051,3 +1051,5 @@ Cible : 58,8 % (plan à 68 jours) | Réel : à valider | Statut : —
 - Les fonctions `message_approve`, `message_send_claim`, `whatsapp_status_apply` et la garde `messages_guard` sont reprises dans la migration (J31, J35) avec des ajouts ; le retour arrière les recrée dans leur version d'avant.
 - Pas de route HTTP ni d'écran pour rattacher un modèle ou approuver (fonctions, comme l'approbation e-mail du J31) : J37 et J38.
 
+## Fusion J36 × J38 — `message_send_claim` (branche `day-36-whatsapp-send`)
+Les migrations `20261206100000_whatsapp_send.sql` (J36) et `20261210100000_replies_lock.sql` (J38) remplacent chacune `private.message_send_claim` depuis la version J31 ; appliquées dans l'ordre, J38 effaçait les changements WhatsApp. Nouvelle migration `20261210120000_message_send_claim_merge.sql` : la version J36 plus exactement les deux changements de J38 (approbateur commercial pour une réponse, consentement conversationnel de 30 jours) ; rollback fourni (retour à la version J38). Vérifié par la CI (pgTAP J36 et J38, acceptation).

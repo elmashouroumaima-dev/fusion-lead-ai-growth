@@ -1,3 +1,5 @@
+import { WHATSAPP_GRAPH_BASE } from "./cloud";
+
 /**
  * Envoi WhatsApp par l'API Cloud officielle (J36, spec §9.3). Le domaine ne connaît que cette interface ; le jeton est passé à chaque appel (lu par le
  * worker via `secret_ref`) et n'apparaît jamais dans une erreur, un code ou un journal. Adresse FIXE de l'API Graph (jamais configurable), identifiant du
@@ -10,7 +12,7 @@
  *  - `retryable` : Meta a répondu qu'il n'a PAS accepté (limite, panne) : un nouvel essai est sûr ;
  *  - `unknown`   : aucune réponse exploitable (coupure, passerelle) : le message a PEUT-ÊTRE été envoyé, il ne faut JAMAIS le renvoyer.
  */
-export const WHATSAPP_MESSAGES_BASE = "https://graph.facebook.com/v21.0";
+export const WHATSAPP_MESSAGES_BASE = WHATSAPP_GRAPH_BASE;
 const TIMEOUT_MS = 15_000;
 const MAX_RESPONSE_BYTES = 65_536;
 const PHONE_NUMBER_ID = /^[0-9]{5,30}$/;

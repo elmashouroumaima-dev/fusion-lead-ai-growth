@@ -6,7 +6,7 @@
 --
 --  * `unsubscribe_apply(p_org, p_message)` (service_role seulement, une transaction, idempotente) :
 --      1. révoque TOUS les consentements e-mail actifs du contact (historique append-only : seule la date de révocation s'ajoute) ;
---      2. inscrit l'adresse dans `suppressions` (raison `unsubscribe`), ce qui bloque aussi tout nouveau consentement saisi par erreur ;
+--      2. inscrit l'adresse dans `suppressions` (raison `unsubscribe`), l'envoi reste bloqué même si un nouveau consentement est saisi (contrôle à l'envoi, pas à l'enregistrement du consentement) ;
 --      3. annule les messages sortants en file, non encore réclamés, du contact (statut `cancelled`) et les jobs `send_message` correspondants ;
 --      4. audite (identifiants et nombres seulement : jamais l'adresse ni le corps).
 --    Un envoi déjà réclamé par le worker n'est pas touché ici : le contrôle final de `checkCanSend` (consentement et suppression relus dans la

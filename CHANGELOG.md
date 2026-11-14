@@ -3,6 +3,11 @@
 Format : Keep a Changelog. Une entrée par jour de travail.
 
 ## [Non publié]
+### J36b — Retrait de consentement WhatsApp (hors plan)
+- Ajout : migration `20261207100000` (et retour arrière) : un mot d'arrêt reçu d'un contact révoque ses consentements WhatsApp, supprime son numéro, annule ses envois WhatsApp en file ; numéro seul supprimé pour un expéditeur inconnu ; rattrapage des « STOP » déjà reçus.
+- Modification : version de l'API Graph v25.0 (une constante pour toutes les requêtes sortantes).
+- Tests : pgTAP 300 (53), acceptation HTTP `whatsapp-flow` (+1).
+- Documentation : `docs/api/whatsapp-inbound.md` (retrait par mot d'arrêt), `docs/api/whatsapp-send.md`.
 ### Fusion J36 × J38 — `message_send_claim` (branche `day-36-whatsapp-send`)
 - Modifié : migration `20261210120000_message_send_claim_merge.sql` (et retour arrière) : version unique de `private.message_send_claim` qui contient les changements WhatsApp de J36 (destinataire par canal, fenêtre de 24 h, modèle, compte) ET ceux de J38 (un commercial approuve sa réponse sur sa conversation ; consentement conversationnel de 30 jours pour la finalité `reply`). Sans elle, la migration J38 (postérieure) effaçait les changements de J36. Les migrations déjà appliquées ne sont pas modifiées.
 ### J36 — Envoi WhatsApp conforme

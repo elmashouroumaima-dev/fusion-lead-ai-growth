@@ -127,7 +127,7 @@ export default async function IntegrationsPage({ params }: { params: Promise<{ l
                     <IntegrationActions integrationId={integration.id} encryptionConfigured={encryptionConfigured} disconnected={integration.status === "disconnected"} />
                   </>
                 ) : (
-                  <a href={`/${locale}/crm`} className="text-primary text-sm underline-offset-4 hover:underline">
+                  <a href={`/${locale}/crm`} className="text-primary-text text-sm underline-offset-4 hover:underline">
                     {t("crmLink")}
                   </a>
                 )}

@@ -106,7 +106,7 @@ export function DealBoard({ stages, deals: initial, canMove }: Props) {
                     }
                   : undefined
               }
-              className={`bg-muted/40 flex w-72 shrink-0 flex-col gap-3 rounded-lg border p-3 ${overStage === stage.id ? "ring-primary ring-2" : ""}`}
+              className={`bg-muted/40 flex w-72 shrink-0 flex-col gap-3 rounded-lg border p-3 ${overStage === stage.id ? "ring-brand ring-2" : ""}`}
             >
               <header className="grid gap-1">
                 <div className="flex items-center justify-between gap-2">

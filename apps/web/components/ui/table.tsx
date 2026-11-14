@@ -10,7 +10,7 @@ function Table({ className, ...props }: ComponentProps<"table">) {
 }
 
 function TableHeader({ className, ...props }: ComponentProps<"thead">) {
-  return <thead data-slot="table-header" className={cn("[&_tr]:border-b", className)} {...props} />;
+  return <thead data-slot="table-header" className={cn("bg-muted/50 [&_tr]:border-b", className)} {...props} />;
 }
 
 function TableBody({ className, ...props }: ComponentProps<"tbody">) {
@@ -29,7 +29,7 @@ function TableHead({ className, ...props }: ComponentProps<"th">) {
   return (
     <th
       data-slot="table-head"
-      className={cn("text-foreground h-10 px-2 text-start align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pe-0", className)}
+      className={cn("text-muted-foreground h-11 px-3 text-start align-middle text-xs font-semibold tracking-wide whitespace-nowrap [&:has([role=checkbox])]:pe-0", className)}
       {...props}
     />
   );
@@ -39,7 +39,7 @@ function TableCell({ className, ...props }: ComponentProps<"td">) {
   return (
     <td
       data-slot="table-cell"
-      className={cn("p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pe-0", className)}
+      className={cn("px-3 py-3 align-middle whitespace-nowrap [&:has([role=checkbox])]:pe-0", className)}
       {...props}
     />
   );

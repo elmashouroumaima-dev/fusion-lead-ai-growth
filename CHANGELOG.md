@@ -3,6 +3,12 @@
 Format : Keep a Changelog. Une entrée par jour de travail.
 
 ## [Non publié]
+### J30c — Fiche lead : détail, chronologie, notes, appels et tâches (branche `day-30c-lead-page`)
+- Ajout : page `/leads/[id]` (résumé, contact, prochaine action, deals, chronologie la plus récente d'abord avec les entrées automatiques d'étape et d'assignation), formulaire « Ajouter à la chronologie » (note, appel, tâche), marquer une tâche faite ou à refaire ; le nom du contact dans la liste des leads devient le lien ; messages fr / ar / en.
+- Ajout : Server Actions `activities.create` et `activities.task.complete` (idempotence obligatoire, droits ADR 014 « Leads / deals : tâches » : owner, admin, commercial sur son lead ; la base revérifie la propriété du lead).
+- Règles : le commercial ne voit que la fiche de ses leads (404 sinon) ; l'analyste est renvoyé au tableau de bord ; le marketing lit sans pouvoir écrire ; le contenu saisi n'est jamais dans l'audit.
+- Tests : Vitest `lib/activities/action-schemas.test.ts` (25), acceptation HTTP `lead-page.test.ts` (6 : rôles, isolation, ordre de la chronologie, entrées automatiques, formulaire par rôle), navigateur (tâche ajoutée, marquée faite, prochaine action mise à jour).
+- Hors plan J30c : pas de « Add lead » (création manuelle d'un lead) ; aucune migration.
 ### J30b — Écran contacts et consentement (branche `day-30b-contacts`)
 - Ajout : pages `/contacts` (liste, recherche par nom, e-mail ou téléphone, pagination côté serveur) et `/contacts/[id]` (coordonnées, statut, historique du consentement avec la preuve, enregistrer ou retirer un consentement, poser ou lever « ne plus contacter »), lien « Contacts » dans le menu pour owner, admin et marketing ; messages fr / ar / en.
 - Ajout : migration `20261208100000_contacts_search.sql` (et retour arrière) : `search_contacts` (SECURITY INVOKER, saisie échappée) ; Server Actions `contacts.consent.record`, `contacts.consent.revoke`, `contacts.do_not_contact.set` (idempotence obligatoire, droits ADR 014, base revérifiant le rôle).

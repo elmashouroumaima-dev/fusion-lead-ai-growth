@@ -1,13 +1,16 @@
 "use client";
 
 import { PROJECT_NAME_MAX, PROJECT_TYPES, type ProjectType } from "@fusion-leap/domain";
+import { GlobeIcon, PaletteIcon, PuzzleIcon, ShoppingBagIcon, type LucideIcon } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useActionState, useEffect, useId, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { buttonVariants } from "@/components/ui/button";
+import { Link } from "../../i18n/navigation";
+import { cn } from "@/lib/utils";
 import { createProjectAction, updateProjectAction } from "../../lib/projects/actions";
 import { cleanSettings, settingsToFormState, type SettingsValue } from "../../lib/projects/settings-form";
 import type { ProjectsActionState } from "../../lib/projects/types";
@@ -21,6 +24,13 @@ type Props = {
   project?: { id: string; type: ProjectType; name: string; settings: SettingsValue };
   /** Lecture seule (rôle sans droit d'écriture, ou projet archivé). */
   readOnly?: boolean;
+};
+
+const TYPE_ICONS: Record<ProjectType, LucideIcon> = {
+  website_sales: GlobeIcon,
+  salla_app: ShoppingBagIcon,
+  salla_theme: PaletteIcon,
+  custom: PuzzleIcon,
 };
 
 const initialState: ProjectsActionState = { status: "idle" };
@@ -64,44 +74,69 @@ export function ProjectForm({ organizationId, idempotencyKey, project, readOnly 
       {editing ? <input type="hidden" name="project_id" value={project.id} /> : <input type="hidden" name="idempotency_key" value={key} />}
       {editing ? null : <input type="hidden" name="type" value={type} />}
 
-      <div className="grid gap-1.5">
-        <Label htmlFor={`${uid}-type`}>{t("form.type")}</Label>
-        {editing ? (
-          <>
-            <p id={`${uid}-type`} className="text-sm font-medium">
-              {t(`types.${type}`)}
-            </p>
-            <p className="text-muted-foreground text-xs">{t("form.typeLocked")}</p>
-          </>
-        ) : (
-          <>
-            <Select
-              value={type}
-              onValueChange={(next) => {
-                setType(next as ProjectType);
-                setSettings({});
-              }}
-            >
-              <SelectTrigger id={`${uid}-type`} className="w-full sm:w-72" aria-describedby={`${uid}-type-hint`}>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {PROJECT_TYPES.map((value) => (
-                  <SelectItem key={value} value={value}>
-                    {t(`types.${value}`)}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <p id={`${uid}-type-hint`} className="text-muted-foreground text-xs">
-              {t(`typeHints.${type}`)}
-            </p>
-          </>
-        )}
-      </div>
+      {editing ? (
+        <div className="grid gap-1.5">
+          <Label htmlFor={`${uid}-type`}>{t("form.type")}</Label>
+          <p id={`${uid}-type`} className="text-sm font-medium">
+            {t(`types.${type}`)}
+          </p>
+          <p className="text-muted-foreground text-xs">{t("form.typeLocked")}</p>
+        </div>
+      ) : (
+        <fieldset className="grid gap-3">
+          <legend className="mb-1 flex items-center gap-2 text-sm leading-none font-semibold">
+            <span className="bg-primary text-primary-foreground grid size-5 place-items-center rounded-full text-xs" aria-hidden="true">
+              1
+            </span>
+            {t("form.type")}
+          </legend>
+          <div className="grid gap-3 sm:grid-cols-2">
+            {PROJECT_TYPES.map((value) => {
+              const Icon = TYPE_ICONS[value];
+              return (
+                <label key={value} className="relative block cursor-pointer">
+                  <input
+                    type="radio"
+                    name={`${uid}-type-choice`}
+                    value={value}
+                    checked={type === value}
+                    onChange={() => {
+                      setType(value);
+                      setSettings({});
+                    }}
+                    className="peer sr-only"
+                  />
+                  <span
+                    className={cn(
+                      "bg-background hover:border-brand/60 flex h-full items-start gap-3 rounded-xl border p-4 transition",
+                      "peer-checked:border-brand peer-checked:bg-brand/10 peer-checked:ring-brand/30 peer-checked:ring-2",
+                      "peer-focus-visible:ring-ring peer-focus-visible:ring-[3px]",
+                    )}
+                  >
+                    <span className="bg-brand/15 text-primary-text grid size-9 shrink-0 place-items-center rounded-lg">
+                      <Icon className="size-4" aria-hidden="true" />
+                    </span>
+                    <span className="grid gap-0.5">
+                      <span className="text-sm font-medium">{t(`types.${value}`)}</span>
+                      <span className="text-muted-foreground text-xs">{t(`typeHints.${value}`)}</span>
+                    </span>
+                  </span>
+                </label>
+              );
+            })}
+          </div>
+        </fieldset>
+      )}
 
-      <div className="grid gap-1.5">
-        <Label htmlFor={nameId}>{t("form.name")}</Label>
+      <div className="grid gap-1.5 border-t pt-5">
+        <Label htmlFor={nameId} className="gap-2">
+          {editing ? null : (
+            <span className="bg-primary text-primary-foreground grid size-5 place-items-center rounded-full text-xs" aria-hidden="true">
+              2
+            </span>
+          )}
+          {t("form.name")}
+        </Label>
         <Input
           id={nameId}
           name="name"
@@ -119,7 +154,7 @@ export function ProjectForm({ organizationId, idempotencyKey, project, readOnly 
       </div>
 
       <fieldset className="grid gap-3" disabled={readOnly}>
-        <legend className="mb-1 text-sm leading-none font-semibold">{t("form.settings")}</legend>
+        <legend className="mb-2 text-sm leading-none font-semibold">{t("form.settings")}</legend>
         <SettingsFields type={type} value={settings} onChange={setSettings} disabled={readOnly} idPrefix={`${uid}-s`} />
       </fieldset>
 
@@ -128,9 +163,16 @@ export function ProjectForm({ organizationId, idempotencyKey, project, readOnly 
       </div>
 
       {readOnly ? null : (
-        <Button type="submit" className="w-fit" disabled={pending}>
-          {pending ? (editing ? t("form.saving") : t("new.creating")) : editing ? t("form.save") : t("new.submit")}
-        </Button>
+        <div className="bg-card/90 sticky bottom-0 z-10 -mx-6 flex flex-wrap items-center gap-3 border-t px-6 py-4 backdrop-blur">
+          <Button type="submit" disabled={pending}>
+            {pending ? (editing ? t("form.saving") : t("new.creating")) : editing ? t("form.save") : t("new.submit")}
+          </Button>
+          {editing ? null : (
+            <Link href="/projects" className={buttonVariants({ variant: "ghost" })}>
+              {t("new.cancel")}
+            </Link>
+          )}
+        </div>
       )}
     </form>
   );

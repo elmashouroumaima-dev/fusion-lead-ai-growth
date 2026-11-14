@@ -10,8 +10,6 @@ import { EMAIL_LANGS, renderEmailHtml, renderEmailText, type EmailContent, type 
  * Les variables `{{ .SiteURL }}` et `{{ .TokenHash }}` sont celles de Supabase Auth, insérées telles quelles.
  */
 
-export const AUTH_LOGO_URL = "{{ .SiteURL }}/brand/email-logo.png";
-
 const CONFIRMATION: EmailContent = {
   fr: {
     title: "Confirmez votre adresse e-mail",
@@ -87,7 +85,7 @@ const DOCUMENT_TITLE = { fr: "Fusion Leap AI Growth", ar: "Fusion Leap AI Growth
 
 function authTemplate(content: EmailContent, actionHref: string): string {
   return goByLocale((lang) =>
-    renderEmailHtml({ lang, documentTitle: `${content[lang].title} · ${DOCUMENT_TITLE[lang]}`, copy: content[lang], actionHref, logoSrc: AUTH_LOGO_URL }),
+    renderEmailHtml({ lang, documentTitle: `${content[lang].title} · ${DOCUMENT_TITLE[lang]}`, copy: content[lang], actionHref }),
   );
 }
 

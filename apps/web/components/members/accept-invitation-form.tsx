@@ -38,7 +38,7 @@ export function AcceptInvitationForm({ token }: { token: string }) {
         type="submit"
         size="lg"
         disabled={pending}
-        className="h-11 w-full bg-linear-to-r from-primary to-secondary font-semibold text-white shadow-md hover:opacity-90 rtl:bg-linear-to-l"
+        className="h-11 w-full font-semibold"
       >
         {pending ? <LoaderCircleIcon className="animate-spin" aria-hidden="true" /> : null}
         {pending ? tc("submitting") : t("accept")}

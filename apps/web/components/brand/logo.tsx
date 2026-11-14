@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { createContext, useContext, type ComponentProps, type ReactNode } from "react";
+import { createContext, useContext, type ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
 /**
@@ -18,7 +18,7 @@ export function BrandLogoProvider({ src, children }: { src: string | null; child
  * Marque graphique : logo personnalisé (`<img>`, jamais d'URL arbitraire : seulement celle du contexte) ou SVG
  * en ligne par défaut. Décorative : le nom est donné par le texte voisin.
  */
-export function LogoMark({ className, ...props }: ComponentProps<"svg">) {
+export function LogoMark({ className }: { className?: string | undefined }) {
   const custom = useContext(BrandLogoContext);
   if (custom) {
     // `unoptimized` : l'image vient de notre route (/api/brand/logo), déjà validée et plafonnée à 128 Ko.
@@ -35,32 +35,18 @@ export function LogoMark({ className, ...props }: ComponentProps<"svg">) {
       />
     );
   }
+  // Marque « F » officielle (noir ; inversée en blanc en mode sombre). Fichier statique : `public/brand/mark.png`.
   return (
-    <svg
-      viewBox="0 0 32 32"
-      fill="none"
+    <Image
+      src="/brand/mark.png"
+      alt=""
       aria-hidden="true"
-      focusable="false"
-      className={cn("size-8 shrink-0", className)}
-      {...props}
-    >
-      <rect width="32" height="32" rx="8" fill="#006a4e" />
-      <path
-        d="M9 22.5 15.5 9l3 6.2L22.8 9"
-        stroke="#ffffff"
-        strokeWidth="2.6"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M9 22.5h14"
-        stroke="#ffffff"
-        strokeWidth="2.6"
-        strokeLinecap="round"
-        opacity="0.55"
-      />
-      <circle cx="23.5" cy="22.5" r="1.8" fill="#ae2b2f" />
-    </svg>
+      draggable={false}
+      unoptimized
+      width={282}
+      height={256}
+      className={cn("h-7 w-auto shrink-0 object-contain dark:invert", className)}
+    />
   );
 }
 

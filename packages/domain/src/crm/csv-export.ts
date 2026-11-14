@@ -31,6 +31,8 @@ export function buildLeadsExportCsv(rows: readonly LeadListRow[]): string {
         .join(","),
     );
   }
-  // BOM UTF-8 : Excel lit correctement les noms arabes et accentués
-  return `\uFEFF${lines.join("\r\n")}\r\n`;
+  // BOM UTF-8 : Excel lit correctement les noms arabes et accentués. Première ligne `sep=,` : indication de séparateur reconnue par
+  // Excel, qui sinon coupe selon le séparateur de liste du système (point-virgule en français ou en arabe) et met toute la ligne
+  // dans la première cellule. Les lecteurs CSV stricts n'ont qu'à ignorer cette ligne.
+  return `\uFEFFsep=,\r\n${lines.join("\r\n")}\r\n`;
 }

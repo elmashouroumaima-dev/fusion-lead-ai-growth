@@ -40,6 +40,10 @@ export default async function AppLayout({ children, params }: Props) {
   let showMembers = false;
   // Leads et deals : tout rôle qui lit les leads (le commercial lit les siens) ; l'analyste n'y a pas accès (PII). Commodité d'affichage.
   let showCrm = false;
+  // Contacts et consentement : owner, admin et marketing (le commercial lit ses leads, pas la liste des contacts). Commodité d'affichage.
+  let showContacts = false;
+  // Boîte de réception : owner et admin (toutes les conversations) et commercial (les siennes). Commodité d'affichage.
+  let showInbox = false;
   // Synchronisation CRM : owner et admin (matrice : état des intégrations). Commodité d'affichage.
   let showCrmSync = false;
   // Paramétrage (palette globale) : owner / admin d'organisation seulement ; commodité d'affichage.
@@ -51,11 +55,15 @@ export default async function AppLayout({ children, params }: Props) {
     const active = resolveActiveMembership(switchable, await readActiveOrgCookie());
     showMembers = can(active.role, "list", "members");
     showCrm = can(active.role, "read", "leads", { isOwnRecord: true });
+    showContacts = can(active.role, "read", "contacts");
+    showInbox = can(active.role, "read", "conversations", { isOwnRecord: true });
     showCrmSync = can(active.role, "view_status", "integrations");
     activeOrganizationName = active.organization.name;
   } catch {
     showMembers = false;
     showCrm = false;
+    showContacts = false;
+    showInbox = false;
     showCrmSync = false;
   }
 
@@ -66,6 +74,8 @@ export default async function AppLayout({ children, params }: Props) {
       email={email}
       showMembers={showMembers}
       showCrm={showCrm}
+      showContacts={showContacts}
+      showInbox={showInbox}
       showCrmSync={showCrmSync}
       showSettings={showSettings}
       showAdmin={showAdmin}

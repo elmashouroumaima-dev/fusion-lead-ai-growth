@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { safeText } from "../projects/text";
 import { uuidSchema } from "../tenant/schemas";
 
 /**
@@ -32,6 +33,11 @@ export type AssignConversationInput = z.infer<typeof assignConversationSchema>;
 
 export const setConversationStateSchema = z.object({ conversation_id: uuidSchema, state: z.enum(CONVERSATION_STATES) }).strict();
 export type SetConversationStateInput = z.infer<typeof setConversationStateSchema>;
+
+/** Réponse humaine (J38) : texte brut de 1 à 10 000 caractères ; la conversation vient de l'adresse, l'entreprise du contexte vérifié. */
+export const REPLY_BODY_MAX = 10_000;
+export const replyInputSchema = z.object({ body: safeText(1, REPLY_BODY_MAX, true) }).strict();
+export type ReplyInput = z.infer<typeof replyInputSchema>;
 
 export const listConversationsSchema = z
   .object({
@@ -71,3 +77,30 @@ export const messageRowSchema = z.object({
   created_at: z.string(),
 });
 export type MessageRow = z.infer<typeof messageRowSchema>;
+
+/** Canaux de la boîte de réception (même liste que les canaux de contact). */
+export const INBOX_CHANNELS = ["email", "whatsapp"] as const;
+export type InboxChannel = (typeof INBOX_CHANNELS)[number];
+
+/**
+ * Ligne de la liste de la boîte de réception (J37) renvoyée par `search_conversations` : la conversation, le nom du contact, le type du
+ * canal et un APERÇU tronqué (140 caractères) du dernier message, jamais le corps entier.
+ */
+export const inboxRowSchema = z.object({
+  id: uuidSchema,
+  contact_id: uuidSchema,
+  channel_id: uuidSchema,
+  assignee_id: uuidSchema.nullable(),
+  state: z.enum(CONVERSATION_STATES),
+  last_message_at: z.string().nullable(),
+  contact_name: z.string().nullable(),
+  contact_email: z.string().nullable(),
+  contact_phone: z.string().nullable(),
+  channel_type: z.enum(INBOX_CHANNELS),
+  last_direction: z.enum(MESSAGE_DIRECTIONS).nullable(),
+  last_status: z.enum(MESSAGE_STATUSES).nullable(),
+  last_preview: z.string().nullable(),
+  last_truncated: z.boolean().nullable(),
+  total_count: z.number().int(),
+});
+export type InboxRow = z.infer<typeof inboxRowSchema>;

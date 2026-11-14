@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Tâches de la responsable technique</title>
+<style>
+@page { size: A4; margin: 15mm 14mm; }
+:root { --ink:#17201a; --mut:#5d6a5c; --line:#d9dfd0; --brand:#2e7d1e; --soft:#f3f6ec; --acc:#8bd43a; --warn:#b26a00; --warnbg:#fff6e5; --red:#b3261e; --redbg:#fdf0ee; }
+* { box-sizing: border-box; }
+body { margin:0; font-family: "Segoe UI", Tahoma, Arial, sans-serif; color:var(--ink); font-size:10pt; line-height:1.5; }
+header { background:linear-gradient(135deg,#eaf6d8,#fff); border:1px solid var(--line); border-radius:12px; padding:14px 18px; margin-bottom:10px; }
+.pill { display:inline-block; font-size:8.5pt; background:var(--acc); color:#10200a; border-radius:20px; padding:1px 11px; font-weight:600; }
+h1 { font-size:20pt; margin:6px 0 2px; line-height:1.2; }
+.lead { color:var(--mut); margin:0; font-size:10pt; }
+h2 { font-size:12.5pt; margin:14px 0 5px; color:var(--brand); border-inline-start:5px solid var(--acc); padding-inline-start:9px; break-after:avoid; }
+.kpis { display:flex; gap:8px; margin:8px 0; }
+.kpi { flex:1; border:1px solid var(--line); border-radius:10px; padding:7px 10px; text-align:center; background:var(--soft); }
+.kpi b { display:block; font-size:16pt; color:var(--brand); }
+.kpi.w b { color:var(--warn); } .kpi.r b { color:var(--red); }
+.kpi span { font-size:8.5pt; color:var(--mut); }
+table { width:100%; border-collapse:collapse; margin:4px 0 8px; font-size:9pt; }
+th, td { border:1px solid var(--line); padding:3.5px 7px; text-align:left; vertical-align:top; }
+th { background:var(--soft); font-size:8.5pt; }
+td.n { width:3.5%; text-align:center; color:var(--mut); }
+tr { break-inside:avoid; }
+.chip { display:inline-block; border-radius:9px; padding:0 8px; font-size:8pt; font-weight:600; white-space:nowrap; }
+.ok { background:#e3f5d3; color:#1f5e10; } .wait { background:var(--warnbg); color:var(--warn); } .urg { background:var(--redbg); color:var(--red); } .part { background:#e6eefc; color:#1f3f8a; }
+.note { border:1px solid var(--line); border-radius:9px; padding:7px 11px; margin:8px 0; background:var(--soft); font-size:9pt; }
+footer { margin-top:12px; color:var(--mut); font-size:8pt; border-top:1px solid var(--line); padding-top:5px; }
+</style>
+</head>
+<body>
+<header>
+  <span class="pill">État au 13 novembre 2026 · J0 → J36b</span>
+  <h1>Tâches de la responsable technique</h1>
+  <p class="lead">Ce qui est déjà validé ou fait, et ce qui reste à valider, décider ou fournir. Sources : checkpoints C0 à C2, ADR, rapport d'avancement, journal et PR ouvertes.</p>
+</header>
+
+<div class="kpis">
+  <div class="kpi"><b>21</b><span>validé ou fait</span></div>
+  <div class="kpi w"><b>28</b><span>en attente</span></div>
+  <div class="kpi r"><b>2</b><span>bloquants (domaine, Postmark)</span></div>
+  <div class="kpi"><b>5</b><span>PR à relire (#41 à #45)</span></div>
+</div>
+
+<h2>A. Déjà validé ou fait</h2>
+<table>
+<tr><th class="n">#</th><th>Tâche</th><th style="width:13%">Date</th><th style="width:15%">Référence</th></tr>
+<tr><td class="n">1</td><td><span class="chip ok">Validé</span> Plan de développement (68 jours) et sources de vérité : porte G0.</td><td>nov.</td><td>Plan, C0</td></tr>
+<tr><td class="n">2</td><td><span class="chip ok">Accepté</span> ADR 001 à 007 (stack, monorepo, file de jobs, secrets, multi-tenant, conventions, modèle de données).</td><td>9 nov</td><td>ADR 001–007</td></tr>
+<tr><td class="n">3</td><td><span class="chip ok">Accepté</span> ADR 014 (matrice des rôles), 015 (kit d'interface), 016 (palette globale, avec condition).</td><td>9 nov</td><td>ADR 014–016</td></tr>
+<tr><td class="n">4</td><td><span class="chip ok">Accepté</span> ADR 011 (internationalisation fr / ar / en).</td><td>6 nov</td><td>ADR 011</td></tr>
+<tr><td class="n">5</td><td><span class="chip ok">Accepté sous réserve</span> ADR 008 (fournisseur e-mail) : hypothèse Postmark, réserve Q2.</td><td>9 nov</td><td>ADR 008</td></tr>
+<tr><td class="n">6</td><td><span class="chip ok">Confirmé</span> Hypothèse d'exécution du §14 de la spec (CRM interne source de vérité, un fournisseur e-mail, numéro WhatsApp de test officiel, Salla en mode marketing).</td><td>9 nov</td><td>Plan</td></tr>
+<tr><td class="n">7</td><td><span class="chip ok">GO avec réserves</span> Checkpoint C1 (phase 1, isolation entre entreprises).</td><td>nov.</td><td>C1</td></tr>
+<tr><td class="n">8</td><td><span class="chip ok">GO</span> Checkpoint C2 (phase 2, parcours lead jusqu'au deal gagné).</td><td>9 nov</td><td>C2</td></tr>
+<tr><td class="n">9</td><td><span class="chip ok">Décidé</span> Écrans CRM planifiés avant G3 (option A) : contacts, fiche lead, configuration, import.</td><td>9 nov</td><td>C2-décisions</td></tr>
+<tr><td class="n">10</td><td><span class="chip ok">Validé</span> Plan de J32 avec les quatre choix par défaut.</td><td>12 nov</td><td>J32</td></tr>
+<tr><td class="n">11</td><td><span class="chip ok">Décidé</span> Rebond dur : adresse supprimée sans toucher « ne plus contacter ». Plainte : adresse supprimée et « ne plus contacter ».</td><td>12 nov</td><td>J32, ADR 008</td></tr>
+<tr><td class="n">12</td><td><span class="chip ok">Ordonné</span> Fusion de la chaîne de PR #8 à #38 dans la branche principale (merge commits, sans squash).</td><td>12 nov</td><td>PR #8–#38</td></tr>
+<tr><td class="n">13</td><td><span class="chip ok">Ordonné</span> Commit et PR pour J30, J31 et J32 ; fusion des PR #39 (rapport et guide de tests) et #40 (correction de <code>pnpm dev</code>).</td><td>12 nov</td><td>PR #39, #40</td></tr>
+<tr><td class="n">14</td><td><span class="chip ok">Ordonné</span> Enchaîner J33 à J39, un commit et une PR par jour.</td><td>13 nov</td><td>PR #41–#45</td></tr>
+<tr><td class="n">15</td><td><span class="chip ok">Demandé</span> Guide de tests des phases 2 et 3 (107 cas) et rapport d'avancement refondu avec journal du jour.</td><td>12 nov</td><td>#39</td></tr>
+<tr><td class="n">16</td><td><span class="chip ok">Fait</span> Compte Postmark créé (mode test, serveur « My First Server »).</td><td>13 nov</td><td>Q2</td></tr>
+<tr><td class="n">17</td><td><span class="chip ok">Fait</span> Numéro de test WhatsApp de Meta obtenu (identifiant du numéro et du compte récupérés).</td><td>13 nov</td><td>J34</td></tr>
+<tr><td class="n">18</td><td><span class="chip ok">Fait</span> Boîte Mailtrap configurée pour les e-mails d'authentification locaux.</td><td>13 nov</td><td>runbook</td></tr>
+<tr><td class="n">19</td><td><span class="chip ok">Fait</span> Documents d'objectif du produit et d'état d'avancement en arabe (PDF).</td><td>13 nov</td><td>docs/product</td></tr>
+<tr><td class="n">20</td><td><span class="chip ok">Décidé</span> Aucune passerelle WhatsApp non officielle (OpenWA refusé) : Cloud API officielle seulement.</td><td>13 nov</td><td>CLAUDE.md, spec §9.3</td></tr>
+<tr><td class="n">21</td><td><span class="chip ok">Décidé</span> Accès minimal à Meta : « comptes WhatsApp actuels seulement », compte de test seul.</td><td>13 nov</td><td>J34</td></tr>
+</table>
+
+<h2>B. En attente : à valider, décider ou fournir</h2>
+
+<h3 style="font-size:10.5pt;margin:8px 0 3px;">B1. À relire et fusionner</h3>
+<table>
+<tr><th class="n">#</th><th>Tâche</th><th style="width:15%">Statut</th><th style="width:19%">Échéance</th></tr>
+<tr><td class="n">1</td><td>Relire la PR #41 (J33, désabonnement), base <code>main</code>.</td><td><span class="chip wait">À relire</span></td><td>Avant fusion</td></tr>
+<tr><td class="n">2</td><td>Relire la PR #42 (J34, connexion WhatsApp) : nouvelle variable <code>WHATSAPP_VERIFY_TOKEN</code>.</td><td><span class="chip wait">À relire</span></td><td>Avant fusion</td></tr>
+<tr><td class="n">3</td><td>Relire la PR #43 (J35, réception) : reprise de la garde des messages.</td><td><span class="chip wait">À relire</span></td><td>Avant fusion</td></tr>
+<tr><td class="n">4</td><td>Relire la PR #44 (J36, envoi) : reprise de l'approbation, de la réclamation et des statuts.</td><td><span class="chip wait">À relire</span></td><td>Avant fusion</td></tr>
+<tr><td class="n">5</td><td>Relire la PR #45 (J36b, retrait par mot d'arrêt).</td><td><span class="chip wait">À relire</span></td><td>Avant fusion</td></tr>
+<tr><td class="n">6</td><td>Ordonner la fusion de la chaîne #41 à #45 (dans l'ordre, base remise sur <code>main</code> à chaque étape).</td><td><span class="chip wait">À ordonner</span></td><td>Après relecture</td></tr>
+</table>
+
+<h3 style="font-size:10.5pt;margin:8px 0 3px;">B2. Décisions d'architecture à valider</h3>
+<table>
+<tr><th class="n">#</th><th>Décision</th><th style="width:15%">Statut</th><th style="width:19%">Échéance</th></tr>
+<tr><td class="n">7</td><td>Variable serveur <code>WHATSAPP_VERIFY_TOKEN</code> (jeton de la plateforme pour la poignée de main de Meta).</td><td><span class="chip wait">À valider</span></td><td>Avant C3</td></tr>
+<tr><td class="n">8</td><td>Limites provisoires de 100 envois par heure et par canal (e-mail et WhatsApp).</td><td><span class="chip wait">À fixer</span></td><td>Avant C3</td></tr>
+<tr><td class="n">9</td><td>Rotation de clé : le trousseau de production n'a qu'une clé ; ajouter une variable des clés précédentes ?</td><td><span class="chip wait">À décider</span></td><td>Avant la 1<sup>re</sup> rotation</td></tr>
+<tr><td class="n">10</td><td>Numéro WhatsApp réservable par une intégration jamais validée : libération après délai ou résolution des seules intégrations actives.</td><td><span class="chip wait">À décider</span></td><td>Avant C3</td></tr>
+<tr><td class="n">11</td><td>Enregistrer et vérifier le compte WhatsApp Business (<code>waba_id</code>) à la connexion.</td><td><span class="chip wait">À décider</span></td><td>Avant C3</td></tr>
+<tr><td class="n">12</td><td>ADR 010 (hébergeur) et ADR 012 (fournisseur IA) : toujours « Proposed », hors stack imposée.</td><td><span class="chip wait">Accord requis</span></td><td>Avant J47 / J58</td></tr>
+<tr><td class="n">13</td><td>Retrait de consentement : un « STOP » ne pose pas « ne plus contacter » (cohérent avec l'e-mail) : confirmer.</td><td><span class="chip wait">À confirmer</span></td><td>Avant le 1<sup>er</sup> envoi</td></tr>
+</table>
+
+<h3 style="font-size:10.5pt;margin:8px 0 3px;">B3. Accès, comptes et réponses externes</h3>
+<table>
+<tr><th class="n">#</th><th>Tâche</th><th style="width:15%">Statut</th><th style="width:19%">Échéance</th></tr>
+<tr><td class="n">14</td><td>Q2 : propriétaire et nom du domaine d'envoi (SPF, DKIM, DMARC). Aucun domaine pour l'instant.</td><td><span class="chip urg">Bloquant</span></td><td>Avant C3</td></tr>
+<tr><td class="n">15</td><td>Postmark : adresse d'expéditeur vérifiée (la saisie « toi@domaine.com » n'est pas valide), puis jeton du serveur dans l'écran des intégrations.</td><td><span class="chip urg">Bloquant</span></td><td>Avant C3</td></tr>
+<tr><td class="n">16</td><td>Meta : finir la configuration (nouveau jeton, secret de l'application, webhook public par tunnel, abonnement « messages », destinataire de test).</td><td><span class="chip part">En cours</span></td><td>Maintenant</td></tr>
+<tr><td class="n">17</td><td>Meta : remplacer le jeton temporaire (24 h) par un jeton d'utilisateur système de longue durée.</td><td><span class="chip wait">À faire</span></td><td>Avant C3</td></tr>
+<tr><td class="n">18</td><td>Q1 : documentation de l'API du CRM Fusion Leap (type, authentification, champs, webhooks, limites).</td><td><span class="chip wait">Sans réponse</span></td><td>Avant le connecteur CRM</td></tr>
+<tr><td class="n">19</td><td>Q5 : marché cible, région et politique de données (Supabase sans région Moyen-Orient listée).</td><td><span class="chip wait">Sans réponse</span></td><td>Avant la production</td></tr>
+<tr><td class="n">20</td><td>Vérifier la version <code>v25.0</code> de l'API Graph avant les envois réels.</td><td><span class="chip wait">À vérifier</span></td><td>C3</td></tr>
+</table>
+
+<h3 style="font-size:10.5pt;margin:8px 0 3px;">B4. Recette, conformité et exploitation</h3>
+<table>
+<tr><th class="n">#</th><th>Tâche</th><th style="width:15%">Statut</th><th style="width:19%">Échéance</th></tr>
+<tr><td class="n">21</td><td>Recette des phases 2 et 3 avec le guide de tests (107 cas), par une personne qui n'a pas écrit le code ; remplir la fiche de résultats.</td><td><span class="chip wait">À faire</span></td><td>Maintenant</td></tr>
+<tr><td class="n">22</td><td>Checkpoint C3 : test manuel e-mail et WhatsApp sur comptes officiels (envoi, réception, arrêt sûr).</td><td><span class="chip wait">À planifier</span></td><td>18 janv. 2027</td></tr>
+<tr><td class="n">23</td><td>Écrans contacts et consentement (J30b), fiche lead (J30c, J30d), boîte de réception (J37), réponses (J38), exploitation des envois (J39).</td><td><span class="chip wait">À réaliser</span></td><td>Avant G3</td></tr>
+<tr><td class="n">24</td><td>Retrait de consentement en texte libre : traitement humain dans la boîte ; réabonnement par une action auditée.</td><td><span class="chip wait">À prévoir</span></td><td>Avant le 1<sup>er</sup> envoi</td></tr>
+<tr><td class="n">25</td><td>Protection de la branche principale sur GitHub (non activée) ; test de base de données « conversations » instable une fois.</td><td><span class="chip wait">À surveiller</span></td><td>Continu</td></tr>
+<tr><td class="n">26</td><td>Purge des contenus conservés (événements de webhook, file de tri) et durée de conservation du journal d'audit.</td><td><span class="chip wait">À décider</span></td><td>J39 / J57</td></tr>
+<tr><td class="n">27</td><td>Effacement d'un contact qui a des messages (droit à l'effacement) : procédure d'anonymisation.</td><td><span class="chip wait">À décider</span></td><td>Avant le pilote</td></tr>
+<tr><td class="n">28</td><td>Réserver la palette et le logo aux administrateurs de la plateforme avant de vrais clients (condition de l'ADR 016).</td><td><span class="chip wait">À faire</span></td><td>Avant J54</td></tr>
+</table>
+
+<div class="note"><b>Prochain jalon : C3 (18 janvier 2027).</b> Il dépend des comptes réels : domaine d'envoi et Postmark pour l'e-mail, application Meta pour WhatsApp. Les lignes « Bloquant » sont celles qui font glisser ce jalon si elles ne sont pas levées.</div>
+
+<footer>Fusion Leap AI Growth · Document de suivi des tâches de la responsable technique · sources : docs/checkpoints, docs/adr, scripts/progress-report/data.json, PR #41 à #45.</footer>
+</body>
+</html>

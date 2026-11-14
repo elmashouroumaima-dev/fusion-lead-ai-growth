@@ -26,7 +26,9 @@
       "leads": "Leads",
       "deals": "Deals",
       "crmSync": "CRM",
-      "integrations": "Intégrations"
+      "integrations": "Intégrations",
+      "contacts": "Contacts",
+      "inbox": "Boîte de réception"
     },
     "sidebar": {
       "toggle": "Afficher ou masquer le menu latéral",
@@ -150,7 +152,28 @@
       "description": "Voici les prochaines étapes pour mettre votre équipe en place.",
       "members": "Gérer les membres",
       "membersHint": "Invitez des personnes et attribuez-leur un rôle.",
-      "noMembers": "La gestion des membres est réservée aux propriétaires et aux administrateurs."
+      "noMembers": "La gestion des membres est réservée aux propriétaires et aux administrateurs.",
+      "progress": "{done} étape(s) sur {total} terminée(s)",
+      "done": "Terminée",
+      "todo": "À faire",
+      "steps": {
+        "project": {
+          "title": "Créez votre premier projet",
+          "hint": "Un projet regroupe vos offres, leads et campagnes."
+        },
+        "lead": {
+          "title": "Ajoutez votre premier lead",
+          "hint": "Enregistrez un contact et commencez à le suivre."
+        },
+        "member": {
+          "title": "Invitez votre équipe",
+          "hint": "Attribuez un rôle à chaque personne."
+        },
+        "integration": {
+          "title": "Connectez un canal",
+          "hint": "E-mail ou WhatsApp, pour échanger avec vos leads."
+        }
+      }
     },
     "usage": {
       "title": "Utilisation du plan",
@@ -165,6 +188,30 @@
         "ai_runs": "Exécutions IA ce mois-ci",
         "integrations": "Intégrations"
       }
+    },
+    "greeting": {
+      "morning": "Bonjour",
+      "afternoon": "Bon après-midi",
+      "evening": "Bonsoir"
+    },
+    "stats": {
+      "title": "Chiffres clés",
+      "projects": "Projets",
+      "projectsHint": "Espaces de travail actifs",
+      "leads": "Prospects",
+      "leadsHint": "Personnes que vous suivez",
+      "dealsOpen": "Deals ouverts",
+      "dealsOpenHint": "Encore en cours",
+      "dealsWon": "Deals gagnés",
+      "dealsWonHint": "Conclus avec succès"
+    },
+    "quick": {
+      "title": "Actions rapides",
+      "description": "Accédez directement à ce que vous faites le plus.",
+      "project": "Nouveau projet",
+      "lead": "Voir les leads",
+      "member": "Inviter un membre",
+      "integration": "Connecter un canal"
     }
   },
   "Org": {
@@ -557,7 +604,8 @@
       "description": "Choisissez le type de projet, puis renseignez ses réglages.",
       "submit": "Créer le projet",
       "creating": "Création…",
-      "back": "Retour aux projets"
+      "back": "Retour aux projets",
+      "cancel": "Annuler"
     },
     "form": {
       "type": "Type de projet",
@@ -905,6 +953,418 @@
       "title": "Un problème est survenu",
       "description": "Votre demande n'a pas pu être traitée. Réessayez dans un instant.",
       "retry": "Réessayer"
+    }
+  },
+  "Contacts": {
+    "title": "Contacts",
+    "description": "Toutes les personnes que vous pouvez contacter, avec la preuve de leur consentement. Enregistrez ou retirez un consentement et bloquez un contact pour tout message futur.",
+    "search": {
+      "label": "Rechercher un contact",
+      "placeholder": "Nom, e-mail ou téléphone",
+      "submit": "Rechercher",
+      "reset": "Réinitialiser"
+    },
+    "count": "Résultats : {count}",
+    "empty": "Aucun contact pour l’instant.",
+    "emptyFiltered": "Aucun contact ne correspond à cette recherche.",
+    "table": {
+      "contact": "Contact",
+      "email": "E-mail",
+      "phone": "Téléphone",
+      "consent": "Consentement",
+      "doNotContact": "Ne plus contacter",
+      "created": "Créé le",
+      "open": "Ouvrir",
+      "openNamed": "Ouvrir {name}",
+      "unnamed": "Sans nom"
+    },
+    "status": {
+      "unknown": "Aucun consentement",
+      "granted": "Consentement donné",
+      "revoked": "Consentement retiré"
+    },
+    "dnc": {
+      "yes": "Bloqué",
+      "no": "Non"
+    },
+    "pagination": {
+      "label": "Pagination",
+      "previous": "Page précédente",
+      "next": "Page suivante",
+      "status": "Page {page} sur {pageCount}"
+    },
+    "detail": {
+      "back": "Retour aux contacts",
+      "identity": "Coordonnées",
+      "name": "Nom",
+      "email": "E-mail",
+      "phone": "Téléphone",
+      "language": "Langue",
+      "country": "Pays",
+      "created": "Créé le",
+      "status": "Statut du consentement",
+      "doNotContact": "Ne plus contacter",
+      "blocked": "Aucun message ne sera envoyé à ce contact.",
+      "notBlocked": "Ce contact peut être sollicité si un consentement valide existe.",
+      "notFound": "Ce contact est introuvable."
+    },
+    "history": {
+      "title": "Historique du consentement",
+      "description": "Chaque consentement est conservé avec sa preuve. Un retrait ne l’efface jamais.",
+      "empty": "Aucun consentement enregistré pour ce contact.",
+      "channel": "Canal",
+      "purpose": "Finalité",
+      "source": "Source",
+      "captured": "Enregistré le",
+      "state": "État",
+      "active": "Actif",
+      "revokedOn": "Retiré le {date}",
+      "proof": "Preuve",
+      "proofText": "Texte présenté",
+      "proofVersion": "Version",
+      "noProof": "Aucun texte de preuve enregistré"
+    },
+    "record": {
+      "title": "Enregistrer un consentement",
+      "description": "À utiliser quand un contact vous a donné son accord en dehors d’un formulaire (téléphone, en personne, papier). Indiquez comment il a été donné.",
+      "channel": "Canal",
+      "purpose": "Finalité",
+      "source": "Comment il a été donné",
+      "text": "Texte accepté par le contact",
+      "textHint": "Facultatif, 2000 caractères au plus.",
+      "version": "Version du texte",
+      "versionHint": "Facultatif, 50 caractères au plus.",
+      "submit": "Enregistrer le consentement",
+      "saving": "Enregistrement…",
+      "needEmail": "Ce contact n’a pas d’adresse e-mail : choisissez WhatsApp ou ajoutez-en une.",
+      "needPhone": "Ce contact n’a pas de téléphone : choisissez l’e-mail ou ajoutez-en un."
+    },
+    "revoke": {
+      "title": "Retirer un consentement",
+      "description": "Effet immédiat : les messages en attente pour ce canal ne sont pas envoyés.",
+      "channel": "Canal",
+      "purpose": "Finalité",
+      "allPurposes": "Toutes les finalités",
+      "alsoBlock": "Bloquer aussi ce contact pour tout message futur",
+      "submit": "Retirer le consentement",
+      "saving": "Enregistrement…"
+    },
+    "block": {
+      "title": "Ne plus contacter",
+      "descriptionOff": "Bloque tout message futur vers ce contact, quel que soit son consentement.",
+      "descriptionOn": "Ce contact est bloqué. Seul un propriétaire ou un administrateur peut lever le blocage.",
+      "set": "Bloquer ce contact",
+      "clear": "Lever le blocage",
+      "clearOnlyAdmin": "Seul un propriétaire ou un administrateur peut lever le blocage.",
+      "saving": "Enregistrement…"
+    },
+    "channels": {
+      "email": "E-mail",
+      "whatsapp": "WhatsApp"
+    },
+    "purposes": {
+      "marketing": "Marketing",
+      "newsletter": "Lettre d’information"
+    },
+    "sources": {
+      "manual": "Saisi à la main",
+      "phone": "Par téléphone",
+      "in_person": "En personne",
+      "paper_form": "Formulaire papier",
+      "web_form": "Formulaire web",
+      "csv_import": "Import CSV",
+      "other": "Autre"
+    },
+    "success": {
+      "consentRecorded": "Consentement enregistré.",
+      "consentRevoked": "Consentement retiré.",
+      "doNotContactSet": "Contact bloqué.",
+      "doNotContactCleared": "Blocage levé."
+    },
+    "errors": {
+      "invalid_input": "Certaines valeurs sont invalides. Vérifiez les champs.",
+      "forbidden": "Votre rôle ne permet pas cette action.",
+      "conflict": "Cette modification entre en conflit avec un autre contact.",
+      "not_found": "Ce contact est introuvable.",
+      "rate_limited": "Trop de tentatives. Réessayez dans un instant.",
+      "duplicate_request": "Cette demande a déjà été traitée.",
+      "idempotency_in_progress": "La demande est en cours de traitement.",
+      "idempotency_conflict": "Cette demande a déjà été envoyée avec d’autres valeurs. Rechargez la page.",
+      "service_unavailable": "Service momentanément indisponible. Réessayez plus tard.",
+      "generic": "Une erreur est survenue. Veuillez réessayer.",
+      "load": "Les contacts n’ont pas pu être chargés. Réessayez."
+    }
+  },
+  "Inbox": {
+    "title": "Boîte de réception",
+    "description": "Les conversations e-mail et WhatsApp dans une seule liste, la plus récemment active d’abord. La liste s’actualise toute seule toutes les 15 secondes.",
+    "ownOnlyHint": "Vous ne voyez que les conversations qui vous sont assignées.",
+    "filters": {
+      "label": "Filtrer les conversations",
+      "search": "Recherche",
+      "searchPlaceholder": "Nom, e-mail ou téléphone du contact",
+      "state": "État",
+      "channel": "Canal",
+      "assignee": "Responsable",
+      "all": "Tous",
+      "mine": "Assignées à moi",
+      "unassigned": "Non assignées",
+      "apply": "Appliquer",
+      "reset": "Réinitialiser"
+    },
+    "states": {
+      "open": "Ouverte",
+      "pending": "En attente",
+      "closed": "Fermée",
+      "to_triage": "À trier"
+    },
+    "channels": {
+      "email": "E-mail",
+      "whatsapp": "WhatsApp"
+    },
+    "count": "Résultats : {count}",
+    "empty": "Aucune conversation pour l’instant.",
+    "emptyFiltered": "Aucune conversation ne correspond à ces filtres.",
+    "row": {
+      "unnamed": "Contact inconnu",
+      "openNamed": "Ouvrir la conversation avec {name}",
+      "you": "Vous :",
+      "noMessage": "Aucun message pour l’instant."
+    },
+    "pagination": {
+      "label": "Pagination",
+      "previous": "Page précédente",
+      "next": "Page suivante",
+      "status": "Page {page} sur {pageCount}"
+    },
+    "thread": {
+      "back": "Retour à la boîte de réception",
+      "summary": "Conversation",
+      "channel": "Canal",
+      "stateLabel": "État",
+      "assigneeLabel": "Responsable",
+      "email": "E-mail",
+      "phone": "Téléphone",
+      "openContact": "Ouvrir la fiche du contact",
+      "messages": "Messages",
+      "empty": "Aucun message dans cette conversation.",
+      "older": "Messages plus anciens",
+      "newer": "Messages plus récents",
+      "sent": "Envoyé",
+      "received": "Reçu",
+      "saving": "Enregistrement…",
+      "assign": {
+        "label": "Responsable",
+        "none": "Aucun responsable (retour au tri)",
+        "submit": "Assigner"
+      },
+      "state": {
+        "label": "État",
+        "submit": "Changer l’état"
+      }
+    },
+    "status": {
+      "queued": "En file",
+      "accepted": "Accepté",
+      "sent": "Envoyé",
+      "delivered": "Livré",
+      "read": "Lu",
+      "failed": "Échec",
+      "bounced": "Rebond",
+      "cancelled": "Annulé",
+      "received": "Reçu"
+    },
+    "success": {
+      "assigned": "Conversation assignée.",
+      "unassigned": "Responsable retiré.",
+      "stateChanged": "État modifié."
+    },
+    "errors": {
+      "invalid_input": "Certaines valeurs sont invalides. Vérifiez les champs.",
+      "forbidden": "Votre rôle ne permet pas cette action sur cette conversation.",
+      "conflict": "Ce changement n’est pas possible (par exemple l’état ne correspond pas au responsable).",
+      "not_found": "Cette conversation est introuvable.",
+      "rate_limited": "Trop de tentatives. Réessayez dans un instant.",
+      "duplicate_request": "Cette demande a déjà été traitée.",
+      "idempotency_in_progress": "La demande est en cours de traitement.",
+      "idempotency_conflict": "Cette demande a déjà été envoyée avec d’autres valeurs. Rechargez la page.",
+      "service_unavailable": "Service momentanément indisponible. Réessayez plus tard.",
+      "generic": "Une erreur est survenue. Veuillez réessayer.",
+      "load": "Les conversations n’ont pas pu être chargées. Réessayez."
+    },
+    "reply": {
+      "label": "Votre réponse",
+      "placeholder": "Écrivez votre réponse par e-mail…",
+      "hint": "{count} / {max} caractères",
+      "send": "Envoyer la réponse",
+      "sending": "Mise en file…",
+      "lock": {
+        "other": "Un autre membre est en train de répondre à cette conversation. Vous pourrez répondre dès qu’il aura terminé.",
+        "ai": "L’assistant IA traite cette conversation. Reprenez la main pour répondre vous-même.",
+        "takeOver": "Reprendre la main"
+      },
+      "unsupported": "La réponse par WhatsApp n’est pas encore disponible : répondez depuis le canal e-mail.",
+      "readOnly": "Lecture seule : vous ne pouvez pas répondre à cette conversation.",
+      "info": "La réponse est envoyée par e-mail après un dernier contrôle (consentement, ne pas contacter, expéditeur). Elle apparaît d’abord « en file ».",
+      "success": {
+        "queued": "Réponse mise en file : elle sera envoyée dans un instant."
+      },
+      "errors": {
+        "conflict": "Réponse impossible : la conversation est tenue par un autre membre ou par l’IA, ou le canal n’est pas disponible.",
+        "forbidden": "Votre rôle ne permet pas de répondre à cette conversation.",
+        "not_found": "Cette conversation est introuvable.",
+        "rate_limited": "Trop de tentatives. Réessayez dans un instant.",
+        "invalid_input": "La réponse est vide, trop longue ou contient des caractères non autorisés.",
+        "generic": "Une erreur est survenue. Veuillez réessayer."
+      }
+    }
+  },
+  "Lead": {
+    "back": "Retour aux leads",
+    "summary": {
+      "title": "Résumé",
+      "stage": "Étape",
+      "assignee": "Responsable",
+      "source": "Source",
+      "project": "Projet",
+      "created": "Créé le"
+    },
+    "contact": {
+      "title": "Contact",
+      "email": "E-mail",
+      "phone": "Téléphone",
+      "open": "Ouvrir la fiche du contact",
+      "unavailable": "Les coordonnées ne sont pas accessibles à votre rôle.",
+      "unnamed": "Sans nom"
+    },
+    "next": {
+      "title": "Prochaine action",
+      "none": "Aucune tâche ouverte pour ce lead.",
+      "noDue": "Sans échéance",
+      "untitled": "Tâche sans titre"
+    },
+    "deals": {
+      "title": "Deals",
+      "none": "Aucun deal pour ce lead.",
+      "description": "Créez un deal, déplacez-le entre les étapes ou clôturez-le comme gagné ou perdu.",
+      "expectedClose": "Clôture prévue : {date}",
+      "won": "Gagné",
+      "lost": "Perdu",
+      "move": {
+        "label": "Déplacer le deal vers une étape",
+        "submit": "Déplacer"
+      },
+      "new": {
+        "title": "Nouveau deal",
+        "value": "Valeur",
+        "currency": "Devise",
+        "close": "Date de clôture prévue",
+        "stage": "Étape de départ",
+        "submit": "Créer le deal"
+      }
+    },
+    "form": {
+      "title": "Ajouter à la chronologie",
+      "description": "Enregistrez une note, un appel ou une tâche. Les entrées sont conservées telles quelles : seules les tâches évoluent ensuite.",
+      "type": "Type d’entrée",
+      "kinds": {
+        "note": "Note",
+        "call": "Appel",
+        "task": "Tâche"
+      },
+      "noteText": "Note",
+      "optionalText": "Détails (facultatif)",
+      "outcome": "Résultat",
+      "duration": "Durée (minutes)",
+      "taskTitle": "Tâche",
+      "dueDate": "Échéance",
+      "submit": {
+        "note": "Ajouter la note",
+        "call": "Enregistrer l’appel",
+        "task": "Ajouter la tâche"
+      },
+      "saving": "Enregistrement…"
+    },
+    "outcomes": {
+      "answered": "Répondu",
+      "no_answer": "Sans réponse",
+      "voicemail": "Messagerie",
+      "busy": "Occupé",
+      "wrong_number": "Mauvais numéro"
+    },
+    "entry": {
+      "note": "Note",
+      "call": "Appel",
+      "email": "E-mail",
+      "meeting": "Rendez-vous",
+      "task": "Tâche",
+      "stage_change": "Changement d’étape",
+      "assignment": "Changement de responsable"
+    },
+    "task": {
+      "open": "À faire",
+      "doneOn": "Faite le {date}",
+      "markDone": "Marquer comme faite",
+      "reopen": "Rouvrir"
+    },
+    "timeline": {
+      "title": "Chronologie",
+      "description": "La plus récente d’abord. Les changements d’étape et de responsable sont enregistrés automatiquement.",
+      "empty": "Rien d’enregistré pour ce lead pour l’instant.",
+      "automatic": "Automatique",
+      "system": "Système",
+      "by": "par {who}",
+      "minutes": "{minutes} min",
+      "due": "Échéance : {date}",
+      "to": "vers",
+      "dealPrefix": "Deal :",
+      "unknownStage": "Étape inconnue",
+      "latest": "Affichage des {count} entrées les plus récentes."
+    },
+    "readOnly": "Votre rôle peut lire ce lead mais pas le modifier.",
+    "success": {
+      "noteAdded": "Note ajoutée.",
+      "callAdded": "Appel enregistré.",
+      "taskAdded": "Tâche ajoutée.",
+      "taskDone": "Tâche marquée comme faite.",
+      "taskReopened": "Tâche rouverte."
+    },
+    "errors": {
+      "invalid_input": "Certaines valeurs sont invalides. Vérifiez les champs.",
+      "forbidden": "Votre rôle ne permet pas cette action sur ce lead.",
+      "quota_exceeded": "Votre abonnement ne le permet pas pour le moment. Contactez l’administrateur de la plateforme.",
+      "conflict": "Ce lead ne peut pas être modifié (projet archivé ou trop d’entrées).",
+      "not_found": "Ce lead est introuvable.",
+      "rate_limited": "Trop de tentatives. Réessayez dans un instant.",
+      "duplicate_request": "Cette demande a déjà été traitée.",
+      "idempotency_in_progress": "La demande est en cours de traitement.",
+      "idempotency_conflict": "Cette demande a déjà été envoyée avec d’autres valeurs. Rechargez la page.",
+      "service_unavailable": "Service momentanément indisponible. Réessayez plus tard.",
+      "generic": "Une erreur est survenue. Veuillez réessayer.",
+      "load": "Le lead n’a pas pu être chargé. Réessayez."
+    },
+    "manage": {
+      "title": "Gérer ce lead",
+      "description": "Faites avancer le lead dans votre pipeline et choisissez qui le suit. Chaque changement apparaît dans la chronologie.",
+      "stage": {
+        "label": "Étape du lead",
+        "submit": "Changer d’étape"
+      },
+      "assign": {
+        "label": "Responsable",
+        "none": "Aucun responsable (retour dans la file des non assignés)",
+        "submit": "Assigner"
+      },
+      "saving": "Enregistrement…",
+      "success": {
+        "leadMoved": "Étape modifiée.",
+        "assigned": "Lead assigné.",
+        "unassigned": "Responsable retiré.",
+        "dealCreated": "Deal créé.",
+        "dealMoved": "Deal déplacé.",
+        "dealWon": "Deal marqué comme gagné.",
+        "dealLost": "Deal marqué comme perdu."
+      }
     }
   }
 }

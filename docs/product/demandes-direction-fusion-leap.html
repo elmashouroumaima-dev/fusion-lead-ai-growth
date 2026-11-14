@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Demandes à la direction et aux partenaires de Fusion Leap</title>
+<style>
+@page { size: A4; margin: 15mm 14mm; }
+:root { --ink:#17201a; --mut:#5d6a5c; --line:#d9dfd0; --brand:#2e7d1e; --soft:#f3f6ec; --acc:#8bd43a; --warn:#b26a00; --warnbg:#fff6e5; --red:#b3261e; --redbg:#fdf0ee; }
+* { box-sizing: border-box; }
+body { margin:0; font-family: "Segoe UI", Tahoma, Arial, sans-serif; color:var(--ink); font-size:10pt; line-height:1.5; }
+header { background:linear-gradient(135deg,#eaf6d8,#fff); border:1px solid var(--line); border-radius:12px; padding:14px 18px; margin-bottom:10px; }
+.pill { display:inline-block; font-size:8.5pt; background:var(--acc); color:#10200a; border-radius:20px; padding:1px 11px; font-weight:600; }
+h1 { font-size:19pt; margin:6px 0 2px; line-height:1.2; }
+.lead { color:var(--mut); margin:0; }
+h2 { font-size:12.5pt; margin:14px 0 5px; color:var(--brand); border-inline-start:5px solid var(--acc); padding-inline-start:9px; break-after:avoid; }
+.req { border:1px solid var(--line); border-radius:10px; margin:7px 0; padding:8px 12px; break-inside:avoid; }
+.req h3 { margin:0 0 3px; font-size:10.5pt; display:flex; gap:8px; align-items:baseline; }
+.req h3 .n { color:var(--brand); }
+.chip { display:inline-block; border-radius:9px; padding:0 8px; font-size:8pt; font-weight:600; white-space:nowrap; }
+.urg { background:var(--redbg); color:var(--red); } .soon { background:var(--warnbg); color:var(--warn); } .later { background:#e6eefc; color:#1f3f8a; }
+dl { margin:3px 0; display:grid; grid-template-columns:7.5em 1fr; gap:1px 8px; font-size:9.3pt; }
+dt { color:var(--mut); font-weight:600; } dd { margin:0; }
+.msg { background:var(--soft); border-inline-start:3px solid var(--acc); border-radius:4px; padding:4px 9px; margin-top:4px; font-size:9pt; }
+.box { display:inline-block; width:10px; height:10px; border:1.3px solid var(--mut); border-radius:2px; margin-inline-end:4px; vertical-align:-1px; }
+table { width:100%; border-collapse:collapse; margin:4px 0 8px; font-size:9pt; }
+th, td { border:1px solid var(--line); padding:3.5px 7px; text-align:left; vertical-align:top; }
+th { background:var(--soft); font-size:8.5pt; }
+footer { margin-top:12px; color:var(--mut); font-size:8pt; border-top:1px solid var(--line); padding-top:5px; }
+</style>
+</head>
+<body>
+<header>
+  <span class="pill">À obtenir de la direction et des partenaires · 13 novembre 2026</span>
+  <h1>Demandes à la direction et aux partenaires de Fusion Leap</h1>
+  <p class="lead">Ce qui manque à l'équipe technique et qu'elle ne peut pas décider ni créer seule. Pour chaque point : la question précise, ce que la réponse débloque, l'échéance et un message prêt à envoyer.</p>
+</header>
+
+<h2>Résumé : 10 demandes</h2>
+<table>
+<tr><th style="width:4%">#</th><th>Demande</th><th style="width:20%">À qui</th><th style="width:16%">Échéance</th><th style="width:11%">Priorité</th></tr>
+<tr><td>1</td><td>Domaine d'envoi des e-mails (SPF, DKIM, DMARC) et adresse d'expéditeur</td><td>Propriétaire du domaine</td><td>Avant C3 (18 janv.)</td><td><span class="chip urg">Bloquant</span></td></tr>
+<tr><td>2</td><td>Compte WhatsApp Business officiel et numéro réel (production)</td><td>Direction / propriétaire du produit</td><td>Avant C3</td><td><span class="chip urg">Bloquant</span></td></tr>
+<tr><td>3</td><td>Documentation de l'API du CRM Fusion Leap (ou confirmation du CRM interne)</td><td>Équipe du CRM Fusion Leap</td><td>Avant le connecteur CRM</td><td><span class="chip soon">Important</span></td></tr>
+<tr><td>4</td><td>Premier marché, devise, protection des données, facturation</td><td>Direction</td><td>Avant la production</td><td><span class="chip soon">Important</span></td></tr>
+<tr><td>5</td><td>Accord sur l'hébergeur (web, worker, base) et ouverture des comptes payants</td><td>Direction</td><td>Avant J58</td><td><span class="chip soon">Important</span></td></tr>
+<tr><td>6</td><td>Accord sur le fournisseur d'IA, clé d'API et conditions d'usage des données</td><td>Direction</td><td>Avant J47</td><td><span class="chip soon">Important</span></td></tr>
+<tr><td>7</td><td>Valeurs des plans d'abonnement, fin d'essai et impayés</td><td>Propriétaire du produit</td><td>Avant le pilote</td><td><span class="chip soon">Important</span></td></tr>
+<tr><td>8</td><td>Textes légaux : consentement, politique de confidentialité, identité de l'expéditeur</td><td>Direction / juridique</td><td>Avant le 1<sup>er</sup> envoi marketing</td><td><span class="chip soon">Important</span></td></tr>
+<tr><td>9</td><td>Personnes pour la recette et numéros de test WhatsApp</td><td>Direction</td><td>Maintenant</td><td><span class="chip soon">Important</span></td></tr>
+<tr><td>10</td><td>Salla : confirmer le mode marketing seul (pas de boutique réelle)</td><td>Propriétaire du produit</td><td>Avant J55</td><td><span class="chip later">À confirmer</span></td></tr>
+</table>
+
+<h2>Détail et messages prêts à envoyer</h2>
+
+<div class="req">
+  <h3><span class="n">1</span> Domaine d'envoi des e-mails <span class="chip urg">Bloquant</span></h3>
+  <dl>
+    <dt>À demander</dt><dd><span class="box"></span>Qui possède le nom de domaine de l'entreprise ? <span class="box"></span>Un accès pour ajouter des enregistrements DNS (SPF, DKIM, DMARC). <span class="box"></span>L'adresse d'expéditeur à utiliser (par exemple ventes@votre-domaine). <span class="box"></span>Accord pour un compte Postmark payant après la phase d'essai.</dd>
+    <dt>Débloque</dt><dd>Premier e-mail réel et test de réception au checkpoint C3 ; sans domaine vérifié, le compte Postmark reste en mode test (envoi limité au même domaine).</dd>
+    <dt>Plan B</dt><dd>Tester seulement entre adresses du même domaine ; aucun envoi réel à d'autres personnes.</dd>
+  </dl>
+  <div class="msg">« Pour envoyer de vrais e-mails depuis la plateforme, il me faut le nom de domaine de l'entreprise et un accès DNS (ou quelqu'un qui peut ajouter 3 enregistrements : SPF, DKIM, DMARC), ainsi que l'adresse d'expéditeur souhaitée. Sans cela, nous restons en mode test. Peux-tu me dire qui gère le domaine ? »</div>
+</div>
+
+<div class="req">
+  <h3><span class="n">2</span> Compte WhatsApp Business officiel et numéro réel <span class="chip urg">Bloquant</span></h3>
+  <dl>
+    <dt>À demander</dt><dd><span class="box"></span>Qui est administrateur du compte Meta Business de l'entreprise ? <span class="box"></span>Vérification d'entreprise Meta (documents légaux). <span class="box"></span>Un numéro de téléphone dédié, non utilisé dans l'application WhatsApp. <span class="box"></span>Un moyen de paiement pour la facturation des conversations Meta. <span class="box"></span>Chaque entreprise cliente connecte-t-elle son propre compte, ou Fusion Leap fournit-elle un numéro géré (question Q3) ?</dd>
+    <dt>Débloque</dt><dd>Envoi réel au-delà des 5 destinataires de test, jeton de longue durée (utilisateur système), modèles de message approuvés par Meta.</dd>
+    <dt>Plan B</dt><dd>Numéro de test de Meta (déjà obtenu) : 5 destinataires, modèles d'exemple.</dd>
+  </dl>
+  <div class="msg">« Pour passer du numéro de test WhatsApp à un numéro réel, il faut l'administrateur du compte Meta Business, la vérification d'entreprise (documents légaux), un numéro dédié et un moyen de paiement. Peux-tu me mettre en relation avec la personne qui gère le compte Meta, et me dire si chaque client connecte son propre compte ou si nous fournissons un numéro ? »</div>
+</div>
+
+<div class="req">
+  <h3><span class="n">3</span> Documentation de l'API du CRM Fusion Leap <span class="chip soon">Important</span></h3>
+  <dl>
+    <dt>À demander</dt><dd><span class="box"></span>Quel CRM utilise Fusion Leap aujourd'hui ? <span class="box"></span>Documentation de l'API : authentification, champs des leads et des deals, webhooks, limites de débit, environnement de test. <span class="box"></span>Ou confirmation que le CRM interne de la plateforme et l'import CSV suffisent pour la première version.</dd>
+    <dt>Débloque</dt><dd>Un connecteur CRM réel avec règles de conflit documentées ; pas de synchronisation dans les deux sens sans ces règles.</dd>
+    <dt>Plan B</dt><dd>CRM interne comme source de vérité, import et export CSV (déjà livrés).</dd>
+  </dl>
+  <div class="msg">« Existe-t-il une API stable pour le CRM de Fusion Leap ? Si oui, peux-tu m'envoyer la documentation (authentification, champs lead et deal, webhooks, limites) et un accès de test ? Sinon, peux-tu confirmer que le CRM interne de la plateforme avec import CSV suffit pour la première version ? »</div>
+</div>
+
+<div class="req">
+  <h3><span class="n">4</span> Premier marché, devise, protection des données <span class="chip soon">Important</span></h3>
+  <dl>
+    <dt>À demander</dt><dd><span class="box"></span>Premier pays cible et langues prioritaires. <span class="box"></span>Devise et règles de TVA. <span class="box"></span>Règles de protection des données applicables (RGPD, PDPL en Arabie saoudite, loi marocaine). <span class="box"></span>Région d'hébergement des données.</dd>
+    <dt>Débloque</dt><dd>Choix de la région de la base, durées de conservation, mentions légales de consentement, facturation.</dd>
+  </dl>
+  <div class="msg">« Quel est le premier marché visé (pays, devise, langue) et quelles règles de protection des données devons-nous respecter ? J'en ai besoin pour choisir la région d'hébergement et les durées de conservation. »</div>
+</div>
+
+<div class="req">
+  <h3><span class="n">5</span> Hébergeur et comptes payants <span class="chip soon">Important</span></h3>
+  <dl>
+    <dt>À demander</dt><dd><span class="box"></span>Accord explicite sur l'hébergeur de l'application web et du worker, et sur Supabase cloud (staging puis production) : ces choix sont hors de la stack imposée (ADR 010, statut « proposé »). <span class="box"></span>Budget mensuel et titulaire des comptes.</dd>
+    <dt>Débloque</dt><dd>Environnement de staging public (aussi nécessaire pour les webhooks Meta et Postmark sans tunnel), recette finale, pilote.</dd>
+  </dl>
+  <div class="msg">« J'ai besoin de ton accord et d'un budget pour l'hébergement (application web, worker, base Supabase cloud) afin de créer un environnement de staging. Peux-tu valider l'hébergeur proposé et créer les comptes au nom de l'entreprise ? »</div>
+</div>
+
+<div class="req">
+  <h3><span class="n">6</span> Fournisseur d'IA <span class="chip soon">Important</span></h3>
+  <dl>
+    <dt>À demander</dt><dd><span class="box"></span>Accord sur le fournisseur (ADR 012, statut « proposé », hors stack imposée). <span class="box"></span>Clé d'API au nom de l'entreprise et plafond de dépense. <span class="box"></span>Conditions d'usage : rétention des données, autorisation d'envoyer des données de clients à un modèle externe (aujourd'hui : jamais de données réelles).</dd>
+    <dt>Débloque</dt><dd>Agents IA (brouillons, qualification, réponses proposées) à partir de J47.</dd>
+  </dl>
+  <div class="msg">« Pour les agents IA, il me faut ton accord sur le fournisseur, une clé d'API au nom de l'entreprise avec un plafond de dépense, et ta position sur l'envoi de données de clients à un modèle externe (aujourd'hui nous n'envoyons que des données de test). »</div>
+</div>
+
+<div class="req">
+  <h3><span class="n">7</span> Plans d'abonnement <span class="chip soon">Important</span></h3>
+  <dl>
+    <dt>À demander</dt><dd><span class="box"></span>Les vraies limites de chaque plan (utilisateurs, projets, contacts, messages par mois, exécutions d'IA, intégrations) : les valeurs actuelles sont provisoires. <span class="box"></span>Que se passe-t-il en cas d'impayé et à la fin de l'essai ? <span class="box"></span>Fournisseur de facturation, devise et taxes (avant tout paiement en libre-service).</dd>
+    <dt>Débloque</dt><dd>Quotas réalistes, comportement des statuts « impayé » et « suspendu », facturation du pilote.</dd>
+  </dl>
+  <div class="msg">« Peux-tu me donner les limites et les prix des plans (utilisateurs, projets, contacts, messages par mois), ce qui se passe à la fin de l'essai et en cas d'impayé ? Les valeurs actuelles sont provisoires. »</div>
+</div>
+
+<div class="req">
+  <h3><span class="n">8</span> Textes légaux et identité de l'expéditeur <span class="chip soon">Important</span></h3>
+  <dl>
+    <dt>À demander</dt><dd><span class="box"></span>Texte de consentement marketing (e-mail et WhatsApp). <span class="box"></span>Politique de confidentialité et conditions d'utilisation (liens affichés sur la page de désabonnement). <span class="box"></span>Raison sociale et adresse à afficher dans les e-mails. <span class="box"></span>Durées de conservation et procédure d'effacement d'un contact.</dd>
+    <dt>Débloque</dt><dd>Premier envoi marketing conforme (désabonnement, retrait par « STOP », preuve de consentement).</dd>
+  </dl>
+  <div class="msg">« Avant le premier envoi marketing, il me faut le texte de consentement, la politique de confidentialité, la raison sociale et l'adresse à afficher, et la durée de conservation des données. Peux-tu les faire valider par la personne compétente ? »</div>
+</div>
+
+<div class="req">
+  <h3><span class="n">9</span> Recette et numéros de test <span class="chip soon">Important</span></h3>
+  <dl>
+    <dt>À demander</dt><dd><span class="box"></span>Une personne qui n'a pas écrit le code pour exécuter le guide de tests (107 cas) et remplir la fiche de résultats. <span class="box"></span>Jusqu'à 5 numéros de téléphone volontaires pour recevoir les messages de test de Meta.</dd>
+    <dt>Débloque</dt><dd>Validation des phases 2 et 3 et test de bout en bout de WhatsApp.</dd>
+  </dl>
+  <div class="msg">« Peux-tu désigner une personne pour tester la plateforme avec un guide pas à pas (environ une demi-journée), et me donner jusqu'à 5 numéros WhatsApp volontaires pour recevoir des messages de test ? »</div>
+</div>
+
+<div class="req">
+  <h3><span class="n">10</span> Salla <span class="chip later">À confirmer</span></h3>
+  <dl>
+    <dt>À demander</dt><dd><span class="box"></span>Confirmer que le premier lot ne connecte aucune boutique réelle (marketing d'applications et de thèmes seulement). <span class="box"></span>Si une boutique réelle est voulue : compte partenaire Salla et autorisations nécessaires.</dd>
+    <dt>Débloque</dt><dd>Périmètre de J54 et J55.</dd>
+  </dl>
+  <div class="msg">« Pour Salla, restons-nous sur le marketing de nos applications et thèmes, sans connecter de boutique réelle pour cette première version ? »</div>
+</div>
+
+<footer>Fusion Leap AI Growth · Demandes à la direction et aux partenaires · sources : plan de développement §6, questions Q1 à Q5, checkpoints C0 à C2, rapport d'avancement. Les messages sont des propositions à adapter.</footer>
+</body>
+</html>

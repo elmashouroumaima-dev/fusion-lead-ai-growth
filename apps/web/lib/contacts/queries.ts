@@ -84,3 +84,40 @@ export async function listConsentEvents(supabase: ServerSupabase, organizationId
   if (error) throw new Error("consent_lookup_failed");
   return parseRows(data, consentEventRowSchema);
 }
+
+export type ContactPage = { rows: ContactRow[]; total: number; page: number; pageSize: number; pageCount: number };
+
+/**
+ * Une page de contacts (25 par page), recherchée côté serveur par `search_contacts` (nom, e-mail, téléphone ; SECURITY INVOKER :
+ * la RLS de l'appelant décide de ce qui est visible). La saisie n'est jamais un motif : la fonction échappe `%`, `_` et `\`.
+ */
+export const CONTACTS_LIST_PAGE_SIZE = 25;
+
+export async function searchContacts(
+  supabase: ServerSupabase,
+  organizationId: string,
+  query: string | null,
+  page: number,
+): Promise<ContactPage> {
+  const run = async (limit: number, offset: number) => {
+    const { data, error } = await supabase.rpc("search_contacts", { p_org: organizationId, p_query: query, p_limit: limit, p_offset: offset });
+    if (error || !Array.isArray(data)) throw new Error("contacts_search_failed");
+    return data.map((row: unknown) => {
+      const { total_count: totalCount, ...contact } = (row ?? {}) as Record<string, unknown>;
+      const parsed = contactRowSchema.safeParse(contact);
+      if (!parsed.success || typeof totalCount !== "number") throw new Error("rows_unreadable");
+      return { contact: parsed.data, total: totalCount };
+    });
+  };
+  const safePage = Number.isInteger(page) && page >= 1 ? page : 1;
+  const rows = await run(CONTACTS_LIST_PAGE_SIZE, (safePage - 1) * CONTACTS_LIST_PAGE_SIZE);
+  let total = rows[0]?.total ?? 0;
+  if (rows.length === 0 && safePage > 1) total = (await run(1, 0))[0]?.total ?? 0;
+  return {
+    rows: rows.map((row) => row.contact),
+    total,
+    page: safePage,
+    pageSize: CONTACTS_LIST_PAGE_SIZE,
+    pageCount: Math.max(1, Math.ceil(total / CONTACTS_LIST_PAGE_SIZE)),
+  };
+}

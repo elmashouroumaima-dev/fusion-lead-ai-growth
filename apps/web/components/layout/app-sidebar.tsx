@@ -3,6 +3,8 @@
 import {
   ChevronDownIcon,
   CircleUserIcon,
+  InboxIcon,
+  ContactRoundIcon,
   FolderKanbanIcon,
   KanbanSquareIcon,
   PlugIcon,
@@ -35,8 +37,8 @@ import {
 import { Link, usePathname } from "../../i18n/navigation";
 
 type NavItem = {
-  href: "/dashboard" | "/projects" | "/leads" | "/deals" | "/crm" | "/members" | "/admin/organizations" | "/integrations";
-  labelKey: "dashboard" | "projects" | "leads" | "deals" | "crmSync" | "members" | "admin" | "integrations";
+  href: "/dashboard" | "/projects" | "/leads" | "/contacts" | "/inbox" | "/deals" | "/crm" | "/members" | "/admin/organizations" | "/integrations";
+  labelKey: "dashboard" | "projects" | "leads" | "contacts" | "inbox" | "deals" | "crmSync" | "members" | "admin" | "integrations";
   icon: typeof UsersIcon;
 };
 
@@ -58,6 +60,8 @@ const isCurrent = (pathname: string, href: string): boolean =>
 export function AppSidebar({
   showMembers,
   showCrm = false,
+  showContacts = false,
+  showInbox = false,
   showCrmSync = false,
   showSettings = false,
   showAdmin = false,
@@ -65,6 +69,10 @@ export function AppSidebar({
   showMembers: boolean;
   /** « Leads » et « Deals » : rôles qui peuvent lire les leads (commodité d'affichage ; les pages et la RLS décident). */
   showCrm?: boolean;
+  /** « Contacts » : owner, admin et marketing (commodité d'affichage ; la page et la RLS décident). */
+  showContacts?: boolean;
+  /** « Boîte de réception » : owner, admin et commercial (commodité d'affichage ; la page et la RLS décident). */
+  showInbox?: boolean;
   /** « CRM » (synchronisation) et « Intégrations » : owner et admin (commodité d'affichage ; la page et la base décident). */
   showCrmSync?: boolean;
   showSettings?: boolean;
@@ -76,9 +84,11 @@ export function AppSidebar({
   const items: NavItem[] = [
     { href: "/dashboard", labelKey: "dashboard", icon: LayoutDashboardIcon },
     { href: "/projects", labelKey: "projects", icon: FolderKanbanIcon },
+    ...(showInbox ? [{ href: "/inbox", labelKey: "inbox", icon: InboxIcon } satisfies NavItem] : []),
     ...(showCrm
       ? [
           { href: "/leads", labelKey: "leads", icon: TargetIcon } satisfies NavItem,
+          ...(showContacts ? [{ href: "/contacts", labelKey: "contacts", icon: ContactRoundIcon } satisfies NavItem] : []),
           { href: "/deals", labelKey: "deals", icon: KanbanSquareIcon } satisfies NavItem,
         ]
       : []),
@@ -184,7 +194,7 @@ export function AppSidebar({
                               <SidebarMenuSubButton
                                 asChild
                                 isActive={active}
-                                className="text-muted-foreground hover:text-foreground data-[active=true]:bg-primary/10 data-[active=true]:text-primary-text relative h-9 translate-x-0 gap-2.5 rounded-md px-3 text-sm font-normal data-[active=true]:font-medium data-[active=true]:before:absolute data-[active=true]:before:-start-[9px] data-[active=true]:before:inset-y-1.5 data-[active=true]:before:w-0.5 data-[active=true]:before:rounded-full data-[active=true]:before:bg-primary data-[active=true]:before:content-['']"
+                                className="text-muted-foreground hover:text-foreground data-[active=true]:bg-brand/15 data-[active=true]:text-primary-text relative h-9 translate-x-0 gap-2.5 rounded-md px-3 text-sm font-normal data-[active=true]:font-medium data-[active=true]:before:absolute data-[active=true]:before:-start-[9px] data-[active=true]:before:inset-y-1.5 data-[active=true]:before:w-0.5 data-[active=true]:before:rounded-full data-[active=true]:before:bg-brand data-[active=true]:before:content-['']"
                               >
                                 <Link href={link.href} aria-current={active ? "page" : undefined}>
                                   <link.icon aria-hidden="true" />

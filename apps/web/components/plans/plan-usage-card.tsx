@@ -4,6 +4,13 @@ import { Alert } from "@/components/ui/alert";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import type { AuthLocale, UsageRow } from "@fusion-leap/domain";
 
+/** Couleur de la barre : vert sous 70 %, ambre jusqu'à 90 %, rouge au-delà (le texte et `near_limit` portent aussi l'information). */
+function toneClass(percent: number): string {
+  if (percent >= 90) return "bg-destructive";
+  if (percent >= 70) return "bg-amber-500";
+  return "bg-brand";
+}
+
 /**
  * Utilisation du plan (owner / admin) : une barre par métrique limitée, avertissement dès 80 % (`near_limit`),
  * blocage signalé à 100 %. Les métriques sans limite ne sont pas affichées.
@@ -50,9 +57,9 @@ export async function PlanUsageCard({ rows, locale }: { rows: UsageRow[]; locale
                   aria-valuemax={limit}
                   aria-valuenow={Math.min(row.used, limit)}
                   aria-label={t(`usage.metrics.${row.metric}`)}
-                  className="bg-muted h-2 overflow-hidden rounded-full"
+                  className="bg-muted h-2.5 overflow-hidden rounded-full"
                 >
-                  <div className={row.near_limit ? "bg-destructive h-full" : "bg-primary h-full"} style={{ width: `${percent}%` }} />
+                  <div className={`h-full rounded-full transition-all ${toneClass(percent)}`} style={{ width: `${percent}%` }} />
                 </div>
               </li>
             );

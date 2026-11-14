@@ -7,48 +7,50 @@
 @custom-variant dark (&:is(.dark *));
 
 /*
- * Jetons de design repris du projet ONMD (ADR 015), ajustés pour le contraste AA (clair ET sombre) :
+ * Jetons de design repris du projet ONMD (ADR 015, design Mintlify : noir et vert, depuis le 2026-11-14), ajustés pour le contraste AA (clair ET sombre) :
  * destructive clair plus foncé, muted-foreground clair plus foncé, anneau de focus plus clair en sombre.
  * --destructive-text : texte d'erreur (>= 4.5:1 dans les deux thèmes) ; --destructive reste le FOND des boutons.
  * --input : bordure des champs (>= 3:1 contre le fond, WCAG 1.4.11) ; --border reste clair (bordures décoratives).
  */
 :root {
   --background: #ffffff;
-  --foreground: #09090b;
-  --card: #f9fafb;
-  --card-foreground: #09090b;
+  --foreground: #0a0a0a;
+  --card: #ffffff;
+  --card-foreground: #0a0a0a;
   --popover: #ffffff;
-  --popover-foreground: #09090b;
-  --primary: #006a4e;
+  --popover-foreground: #0a0a0a;
+  --primary: #0a0a0a;
   --primary-foreground: #ffffff;
-  --secondary: #ae2b2f;
-  --secondary-foreground: #ffffff;
-  --muted: #f4f4f5;
-  --muted-foreground: #52525b;
-  --accent: #f4f4f5;
-  --accent-foreground: #18181b;
+  --brand: #00d4a4;
+  --brand-foreground: #0a0a0a;
+  --secondary: #f1f1f1;
+  --secondary-foreground: #0a0a0a;
+  --muted: #f7f7f7;
+  --muted-foreground: #5a5a5c;
+  --accent: #f2f2f2;
+  --accent-foreground: #0a0a0a;
   --destructive: #dc2626;
   --destructive-foreground: #ffffff;
   --destructive-text: #b91c1c;
   --success: #15803d;
   --success-foreground: #ffffff;
-  --border: #e4e4e7;
-  --input: #8a8a93;
-  --ring: #006a4e;
-  --chart-1: #006a4e;
-  --chart-2: #ae2b2f;
-  --chart-3: #008000;
-  --chart-4: #c00000;
-  --chart-5: #d04a4e;
-  --sidebar: #f9fafb;
-  --sidebar-foreground: #09090b;
-  --sidebar-primary: #006a4e;
+  --border: #e5e5e5;
+  --input: #8a8a8a;
+  --ring: #00836a;
+  --chart-1: #00b48a;
+  --chart-2: #3772cf;
+  --chart-3: #c37d0d;
+  --chart-4: #d45656;
+  --chart-5: #7cebcb;
+  --sidebar: #fafafa;
+  --sidebar-foreground: #0a0a0a;
+  --sidebar-primary: #0a0a0a;
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #f4f4f5;
-  --sidebar-accent-foreground: #18181b;
-  --sidebar-border: #e4e4e7;
-  --sidebar-ring: #006a4e;
-  --radius: 0.5rem;
+  --sidebar-accent: #f0f0f0;
+  --sidebar-accent-foreground: #0a0a0a;
+  --sidebar-border: #e5e5e5;
+  --sidebar-ring: #00836a;
+  --radius: 0.75rem;
   --shadow-2xs: 0px 4px 8px -2px hsl(0 0% 0% / 0.05);
   --shadow-xs: 0px 4px 8px -2px hsl(0 0% 0% / 0.05);
   --shadow-sm: 0px 4px 8px -2px hsl(0 0% 0% / 0.1), 0px 1px 2px -3px hsl(0 0% 0% / 0.1);
@@ -58,52 +60,54 @@
   --shadow-xl: 0px 4px 8px -2px hsl(0 0% 0% / 0.1), 0px 8px 10px -3px hsl(0 0% 0% / 0.1);
   --shadow-2xl: 0px 4px 8px -2px hsl(0 0% 0% / 0.25);
 
-  /* Dégradé de marque des pages publiques (bleu -> turquoise -> vert, fond de connexion ONMD). */
-  --brand-gradient: linear-gradient(to bottom right, #1e3a8a, #14b8a6, #10b981);
+  /* Dégradé de marque des pages publiques (indigo -> violet -> bleu ciel). */
+  --brand-gradient: linear-gradient(to bottom right, #0a0a0a, #1a3d4a, #00b48a);
 
   /* Texte « primaire » lisible sur le fond courant (liens, boutons fantômes). */
-  --primary-text-color: #006a4e;
+  --primary-text-color: #00775f;
 
-  /* Polices : Poppins (latin). Cairo n'est chargé que sur la locale arabe, qui inverse l'ordre (voir plus bas). */
-  --font-app: var(--font-poppins), system-ui, sans-serif;
+  /* Polices : Inter (latin). Cairo n'est chargé que sur la locale arabe, qui inverse l'ordre (voir plus bas). */
+  --font-app: var(--font-inter), system-ui, sans-serif;
 }
 
 .dark {
-  --background: #09090b;
+  --background: #0a0a0a;
   --foreground: #ffffff;
-  --card: #18181b;
+  --card: #141414;
   --card-foreground: #ffffff;
-  --popover: #09090b;
+  --popover: #0a0a0a;
   --popover-foreground: #ffffff;
-  --primary: #006a4e;
-  --primary-foreground: #ffffff;
-  --secondary: #ae2b2f;
+  --primary: #ffffff;
+  --primary-foreground: #0a0a0a;
+  --brand: #00d4a4;
+  --brand-foreground: #0a0a0a;
+  --secondary: #1f1f1f;
   --secondary-foreground: #ffffff;
-  --muted: #27272a;
-  --muted-foreground: #a1a1aa;
-  --accent: #27272a;
-  --accent-foreground: #fafafa;
+  --muted: #1c1c1e;
+  --muted-foreground: #a8a8aa;
+  --accent: #1f1f1f;
+  --accent-foreground: #ffffff;
   --destructive: #b91c1c;
   --destructive-foreground: #ffffff;
   --destructive-text: #fca5a5;
   --success: #166534;
   --success-foreground: #ffffff;
-  --border: #3f3f46;
-  --input: #71717a;
-  --ring: #34d399;
-  --sidebar: #18181b;
+  --border: #262626;
+  --input: #6b6b6b;
+  --ring: #00d4a4;
+  --sidebar: #101010;
   --sidebar-foreground: #ffffff;
-  --sidebar-primary: #006a4e;
-  --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #27272a;
-  --sidebar-accent-foreground: #fafafa;
-  --sidebar-border: #27272a;
-  --sidebar-ring: #34d399;
-  --primary-text-color: #34d399;
+  --sidebar-primary: #ffffff;
+  --sidebar-primary-foreground: #0a0a0a;
+  --sidebar-accent: #1f1f1f;
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-border: #262626;
+  --sidebar-ring: #00d4a4;
+  --primary-text-color: #00d4a4;
 }
 
 :root:lang(ar) {
-  --font-app: var(--font-cairo), var(--font-poppins), system-ui, sans-serif;
+  --font-app: var(--font-cairo), var(--font-inter), system-ui, sans-serif;
 }
 
 @theme inline {
@@ -116,6 +120,8 @@
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
   --color-primary-text: var(--primary-text-color);
+  --color-brand: var(--brand);
+  --color-brand-foreground: var(--brand-foreground);
   --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
   --color-muted: var(--muted);

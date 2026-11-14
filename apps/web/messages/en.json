@@ -26,7 +26,9 @@
       "leads": "Leads",
       "deals": "Deals",
       "crmSync": "CRM",
-      "integrations": "Integrations"
+      "integrations": "Integrations",
+      "contacts": "Contacts",
+      "inbox": "Inbox"
     },
     "sidebar": {
       "toggle": "Show or hide the side menu",
@@ -150,7 +152,28 @@
       "description": "Here are the next steps to set up your team.",
       "members": "Manage members",
       "membersHint": "Invite people and give them a role.",
-      "noMembers": "Member management is reserved for owners and administrators."
+      "noMembers": "Member management is reserved for owners and administrators.",
+      "progress": "{done} of {total} steps completed",
+      "done": "Completed",
+      "todo": "To do",
+      "steps": {
+        "project": {
+          "title": "Create your first project",
+          "hint": "A project groups your offers, leads and campaigns."
+        },
+        "lead": {
+          "title": "Add your first lead",
+          "hint": "Capture a contact and start following it."
+        },
+        "member": {
+          "title": "Invite your team",
+          "hint": "Give each person a role."
+        },
+        "integration": {
+          "title": "Connect a channel",
+          "hint": "E-mail or WhatsApp, to talk with your leads."
+        }
+      }
     },
     "usage": {
       "title": "Plan usage",
@@ -165,6 +188,30 @@
         "ai_runs": "AI runs this month",
         "integrations": "Integrations"
       }
+    },
+    "greeting": {
+      "morning": "Good morning",
+      "afternoon": "Good afternoon",
+      "evening": "Good evening"
+    },
+    "stats": {
+      "title": "Key figures",
+      "projects": "Projects",
+      "projectsHint": "Active workspaces",
+      "leads": "Leads",
+      "leadsHint": "People you are following",
+      "dealsOpen": "Open deals",
+      "dealsOpenHint": "Still in progress",
+      "dealsWon": "Deals won",
+      "dealsWonHint": "Closed successfully"
+    },
+    "quick": {
+      "title": "Quick actions",
+      "description": "Jump straight to what you do most.",
+      "project": "New project",
+      "lead": "View leads",
+      "member": "Invite a member",
+      "integration": "Connect a channel"
     }
   },
   "Org": {
@@ -557,7 +604,8 @@
       "description": "Choose the project type, then fill in its settings.",
       "submit": "Create project",
       "creating": "Creating…",
-      "back": "Back to projects"
+      "back": "Back to projects",
+      "cancel": "Cancel"
     },
     "form": {
       "type": "Project type",
@@ -929,6 +977,418 @@
       "title": "Something went wrong",
       "description": "Your request could not be processed. Please try again in a moment.",
       "retry": "Try again"
+    }
+  },
+  "Contacts": {
+    "title": "Contacts",
+    "description": "Everyone you can contact, with the proof of their consent. Record or withdraw a consent and block a contact from any future message.",
+    "search": {
+      "label": "Search contacts",
+      "placeholder": "Name, e-mail or phone",
+      "submit": "Search",
+      "reset": "Reset"
+    },
+    "count": "Results: {count}",
+    "empty": "No contact yet.",
+    "emptyFiltered": "No contact matches this search.",
+    "table": {
+      "contact": "Contact",
+      "email": "E-mail",
+      "phone": "Phone",
+      "consent": "Consent",
+      "doNotContact": "Do not contact",
+      "created": "Created on",
+      "open": "Open",
+      "openNamed": "Open {name}",
+      "unnamed": "No name"
+    },
+    "status": {
+      "unknown": "No consent",
+      "granted": "Consent given",
+      "revoked": "Consent withdrawn"
+    },
+    "dnc": {
+      "yes": "Blocked",
+      "no": "No"
+    },
+    "pagination": {
+      "label": "Pagination",
+      "previous": "Previous page",
+      "next": "Next page",
+      "status": "Page {page} of {pageCount}"
+    },
+    "detail": {
+      "back": "Back to contacts",
+      "identity": "Contact details",
+      "name": "Name",
+      "email": "E-mail",
+      "phone": "Phone",
+      "language": "Language",
+      "country": "Country",
+      "created": "Created on",
+      "status": "Consent status",
+      "doNotContact": "Do not contact",
+      "blocked": "No message will be sent to this contact.",
+      "notBlocked": "This contact can be messaged if a valid consent exists.",
+      "notFound": "This contact cannot be found."
+    },
+    "history": {
+      "title": "Consent history",
+      "description": "Every consent is kept with its proof. A withdrawal never erases it.",
+      "empty": "No consent recorded for this contact.",
+      "channel": "Channel",
+      "purpose": "Purpose",
+      "source": "Source",
+      "captured": "Recorded on",
+      "state": "State",
+      "active": "Active",
+      "revokedOn": "Withdrawn on {date}",
+      "proof": "Proof",
+      "proofText": "Text shown",
+      "proofVersion": "Version",
+      "noProof": "No proof text recorded"
+    },
+    "record": {
+      "title": "Record a consent",
+      "description": "Use this when a contact gave you their consent outside a form (phone, in person, paper). Describe how it was given.",
+      "channel": "Channel",
+      "purpose": "Purpose",
+      "source": "How it was given",
+      "text": "Text the contact agreed to",
+      "textHint": "Optional, 2000 characters at most.",
+      "version": "Version of the text",
+      "versionHint": "Optional, 50 characters at most.",
+      "submit": "Record the consent",
+      "saving": "Saving…",
+      "needEmail": "This contact has no e-mail address: choose WhatsApp or add one.",
+      "needPhone": "This contact has no phone number: choose e-mail or add one."
+    },
+    "revoke": {
+      "title": "Withdraw a consent",
+      "description": "Takes effect at once: queued messages for this channel are not sent.",
+      "channel": "Channel",
+      "purpose": "Purpose",
+      "allPurposes": "All purposes",
+      "alsoBlock": "Also block this contact from any future message",
+      "submit": "Withdraw the consent",
+      "saving": "Saving…"
+    },
+    "block": {
+      "title": "Do not contact",
+      "descriptionOff": "Blocks every future message to this contact, whatever the consent.",
+      "descriptionOn": "This contact is blocked. Only an owner or an administrator can lift the block.",
+      "set": "Block this contact",
+      "clear": "Lift the block",
+      "clearOnlyAdmin": "Only an owner or an administrator can lift the block.",
+      "saving": "Saving…"
+    },
+    "channels": {
+      "email": "E-mail",
+      "whatsapp": "WhatsApp"
+    },
+    "purposes": {
+      "marketing": "Marketing",
+      "newsletter": "Newsletter"
+    },
+    "sources": {
+      "manual": "Entered by hand",
+      "phone": "By phone",
+      "in_person": "In person",
+      "paper_form": "Paper form",
+      "web_form": "Web form",
+      "csv_import": "CSV import",
+      "other": "Other"
+    },
+    "success": {
+      "consentRecorded": "Consent recorded.",
+      "consentRevoked": "Consent withdrawn.",
+      "doNotContactSet": "Contact blocked.",
+      "doNotContactCleared": "Block lifted."
+    },
+    "errors": {
+      "invalid_input": "Some values are invalid. Check the fields.",
+      "forbidden": "Your role does not allow this action.",
+      "conflict": "This change conflicts with another contact.",
+      "not_found": "This contact cannot be found.",
+      "rate_limited": "Too many attempts. Try again in a moment.",
+      "duplicate_request": "This request was already processed.",
+      "idempotency_in_progress": "The request is being processed.",
+      "idempotency_conflict": "This request was already sent with other values. Reload the page.",
+      "service_unavailable": "Service temporarily unavailable. Try again later.",
+      "generic": "An error occurred. Please try again.",
+      "load": "The contacts could not be loaded. Try again."
+    }
+  },
+  "Inbox": {
+    "title": "Inbox",
+    "description": "E-mail and WhatsApp conversations in one list, the most recently active first. The list refreshes by itself every 15 seconds.",
+    "ownOnlyHint": "You only see the conversations assigned to you.",
+    "filters": {
+      "label": "Filter conversations",
+      "search": "Search",
+      "searchPlaceholder": "Contact name, e-mail or phone",
+      "state": "State",
+      "channel": "Channel",
+      "assignee": "Assignee",
+      "all": "All",
+      "mine": "Assigned to me",
+      "unassigned": "Unassigned",
+      "apply": "Apply",
+      "reset": "Reset"
+    },
+    "states": {
+      "open": "Open",
+      "pending": "Pending",
+      "closed": "Closed",
+      "to_triage": "To triage"
+    },
+    "channels": {
+      "email": "E-mail",
+      "whatsapp": "WhatsApp"
+    },
+    "count": "Results: {count}",
+    "empty": "No conversation yet.",
+    "emptyFiltered": "No conversation matches these filters.",
+    "row": {
+      "unnamed": "Unknown contact",
+      "openNamed": "Open the conversation with {name}",
+      "you": "You:",
+      "noMessage": "No message yet."
+    },
+    "pagination": {
+      "label": "Pagination",
+      "previous": "Previous page",
+      "next": "Next page",
+      "status": "Page {page} of {pageCount}"
+    },
+    "thread": {
+      "back": "Back to the inbox",
+      "summary": "Conversation",
+      "channel": "Channel",
+      "stateLabel": "State",
+      "assigneeLabel": "Assignee",
+      "email": "E-mail",
+      "phone": "Phone",
+      "openContact": "Open the contact record",
+      "messages": "Messages",
+      "empty": "No message in this conversation.",
+      "older": "Older messages",
+      "newer": "Newer messages",
+      "sent": "Sent",
+      "received": "Received",
+      "saving": "Saving…",
+      "assign": {
+        "label": "Assignee",
+        "none": "No assignee (back to triage)",
+        "submit": "Assign"
+      },
+      "state": {
+        "label": "State",
+        "submit": "Change state"
+      }
+    },
+    "status": {
+      "queued": "Queued",
+      "accepted": "Accepted",
+      "sent": "Sent",
+      "delivered": "Delivered",
+      "read": "Read",
+      "failed": "Failed",
+      "bounced": "Bounced",
+      "cancelled": "Cancelled",
+      "received": "Received"
+    },
+    "success": {
+      "assigned": "Conversation assigned.",
+      "unassigned": "Assignee removed.",
+      "stateChanged": "State changed."
+    },
+    "errors": {
+      "invalid_input": "Some values are invalid. Check the fields.",
+      "forbidden": "Your role does not allow this action on this conversation.",
+      "conflict": "This change is not possible (for example the state does not match the assignee).",
+      "not_found": "This conversation cannot be found.",
+      "rate_limited": "Too many attempts. Try again in a moment.",
+      "duplicate_request": "This request was already processed.",
+      "idempotency_in_progress": "The request is being processed.",
+      "idempotency_conflict": "This request was already sent with other values. Reload the page.",
+      "service_unavailable": "Service temporarily unavailable. Try again later.",
+      "generic": "An error occurred. Please try again.",
+      "load": "The conversations could not be loaded. Try again."
+    },
+    "reply": {
+      "label": "Your reply",
+      "placeholder": "Write your reply by e-mail…",
+      "hint": "{count} / {max} characters",
+      "send": "Send reply",
+      "sending": "Queuing…",
+      "lock": {
+        "other": "Another member is replying to this conversation. You can reply once they are done.",
+        "ai": "The AI assistant is handling this conversation. Take over to reply yourself.",
+        "takeOver": "Take over"
+      },
+      "unsupported": "Replying on WhatsApp is not available yet: reply from the e-mail channel.",
+      "readOnly": "Read-only: you cannot reply to this conversation.",
+      "info": "The reply is sent by e-mail after a final check (consent, do not contact, sender). It first appears as “queued”.",
+      "success": {
+        "queued": "Reply queued: it will be sent in a moment."
+      },
+      "errors": {
+        "conflict": "Cannot reply: the conversation is held by another member or by the AI, or the channel is not available.",
+        "forbidden": "Your role does not allow replying to this conversation.",
+        "not_found": "This conversation cannot be found.",
+        "rate_limited": "Too many attempts. Try again in a moment.",
+        "invalid_input": "The reply is empty, too long or contains disallowed characters.",
+        "generic": "An error occurred. Please try again."
+      }
+    }
+  },
+  "Lead": {
+    "back": "Back to leads",
+    "summary": {
+      "title": "Summary",
+      "stage": "Stage",
+      "assignee": "Assignee",
+      "source": "Source",
+      "project": "Project",
+      "created": "Created on"
+    },
+    "contact": {
+      "title": "Contact",
+      "email": "E-mail",
+      "phone": "Phone",
+      "open": "Open the contact record",
+      "unavailable": "The contact details are not available to your role.",
+      "unnamed": "No name"
+    },
+    "next": {
+      "title": "Next action",
+      "none": "No open task for this lead.",
+      "noDue": "No due date",
+      "untitled": "Untitled task"
+    },
+    "deals": {
+      "title": "Deals",
+      "none": "No deal for this lead yet.",
+      "description": "Create a deal, move it between stages, or close it as won or lost.",
+      "expectedClose": "Expected close: {date}",
+      "won": "Won",
+      "lost": "Lost",
+      "move": {
+        "label": "Move the deal to a stage",
+        "submit": "Move"
+      },
+      "new": {
+        "title": "New deal",
+        "value": "Value",
+        "currency": "Currency",
+        "close": "Expected close date",
+        "stage": "Starting stage",
+        "submit": "Create the deal"
+      }
+    },
+    "form": {
+      "title": "Add to the timeline",
+      "description": "Log a note, a call or a task. Entries are kept as they are: only tasks can change afterwards.",
+      "type": "Type of entry",
+      "kinds": {
+        "note": "Note",
+        "call": "Call",
+        "task": "Task"
+      },
+      "noteText": "Note",
+      "optionalText": "Details (optional)",
+      "outcome": "Outcome",
+      "duration": "Duration (minutes)",
+      "taskTitle": "Task",
+      "dueDate": "Due date",
+      "submit": {
+        "note": "Add the note",
+        "call": "Log the call",
+        "task": "Add the task"
+      },
+      "saving": "Saving…"
+    },
+    "outcomes": {
+      "answered": "Answered",
+      "no_answer": "No answer",
+      "voicemail": "Voicemail",
+      "busy": "Busy",
+      "wrong_number": "Wrong number"
+    },
+    "entry": {
+      "note": "Note",
+      "call": "Call",
+      "email": "E-mail",
+      "meeting": "Meeting",
+      "task": "Task",
+      "stage_change": "Stage changed",
+      "assignment": "Assignee changed"
+    },
+    "task": {
+      "open": "To do",
+      "doneOn": "Done on {date}",
+      "markDone": "Mark as done",
+      "reopen": "Reopen"
+    },
+    "timeline": {
+      "title": "Timeline",
+      "description": "Most recent first. Stage and assignee changes are recorded automatically.",
+      "empty": "Nothing recorded for this lead yet.",
+      "automatic": "Automatic",
+      "system": "System",
+      "by": "by {who}",
+      "minutes": "{minutes} min",
+      "due": "Due {date}",
+      "to": "to",
+      "dealPrefix": "Deal:",
+      "unknownStage": "Unknown stage",
+      "latest": "Showing the {count} most recent entries."
+    },
+    "readOnly": "Your role can read this lead but not change it.",
+    "success": {
+      "noteAdded": "Note added.",
+      "callAdded": "Call logged.",
+      "taskAdded": "Task added.",
+      "taskDone": "Task marked as done.",
+      "taskReopened": "Task reopened."
+    },
+    "errors": {
+      "invalid_input": "Some values are invalid. Check the fields.",
+      "forbidden": "Your role does not allow this action on this lead.",
+      "quota_exceeded": "Your plan does not allow this right now. Contact the platform administrator.",
+      "conflict": "This lead cannot be changed (archived project or too many entries).",
+      "not_found": "This lead cannot be found.",
+      "rate_limited": "Too many attempts. Try again in a moment.",
+      "duplicate_request": "This request was already processed.",
+      "idempotency_in_progress": "The request is being processed.",
+      "idempotency_conflict": "This request was already sent with other values. Reload the page.",
+      "service_unavailable": "Service temporarily unavailable. Try again later.",
+      "generic": "An error occurred. Please try again.",
+      "load": "The lead could not be loaded. Try again."
+    },
+    "manage": {
+      "title": "Manage this lead",
+      "description": "Move the lead through your pipeline and choose who follows it up. Every change appears in the timeline.",
+      "stage": {
+        "label": "Lead stage",
+        "submit": "Change stage"
+      },
+      "assign": {
+        "label": "Assignee",
+        "none": "No assignee (back to the unassigned queue)",
+        "submit": "Assign"
+      },
+      "saving": "Saving…",
+      "success": {
+        "leadMoved": "Stage changed.",
+        "assigned": "Lead assigned.",
+        "unassigned": "Assignee removed.",
+        "dealCreated": "Deal created.",
+        "dealMoved": "Deal moved.",
+        "dealWon": "Deal marked as won.",
+        "dealLost": "Deal marked as lost."
+      }
     }
   }
 }

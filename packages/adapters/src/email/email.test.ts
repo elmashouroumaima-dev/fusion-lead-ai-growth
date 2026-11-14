@@ -3,7 +3,6 @@ import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { EMAIL_LANGS, escapeHtml, renderEmailHtml, renderEmailText } from "./layout";
 import {
-  AUTH_LOGO_URL,
   CONFIRMATION_ACTION_HREF,
   RECOVERY_ACTION_HREF,
   SMTP_TEST_LOGO_CID,
@@ -52,7 +51,8 @@ describe("gabarits d'authentification : une langue par message, choisie par Supa
     const footers = { fr: "Tous droits réservés.", ar: "جميع الحقوق محفوظة.", en: "All rights reserved." };
     for (const lang of EMAIL_LANGS) {
       const html = variant(template, lang);
-      expect(html, lang).toContain(`src="${AUTH_LOGO_URL}"`);
+      expect(html, lang).toContain("FUSION LEAP");
+      expect(html, lang).toContain('src="data:image/png;base64,');
       expect(html, lang).toContain(`href="${href}"`);
       expect(html, lang).toContain(`type=${type}`);
       expect(html, lang).toContain(`<html lang="${lang}"`);
@@ -70,7 +70,7 @@ describe("gabarits d'authentification : une langue par message, choisie par Supa
     }
   });
 
-  it("aucun secret ni URL en dur : seules les variables de Supabase Auth et l'adresse du logo", () => {
+  it("aucun secret ni URL en dur : seules les variables de Supabase Auth (la marque est en data URI, sans image distante)", () => {
     for (const html of [renderConfirmationTemplate(), renderRecoveryTemplate()]) {
       expect(html).not.toMatch(/https?:\/\/(?!www\.w3\.org)/);
       expect(html).not.toMatch(/127\.0\.0\.1|localhost/);

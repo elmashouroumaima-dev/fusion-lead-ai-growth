@@ -40,6 +40,20 @@ Codes d'erreur : `28000` non authentifié · `42501` interdit · `22023` / `2351
 ## Service web (`apps/web/lib/leads`)
 `createLead`, `updateLead`, `assignLead`, `moveLeadStage`, `createDeal`, `updateDeal`, `moveDealStage`, `createPipeline`, `renamePipeline`, `setDefaultPipeline`, `createStage`, `updateStage`, `deleteStage` (résultat `{ ok, value | code }`, entreprise du **contexte vérifié**) ; lectures `listPipelines`, `listStages`, `listLeads` (filtres étape / responsable / projet, pagination), `getLead`, `listDeals`, `getDeal` avec les droits de l'utilisateur. Codes : `assignee_invalid` → `validation_failed` ; `project_archived`, `stage_in_use`, `system_stage`, `last_open_stage`, `pipeline_incomplete`, plafonds, doublons → `conflict`.
 
+## Gestion d'un lead depuis sa fiche (J30d)
+Sur `/leads/[id]` (J30c), quatre Server Actions (`withAction` : zod, contexte tenant relu en base, `organization_id` comparé, `can()` ADR 014, limitation de débit, **clé d'idempotence obligatoire**) appellent les services ci-dessus :
+| Action | Service (fonction SQL) | Permission | Qui |
+|---|---|---|---|
+| `leads.stage.move` | `moveLeadStage` (`move_lead_stage`) | `leads` / `change_stage` (« own ») | owner, admin, commercial **sur son lead** |
+| `leads.assign` | `assignLead` (`assign_lead`) | `unassigned_leads` / `assign` | owner et admin ; « aucun responsable » renvoie le lead dans la file des non assignés |
+| `deals.create` | `createDeal` (`create_deal`) | `deals` / `update` (« own ») | owner, admin, commercial sur son lead |
+| `deals.stage.move` | `moveDealStage` (`move_deal_stage`) | `deals` / `change_stage` (« own ») | owner, admin, commercial sur son lead |
+- **Formulaires** : étape du lead (toutes les étapes sauf l'étape système « non assigné », qui découle de l'assignation) ; assignation (membres actifs owner, admin ou commercial, affichés « Moi / Membre 0000XX · rôle » : l'identité par nom n'existe pas encore) ; création d'un deal (valeur entière ou à 2 décimales, devise MAD / SAR / AED / EUR / USD par défaut MAD, clôture prévue en **date** enregistrée à midi UTC, étape de départ ouverte, par défaut la première) ; déplacement d'un deal par menu, et boutons **Gagné** / **Perdu** qui visent l'étape de ce genre du pipeline (la base pose `won_at` / `lost_at` : c'est elle qui décide du message).
+- **Droits** : le formulaire n'est offert qu'à owner, admin et au commercial sur son lead ; **le marketing lit sans rien modifier** ; l'assignation n'est offerte qu'à owner et admin. La base revérifie tout (rôle, propriété du lead, étape du bon pipeline, projet archivé, abonnement).
+- **Historique** : chaque changement écrit son entrée automatique dans la chronologie (J20) : changement d'étape du lead, du deal (« Deal : Nouveau → Gagné »), assignation.
+- **Audit** (déjà décrit plus haut) : `lead.stage_changed`, `lead.assigned`, `deal.created` (devise et étape), `deal.stage_changed`, `deal.won` / `deal.lost` ; **jamais** la valeur du deal.
+- Aucune migration, aucune route REST ajoutée.
+
 ## Audit
 `pipeline.created / renamed / default_changed`, `stage.created / updated / deleted`, `lead.created / assigned / stage_changed / updated` (noms des champs), `deal.created / stage_changed / won / lost / updated` (noms des champs). **Jamais** la valeur d'un deal, le score, les raisons, les UTM ni l'identité d'un contact. La création système des étapes par défaut n'est pas journalisée (aucun acteur).
 

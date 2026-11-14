@@ -3,6 +3,13 @@
 Format : Keep a Changelog. Une entrée par jour de travail.
 
 ## [Non publié]
+### J30d — Fiche lead, 2e partie : deal, étape, gagné / perdu, assignation (branche `day-30d-lead-actions`)
+- Ajout : sur `/leads/[id]`, carte « Gérer ce lead » (étape du lead ; assignation pour owner et admin), création d'un deal (valeur, devise, clôture prévue, étape de départ), déplacement d'un deal par menu et boutons **Gagné** / **Perdu** ; messages fr / ar / en.
+- Ajout : Server Actions `leads.stage.move`, `leads.assign`, `deals.create`, `deals.stage.move` (idempotence obligatoire, droits ADR 014 : owner, admin, commercial sur son lead ; assignation : owner et admin ; la base revérifie rôle, propriété, étape et projet).
+- Règles : le marketing lit sans rien modifier ; le message « gagné » ou « perdu » vient de la date posée par la base ; l'audit ne contient jamais la valeur d'un deal.
+- Parcours G2 rejoué par l'interface (navigateur) : lead non assigné -> assigné (Sales agent) -> deal créé (5 000 MAD) -> « Gagné », avec l'historique dans la chronologie (voir le journal).
+- Tests : Vitest `lib/leads/action-schemas.test.ts` (30), acceptation HTTP `lead-page.test.ts` (8, dont formulaires par rôle).
+- Aucune migration. Hors plan : pas de « Add lead » (création manuelle).
 ### J30c — Fiche lead : détail, chronologie, notes, appels et tâches (branche `day-30c-lead-page`)
 - Ajout : page `/leads/[id]` (résumé, contact, prochaine action, deals, chronologie la plus récente d'abord avec les entrées automatiques d'étape et d'assignation), formulaire « Ajouter à la chronologie » (note, appel, tâche), marquer une tâche faite ou à refaire ; le nom du contact dans la liste des leads devient le lien ; messages fr / ar / en.
 - Ajout : Server Actions `activities.create` et `activities.task.complete` (idempotence obligatoire, droits ADR 014 « Leads / deals : tâches » : owner, admin, commercial sur son lead ; la base revérifie la propriété du lead).

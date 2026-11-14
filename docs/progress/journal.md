@@ -842,6 +842,57 @@ Décision C2 : écrans avant G3, contacts et consentement avant le premier envoi
 - Une migration (`search_contacts`) : le plan n'en prévoyait pas, la recherche partielle avec total en demande une (même schéma que `search_leads`).
 - Pas de création de contact ni de lead : hors plan J30b, à traiter avec J30c et J30d.
 
+## J30c — Fiche lead, 1re partie (branche `day-30c-lead-page`, décision C2)
+Cible : 48,5 % (plan à 68 jours) | Réel : à valider | Statut : —
+Décision C2 : écrans avant G3, fiche lead avant la boîte de réception J37.
+
+### Tâches
+| Tâche | Estimé | Livré | Validée |
+|---|---|---|---|
+| Page de détail `/leads/[id]` (contact, statut, responsable, prochaine action) | 2 h | oui (+ deals du lead en lecture) | acceptation HTTP, navigateur |
+| Chronologie des activités | 2 h | oui (entrées saisies et automatiques, la plus récente d'abord) | acceptation HTTP (ordre), navigateur |
+| Ajout de note, appel et tâche | 1,5 h | oui (+ marquer une tâche faite ou à refaire) | Vitest 25, navigateur |
+| Tests | 0,5 h | oui | acceptation HTTP 6 ✓ |
+
+### Validation du jour
+- Un commercial ne voit que la fiche de ses leads : celle d'un autre lead est introuvable (404) ; l'analyste est renvoyé au tableau de bord ; le marketing lit sans formulaire.
+- La chronologie affiche l'assignation, les changements d'étape et les notes dans l'ordre (le plus récent d'abord).
+- Démontré dans le navigateur : tâche ajoutée, « prochaine action » mise à jour, tâche marquée faite, audit `activity.created` / `activity.completed` sans contenu.
+
+### Écarts à la spec / plan
+- Aucun écart de livrable. Ajout léger : marquer une tâche faite ou à refaire (le service existait). Deals du lead affichés en lecture (création = J30d).
+- Question ouverte J20 maintenue : le marketing lit toutes les notes (l'ADR 014 n'a pas de ligne « activités »).
+- Pas de « Add lead » (création manuelle) : hors plan.
+
+## J30d — Fiche lead, 2e partie (branche `day-30d-lead-actions`, décision C2)
+Cible : 50,0 % (plan à 68 jours) | Réel : à valider | Statut : —
+Décision C2 : écrans avant G3, fiche lead avant la boîte de réception J37.
+
+### Tâches
+| Tâche | Estimé | Livré | Validée |
+|---|---|---|---|
+| Création du deal depuis la fiche | 1,5 h | oui (valeur, devise, clôture prévue, étape de départ) | Vitest, acceptation HTTP, navigateur |
+| Déplacement d'étape et « gagné / perdu » | 1,5 h | oui (menu + boutons ; étape du lead en plus) | Vitest, navigateur |
+| Assignation manuelle (owner, admin) | 1 h | oui (« Moi / Membre 0000XX · rôle ») | acceptation HTTP, navigateur |
+| Parcours G2 rejoué par l'interface | 2 h | oui, dans le navigateur | voir ci-dessous |
+
+### Parcours G2 par l'interface (navigateur, compte propriétaire d'Alpha, données de démonstration)
+| Étape | Action à l'écran | Résultat |
+|---|---|---|
+| 1 | `/leads/…` d'un lead non assigné (Lina Fassi) -> « Assignee » = Member 000004 · Sales agent -> **Assign** | « Lead assigned. » ; étape « New » ; deux entrées automatiques dans la chronologie |
+| 2 | « New deal » : valeur 5000, devise MAD, clôture 2027-01-31 -> **Create the deal** | « Deal created. » ; « MAD 5,000.00 », étape New |
+| 3 | Bouton **Won** du deal | deal « Won » ; entrée « Deal : New -> Won » en tête de la chronologie |
+| 4 | Audit | `lead.assigned`, `deal.created` (devise, étape), `deal.won` : **aucune valeur de deal** |
+Le pas « note ou appel » est démontré à J30c ; la vue du commercial (SA propre fiche, 404 sur celle d'un autre) et celle de l'analyste sont couvertes par l'acceptation HTTP `lead-page` ; la capture publique et l'assignation automatique par le worker restent couvertes par `g2-lead-to-deal` (HTTP).
+
+### Validation du jour
+- Un lead est amené jusqu'au deal gagné **sans accès à la base**, historique visible dans la chronologie.
+
+### Écarts à la spec / plan
+- Aucun écart de livrable. Ajout léger : l'étape du lead (pas seulement celle du deal) est modifiable depuis la fiche.
+- Le parcours est joué avec le compte propriétaire (qui peut tout faire) ; le test automatique `g2-lead-to-deal` crée toujours le deal par la fonction SQL (il n'appelle pas les Server Actions : leur identifiant change à chaque compilation).
+- Pas de « Add lead » (création manuelle) : hors plan.
+
 ## J37 — Boîte de réception unifiée (branche `day-37-inbox`)
 Cible : 60,3 % (plan à 68 jours) | Réel : à valider | Statut : —
 ⚠ Les journées J33 à J36b (désabonnement, WhatsApp) sont dans des PR encore ouvertes (#42 à #45), pas dans `main` : la boîte de réception est indépendante du canal.

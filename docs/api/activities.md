@@ -54,6 +54,17 @@ Codes d'erreur : `28000` non authentifié · `42501` interdit · `22023` / `2351
 ## Audit
 `activity.created` (lead, type), `activity.updated` (noms des champs), `activity.completed`, `activity.reopened`. **Jamais** le texte, le titre ni l'objet. Les changements d'étape et d'assignation sont déjà journalisés par `lead.*` et `deal.*` (pas de doublon).
 
+## Fiche lead (J30c)
+Page `/leads/[id]` (le nom du contact dans `/leads` en est le lien). **Rôles** : owner, admin et marketing lisent tous les leads, le commercial **les siens** (le lead d'un autre commercial, d'une autre entreprise ou un identifiant invalide donne 404 : RLS) ; l'analyste est renvoyé au tableau de bord (données personnelles).
+- **Contenu** : résumé (étape, responsable, source, projet, date), contact (e-mail, téléphone ; lien vers la fiche contact pour owner, admin et marketing), **prochaine action** (`nextAction` : première tâche ouverte), deals du lead (lecture ; la création est J30d), **chronologie** (`listTimeline`, 50 entrées, la plus récente d'abord).
+- **Chronologie** : notes, appels (résultat, durée), e-mails (comptes rendus), rendez-vous, tâches (échéance, faite le …) et les entrées **automatiques** écrites par la base (changement d'étape d'un lead ou d'un deal, changement de responsable), marquées « Automatique ». L'auteur est « Moi », « Membre 0000XX » ou « Système ».
+- **Formulaires** (Server Actions, `withAction` : zod, contexte tenant relu en base, `organization_id` comparé, `can()` ADR 014 ligne 14 `leads` / `manage_tasks` accordé « own » aux commerciaux, limitation de débit, **clé d'idempotence obligatoire**) :
+  - `activities.create` : note (texte obligatoire), appel (résultat, durée 0 à 600 min, texte), tâche (titre obligatoire, texte, échéance en **date** enregistrée à midi UTC). L'e-mail, le rendez-vous, l'étape et l'assignation ne sont **pas** proposés (rejetés par le schéma) ;
+  - `activities.task.complete` : marquer une tâche faite ou à refaire.
+  Visibles pour owner, admin et le commercial sur son lead ; **jamais pour le marketing** (lecture seule). La base refuse tout autre lead (`create_activity`, `complete_task` relisent le rôle et la propriété), un projet archivé et un abonnement inactif.
+- **Contenu saisi** : affiché seulement ici, aux rôles qui lisent le lead ; l'audit (`activity.created`, `activity.completed`) ne garde que le type et le lead, **jamais** le texte, le titre ni l'objet.
+- Aucune migration, aucune route REST ajoutée (Server Actions, comme les écrans Projets et Contacts).
+
 ## Limites connues
 - **Auteur après suppression d'un membre** : la ligne du membre supprimée, `owner_id` de ses entrées devient vide (elles ressemblent alors à une entrée système) ; `audit_logs` (`activity.created`) conserve l'auteur.
 - **Lecture par le marketing** : le marketing lit toutes les activités (notes, comptes rendus d'appel et d'e-mail), comme les leads ; l'ADR 014 n'a pas de ligne « activités » : à confirmer avec la responsable technique.

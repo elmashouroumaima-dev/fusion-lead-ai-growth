@@ -3,6 +3,12 @@
 Format : Keep a Changelog. Une entrée par jour de travail.
 
 ## [Non publié]
+### J33 — Désabonnement
+- Ajout : migration `20261203100000` (et retour arrière) : `unsubscribe_apply` (service_role seulement) révoque les consentements e-mail du contact, supprime l'adresse (`suppressions`, raison `unsubscribe`), annule les messages en file non réclamés et leurs jobs, audite sans donnée personnelle ; idempotente.
+- Ajout : lien signé (`packages/adapters/src/email/unsubscribe.ts`, HMAC-SHA256, clé dérivée du trousseau, rotation sans casser les anciens liens), en-têtes `List-Unsubscribe` / One-Click et pied de page dans chaque e-mail ; le worker refuse d'envoyer sans clé de signature ; l'adaptateur Postmark transmet les en-têtes (liste blanche).
+- Ajout : `GET` et `POST /api/unsubscribe/[token]`, page publique `/{fr,ar,en}/unsubscribe/[token]` (confirmation, jamais de désabonnement à l'ouverture), limite par adresse, textes génériques.
+- Tests : pgTAP 260 (42), adaptateurs +10, worker +3, web +22, acceptation HTTP.
+- Documentation : `docs/api/unsubscribe.md`, ADR 008 (note J33).
 ### Correctif J37 — L10 : `search_conversations` hors de `public` (branche `day-38-replies`)
 - Modifié : migration `20261210110000_inbox_search_private.sql` (et retour arrière) : le corps SECURITY DEFINER passe dans `private.search_conversations`, `public.search_conversations` devient une enveloppe SECURITY INVOKER (mêmes arguments, mêmes colonnes, mêmes droits de lecture réappliqués). Aucun changement de comportement ni de code web. La migration J37 déjà appliquée n'est pas modifiée.
 - Tests : `030_organizations_create` (test 8) et `900_schema_lint` (test 10, L10) repassent au vert ; `260_inbox` (31) inchangé.

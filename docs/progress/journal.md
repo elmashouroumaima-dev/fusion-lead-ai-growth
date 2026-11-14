@@ -947,3 +947,29 @@ Cible : 61,8 % (plan à 68 jours) | Réel : à valider | Statut : —
 ## Correctif J37 — lint L10 (branche `day-38-replies`)
 `public.search_conversations` (J37) était SECURITY DEFINER dans `public` : le lint L10 échouait (`030` test 8, `900` test 10). Nouvelle migration `20261210110000_inbox_search_private.sql` : corps dans `private`, enveloppe SECURITY INVOKER dans `public` ; rollback fourni. Vérifié : pgTAP 030 et 900 verts, 260 inchangé, acceptation `inbox-pages` (7) et `replies-flow` (11) verts, lint, typecheck, Vitest verts.
 ⚠ Restent hors périmètre : `050` test 162 (une ligne résiduelle dans `rate_limit_buckets` laissée par les tests d'acceptation) et `190_crm_search` (plan incomplet, données de démonstration).
+
+## J33 — Désabonnement (branche `day-33-unsubscribe`)
+Cible : 54,4 % (plan à 68 jours) | Réel : à valider | Statut : —
+
+### Tâches
+| Tâche | Estimé | Livré | Validée |
+|---|---|---|---|
+| Lien signé + `List-Unsubscribe` | 2 h | oui (jeton HMAC sans donnée personnelle, en-têtes One-Click, pied de page, en-têtes Postmark en liste blanche) | oui (adaptateurs 116, worker 132) |
+| Page publique | 1,5 h | oui (`/api/unsubscribe/[token]` GET et POST, page `/{fr,ar,en}/unsubscribe/[token]`) | oui (web 2544, acceptation HTTP) |
+| Révocation + annulation des jobs | 2 h | oui (`unsubscribe_apply` : consentements révoqués, adresse supprimée, envois en file annulés) | oui (pgTAP 42) |
+| Tests | 0,5 h | oui | oui |
+
+### Validation du jour
+- **Message suivant bloqué** : après le désabonnement, la réclamation d'envoi voit « pas de consentement » et « adresse supprimée » ; le contrôle final refuse.
+- **Jobs en attente → `cancelled`** : messages en file non réclamés et leurs jobs annulés ; un envoi déjà réclamé n'est pas touché (le contrôle final le refuse, fenêtre de quelques secondes documentée).
+- **Ouvrir le lien ne désabonne pas** : GET redirige vers une page de confirmation ; le un-clic RFC 8058 passe par POST.
+
+### Revue sécurité (0 bloquant, 1 majeur, 3 moyens) — corrigés : jeton valide sous plusieurs écritures de la version de clé (zéro initial), validation du jeton AVANT la limite de débit et la base, échec du worker avant la réclamation sans clé, démarrage du worker avec clé invalide, motif de chemin public inutile retiré. Le majeur (rotation de clé : les anciens liens cessent de fonctionner) n'est pas corrigé : limite du trousseau à une seule clé en production, commune au chiffrement des secrets ; documentée comme point ouvert.
+
+### Tests : domain 654 ✓ · adapters 116 ✓ · permissions 394 ✓ · worker 132 ✓ · web 2544 ✓ · pgTAP 2970 (dont 260_unsubscribe : 42) ✓ · API réelle 485 ✓ · acceptation HTTP réelle (unsubscribe-flow : 8) · lint, typecheck ✓
+### À surveiller
+- **Rotation de clé** : le trousseau de production n'a qu'une clé ; une rotation casserait les anciens liens de désabonnement et le déchiffrement des anciens secrets. Variable des clés précédentes à décider avant la première rotation.
+- **Réabonnement** : aucune fonction pour lever une désinscription (action auditée à prévoir avec l'écran contacts, J30b).
+### Écarts à la spec / plan
+- Pas de suppression de l'adresse courante si l'e-mail du contact a changé depuis l'approbation (l'adresse supprimée est celle où le message est parti).
+- Hypothèse à confirmer à C3 : Postmark transmet tels quels les en-têtes `List-Unsubscribe` de `Headers`.

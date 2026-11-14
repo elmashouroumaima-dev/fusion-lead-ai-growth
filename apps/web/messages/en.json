@@ -125,6 +125,8 @@
   },
   "Dashboard": {
     "title": "Dashboard",
+    "signedInAs": "Signed in as",
+    "unknownUser": "Unknown user",
     "subtitle": "An overview of your organization and your access.",
     "organization": {
       "title": "Organization",
@@ -132,7 +134,8 @@
       "slug": "Identifier"
     },
     "role": {
-      "title": "Your role"
+      "title": "Your role",
+      "description": "This role determines what you can do in this organization."
     },
     "preferences": {
       "title": "Language and time zone",
@@ -146,6 +149,10 @@
     },
     "start": {
       "title": "Getting started",
+      "description": "Here are the next steps to set up your team.",
+      "members": "Manage members",
+      "membersHint": "Invite people and give them a role.",
+      "noMembers": "Member management is reserved for owners and administrators.",
       "progress": "{done} of {total} steps completed",
       "done": "Completed",
       "todo": "To do",
@@ -926,6 +933,26 @@
       "cancel": "Cancel",
       "done": "Integration disconnected.",
       "failed": "The integration could not be disconnected."
+    }
+  },
+  "Unsubscribe": {
+    "confirm": {
+      "title": "Unsubscribe",
+      "description": "Confirm to stop receiving emails from this sender.",
+      "submit": "Unsubscribe me"
+    },
+    "done": {
+      "title": "You are unsubscribed",
+      "description": "You will no longer receive emails from this sender."
+    },
+    "invalid": {
+      "title": "Invalid link",
+      "description": "This unsubscribe link is not valid. Use the link in the latest email you received."
+    },
+    "error": {
+      "title": "Something went wrong",
+      "description": "Your request could not be processed. Please try again in a moment.",
+      "retry": "Try again"
     }
   },
   "Contacts": {

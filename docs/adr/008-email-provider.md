@@ -43,3 +43,10 @@ Q2 n'a toujours pas de réponse : en application de la règle du 2026-11-09, l'*
 - **Rattachement des réponses** : par l'adresse expéditrice dans le canal désigné par l'adresse destinataire (un fil par contact et canal, J30), pas par `Message-ID` / `In-Reply-To` / `References`. **Anti-usurpation** : le « Pass » SPF doit être aligné sur le domaine de l'adresse « From » (ou DKIM valide du domaine de l'auteur) ; en-têtes dupliqués = non fiable ; sinon file `inbound_unmatched`.
 - **Rebonds et plaintes** : rebond dur (TypeCode 1 ou 100000) : adresse en `suppressions` sans toucher `do_not_contact` ; plainte : `suppressions` et `do_not_contact = true`.
 - Tout reste **À CONFIRMER sur un compte sandbox** (checkpoint C3) : en-têtes réellement ajoutés aux entrants, `Metadata` renvoyées dans les événements, codes de rebond. Voir `docs/api/email-inbound.md` et `docs/runbooks/email-webhooks.md`.
+
+## Note du 2026-11-13 (J33) — désabonnement
+- Chaque e-mail porte un lien signé (HMAC-SHA256, clé dérivée par HKDF de la clé maître du trousseau, version de clé dans le jeton), les en-têtes `List-Unsubscribe` et `List-Unsubscribe-Post: List-Unsubscribe=One-Click`, et un pied de page. L'envoi est refusé (jamais fait sans lien) quand la clé de signature manque.
+- Le lien ouvre une page de confirmation (il ne désabonne pas à l'ouverture) ; le un-clic RFC 8058 passe par `POST /api/unsubscribe/[token]`. Le désabonnement révoque les consentements e-mail du contact, supprime l'adresse (`suppressions`, raison `unsubscribe`) et annule les envois en file non réclamés.
+- Hypothèse à confirmer au checkpoint C3 : que Postmark transmette tels quels les en-têtes `List-Unsubscribe` fournis dans `Headers` de l'appel d'envoi.
+- Point ouvert : la levée d'une désinscription (réabonnement) n'existe pas encore (action auditée à prévoir avec l'écran contacts, J30b).
+

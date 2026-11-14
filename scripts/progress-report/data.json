@@ -1,16 +1,16 @@
 {
   "title": "Rapport d'avancement",
-  "intro": "Fusion Leap AI Growth : plateforme SaaS multi-tenant de croissance (CRM, canaux, campagnes, agents IA). Les fondations, le CRM (projets, contacts, leads, deals, capture, import) et le socle des canaux e-mail (intégrations, webhooks, conversations, envoi sous contrôles, statuts et réception) sont en place et fusionnés.",
-  "summary": "Les phases 0 à 2 sont terminées et fusionnées ; la phase 3 (canaux) est bien engagée : un e-mail ne part qu'avec une approbation humaine et un contrôle final dans le worker, les statuts du fournisseur et les réponses sont rattachés sans jamais créer de contact. Rien ne peut encore partir pour de vrai : il manque le désabonnement (J33), l'écran contacts et consentement (J30b), l'activation d'un canal et le compte d'essai du fournisseur (checkpoint C3).",
+  "intro": "Fusion Leap AI Growth : plateforme SaaS multi-tenant de croissance (CRM, canaux, campagnes, agents IA). Les fondations, le CRM (projets, contacts, leads, deals, capture, import) et le socle des canaux e-mail (intégrations, webhooks, conversations, envoi sous contrôles, statuts et réception, désabonnement) sont en place ; le désabonnement est en revue.",
+  "summary": "Les phases 0 à 2 sont terminées et fusionnées ; la phase 3 (canaux) est bien engagée : un e-mail ne part qu'avec une approbation humaine et un contrôle final dans le worker, les statuts du fournisseur et les réponses sont rattachés sans jamais créer de contact. Chaque e-mail porte maintenant un lien de désabonnement signé. Rien ne peut encore partir pour de vrai : il manque l'écran contacts et consentement (J30b), l'activation d'un canal et le compte d'essai du fournisseur (checkpoint C3).",
   "tests": [
     {
       "label": "Web (application)",
-      "value": 2523,
+      "value": 2544,
       "note": "Écrans, routes HTTP et services de l'application"
     },
     {
       "label": "Base de données (pgTAP)",
-      "value": 2928,
+      "value": 2970,
       "note": "Tables, droits et règles de la base de données"
     },
     {
@@ -30,12 +30,12 @@
     },
     {
       "label": "Worker et adaptateurs",
-      "value": 235,
+      "value": 248,
       "note": "Tâches de fond et adaptateurs de fournisseurs"
     },
     {
       "label": "Acceptation (T1, T5)",
-      "value": 185,
+      "value": 193,
       "note": "Parcours complets en HTTP réel sur l'application construite"
     }
   ],
@@ -244,9 +244,9 @@
           "day": "J31–J33",
           "days": 3,
           "name": "Envoi, statuts et réception e-mail · désabonnement",
-          "progress": 67,
-          "status": "part",
-          "note": "J31 envoi sous contrôles, J32 statuts du fournisseur et réponses ; J33 désabonnement à faire."
+          "progress": 100,
+          "status": "review",
+          "note": "J31 envoi sous contrôles, J32 statuts du fournisseur et réponses, J33 désabonnement (lien signé, page publique, révocation)."
         },
         {
           "day": "J34–J37",
@@ -419,7 +419,7 @@
       "urgency": "Avant C3"
     },
     {
-      "text": "Désabonnement (J33) et écran contacts et consentement (J30b) : prérequis d'un premier envoi marketing.",
+      "text": "Écran contacts et consentement (J30b), avec la levée d'une désinscription : prérequis d'un premier envoi marketing.",
       "owner": "Équipe",
       "urgency": "Avant le premier envoi"
     },
@@ -457,16 +457,17 @@
       "text": "Protection de la branche principale non activée sur GitHub ; un test de base de données (conversations) a échoué deux fois sans cause trouvée.",
       "owner": "Responsable technique",
       "urgency": "À surveiller"
+    },
+    {
+      "text": "Rotation de clé : le trousseau de production n'a qu'une clé ; une rotation casserait les anciens liens de désabonnement et le déchiffrement des anciens secrets. Décider d'une variable des clés précédentes.",
+      "owner": "Responsable technique",
+      "urgency": "Avant la première rotation"
     }
   ],
   "nextSteps": [
     {
       "when": "Maintenant",
       "action": "Recette des phases 2 et 3 avec le guide de tests (PDF), par une personne qui n'a pas écrit le code."
-    },
-    {
-      "when": "J33",
-      "action": "Désabonnement : jeton signé, en-têtes de désabonnement, page publique en arabe et en anglais, révocation du consentement et annulation des envois en attente."
     },
     {
       "when": "J30b à J30d",
@@ -521,16 +522,6 @@
   ],
   "recent": [
     {
-      "day": "J28",
-      "title": "Intégrations et secrets",
-      "items": [
-        "Intégrations e-mail et WhatsApp, canaux, secrets chiffrés (jamais lisibles ni renvoyés).",
-        "Rotation et déconnexion qui supprime le secret."
-      ],
-      "proof": "pgTAP, API réelle et acceptation HTTP",
-      "review": null
-    },
-    {
       "day": "J29",
       "title": "Réception des webhooks",
       "items": [
@@ -581,19 +572,33 @@
         "major": 1,
         "medium": 5
       }
+    },
+    {
+      "day": "J33",
+      "title": "Désabonnement",
+      "items": [
+        "Chaque e-mail porte un lien signé (sans donnée personnelle), les en-têtes de désabonnement en un clic et un pied de page ; sans clé de signature, rien ne part.",
+        "Le lien ouvre une page de confirmation (jamais de désabonnement à l'ouverture) : consentements e-mail révoqués, adresse supprimée, envois en file annulés avec leurs jobs."
+      ],
+      "proof": "42 tests de base, 8 tests d'acceptation HTTP réelle, adaptateurs et web",
+      "review": {
+        "blocking": 0,
+        "major": 1,
+        "medium": 3
+      }
     }
   ],
   "capabilities": {
     "ready": [
-      "Gérer projets, contacts, leads et deals, avec rôles et isolation entre entreprises.",
       "Importer des contacts (CSV), capturer des leads par formulaire public, les assigner automatiquement.",
       "Connecter une intégration e-mail, avec secrets chiffrés et jamais renvoyés.",
       "Préparer un envoi : approbation humaine, 15 contrôles juste avant l'appel.",
-      "Recevoir les statuts du fournisseur et les réponses, rattachés à la bonne conversation."
+      "Recevoir les statuts du fournisseur et les réponses, rattachés à la bonne conversation.",
+      "Se désabonner par un lien signé : consentement révoqué, adresse supprimée, envois en attente annulés."
     ],
     "notYet": [
       "Envoyer ou recevoir un vrai e-mail : il manque l'activation d'un canal et un compte d'essai (C3).",
-      "Se désabonner (J33) : aucun envoi marketing avant ce lien.",
+      "Se réabonner : aucune action pour lever une désinscription (écran contacts, J30b).",
       "Gérer les contacts et le consentement à l'écran (J30b) et lire les conversations (boîte de réception, J37).",
       "WhatsApp (J34 à J37) : en attente du compte Meta."
     ]
@@ -603,79 +608,48 @@
     "intro": "Le travail du jour raconté étape par étape : ce qui a été fait, les vérifications menées et le volume de code touché.",
     "steps": [
       {
-        "sentence": "J'ai ajouté en base le secret de webhook par intégration, la file des e-mails non rattachés et les fonctions qui appliquent statuts et réponses.",
+        "sentence": "J'ai ajouté en base la fonction de désabonnement : elle révoque les consentements e-mail, supprime l'adresse et annule les envois en file avec leurs jobs.",
         "actions": [
           "Migration et retour arrière écrits",
           "Tests pgTAP lancés"
         ],
-        "grep": "feat\\(db\\).*J32"
+        "grep": "feat\\(db\\).*J33"
       },
       {
-        "sentence": "J'ai écrit l'adaptateur Postmark (authentification, événements normalisés, contrôle SPF), le traitement côté worker et l'endpoint du secret.",
+        "sentence": "J'ai écrit le jeton signé (sans donnée personnelle), les en-têtes de désabonnement en un clic et leur transmission à Postmark.",
         "actions": [
-          "Adaptateur, worker et route web",
-          "Tests unitaires lancés"
+          "Jeton, rotation et falsification testés"
         ],
-        "grep": "feat\\((adapters|worker|web)\\).*J32|feat\\((adapters|worker)\\): add the (Postmark|email)"
+        "grep": "feat\\(adapters\\).*J33"
       },
       {
-        "sentence": "J'ai ajouté les tests d'acceptation du flux e-mail puis la documentation (API, runbook, ADR).",
+        "sentence": "J'ai branché le lien dans chaque e-mail du worker, avec un refus d'envoyer quand la clé de signature manque.",
         "actions": [
-          "Tests d'acceptation lancés",
+          "Tests du worker lancés"
+        ],
+        "grep": "feat\\(worker\\).*J33"
+      },
+      {
+        "sentence": "J'ai ajouté les routes publiques et la page de confirmation en français, arabe et anglais : ouvrir le lien ne désabonne pas.",
+        "actions": [
+          "Pages vérifiées dans les trois langues"
+        ],
+        "grep": "feat\\(web\\).*J33"
+      },
+      {
+        "sentence": "J'ai écrit les tests pgTAP et les tests d'acceptation HTTP, puis fait attaquer le tout par une revue de sécurité indépendante.",
+        "actions": [
+          "Suite complète lancée",
+          "Failles corrigées avec un test"
+        ],
+        "grep": "test:.*J33"
+      },
+      {
+        "sentence": "J'ai documenté l'API, la note de l'ADR 008, le journal et le CHANGELOG.",
+        "actions": [
           "Documentation mise à jour"
         ],
-        "grep": "J32\\)$|docs: J32"
-      },
-      {
-        "sentence": "J'ai fusionné la chaîne de PR dans la branche principale, en gardant un commit par sujet.",
-        "actions": [
-          "PR rebasées sur main",
-          "Aucune branche supprimée"
-        ]
-      },
-      {
-        "sentence": "J'ai écrit le guide de tests des phases 2 et 3 (107 cas) et les outils d'appel de l'API, puis vérifié les résultats attendus sur l'application réelle.",
-        "actions": [
-          "Scénarios exécutés",
-          "Pages du PDF capturées"
-        ],
-        "grep": "docs\\(testing\\)|test:call",
-        "thumbs": [
-          [
-            "guide-couverture.png",
-            "Couverture du guide"
-          ],
-          [
-            "guide-cas-de-test.png",
-            "Un cas de test"
-          ]
-        ]
-      },
-      {
-        "sentence": "J'ai refondu le rapport d'avancement en 7 pages, avec historique et comparaison avec le rapport précédent.",
-        "actions": [
-          "PDF régénéré",
-          "Pages capturées"
-        ],
-        "grep": "docs\\(progress\\): redesign",
-        "thumbs": [
-          [
-            "rapport-synthese.png",
-            "Synthèse"
-          ],
-          [
-            "rapport-feuille-de-route.png",
-            "Feuille de route"
-          ]
-        ]
-      },
-      {
-        "sentence": "J'ai corrigé l'erreur de `pnpm dev` (module ES chargé par Turbopack) et mis à jour le runbook.",
-        "actions": [
-          "Correction vérifiée",
-          "CI verte"
-        ],
-        "grep": "Turbopack|pnpm dev"
+        "grep": "docs: J33"
       }
     ]
   }

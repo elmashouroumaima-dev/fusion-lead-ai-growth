@@ -1,5 +1,13 @@
 import { z } from "zod";
-import { CsvCrmAdapter, type EmailProvider } from "@fusion-leap/adapters";
+import {
+  CsvCrmAdapter,
+  appendUnsubscribeFooter,
+  createUnsubscribeToken,
+  listUnsubscribeHeaders,
+  unsubscribeUrl,
+  type EmailProvider,
+  type KeyRing,
+} from "@fusion-leap/adapters";
 import {
   checkCanSend, CsvError, CsvParser, crmMappingsSchema, decideCreate, deriveEmailSubject, detectDelimiter, EMAIL_SENDS_PER_HOUR, IMPORT_MAX_BYTES,
   isRetryableRefusal, normalizeContactEmail, normalizeImportRow, normalizePhone, resolveContactRecord, type CrmMappingEntry,
@@ -354,7 +362,9 @@ export function createProcessWebhookHandler(gateway: WebhookGateway, processors:
  * Résultat inconnu (aucune réponse) : message `failed` / `send_outcome_unknown`, jamais renvoyé automatiquement. Aucun corps, adresse ni jeton
  * n'est journalisé : seuls des codes courts sortent d'ici.
  */
-export type SendDeps = { gateway: SendGateway; readSecret: SecretReader; provider: EmailProvider };
+/** Désabonnement (J33) : trousseau de clés (`null` si la clé maître manque : l'envoi est alors refusé, jamais fait sans lien) et URL publique du site. */
+export type UnsubscribeDeps = { keyRing: KeyRing | null; siteUrl: string };
+export type SendDeps = { gateway: SendGateway; readSecret: SecretReader; provider: EmailProvider; unsubscribe: UnsubscribeDeps };
 
 export function createSendMessageHandler(deps: SendDeps): JobHandler {
   return defineHandler({
@@ -364,6 +374,8 @@ export function createSendMessageHandler(deps: SendDeps): JobHandler {
       const org = ctx.organizationId;
       const messageId = payload.message_id;
       const { gateway } = deps;
+      // sans clé de signature rien ne peut partir : on échoue AVANT la réclamation (le message reste en file, le job visible dans les échecs)
+      if (!deps.unsubscribe.keyRing) throw new Error("unsubscribe_unavailable");
       const claim = await gateway.claim(org, messageId);
       if (claim.status === "missing" || claim.status === "not_queued") return;
       if (claim.status === "in_progress") {
@@ -419,10 +431,14 @@ export function createSendMessageHandler(deps: SendDeps): JobHandler {
         throw new Error("aborted");
       }
 
+      // chaque e-mail porte son lien de désabonnement signé (en-têtes One-Click et pied de page)
+      const unsubUrl = unsubscribeUrl(deps.unsubscribe.siteUrl, createUnsubscribeToken(deps.unsubscribe.keyRing, { organizationId: org, messageId }));
+
       // juste avant l'appel : aucun autre accès base entre le contrôle final et le fournisseur
       const outcome = await deps.provider.send(
         {
-          from: claim.channel.sender, to: claim.contact.email as string, subject: deriveEmailSubject(claim.message.body), textBody: claim.message.body,
+          from: claim.channel.sender, to: claim.contact.email as string, subject: deriveEmailSubject(claim.message.body),
+          textBody: appendUnsubscribeFooter(claim.message.body, unsubUrl), headers: listUnsubscribeHeaders(unsubUrl),
           metadata: { fusion_message_id: messageId },
         },
         secret,

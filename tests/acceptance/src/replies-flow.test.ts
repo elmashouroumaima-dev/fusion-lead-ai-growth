@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import type { EmailProvider, EmailSendInput } from "../../../packages/adapters/src";
+import { createKeyRing, type EmailProvider, type EmailSendInput } from "../../../packages/adapters/src";
 import { createSendMessageHandler } from "../../../apps/worker/src/handlers";
 import type { SendClaim, SendGateway } from "../../../apps/worker/src/send";
 import { api, ORG, psql, USER } from "../../../supabase/tests/rls/src/harness";
@@ -87,7 +87,10 @@ const provider: EmailProvider = {
     return { kind: "accepted", providerMessageId: `pm-${TAG}-${sent.length}` };
   },
 };
-const sendHandler = createSendMessageHandler({ gateway, readSecret: async () => "jeton-de-test", provider });
+const sendHandler = createSendMessageHandler({
+  gateway, readSecret: async () => "jeton-de-test", provider,
+  unsubscribe: { keyRing: createKeyRing(1, { 1: Buffer.alloc(32, 7).toString("base64") }), siteUrl: "http://localhost:3000" },
+});
 const runWorker = (message: string) =>
   sendHandler.run({ jobId: randomUUID(), organizationId: ORG.alpha, idempotencyKey: `send-message:${message}`, attempt: 1, maxAttempts: 5, signal: new AbortController().signal }, { message_id: message });
 const statusOf = (message: string) => psql(`select status from public.messages where id = '${message}'`);
@@ -218,7 +221,8 @@ describe("réponse du commercial assigné : mise en file puis ENVOI PAR LE WORKE
     expect(sent).toHaveLength(1);
     expect(sent[0]?.to).toBe(`nadia.${TAG}@rpl.test`);
     expect(sent[0]?.from).toBe(`ventes@${TAG}.test`);
-    expect(sent[0]?.textBody).toBe("Bonjour Nadia, voici notre offre.");
+    // chaque e-mail porte le pied de page de désabonnement (J33) : le texte de la réponse reste en tête, inchangé
+    expect(sent[0]?.textBody.startsWith("Bonjour Nadia, voici notre offre.")).toBe(true);
     await runWorker(messageId);
     expect(sent).toHaveLength(1);
   });

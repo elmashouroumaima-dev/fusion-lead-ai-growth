@@ -125,6 +125,8 @@
   },
   "Dashboard": {
     "title": "Tableau de bord",
+    "signedInAs": "Connecté en tant que",
+    "unknownUser": "Utilisateur inconnu",
     "subtitle": "Vue d’ensemble de votre organisation et de votre accès.",
     "organization": {
       "title": "Organisation",
@@ -132,7 +134,8 @@
       "slug": "Identifiant"
     },
     "role": {
-      "title": "Votre rôle"
+      "title": "Votre rôle",
+      "description": "Ce rôle détermine ce que vous pouvez faire dans cette organisation."
     },
     "preferences": {
       "title": "Langue et fuseau horaire",
@@ -146,6 +149,10 @@
     },
     "start": {
       "title": "Pour commencer",
+      "description": "Voici les prochaines étapes pour mettre votre équipe en place.",
+      "members": "Gérer les membres",
+      "membersHint": "Invitez des personnes et attribuez-leur un rôle.",
+      "noMembers": "La gestion des membres est réservée aux propriétaires et aux administrateurs.",
       "progress": "{done} étape(s) sur {total} terminée(s)",
       "done": "Terminée",
       "todo": "À faire",
@@ -926,6 +933,26 @@
       "cancel": "Annuler",
       "done": "Intégration déconnectée.",
       "failed": "L'intégration n'a pas pu être déconnectée."
+    }
+  },
+  "Unsubscribe": {
+    "confirm": {
+      "title": "Se désabonner",
+      "description": "Confirmez pour ne plus recevoir d'e-mails de cet expéditeur.",
+      "submit": "Me désabonner"
+    },
+    "done": {
+      "title": "Vous êtes désabonné(e)",
+      "description": "Vous ne recevrez plus d'e-mails de cet expéditeur."
+    },
+    "invalid": {
+      "title": "Lien invalide",
+      "description": "Ce lien de désabonnement n'est pas valide. Utilisez le lien du dernier e-mail reçu."
+    },
+    "error": {
+      "title": "Un problème est survenu",
+      "description": "Votre demande n'a pas pu être traitée. Réessayez dans un instant.",
+      "retry": "Réessayer"
     }
   },
   "Contacts": {

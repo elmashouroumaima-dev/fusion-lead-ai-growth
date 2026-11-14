@@ -83,6 +83,8 @@ describe("pages publiques / invités", () => {
     for (const p of ["/Login", "/login/x", "/login.", "/dashboard", "//login"]) {
       expect(isPublicPath(p)).toBe(false);
     }
+    // la page de désabonnement (J33) n'est PAS dans cette liste : son adresse contient des points (jeton), le matcher du proxy ne la traite donc pas
+    expect(isPublicPath("/unsubscribe/v1.1.x.y.z")).toBe(false);
     expect(isGuestOnlyPath("/login")).toBe(true);
     expect(isGuestOnlyPath("/forgot-password")).toBe(false);
   });

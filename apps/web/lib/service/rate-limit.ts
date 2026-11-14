@@ -102,6 +102,8 @@ export const PUBLIC_LIMITS = {
   capture_key: { capacity: 200, refillPerSecond: 2 },
   /** Webhooks entrants (J29), par fournisseur et adresse source : les fournisseurs envoient en rafale depuis peu d'adresses. */
   webhook_ip: { capacity: 300, refillPerSecond: 10 },
+  /** Désabonnement public (J33) : un jeton signé est exigé, la limite protège seulement la base ; les messageries envoient le un-clic depuis peu d'adresses. */
+  unsubscribe_ip: { capacity: 120, refillPerSecond: 2 },
 } as const;
 export type PublicRateLimitScope = keyof typeof PUBLIC_LIMITS;
 

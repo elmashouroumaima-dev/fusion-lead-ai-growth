@@ -40,5 +40,12 @@
     "days": 33,
     "totalDays": 68,
     "tests": 7404
+  },
+  {
+    "date": "2026-11-14",
+    "percent": 48.5,
+    "days": 33,
+    "totalDays": 68,
+    "tests": 7404
   }
 ]

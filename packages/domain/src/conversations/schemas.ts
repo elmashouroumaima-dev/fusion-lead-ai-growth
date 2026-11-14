@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { safeText } from "../projects/text";
 import { uuidSchema } from "../tenant/schemas";
 
 /**
@@ -32,6 +33,11 @@ export type AssignConversationInput = z.infer<typeof assignConversationSchema>;
 
 export const setConversationStateSchema = z.object({ conversation_id: uuidSchema, state: z.enum(CONVERSATION_STATES) }).strict();
 export type SetConversationStateInput = z.infer<typeof setConversationStateSchema>;
+
+/** Réponse humaine (J38) : texte brut de 1 à 10 000 caractères ; la conversation vient de l'adresse, l'entreprise du contexte vérifié. */
+export const REPLY_BODY_MAX = 10_000;
+export const replyInputSchema = z.object({ body: safeText(1, REPLY_BODY_MAX, true) }).strict();
+export type ReplyInput = z.infer<typeof replyInputSchema>;
 
 export const listConversationsSchema = z
   .object({

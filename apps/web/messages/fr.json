@@ -1120,7 +1120,6 @@
       "phone": "Téléphone",
       "openContact": "Ouvrir la fiche du contact",
       "messages": "Messages",
-      "readOnly": "Vous pouvez lire cette conversation. La réponse sera disponible dans une prochaine mise à jour.",
       "empty": "Aucun message dans cette conversation.",
       "older": "Messages plus anciens",
       "newer": "Messages plus récents",
@@ -1165,6 +1164,32 @@
       "service_unavailable": "Service momentanément indisponible. Réessayez plus tard.",
       "generic": "Une erreur est survenue. Veuillez réessayer.",
       "load": "Les conversations n’ont pas pu être chargées. Réessayez."
+    },
+    "reply": {
+      "label": "Votre réponse",
+      "placeholder": "Écrivez votre réponse par e-mail…",
+      "hint": "{count} / {max} caractères",
+      "send": "Envoyer la réponse",
+      "sending": "Mise en file…",
+      "lock": {
+        "other": "Un autre membre est en train de répondre à cette conversation. Vous pourrez répondre dès qu’il aura terminé.",
+        "ai": "L’assistant IA traite cette conversation. Reprenez la main pour répondre vous-même.",
+        "takeOver": "Reprendre la main"
+      },
+      "unsupported": "La réponse par WhatsApp n’est pas encore disponible : répondez depuis le canal e-mail.",
+      "readOnly": "Lecture seule : vous ne pouvez pas répondre à cette conversation.",
+      "info": "La réponse est envoyée par e-mail après un dernier contrôle (consentement, ne pas contacter, expéditeur). Elle apparaît d’abord « en file ».",
+      "success": {
+        "queued": "Réponse mise en file : elle sera envoyée dans un instant."
+      },
+      "errors": {
+        "conflict": "Réponse impossible : la conversation est tenue par un autre membre ou par l’IA, ou le canal n’est pas disponible.",
+        "forbidden": "Votre rôle ne permet pas de répondre à cette conversation.",
+        "not_found": "Cette conversation est introuvable.",
+        "rate_limited": "Trop de tentatives. Réessayez dans un instant.",
+        "invalid_input": "La réponse est vide, trop longue ou contient des caractères non autorisés.",
+        "generic": "Une erreur est survenue. Veuillez réessayer."
+      }
     }
   }
 }

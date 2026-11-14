@@ -1120,7 +1120,6 @@
       "phone": "Phone",
       "openContact": "Open the contact record",
       "messages": "Messages",
-      "readOnly": "You can read this conversation. Replying will be available in a later update.",
       "empty": "No message in this conversation.",
       "older": "Older messages",
       "newer": "Newer messages",
@@ -1165,6 +1164,32 @@
       "service_unavailable": "Service temporarily unavailable. Try again later.",
       "generic": "An error occurred. Please try again.",
       "load": "The conversations could not be loaded. Try again."
+    },
+    "reply": {
+      "label": "Your reply",
+      "placeholder": "Write your reply by e-mail…",
+      "hint": "{count} / {max} characters",
+      "send": "Send reply",
+      "sending": "Queuing…",
+      "lock": {
+        "other": "Another member is replying to this conversation. You can reply once they are done.",
+        "ai": "The AI assistant is handling this conversation. Take over to reply yourself.",
+        "takeOver": "Take over"
+      },
+      "unsupported": "Replying on WhatsApp is not available yet: reply from the e-mail channel.",
+      "readOnly": "Read-only: you cannot reply to this conversation.",
+      "info": "The reply is sent by e-mail after a final check (consent, do not contact, sender). It first appears as “queued”.",
+      "success": {
+        "queued": "Reply queued: it will be sent in a moment."
+      },
+      "errors": {
+        "conflict": "Cannot reply: the conversation is held by another member or by the AI, or the channel is not available.",
+        "forbidden": "Your role does not allow replying to this conversation.",
+        "not_found": "This conversation cannot be found.",
+        "rate_limited": "Too many attempts. Try again in a moment.",
+        "invalid_input": "The reply is empty, too long or contains disallowed characters.",
+        "generic": "An error occurred. Please try again."
+      }
     }
   }
 }

@@ -8,10 +8,11 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { AutoRefresh } from "../../../../../components/inbox/auto-refresh";
 import { AssignConversationForm, ConversationStateForm } from "../../../../../components/inbox/conversation-controls";
+import { ReplyComposer } from "../../../../../components/inbox/reply-composer";
 import { Link } from "../../../../../i18n/navigation";
 import { requireLocale } from "../../../../../i18n/require-locale";
 import { requireClaims } from "../../../../../lib/auth/require-claims";
-import { listMessages, MESSAGES_PAGE_SIZE } from "../../../../../lib/conversations/service";
+import { getConversationLock, listMessages, MESSAGES_PAGE_SIZE } from "../../../../../lib/conversations/service";
 import { getInboxConversation } from "../../../../../lib/inbox/queries";
 import { listOrganizationMembers } from "../../../../../lib/members/queries";
 import { createClient } from "../../../../../lib/supabase/server";
@@ -31,7 +32,8 @@ const STATE_VARIANT = { open: "secondary", pending: "warning", closed: "outline"
  * Fil d'une conversation (J37), en lecture : messages du plus ancien au plus récent (les plus anciens par pages de 50), état, responsable,
  * contact. Le CORPS d'un message n'est affiché qu'ici, aux rôles qui lisent la conversation (owner et admin toutes, le commercial les
  * siennes ; une conversation interdite ou d'une autre entreprise est introuvable). Assigner : owner et admin ; changer l'état : owner et
- * admin, le commercial sur les siennes. Pas de composeur : les réponses arrivent avec le verrou humain / IA (J38).
+ * admin, le commercial sur les siennes. Répondre (J38) : owner et admin sur toute conversation, le commercial sur les siennes, par e-mail
+ * seulement ; le composeur prend un bail de 5 minutes (verrou humain / IA) et le worker envoie après le contrôle final.
  */
 export default async function ConversationPage({ params, searchParams }: Props) {
   const { id: rawId } = await params;
@@ -65,6 +67,13 @@ export default async function ConversationPage({ params, searchParams }: Props) 
   const canAssign = can(ctx.role, "assign", "unassigned_leads");
   const canSetState = conversation !== null && can(ctx.role, "reply", "conversations", { isOwnRecord: conversation.assignee_id === ctx.userId });
   const canOpenContact = can(ctx.role, "read", "contacts");
+  const canReply = canSetState;
+  // Verrou courant : l'état réel (jamais l'identité de l'autre rédacteur), relu à chaque rafraîchissement.
+  let lock: "none" | "mine" | "other" | "ai" = "none";
+  if (canReply && conversation) {
+    const status = await getConversationLock(supabase, ctx.organizationId, conversation.id);
+    if (status.ok) lock = status.value.handled_by === "ai_suggest" ? "ai" : status.value.lock;
+  }
   let members: { value: string; label: string }[] = [];
   if (canAssign) {
     try {
@@ -177,7 +186,7 @@ export default async function ConversationPage({ params, searchParams }: Props) 
               <CardTitle id="thread-messages-title">
                 <h2>{t("thread.messages")}</h2>
               </CardTitle>
-              <CardDescription>{t("thread.readOnly")}</CardDescription>
+              <CardDescription>{canReply ? t("reply.info") : t("reply.readOnly")}</CardDescription>
             </CardHeader>
             <CardContent className="grid gap-3">
               {messages.length >= MESSAGES_PAGE_SIZE ? (
@@ -216,6 +225,23 @@ export default async function ConversationPage({ params, searchParams }: Props) 
               ) : null}
             </CardContent>
           </Card>
+
+          {canReply ? (
+            <Card role="region" aria-labelledby="thread-reply-title">
+              <CardHeader>
+                <CardTitle id="thread-reply-title">
+                  <h2>{t("reply.label")}</h2>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {conversation.channel_type === "email" ? (
+                  <ReplyComposer conversationId={conversation.id} initialLock={lock} />
+                ) : (
+                  <p className="text-muted-foreground text-sm">{t("reply.unsupported")}</p>
+                )}
+              </CardContent>
+            </Card>
+          ) : null}
         </>
       )}
     </div>

@@ -195,7 +195,8 @@ describe("export CSV audité", () => {
     const bytes = new Uint8Array(await res.arrayBuffer());
     expect([...bytes.slice(0, 3)]).toEqual([0xef, 0xbb, 0xbf]);
     const text = new TextDecoder().decode(bytes);
-    expect(text.startsWith("lead_id,created_at,name,email,phone,source,stage,assignee_id,project_id")).toBe(true);
+    // (le décodeur retire le BOM vérifié juste au-dessus) l'indication de séparateur `sep=,` (Excel en français ou en arabe), puis l'en-tête
+    expect(text.startsWith("sep=,\r\nlead_id,created_at,name,email,phone,source,stage,assignee_id,project_id")).toBe(true);
     expect(text).toContain(name("Nadia"));
     expect(text).toContain(name("Sarah"));
     expect(text).not.toContain(name("Youssef"));

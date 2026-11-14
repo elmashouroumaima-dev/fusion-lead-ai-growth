@@ -123,8 +123,6 @@
   },
   "Dashboard": {
     "title": "Dashboard",
-    "signedInAs": "Signed in as",
-    "unknownUser": "Unknown user",
     "subtitle": "An overview of your organization and your access.",
     "organization": {
       "title": "Organization",
@@ -132,8 +130,7 @@
       "slug": "Identifier"
     },
     "role": {
-      "title": "Your role",
-      "description": "This role determines what you can do in this organization."
+      "title": "Your role"
     },
     "preferences": {
       "title": "Language and time zone",
@@ -147,10 +144,27 @@
     },
     "start": {
       "title": "Getting started",
-      "description": "Here are the next steps to set up your team.",
-      "members": "Manage members",
-      "membersHint": "Invite people and give them a role.",
-      "noMembers": "Member management is reserved for owners and administrators."
+      "progress": "{done} of {total} steps completed",
+      "done": "Completed",
+      "todo": "To do",
+      "steps": {
+        "project": {
+          "title": "Create your first project",
+          "hint": "A project groups your offers, leads and campaigns."
+        },
+        "lead": {
+          "title": "Add your first lead",
+          "hint": "Capture a contact and start following it."
+        },
+        "member": {
+          "title": "Invite your team",
+          "hint": "Give each person a role."
+        },
+        "integration": {
+          "title": "Connect a channel",
+          "hint": "E-mail or WhatsApp, to talk with your leads."
+        }
+      }
     },
     "usage": {
       "title": "Plan usage",
@@ -165,6 +179,30 @@
         "ai_runs": "AI runs this month",
         "integrations": "Integrations"
       }
+    },
+    "greeting": {
+      "morning": "Good morning",
+      "afternoon": "Good afternoon",
+      "evening": "Good evening"
+    },
+    "stats": {
+      "title": "Key figures",
+      "projects": "Projects",
+      "projectsHint": "Active workspaces",
+      "leads": "Leads",
+      "leadsHint": "People you are following",
+      "dealsOpen": "Open deals",
+      "dealsOpenHint": "Still in progress",
+      "dealsWon": "Deals won",
+      "dealsWonHint": "Closed successfully"
+    },
+    "quick": {
+      "title": "Quick actions",
+      "description": "Jump straight to what you do most.",
+      "project": "New project",
+      "lead": "View leads",
+      "member": "Invite a member",
+      "integration": "Connect a channel"
     }
   },
   "Org": {
@@ -557,7 +595,8 @@
       "description": "Choose the project type, then fill in its settings.",
       "submit": "Create project",
       "creating": "Creating…",
-      "back": "Back to projects"
+      "back": "Back to projects",
+      "cancel": "Cancel"
     },
     "form": {
       "type": "Project type",

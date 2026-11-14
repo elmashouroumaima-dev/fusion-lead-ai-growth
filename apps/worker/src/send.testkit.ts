@@ -1,4 +1,4 @@
-import { createKeyRing, type EmailProvider, type EmailSendInput, type EmailSendOutcome } from "@fusion-leap/adapters";
+import { createKeyRing, type EmailProvider, type EmailSendInput, type EmailSendOutcome, type WhatsAppSender, type WhatsAppSendInput, type WhatsAppSendOutcome } from "@fusion-leap/adapters";
 import type { SendClaim, SendGateway } from "./send";
 import type { SendDeps } from "./handlers";
 
@@ -11,8 +11,10 @@ export function claimedOk(patch: Partial<Extract<SendClaim, { status: "claimed" 
   return {
     status: "claimed",
     message: { body: "Bonjour Karim\nVoici notre offre.", approved: true, purpose: "marketing", approverValid: true, approvalAgeSeconds: 120, recipientUnchanged: true },
-    contact: { email: "karim@example.test", doNotContact: false },
-    channel: { type: "email", status: "active", sendPaused: false, sender: "ventes@acme.test", integrationId: SEND_INTEGRATION, integrationStatus: "active" },
+    contact: { email: "karim@example.test", phone: "+212600000001", doNotContact: false },
+    channel: { type: "email", status: "active", sendPaused: false, sender: "ventes@acme.test", integrationId: SEND_INTEGRATION, integrationStatus: "active", account: "106540352242922" },
+    windowOpen: true,
+    template: null,
     organizationActive: true,
     organizationSendPaused: false,
     consent: true,
@@ -69,9 +71,19 @@ export class FakeEmailProvider implements EmailProvider {
   }
 }
 
+export class FakeWhatsAppSender implements WhatsAppSender {
+  readonly name = "fake_whatsapp";
+  readonly sent: Array<{ input: WhatsAppSendInput; secret: string }> = [];
+  outcome: WhatsAppSendOutcome = { kind: "accepted", providerMessageId: "wamid.TEST" };
+  async send(input: WhatsAppSendInput, secret: string): Promise<WhatsAppSendOutcome> {
+    this.sent.push({ input, secret });
+    return this.outcome;
+  }
+}
+
 /** Dépendances d'envoi par défaut des tests qui n'envoient rien. */
 export function noSend(): SendDeps {
-  return { gateway: new MemorySend(), readSecret: async () => "tok-test-0123456789", provider: new FakeEmailProvider(), unsubscribe: testUnsubscribe() };
+  return { gateway: new MemorySend(), readSecret: async () => "tok-test-0123456789", provider: new FakeEmailProvider(), whatsapp: new FakeWhatsAppSender(), unsubscribe: testUnsubscribe() };
 }
 
 /** Trousseau de test (clé fixe, jamais utilisée hors tests) et site de test pour le lien de désabonnement. */

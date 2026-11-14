@@ -15,8 +15,11 @@ export type SendClaim =
   | {
       status: "claimed";
       message: { body: string; approved: boolean; purpose: string | null; approverValid: boolean; approvalAgeSeconds: number | null; recipientUnchanged: boolean };
-      contact: { email: string | null; doNotContact: boolean };
-      channel: { type: string; status: string; sendPaused: boolean; sender: string; integrationId: string; integrationStatus: string };
+      contact: { email: string | null; phone: string | null; doNotContact: boolean };
+      channel: { type: string; status: string; sendPaused: boolean; sender: string; integrationId: string; integrationStatus: string; account: string | null };
+      /** Fenêtre de conversation WhatsApp : le contact a écrit il y a moins de 24 h dans ce fil. */
+      windowOpen: boolean;
+      template: { status: string; name: string; language: string; category: string; version: number; variables: string[] } | null;
       organizationActive: boolean;
       organizationSendPaused: boolean;
       consent: boolean;
@@ -53,9 +56,11 @@ const claimSchema = z.discriminatedUnion("status", [
       body: z.string().min(1), approved: z.boolean(), purpose: z.string().nullable(),
       approver_valid: z.boolean(), approval_age_seconds: z.number().int().nullable(), recipient_unchanged: z.boolean(),
     }),
-    contact: z.object({ email: z.string().nullable(), do_not_contact: z.boolean() }),
+    contact: z.object({ email: z.string().nullable(), phone: z.string().nullable().default(null), do_not_contact: z.boolean() }),
+    window_open: z.boolean().default(false),
+    template: z.object({ status: z.string(), name: z.string(), language: z.string(), category: z.string(), version: z.number().int(), variables: z.array(z.string()) }).nullable().default(null),
     channel: z.object({
-      type: z.string(), status: z.string(), send_paused: z.boolean(), sender: z.string(), integration_id: z.uuid(), integration_status: z.string().nullable(),
+      type: z.string(), status: z.string(), send_paused: z.boolean(), sender: z.string(), integration_id: z.uuid(), integration_status: z.string().nullable(), account: z.string().nullable().default(null),
     }),
     organization_active: z.boolean(),
     organization_send_paused: z.boolean(),
@@ -91,10 +96,12 @@ export function createSupabaseSendGateway(env: SendEnv): SendGateway {
           body: row.message.body, approved: row.message.approved, purpose: row.message.purpose, approverValid: row.message.approver_valid,
           approvalAgeSeconds: row.message.approval_age_seconds, recipientUnchanged: row.message.recipient_unchanged,
         },
-        contact: { email: row.contact.email, doNotContact: row.contact.do_not_contact },
+        contact: { email: row.contact.email, phone: row.contact.phone, doNotContact: row.contact.do_not_contact },
+        windowOpen: row.window_open,
+        template: row.template,
         channel: {
           type: row.channel.type, status: row.channel.status, sendPaused: row.channel.send_paused, sender: row.channel.sender,
-          integrationId: row.channel.integration_id, integrationStatus: row.channel.integration_status ?? "unknown",
+          integrationId: row.channel.integration_id, integrationStatus: row.channel.integration_status ?? "unknown", account: row.channel.account,
         },
         organizationActive: row.organization_active,
         organizationSendPaused: row.organization_send_paused,

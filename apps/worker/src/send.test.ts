@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { createSendMessageHandler, type JobContext } from "./handlers";
 import { createKeyRing, verifyUnsubscribeToken } from "@fusion-leap/adapters";
-import { claimedOk, FakeEmailProvider, MemorySend, SEND_INTEGRATION, SEND_MESSAGE, SEND_ORG, TEST_SITE_URL, testUnsubscribe } from "./send.testkit";
+import { claimedOk, FakeEmailProvider, FakeWhatsAppSender, MemorySend, SEND_INTEGRATION, SEND_MESSAGE, SEND_ORG, TEST_SITE_URL, testUnsubscribe } from "./send.testkit";
 
 const ctx = (patch: Partial<JobContext> = {}): JobContext => ({
   jobId: "44444444-4444-4444-8444-444444444444", organizationId: SEND_ORG, idempotencyKey: "send-message:x", attempt: 1, maxAttempts: 5, signal: new AbortController().signal, ...patch,
@@ -10,12 +10,13 @@ const ctx = (patch: Partial<JobContext> = {}): JobContext => ({
 function setup(readSecret: (org: string, integration: string) => Promise<string | null> = async () => "tok-SECRET-0123456789", unsubscribe = testUnsubscribe()) {
   const gateway = new MemorySend();
   const provider = new FakeEmailProvider();
+  const whatsapp = new FakeWhatsAppSender();
   const secrets: Array<[string, string]> = [];
   const handler = createSendMessageHandler({
-    gateway, provider, readSecret: async (org, integration) => { secrets.push([org, integration]); return readSecret(org, integration); }, unsubscribe,
+    gateway, provider, whatsapp, readSecret: async (org, integration) => { secrets.push([org, integration]); return readSecret(org, integration); }, unsubscribe,
   });
   const run = (patch: Partial<JobContext> = {}) => handler.run(ctx(patch), { message_id: SEND_MESSAGE });
-  return { gateway, provider, handler, run, secrets };
+  return { gateway, provider, whatsapp, handler, run, secrets };
 }
 
 describe("send_message : désabonnement (J33)", () => {
@@ -37,12 +38,19 @@ describe("send_message : désabonnement (J33)", () => {
     expect(verifyUnsubscribeToken(createKeyRing(1, { 1: Buffer.alloc(32, 9).toString("base64") }), token)).toBeNull();
   });
 
-  it("sans clé de signature : échec AVANT la réclamation, rien ne part, aucun appel à la base", async () => {
+  it("e-mail sans clé de signature : rien ne part, la tentative est libérée (essai sûr), le job échoue et reste visible", async () => {
     const { gateway, provider, run } = setup(undefined, { keyRing: null, siteUrl: TEST_SITE_URL });
     await expect(run()).rejects.toThrow("unsubscribe_unavailable");
     expect(provider.sent).toHaveLength(0);
-    expect(gateway.calls).toEqual([]);
+    expect(gateway.released).toBe(1);
     expect(gateway.accepted).toEqual([]);
+  });
+
+  it("WhatsApp n'a pas besoin de la clé de désabonnement : il part sans elle", async () => {
+    const { whatsapp, run, gateway } = setup(undefined, { keyRing: null, siteUrl: TEST_SITE_URL });
+    gateway.claimResult = claimedOk({ channel: { ...claimedOk().channel, type: "whatsapp" } });
+    await run();
+    expect(whatsapp.sent).toHaveLength(1);
   });
 
   it("adresse désabonnée (suppression) : le contrôle final refuse, rien ne part", async () => {
@@ -93,7 +101,7 @@ describe("send_message : chemin nominal", () => {
     const provider = new FakeEmailProvider();
     const send = provider.send.bind(provider);
     provider.send = async (i, s) => { order.push("provider"); return send(i, s); };
-    const handler = createSendMessageHandler({ gateway, provider, readSecret: async () => { order.push("secret"); return "tok-0123456789"; }, unsubscribe: testUnsubscribe() });
+    const handler = createSendMessageHandler({ gateway, provider, whatsapp: new FakeWhatsAppSender(), readSecret: async () => { order.push("secret"); return "tok-0123456789"; }, unsubscribe: testUnsubscribe() });
     await handler.run(ctx(), { message_id: SEND_MESSAGE });
     expect(order).toEqual(["claim", "secret", "provider"]);
   });
@@ -107,13 +115,13 @@ describe("send_message : refus de la chaîne de contrôles (aucun appel au fourn
     ["adresse modifiée depuis l'approbation", { message: { ...claimedOk().message, recipientUnchanged: false } }, "refused_recipient_changed"],
     ["entreprise suspendue ou abonnement inactif", { organizationActive: false }, "refused_organization_inactive"],
     ["sans consentement", { consent: false }, "refused_no_consent"],
-    ["ne plus contacter", { contact: { email: "k@example.test", doNotContact: true } }, "refused_do_not_contact"],
+    ["ne plus contacter", { contact: { email: "k@example.test", phone: "+212600000001", doNotContact: true } }, "refused_do_not_contact"],
     ["adresse supprimée", { suppressed: true }, "refused_suppressed"],
     ["entreprise en pause", { organizationSendPaused: true }, "refused_organization_paused"],
     ["canal en pause", { channel: { ...claimedOk().channel, sendPaused: true } }, "refused_channel_paused"],
     ["canal non actif", { channel: { ...claimedOk().channel, status: "pending" } }, "refused_channel_inactive"],
     ["intégration déconnectée", { channel: { ...claimedOk().channel, integrationStatus: "disconnected" } }, "refused_channel_inactive"],
-    ["sans adresse", { contact: { email: null, doNotContact: false } }, "refused_no_recipient"],
+    ["sans adresse", { contact: { email: null, phone: null, doNotContact: false } }, "refused_no_recipient"],
   ];
   for (const [label, patch, code] of refusals) {
     it(`${label} : message « failed » (${code}), job réussi, rien d'envoyé`, async () => {
@@ -127,9 +135,9 @@ describe("send_message : refus de la chaîne de contrôles (aucun appel au fourn
     });
   }
 
-  it("canal non e-mail : refusé (channel_unsupported)", async () => {
+  it("canal ni e-mail ni WhatsApp : refusé (channel_unsupported)", async () => {
     const { gateway, provider, run } = setup();
-    gateway.claimResult = claimedOk({ channel: { ...claimedOk().channel, type: "whatsapp" } });
+    gateway.claimResult = claimedOk({ channel: { ...claimedOk().channel, type: "sms" } });
     await run();
     expect(provider.sent).toHaveLength(0);
     expect(gateway.failed).toEqual([{ code: "channel_unsupported" }]);
@@ -261,5 +269,104 @@ describe("send_message : aucune fuite", () => {
       expect(text).not.toContain("karim@example.test");
       expect(text).not.toContain("Voici notre offre");
     }
+  });
+});
+
+describe("send_message : WhatsApp (J36)", () => {
+  const wa = (patch: Partial<Extract<ReturnType<typeof claimedOk>, { status: "claimed" }>> = {}) =>
+    claimedOk({ channel: { ...claimedOk().channel, type: "whatsapp", sender: "+15550783881" }, ...patch });
+  const template = { status: "approved", name: "offre_ete", language: "fr", category: "marketing", version: 2, variables: ["Nadia"] };
+
+  it("dans la fenêtre de 24 h, sans modèle : texte libre vers le numéro SANS « + », identifiant du numéro du fournisseur ; accepté", async () => {
+    const { gateway, whatsapp, provider, run } = setup();
+    gateway.claimResult = wa({ windowOpen: true });
+    await run();
+    expect(provider.sent).toHaveLength(0);
+    expect(whatsapp.sent).toHaveLength(1);
+    expect(whatsapp.sent[0]?.input).toEqual({ kind: "text", phoneNumberId: "106540352242922", to: "212600000001", text: "Bonjour Karim\nVoici notre offre." });
+    expect(whatsapp.sent[0]?.secret).toBe("tok-SECRET-0123456789");
+    expect(gateway.accepted).toEqual([{ providerMessageId: "wamid.TEST" }]);
+  });
+
+  it("HORS fenêtre sans modèle : refusé AVANT tout appel (template_missing), message « failed »", async () => {
+    const { gateway, whatsapp, run } = setup();
+    gateway.claimResult = wa({ windowOpen: false, template: null });
+    await run();
+    expect(whatsapp.sent).toHaveLength(0);
+    expect(gateway.failed).toEqual([{ code: "refused_template_missing" }]);
+  });
+
+  it("HORS fenêtre avec un modèle approuvé : envoi du modèle (nom, langue, variables) ; la version est celle de la ligne réclamée", async () => {
+    const { gateway, whatsapp, run } = setup();
+    gateway.claimResult = wa({ windowOpen: false, template });
+    await run();
+    expect(whatsapp.sent[0]?.input).toEqual({ kind: "template", phoneNumberId: "106540352242922", to: "212600000001", template: { name: "offre_ete", language: "fr", variables: ["Nadia"] } });
+    expect(gateway.failed).toEqual([]);
+  });
+
+  it("modèle rattaché mais plus approuvé (suspendu depuis), même dans la fenêtre : refusé (template_missing)", async () => {
+    for (const status of ["paused", "pending", "rejected"]) {
+      const { gateway, whatsapp, run } = setup();
+      gateway.claimResult = wa({ windowOpen: true, template: { ...template, status } });
+      await run();
+      expect(whatsapp.sent, status).toHaveLength(0);
+      expect(gateway.failed, status).toEqual([{ code: "refused_template_missing" }]);
+    }
+  });
+
+  it("les contrôles communs s'appliquent : pas de consentement, adresse supprimée, ne plus contacter, pas de numéro", async () => {
+    const cases: Array<[Partial<Extract<ReturnType<typeof claimedOk>, { status: "claimed" }>>, string]> = [
+      [{ consent: false }, "refused_no_consent"],
+      [{ suppressed: true }, "refused_suppressed"],
+      [{ contact: { email: "karim@example.test", phone: "+212600000001", doNotContact: true } }, "refused_do_not_contact"],
+      [{ contact: { email: "karim@example.test", phone: null, doNotContact: false } }, "refused_no_recipient"],
+    ];
+    for (const [patch, code] of cases) {
+      const { gateway, whatsapp, run } = setup();
+      gateway.claimResult = wa(patch);
+      await run();
+      expect(whatsapp.sent, code).toHaveLength(0);
+      expect(gateway.failed, code).toEqual([{ code }]);
+    }
+  });
+
+  it("canal WhatsApp sans compte du fournisseur : « no_account », rien ne part", async () => {
+    const { gateway, whatsapp, run } = setup();
+    gateway.claimResult = wa({ channel: { ...wa().channel, account: null } as never });
+    await run();
+    expect(whatsapp.sent).toHaveLength(0);
+    expect(gateway.failed).toEqual([{ code: "no_account" }]);
+  });
+
+  it("résultats de Meta : refus définitif, limite (réessayable), inconnu (jamais renvoyé)", async () => {
+    let s = setup();
+    s.gateway.claimResult = wa();
+    s.whatsapp.outcome = { kind: "rejected", code: "window_closed" };
+    await s.run();
+    expect(s.gateway.failed).toEqual([{ code: "window_closed" }]);
+
+    s = setup();
+    s.gateway.claimResult = wa();
+    s.whatsapp.outcome = { kind: "retryable", code: "provider_rate_limited" };
+    await expect(s.run({ attempt: 1 })).rejects.toThrow("provider_rate_limited");
+    expect(s.gateway.released).toBe(1);
+
+    s = setup();
+    s.gateway.claimResult = wa();
+    s.whatsapp.outcome = { kind: "unknown", code: "no_response" };
+    await s.run();
+    expect(s.gateway.failed).toEqual([{ code: "send_outcome_unknown" }]);
+    expect(s.whatsapp.sent).toHaveLength(1);
+  });
+
+  it("un canal e-mail n'utilise jamais l'envoi WhatsApp (et inversement)", async () => {
+    const mail = setup();
+    await mail.run();
+    expect(mail.whatsapp.sent).toHaveLength(0);
+    expect(mail.provider.sent).toHaveLength(1);
+    const chat = setup();
+    chat.gateway.claimResult = wa();
+    await chat.run();
+    expect(chat.provider.sent).toHaveLength(0);
   });
 });

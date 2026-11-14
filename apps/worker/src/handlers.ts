@@ -6,10 +6,13 @@ import {
   listUnsubscribeHeaders,
   unsubscribeUrl,
   type EmailProvider,
+  type EmailSendOutcome,
   type KeyRing,
+  type WhatsAppSender,
+  type WhatsAppSendOutcome,
 } from "@fusion-leap/adapters";
 import {
-  checkCanSend, CsvError, CsvParser, crmMappingsSchema, decideCreate, deriveEmailSubject, detectDelimiter, EMAIL_SENDS_PER_HOUR, IMPORT_MAX_BYTES,
+  checkCanSend, CsvError, CsvParser, crmMappingsSchema, decideCreate, deriveEmailSubject, detectDelimiter, EMAIL_SENDS_PER_HOUR, IMPORT_MAX_BYTES, WHATSAPP_SENDS_PER_HOUR,
   isRetryableRefusal, normalizeContactEmail, normalizeImportRow, normalizePhone, resolveContactRecord, type CrmMappingEntry,
 } from "@fusion-leap/domain";
 import type { SecretReader, SendGateway } from "./send";
@@ -364,7 +367,7 @@ export function createProcessWebhookHandler(gateway: WebhookGateway, processors:
  */
 /** Désabonnement (J33) : trousseau de clés (`null` si la clé maître manque : l'envoi est alors refusé, jamais fait sans lien) et URL publique du site. */
 export type UnsubscribeDeps = { keyRing: KeyRing | null; siteUrl: string };
-export type SendDeps = { gateway: SendGateway; readSecret: SecretReader; provider: EmailProvider; unsubscribe: UnsubscribeDeps };
+export type SendDeps = { gateway: SendGateway; readSecret: SecretReader; provider: EmailProvider; whatsapp: WhatsAppSender; unsubscribe: UnsubscribeDeps };
 
 export function createSendMessageHandler(deps: SendDeps): JobHandler {
   return defineHandler({
@@ -374,8 +377,6 @@ export function createSendMessageHandler(deps: SendDeps): JobHandler {
       const org = ctx.organizationId;
       const messageId = payload.message_id;
       const { gateway } = deps;
-      // sans clé de signature rien ne peut partir : on échoue AVANT la réclamation (le message reste en file, le job visible dans les échecs)
-      if (!deps.unsubscribe.keyRing) throw new Error("unsubscribe_unavailable");
       const claim = await gateway.claim(org, messageId);
       if (claim.status === "missing" || claim.status === "not_queued") return;
       if (claim.status === "in_progress") {
@@ -388,9 +389,15 @@ export function createSendMessageHandler(deps: SendDeps): JobHandler {
         return;
       }
       // à partir d'ici la tentative est posée : toute sortie anticipée la libère (essai sûr) ou clôt le message
-      if (claim.channel.type !== "email") {
+      const whatsapp = claim.channel.type === "whatsapp";
+      if (claim.channel.type !== "email" && !whatsapp) {
         await gateway.markFailed(org, messageId, "channel_unsupported");
         return;
+      }
+      // un e-mail sans clé de signature ne part jamais (pas de lien de désabonnement) : la tentative est libérée, le job échoue et reste visible
+      if (!whatsapp && !deps.unsubscribe.keyRing) {
+        await bestEffort(() => gateway.releaseClaim(org, messageId));
+        throw new Error("unsubscribe_unavailable");
       }
       const check = checkCanSend({
         approved: claim.message.approved,
@@ -399,12 +406,13 @@ export function createSendMessageHandler(deps: SendDeps): JobHandler {
         organizationActive: claim.organizationActive,
         organizationSendPaused: claim.organizationSendPaused,
         channel: { status: claim.channel.status, sendPaused: claim.channel.sendPaused, integrationStatus: claim.channel.integrationStatus },
-        recipient: claim.contact.email,
+        recipient: whatsapp ? claim.contact.phone : claim.contact.email,
         doNotContact: claim.contact.doNotContact,
         suppressed: claim.suppressed,
         consent: claim.consent,
-        template: { required: false, approved: false },
-        rate: { sentInWindow: claim.sentLastHour, limit: EMAIL_SENDS_PER_HOUR },
+        // WhatsApp : hors de la fenêtre de 24 h un modèle APPROUVÉ est obligatoire ; un modèle rattaché mais plus approuvé (suspendu depuis) refuse aussi l'envoi
+        template: { required: whatsapp && (!claim.windowOpen || claim.template !== null), approved: claim.template !== null && claim.template.status === "approved" },
+        rate: { sentInWindow: claim.sentLastHour, limit: whatsapp ? WHATSAPP_SENDS_PER_HOUR : EMAIL_SENDS_PER_HOUR },
       });
       if (!check.ok) {
         if (isRetryableRefusal(check.reason) && ctx.attempt < ctx.maxAttempts) {
@@ -431,18 +439,35 @@ export function createSendMessageHandler(deps: SendDeps): JobHandler {
         throw new Error("aborted");
       }
 
-      // chaque e-mail porte son lien de désabonnement signé (en-têtes One-Click et pied de page)
-      const unsubUrl = unsubscribeUrl(deps.unsubscribe.siteUrl, createUnsubscribeToken(deps.unsubscribe.keyRing, { organizationId: org, messageId }));
-
-      // juste avant l'appel : aucun autre accès base entre le contrôle final et le fournisseur
-      const outcome = await deps.provider.send(
-        {
-          from: claim.channel.sender, to: claim.contact.email as string, subject: deriveEmailSubject(claim.message.body),
-          textBody: appendUnsubscribeFooter(claim.message.body, unsubUrl), headers: listUnsubscribeHeaders(unsubUrl),
-          metadata: { fusion_message_id: messageId },
-        },
-        secret,
-      );
+      let outcome: EmailSendOutcome | WhatsAppSendOutcome;
+      if (whatsapp) {
+        // numéro du fournisseur et destinataire : jamais d'une valeur du client (lignes de la réclamation) ; le « + » du E.164 n'est pas envoyé
+        const phoneNumberId = claim.channel.account;
+        const to = claim.contact.phone?.replace(/^\+/, "") ?? "";
+        if (phoneNumberId === null) {
+          await gateway.markFailed(org, messageId, "no_account");
+          return;
+        }
+        // juste avant l'appel : aucun autre accès base entre le contrôle final et le fournisseur
+        outcome = await deps.whatsapp.send(
+          claim.template
+            ? { kind: "template", phoneNumberId, to, template: { name: claim.template.name, language: claim.template.language, variables: claim.template.variables } }
+            : { kind: "text", phoneNumberId, to, text: claim.message.body },
+          secret,
+        );
+      } else {
+        // chaque e-mail porte son lien de désabonnement signé (en-têtes One-Click et pied de page)
+        const unsubUrl = unsubscribeUrl(deps.unsubscribe.siteUrl, createUnsubscribeToken(deps.unsubscribe.keyRing as KeyRing, { organizationId: org, messageId }));
+        // juste avant l'appel : aucun autre accès base entre le contrôle final et le fournisseur
+        outcome = await deps.provider.send(
+          {
+            from: claim.channel.sender, to: claim.contact.email as string, subject: deriveEmailSubject(claim.message.body),
+            textBody: appendUnsubscribeFooter(claim.message.body, unsubUrl), headers: listUnsubscribeHeaders(unsubUrl),
+            metadata: { fusion_message_id: messageId },
+          },
+          secret,
+        );
+      }
       switch (outcome.kind) {
         case "accepted":
           await markAcceptedWithRetry(gateway, org, messageId, outcome.providerMessageId);

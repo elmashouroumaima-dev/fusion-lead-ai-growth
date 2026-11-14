@@ -100,6 +100,8 @@ export function isRetryableRefusal(reason: SendRefusalReason): boolean {
 
 /** Limite provisoire d'envois par canal et par heure, en attendant le limiteur par fournisseur du J39 (décision de la responsable technique). */
 export const EMAIL_SENDS_PER_HOUR = 100;
+/** Limite PROVISOIRE d'envois WhatsApp par heure et par canal (J36) : à fixer avec le palier de messagerie de Meta et le plan de l'entreprise. */
+export const WHATSAPP_SENDS_PER_HOUR = 100;
 
 /** Objet de l'e-mail (la table des messages n'a pas de sujet avant les modèles du J40) : première ligne non vide du corps, 120 caractères au plus. */
 export function deriveEmailSubject(body: string): string {

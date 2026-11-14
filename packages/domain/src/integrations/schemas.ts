@@ -62,6 +62,10 @@ export type ReplaceIntegrationSecretInput = z.infer<typeof replaceIntegrationSec
 export const validateIntegrationSchema = z.object({ integration_id: uuidSchema }).strict();
 export type ValidateIntegrationInput = z.infer<typeof validateIntegrationSchema>;
 
+/** Synchronisation des modèles WhatsApp (J36) : le compte WhatsApp Business (`waba_id`) est fourni à chaque appel (non conservé) ; l'entreprise vient du contexte vérifié. */
+export const syncTemplatesSchema = z.object({ integration_id: uuidSchema, channel_id: uuidSchema, waba_id: z.string().regex(/^[0-9]{5,30}$/) }).strict();
+export type SyncTemplatesInput = z.infer<typeof syncTemplatesSchema>;
+
 export const disconnectIntegrationSchema = z.object({ integration_id: uuidSchema }).strict();
 export type DisconnectIntegrationInput = z.infer<typeof disconnectIntegrationSchema>;
 

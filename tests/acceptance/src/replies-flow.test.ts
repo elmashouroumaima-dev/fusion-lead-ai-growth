@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { createKeyRing, type EmailProvider, type EmailSendInput } from "../../../packages/adapters/src";
+import { createKeyRing, type EmailProvider, type EmailSendInput, type WhatsAppSender } from "../../../packages/adapters/src";
 import { createSendMessageHandler } from "../../../apps/worker/src/handlers";
 import type { SendClaim, SendGateway } from "../../../apps/worker/src/send";
 import { api, ORG, psql, USER } from "../../../supabase/tests/rls/src/harness";
@@ -39,8 +39,10 @@ const rpc = async <T>(name: string, body: Record<string, unknown>): Promise<T> =
 type RawClaim = {
   status: string;
   message?: { body: string; approved: boolean; purpose: string | null; approver_valid: boolean; approval_age_seconds: number | null; recipient_unchanged: boolean };
-  contact?: { email: string | null; do_not_contact: boolean };
-  channel?: { type: string; status: string; send_paused: boolean; sender: string; integration_id: string; integration_status: string | null };
+  contact?: { email: string | null; phone?: string | null; do_not_contact: boolean };
+  window_open?: boolean;
+  template?: { status: string; name: string; language: string; category: string; version: number; variables: string[] } | null;
+  channel?: { type: string; status: string; send_paused: boolean; sender: string; integration_id: string; integration_status: string | null; account?: string | null };
   organization_active?: boolean;
   organization_send_paused?: boolean;
   consent?: boolean;
@@ -57,10 +59,12 @@ const gateway: SendGateway = {
         body: raw.message.body, approved: raw.message.approved, purpose: raw.message.purpose, approverValid: raw.message.approver_valid,
         approvalAgeSeconds: raw.message.approval_age_seconds, recipientUnchanged: raw.message.recipient_unchanged,
       },
-      contact: { email: raw.contact.email, doNotContact: raw.contact.do_not_contact },
+      contact: { email: raw.contact.email, phone: raw.contact.phone ?? null, doNotContact: raw.contact.do_not_contact },
+      windowOpen: raw.window_open === true,
+      template: raw.template ?? null,
       channel: {
         type: raw.channel.type, status: raw.channel.status, sendPaused: raw.channel.send_paused, sender: raw.channel.sender,
-        integrationId: raw.channel.integration_id, integrationStatus: raw.channel.integration_status ?? "unknown",
+        integrationId: raw.channel.integration_id, integrationStatus: raw.channel.integration_status ?? "unknown", account: raw.channel.account ?? null,
       },
       organizationActive: raw.organization_active === true,
       organizationSendPaused: raw.organization_send_paused === true,
@@ -87,8 +91,15 @@ const provider: EmailProvider = {
     return { kind: "accepted", providerMessageId: `pm-${TAG}-${sent.length}` };
   },
 };
+// la réponse est e-mail seulement (J38) : l'expéditeur WhatsApp ne doit jamais être appelé
+const unusedWhatsApp: WhatsAppSender = {
+  name: "test-whatsapp-unused",
+  async send() {
+    throw new Error("whatsapp_must_not_be_called");
+  },
+};
 const sendHandler = createSendMessageHandler({
-  gateway, readSecret: async () => "jeton-de-test", provider,
+  gateway, readSecret: async () => "jeton-de-test", provider, whatsapp: unusedWhatsApp,
   unsubscribe: { keyRing: createKeyRing(1, { 1: Buffer.alloc(32, 7).toString("base64") }), siteUrl: "http://localhost:3000" },
 });
 const runWorker = (message: string) =>

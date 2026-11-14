@@ -3,6 +3,12 @@
 Format : Keep a Changelog. Une entrée par jour de travail.
 
 ## [Non publié]
+### J38 — Réponses et verrou humain / IA (branche `day-38-replies`)
+- Ajout : `POST /api/conversations/:id/replies` (`Idempotency-Key` obligatoire, 1 à 10 000 caractères, `202 { message_id, status: "queued" }`) : la réponse est créée et approuvée par son auteur en une transaction (owner et admin partout, commercial sur SES conversations, marketing et analyste jamais), puis envoyée par le worker après le contrôle final ; composeur dans `/inbox/[id]` (e-mail) avec bail de 5 minutes, battement de cœur de 2 minutes, bandeaux « autre membre » et « IA » et « Reprendre la main » ; messages fr / ar / en.
+- Ajout : migration `20261210100000_replies_lock.sql` (et retour arrière) : `conversation_reply`, bail (`conversation_lock_acquire` / `status` / `release`), `conversation_take_over`, `conversation_ai_claim` / `conversation_ai_release` (service_role), jamais l'IA et un humain en même temps.
+- Modifié : `message_send_claim` (J31) : un commercial approuve sa propre réponse sur sa conversation ; consentement conversationnel de 30 jours pour la finalité `reply`. **Point sensible à valider** ; conflit à fusionner avec la migration WhatsApp (J36) qui remplace la même fonction.
+- Tests : pgTAP `270_replies_lock` (46), Vitest `lib/conversations/reply.test.ts` (8), acceptation HTTP `replies-flow.test.ts` (11 : rôles, clé d'idempotence, envoi par le worker avec un fournisseur de test, `do_not_contact`, verrou IA / humain).
+- Écart au plan : WhatsApp indisponible pour la réponse (J36 non fusionnée) ; une migration qui remplace une fonction de J31.
 ### J37 — Boîte de réception unifiée (branche `day-37-inbox`)
 - Ajout : pages `/inbox` (e-mail et WhatsApp dans une même liste, filtres état / canal / responsable, recherche, aperçu de 140 caractères du dernier message) et `/inbox/[id]` (fil en lecture, assigner, changer l'état), lien « Boîte de réception » dans le menu pour owner, admin et commercial ; actualisation automatique toutes les 15 s ; messages fr / ar / en.
 - Ajout : migration `20261209100000_inbox.sql` (et retour arrière) : `search_conversations` (SECURITY DEFINER qui réapplique les droits de lecture des conversations ; nom du contact, type du canal et aperçu tronqué) ; Server Actions `inbox.assign` et `inbox.state.set` (idempotence obligatoire, droits ADR 014) ; ADR 013 (polling, **Proposed**).

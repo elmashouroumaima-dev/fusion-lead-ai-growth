@@ -866,3 +866,29 @@ Cible : 60,3 % (plan à 68 jours) | Réel : à valider | Statut : —
 ### À surveiller
 - Un message dont la transaction partage le même `created_at` (import en bloc) peut s'afficher dans un autre ordre : les messages réels arrivent dans des transactions séparées.
 - Cinq tests `test:rls` (jobs, imports, webhooks, chaîne d'envoi) échouent tant que le worker de développement tourne ; sans lien avec J37.
+
+## J38 — Réponses et verrou humain / IA (branche `day-38-replies`)
+Cible : 61,8 % (plan à 68 jours) | Réel : à valider | Statut : —
+⚠ Branche empilée sur `day-37-inbox` (PR #50) ; la PR de J38 vise `day-37-inbox` puis sera retargetée vers `main`.
+
+### Tâches
+| Tâche | Estimé | Livré | Validée |
+|---|---|---|---|
+| SQL : réponse + verrou humain / IA | 2 h | oui (`20261210100000_replies_lock.sql`) | pgTAP 46 |
+| API `POST /api/conversations/:id/replies` | 1 h | oui (202 queued, clé obligatoire) | acceptation HTTP |
+| UI : composeur, bandeau de verrou, battement de cœur | 2 h | oui (`reply-composer.tsx`) | acceptation HTTP (composeur présent) ; essai en navigateur à faire par l'utilisateur |
+| Tests + démonstration (worker avec fournisseur de test) | 1 h | oui (`replies-flow.test.ts`) | acceptation 11 |
+
+### Validation du jour
+- Réponse envoyée par le worker : démontré (statut « accepté », un seul appel au fournisseur, bon destinataire / expéditeur / texte ; un second passage n'envoie rien).
+- Pas de réponse simultanée IA + humain : démontré en SQL (pgTAP) et par HTTP (409 pendant le bail d'un autre membre ou pendant que l'IA tient la conversation ; « Reprendre la main » rend la réponse possible).
+- Contrôle final : un contact « ne pas contacter » reçoit un message mis en file mais le worker refuse de l'envoyer.
+
+### Écarts à la spec / plan
+- `message_send_claim` (J31) est remplacée : un commercial approuve sa propre réponse sur sa conversation, et le consentement conversationnel (30 jours) couvre la finalité `reply`. Décision « option B » validée avec l'utilisateur ; **à faire valider par la responsable technique** (changement d'une règle d'envoi).
+- E-mail seulement : la réponse WhatsApp arrive avec J36 (non fusionnée).
+
+### À surveiller
+- Fusion avec la migration WhatsApp (J36) : les deux remplacent `message_send_claim` ; garder une seule version qui contient les changements des deux.
+- Le battement de cœur du bail (2 minutes) dépend du navigateur ouvert ; sinon le bail expire seul au bout de 5 minutes.
+- Cinq tests `test:rls` (jobs, imports, webhooks, chaîne d'envoi) échouent tant que le worker de développement tourne ; sans lien avec J38 (`replies-flow` neutralise ce worker pour ses propres messages).

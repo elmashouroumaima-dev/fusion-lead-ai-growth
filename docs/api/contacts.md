@@ -46,6 +46,17 @@ Codes d'erreur : `28000` non authentifié · `42501` interdit · `22023` / `2351
 ## Audit
 `contact.created`, `contact.updated` (noms des champs modifiés), `contact.do_not_contact_changed`, `consent.recorded` (contact, canal, finalité, source), `consent.revoked`. **Jamais** le nom, l'e-mail, le téléphone ni la preuve.
 
+## Écran Contacts (J30b)
+Pages `/contacts` (liste) et `/contacts/[id]` (fiche). **Rôles** : owner, admin et marketing ; le commercial et l'analyste sont renvoyés au tableau de bord (données personnelles) ; un contact d'une autre entreprise ou un identifiant invalide donne 404. Le lien du menu n'apparaît que pour ces rôles (commodité d'affichage : la page et la RLS décident).
+- **Liste** : recherche (nom, e-mail, téléphone) et pagination (25 par page) côté serveur par `search_contacts(p_org, p_query, p_limit, p_offset)` : fonction **SECURITY INVOKER** (la RLS de `contacts` s'applique à l'appelant ; filtre d'entreprise explicite), saisie **échappée** (`%`, `_`, `\` ne sont jamais des motifs), recherche de téléphone par chiffres, limite de 1 à 200, total renvoyé avec chaque ligne. Migration `20261208100000_contacts_search.sql` (retour arrière : `supabase/rollbacks/20261208100000_contacts_search.sql`). Colonnes : contact, e-mail, téléphone, statut du consentement, « ne plus contacter », date de création.
+- **Fiche** : coordonnées, statut dérivé, historique de `consent_events` (canal, finalité, date, source, état actif ou retiré le …) avec la **preuve** : texte présenté et version. **L'adresse IP et l'URL conservées dans la preuve ne sont jamais affichées.**
+- **Formulaires** (Server Actions, `withAction` : zod, contexte tenant relu en base, `organization_id` comparé, `can()`, limitation de débit, **clé d'idempotence obligatoire**) :
+  - `contacts.consent.record` : canal, finalité (marketing, lettre d'information), source (saisi à la main, téléphone, en personne, formulaire papier), texte et version facultatifs ; permission `contacts` / `create` ; la preuve se limite au texte et à la version ;
+  - `contacts.consent.revoke` : canal, finalité (ou toutes), case « bloquer aussi » ; permission `consent` / `revoke` ; effet immédiat ;
+  - `contacts.do_not_contact.set` : pose ou lève le blocage ; permission `consent` / `mark_do_not_contact` ; le bouton « lever » n'est proposé qu'à owner et admin et la base le revérifie (marketing : refus).
+  Chaque action rappelle les fonctions SQL de J18 (`record_consent`, `revoke_consent`, `set_do_not_contact`) : rôle relu par la base, quota, audit (`consent.recorded`, `consent.revoked`, `contact.do_not_contact_changed`) **sans donnée personnelle**.
+- **Pas de création de contact ni de lead dans cet écran** : la création arrive avec la fiche lead (J30c, J30d) ; aucune route d'API REST n'a été ajoutée (Server Actions, comme l'écran Projets).
+
 ## Limites connues
 - **Journaux Postgres** : une violation d'unicité ou de contrainte écrit la valeur fautive dans le DETAIL du journal du serveur de base (jamais renvoyée au client). En production : `log_error_verbosity = terse` ou filtrage des journaux (à traiter avec l'hébergement, ADR 010).
 - **Décisions d'architecture soumises à la responsable technique** : (1) table de suppression d'identifiants alimentée quand `do_not_contact` passe à vrai (aujourd'hui, un owner ou admin peut encore libérer l'identifiant d'un contact « ne plus contacter ») ; (2) fonction SQL unique `can_contact(org, contact, canal, finalité)` pour le contrôle final d'envoi.

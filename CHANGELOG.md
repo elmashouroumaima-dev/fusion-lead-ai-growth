@@ -3,6 +3,12 @@
 Format : Keep a Changelog. Une entrée par jour de travail.
 
 ## [Non publié]
+### J30b — Écran contacts et consentement (branche `day-30b-contacts`)
+- Ajout : pages `/contacts` (liste, recherche par nom, e-mail ou téléphone, pagination côté serveur) et `/contacts/[id]` (coordonnées, statut, historique du consentement avec la preuve, enregistrer ou retirer un consentement, poser ou lever « ne plus contacter »), lien « Contacts » dans le menu pour owner, admin et marketing ; messages fr / ar / en.
+- Ajout : migration `20261208100000_contacts_search.sql` (et retour arrière) : `search_contacts` (SECURITY INVOKER, saisie échappée) ; Server Actions `contacts.consent.record`, `contacts.consent.revoke`, `contacts.do_not_contact.set` (idempotence obligatoire, droits ADR 014, base revérifiant le rôle).
+- Règles : l'adresse IP et l'URL d'une preuve ne sont jamais affichées ; lever « ne plus contacter » : owner et admin seulement ; commercial et analyste renvoyés au tableau de bord.
+- Tests : pgTAP `250_contacts_search` (19), Vitest `lib/contacts/action-schemas.test.ts` (33 avec les services), acceptation HTTP `contacts-pages.test.ts` (6 : rôles, recherche, pagination, preuve sans IP, autre entreprise en 404).
+- Écart au plan : une migration (recherche) alors que le plan n'en prévoyait pas ; la création de contact ou de lead n'est pas dans J30b (voir J30c et J30d).
 ### Hors plan — tableau de bord repensé (branche `day-37a-dashboard-ux`)
 - Modification : tableau de bord (`apps/web/app/[locale]/(app)/dashboard/page.tsx`) : en-tête d'accueil (salutation selon l'heure du fuseau de l'organisation, date longue, rôle), cartes d'indicateurs (projets, leads, deals ouverts, deals gagnés) lues sous RLS (`lib/dashboard/queries.ts` ; `null` = carte masquée, jamais de faux zéro), liste « pour commencer » avec progression, actions rapides filtrées par rôle, barres d'usage du plan vert / ambre / rouge, carte organisation regroupée.
 - Modification : thème global indigo / violet (`app/globals.css`, clair et sombre, rayon 0,75 rem, logo) ; ADR 015 amendé. Contrastes AA vérifiés par les tests.

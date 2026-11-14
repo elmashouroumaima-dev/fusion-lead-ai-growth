@@ -818,3 +818,26 @@ Cible : 52,9 % (plan à 68 jours) | Réel : à valider | Statut : —
 - Secret de webhook fourni par l'administrateur (et non généré par le serveur) ; table `inbound_unmatched` et second secret : amendements de l'ADR 007.
 - Tout ce qui dépend de Postmark reste À CONFIRMER sur un compte sandbox (checkpoint C3) : en-têtes SPF / DKIM des entrants, `Metadata` des événements, codes de rebond.
 - Aucun flux n'active encore un canal e-mail : ni envoi réel ni réception réelle avant ce flux et C3.
+
+## J30b — Écran contacts et consentement (branche `day-30b-contacts`, hors ordre : avant J33, décision C2)
+Cible : 47,1 % (plan à 68 jours) | Réel : à valider | Statut : —
+Décision C2 : écrans avant G3, contacts et consentement avant le premier envoi.
+
+### Tâches
+| Tâche | Estimé | Livré | Validée |
+|---|---|---|---|
+| Liste + recherche + détail du contact | 2 h | oui (`/contacts`, `/contacts/[id]`, `search_contacts`) | pgTAP 19, Vitest, acceptation HTTP 6 ✓, navigateur (liste, fiche, enregistrer et retirer un consentement) |
+| Enregistrer / révoquer un consentement et `do_not_contact` | 2 h | oui (3 Server Actions, idempotence, droits) | Vitest ; navigateur : notification, statut « Consent given » puis « withdrawn », audit sans donnée personnelle |
+| Messages fr / ar / en | 1 h | oui | parité et typographie vérifiées par les tests existants |
+| Tests HTTP et rôles | 1 h | `tests/acceptance/src/contacts-pages.test.ts` | 6 ✓ (après `pnpm db:reset`, les mots de passe du seed ne fonctionnaient plus) |
+
+### Validation du jour
+- Le consentement et sa preuve sont lisibles (texte et version) ; l'adresse IP de la preuve n'est jamais affichée.
+- La révocation est visible dans l'historique (retiré le …) et journalisée par la base (`consent.revoked`, sans donnée personnelle).
+- Analyst et commercial n'accèdent pas aux contacts (redirection au tableau de bord).
+- Démontré dans le navigateur (compte propriétaire) : enregistrement puis retrait d'un consentement, notifications, historique, audit `consent.recorded` / `consent.revoked` sans nom ni e-mail.
+- À surveiller : cinq tests `test:rls` (jobs, imports, webhooks, chaîne d'envoi) échouent tant que le worker de développement tourne (il réclame les jobs en même temps que les tests) ; sans lien avec J30b.
+
+### Écarts à la spec / plan
+- Une migration (`search_contacts`) : le plan n'en prévoyait pas, la recherche partielle avec total en demande une (même schéma que `search_leads`).
+- Pas de création de contact ni de lead : hors plan J30b, à traiter avec J30c et J30d.

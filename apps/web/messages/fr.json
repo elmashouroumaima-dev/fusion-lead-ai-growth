@@ -26,7 +26,8 @@
       "leads": "Leads",
       "deals": "Deals",
       "crmSync": "CRM",
-      "integrations": "Intégrations"
+      "integrations": "Intégrations",
+      "contacts": "Contacts"
     },
     "sidebar": {
       "toggle": "Afficher ou masquer le menu latéral",
@@ -924,6 +925,146 @@
       "cancel": "Annuler",
       "done": "Intégration déconnectée.",
       "failed": "L'intégration n'a pas pu être déconnectée."
+    }
+  },
+  "Contacts": {
+    "title": "Contacts",
+    "description": "Toutes les personnes que vous pouvez contacter, avec la preuve de leur consentement. Enregistrez ou retirez un consentement et bloquez un contact pour tout message futur.",
+    "search": {
+      "label": "Rechercher un contact",
+      "placeholder": "Nom, e-mail ou téléphone",
+      "submit": "Rechercher",
+      "reset": "Réinitialiser"
+    },
+    "count": "Résultats : {count}",
+    "empty": "Aucun contact pour l’instant.",
+    "emptyFiltered": "Aucun contact ne correspond à cette recherche.",
+    "table": {
+      "contact": "Contact",
+      "email": "E-mail",
+      "phone": "Téléphone",
+      "consent": "Consentement",
+      "doNotContact": "Ne plus contacter",
+      "created": "Créé le",
+      "open": "Ouvrir",
+      "openNamed": "Ouvrir {name}",
+      "unnamed": "Sans nom"
+    },
+    "status": {
+      "unknown": "Aucun consentement",
+      "granted": "Consentement donné",
+      "revoked": "Consentement retiré"
+    },
+    "dnc": {
+      "yes": "Bloqué",
+      "no": "Non"
+    },
+    "pagination": {
+      "label": "Pagination",
+      "previous": "Page précédente",
+      "next": "Page suivante",
+      "status": "Page {page} sur {pageCount}"
+    },
+    "detail": {
+      "back": "Retour aux contacts",
+      "identity": "Coordonnées",
+      "name": "Nom",
+      "email": "E-mail",
+      "phone": "Téléphone",
+      "language": "Langue",
+      "country": "Pays",
+      "created": "Créé le",
+      "status": "Statut du consentement",
+      "doNotContact": "Ne plus contacter",
+      "blocked": "Aucun message ne sera envoyé à ce contact.",
+      "notBlocked": "Ce contact peut être sollicité si un consentement valide existe.",
+      "notFound": "Ce contact est introuvable."
+    },
+    "history": {
+      "title": "Historique du consentement",
+      "description": "Chaque consentement est conservé avec sa preuve. Un retrait ne l’efface jamais.",
+      "empty": "Aucun consentement enregistré pour ce contact.",
+      "channel": "Canal",
+      "purpose": "Finalité",
+      "source": "Source",
+      "captured": "Enregistré le",
+      "state": "État",
+      "active": "Actif",
+      "revokedOn": "Retiré le {date}",
+      "proof": "Preuve",
+      "proofText": "Texte présenté",
+      "proofVersion": "Version",
+      "noProof": "Aucun texte de preuve enregistré"
+    },
+    "record": {
+      "title": "Enregistrer un consentement",
+      "description": "À utiliser quand un contact vous a donné son accord en dehors d’un formulaire (téléphone, en personne, papier). Indiquez comment il a été donné.",
+      "channel": "Canal",
+      "purpose": "Finalité",
+      "source": "Comment il a été donné",
+      "text": "Texte accepté par le contact",
+      "textHint": "Facultatif, 2000 caractères au plus.",
+      "version": "Version du texte",
+      "versionHint": "Facultatif, 50 caractères au plus.",
+      "submit": "Enregistrer le consentement",
+      "saving": "Enregistrement…",
+      "needEmail": "Ce contact n’a pas d’adresse e-mail : choisissez WhatsApp ou ajoutez-en une.",
+      "needPhone": "Ce contact n’a pas de téléphone : choisissez l’e-mail ou ajoutez-en un."
+    },
+    "revoke": {
+      "title": "Retirer un consentement",
+      "description": "Effet immédiat : les messages en attente pour ce canal ne sont pas envoyés.",
+      "channel": "Canal",
+      "purpose": "Finalité",
+      "allPurposes": "Toutes les finalités",
+      "alsoBlock": "Bloquer aussi ce contact pour tout message futur",
+      "submit": "Retirer le consentement",
+      "saving": "Enregistrement…"
+    },
+    "block": {
+      "title": "Ne plus contacter",
+      "descriptionOff": "Bloque tout message futur vers ce contact, quel que soit son consentement.",
+      "descriptionOn": "Ce contact est bloqué. Seul un propriétaire ou un administrateur peut lever le blocage.",
+      "set": "Bloquer ce contact",
+      "clear": "Lever le blocage",
+      "clearOnlyAdmin": "Seul un propriétaire ou un administrateur peut lever le blocage.",
+      "saving": "Enregistrement…"
+    },
+    "channels": {
+      "email": "E-mail",
+      "whatsapp": "WhatsApp"
+    },
+    "purposes": {
+      "marketing": "Marketing",
+      "newsletter": "Lettre d’information"
+    },
+    "sources": {
+      "manual": "Saisi à la main",
+      "phone": "Par téléphone",
+      "in_person": "En personne",
+      "paper_form": "Formulaire papier",
+      "web_form": "Formulaire web",
+      "csv_import": "Import CSV",
+      "other": "Autre"
+    },
+    "success": {
+      "consentRecorded": "Consentement enregistré.",
+      "consentRevoked": "Consentement retiré.",
+      "doNotContactSet": "Contact bloqué.",
+      "doNotContactCleared": "Blocage levé."
+    },
+    "errors": {
+      "invalid_input": "Certaines valeurs sont invalides. Vérifiez les champs.",
+      "forbidden": "Votre rôle ne permet pas cette action.",
+      "conflict": "Cette modification entre en conflit avec un autre contact.",
+      "not_found": "Ce contact est introuvable.",
+      "rate_limited": "Trop de tentatives. Réessayez dans un instant.",
+      "duplicate_request": "Cette demande a déjà été traitée.",
+      "idempotency_in_progress": "La demande est en cours de traitement.",
+      "idempotency_conflict": "Cette demande a déjà été envoyée avec d’autres valeurs. Rechargez la page.",
+      "service_unavailable": "Service momentanément indisponible. Réessayez plus tard.",
+      "generic": "Une erreur est survenue. Veuillez réessayer.",
+      "load": "Les contacts n’ont pas pu être chargés. Réessayez."
     }
   }
 }

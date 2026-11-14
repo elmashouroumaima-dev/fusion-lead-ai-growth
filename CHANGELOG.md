@@ -3,6 +3,9 @@
 Format : Keep a Changelog. Une entrée par jour de travail.
 
 ## [Non publié]
+### Correctif J37 — L10 : `search_conversations` hors de `public` (branche `day-38-replies`)
+- Modifié : migration `20261210110000_inbox_search_private.sql` (et retour arrière) : le corps SECURITY DEFINER passe dans `private.search_conversations`, `public.search_conversations` devient une enveloppe SECURITY INVOKER (mêmes arguments, mêmes colonnes, mêmes droits de lecture réappliqués). Aucun changement de comportement ni de code web. La migration J37 déjà appliquée n'est pas modifiée.
+- Tests : `030_organizations_create` (test 8) et `900_schema_lint` (test 10, L10) repassent au vert ; `260_inbox` (31) inchangé.
 ### J38 — Réponses et verrou humain / IA (branche `day-38-replies`)
 - Ajout : `POST /api/conversations/:id/replies` (`Idempotency-Key` obligatoire, 1 à 10 000 caractères, `202 { message_id, status: "queued" }`) : la réponse est créée et approuvée par son auteur en une transaction (owner et admin partout, commercial sur SES conversations, marketing et analyste jamais), puis envoyée par le worker après le contrôle final ; composeur dans `/inbox/[id]` (e-mail) avec bail de 5 minutes, battement de cœur de 2 minutes, bandeaux « autre membre » et « IA » et « Reprendre la main » ; messages fr / ar / en.
 - Ajout : migration `20261210100000_replies_lock.sql` (et retour arrière) : `conversation_reply`, bail (`conversation_lock_acquire` / `status` / `release`), `conversation_take_over`, `conversation_ai_claim` / `conversation_ai_release` (service_role), jamais l'IA et un humain en même temps.

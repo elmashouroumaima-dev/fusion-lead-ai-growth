@@ -892,3 +892,7 @@ Cible : 61,8 % (plan à 68 jours) | Réel : à valider | Statut : —
 - Fusion avec la migration WhatsApp (J36) : les deux remplacent `message_send_claim` ; garder une seule version qui contient les changements des deux.
 - Le battement de cœur du bail (2 minutes) dépend du navigateur ouvert ; sinon le bail expire seul au bout de 5 minutes.
 - Cinq tests `test:rls` (jobs, imports, webhooks, chaîne d'envoi) échouent tant que le worker de développement tourne ; sans lien avec J38 (`replies-flow` neutralise ce worker pour ses propres messages).
+
+## Correctif J37 — lint L10 (branche `day-38-replies`)
+`public.search_conversations` (J37) était SECURITY DEFINER dans `public` : le lint L10 échouait (`030` test 8, `900` test 10). Nouvelle migration `20261210110000_inbox_search_private.sql` : corps dans `private`, enveloppe SECURITY INVOKER dans `public` ; rollback fourni. Vérifié : pgTAP 030 et 900 verts, 260 inchangé, acceptation `inbox-pages` (7) et `replies-flow` (11) verts, lint, typecheck, Vitest verts.
+⚠ Restent hors périmètre : `050` test 162 (une ligne résiduelle dans `rate_limit_buckets` laissée par les tests d'acceptation) et `190_crm_search` (plan incomplet, données de démonstration).

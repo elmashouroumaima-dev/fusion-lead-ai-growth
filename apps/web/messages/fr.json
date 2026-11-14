@@ -1093,7 +1093,23 @@
     },
     "deals": {
       "title": "Deals",
-      "none": "Aucun deal pour ce lead."
+      "none": "Aucun deal pour ce lead.",
+      "description": "Créez un deal, déplacez-le entre les étapes ou clôturez-le comme gagné ou perdu.",
+      "expectedClose": "Clôture prévue : {date}",
+      "won": "Gagné",
+      "lost": "Perdu",
+      "move": {
+        "label": "Déplacer le deal vers une étape",
+        "submit": "Déplacer"
+      },
+      "new": {
+        "title": "Nouveau deal",
+        "value": "Valeur",
+        "currency": "Devise",
+        "close": "Date de clôture prévue",
+        "stage": "Étape de départ",
+        "submit": "Créer le deal"
+      }
     },
     "form": {
       "title": "Ajouter à la chronologie",
@@ -1174,6 +1190,29 @@
       "service_unavailable": "Service momentanément indisponible. Réessayez plus tard.",
       "generic": "Une erreur est survenue. Veuillez réessayer.",
       "load": "Le lead n’a pas pu être chargé. Réessayez."
+    },
+    "manage": {
+      "title": "Gérer ce lead",
+      "description": "Faites avancer le lead dans votre pipeline et choisissez qui le suit. Chaque changement apparaît dans la chronologie.",
+      "stage": {
+        "label": "Étape du lead",
+        "submit": "Changer d’étape"
+      },
+      "assign": {
+        "label": "Responsable",
+        "none": "Aucun responsable (retour dans la file des non assignés)",
+        "submit": "Assigner"
+      },
+      "saving": "Enregistrement…",
+      "success": {
+        "leadMoved": "Étape modifiée.",
+        "assigned": "Lead assigné.",
+        "unassigned": "Responsable retiré.",
+        "dealCreated": "Deal créé.",
+        "dealMoved": "Deal déplacé.",
+        "dealWon": "Deal marqué comme gagné.",
+        "dealLost": "Deal marqué comme perdu."
+      }
     }
   }
 }

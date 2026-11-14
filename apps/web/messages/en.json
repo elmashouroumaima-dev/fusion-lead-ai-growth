@@ -1093,7 +1093,23 @@
     },
     "deals": {
       "title": "Deals",
-      "none": "No deal for this lead yet."
+      "none": "No deal for this lead yet.",
+      "description": "Create a deal, move it between stages, or close it as won or lost.",
+      "expectedClose": "Expected close: {date}",
+      "won": "Won",
+      "lost": "Lost",
+      "move": {
+        "label": "Move the deal to a stage",
+        "submit": "Move"
+      },
+      "new": {
+        "title": "New deal",
+        "value": "Value",
+        "currency": "Currency",
+        "close": "Expected close date",
+        "stage": "Starting stage",
+        "submit": "Create the deal"
+      }
     },
     "form": {
       "title": "Add to the timeline",
@@ -1174,6 +1190,29 @@
       "service_unavailable": "Service temporarily unavailable. Try again later.",
       "generic": "An error occurred. Please try again.",
       "load": "The lead could not be loaded. Try again."
+    },
+    "manage": {
+      "title": "Manage this lead",
+      "description": "Move the lead through your pipeline and choose who follows it up. Every change appears in the timeline.",
+      "stage": {
+        "label": "Lead stage",
+        "submit": "Change stage"
+      },
+      "assign": {
+        "label": "Assignee",
+        "none": "No assignee (back to the unassigned queue)",
+        "submit": "Assign"
+      },
+      "saving": "Saving…",
+      "success": {
+        "leadMoved": "Stage changed.",
+        "assigned": "Lead assigned.",
+        "unassigned": "Assignee removed.",
+        "dealCreated": "Deal created.",
+        "dealMoved": "Deal moved.",
+        "dealWon": "Deal marked as won.",
+        "dealLost": "Deal marked as lost."
+      }
     }
   }
 }

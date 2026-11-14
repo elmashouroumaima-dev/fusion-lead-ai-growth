@@ -7,6 +7,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { LeadActivityForm } from "../../../../../components/crm/lead-activity-form";
+import { AssignLeadForm, CreateDealForm, DealQuickForm, DealStageForm, LeadStageForm } from "../../../../../components/crm/lead-manage-forms";
 import { LeadTimeline } from "../../../../../components/crm/lead-timeline";
 import { Link } from "../../../../../i18n/navigation";
 import { requireLocale } from "../../../../../i18n/require-locale";
@@ -14,6 +15,7 @@ import { listTimeline, nextActionsFor, TIMELINE_PAGE_SIZE } from "../../../../..
 import { requireClaims } from "../../../../../lib/auth/require-claims";
 import { getContact } from "../../../../../lib/contacts/queries";
 import { getLead, listDeals, listPipelines, listStages } from "../../../../../lib/leads/queries";
+import { listOrganizationMembers } from "../../../../../lib/members/queries";
 import { listProjects } from "../../../../../lib/projects/queries";
 import { createClient } from "../../../../../lib/supabase/server";
 import { requireTenantContext } from "../../../../../lib/tenant/context";
@@ -38,6 +40,7 @@ export default async function LeadPage({ params }: Props) {
   const locale = localeSchema.parse(await requireLocale(params));
   const t = await getTranslations({ locale, namespace: "Lead" });
   const tc = await getTranslations({ locale, namespace: "Crm" });
+  const to = await getTranslations({ locale, namespace: "Org" });
   await requireClaims(locale);
   const ctx = await requireTenantContext(locale);
   if (!can(ctx.role, "read", "leads", { isOwnRecord: true })) redirect(`/${locale}/dashboard`);
@@ -58,6 +61,28 @@ export default async function LeadPage({ params }: Props) {
   const lead = loaded?.lead ?? null;
   const canWrite = lead !== null && can(ctx.role, "manage_tasks", "leads", { isOwnRecord: lead.assignee_id === ctx.userId });
   const canOpenContact = can(ctx.role, "read", "contacts");
+  // Assignation manuelle : owner et admin (matrice ADR 014 « Leads non assignés : assigner »). La base revérifie.
+  const canAssign = lead !== null && can(ctx.role, "assign", "unassigned_leads");
+  const stages = loaded?.stages ?? [];
+  const openStages = stages.filter((item) => item.kind === "open").map((item) => ({ id: item.id, name: item.name }));
+  // Étape d'un lead : toutes sauf l'étape système « non assigné » (elle découle de l'assignation).
+  const leadStages = stages.filter((item) => item.kind !== "unassigned").map((item) => ({ id: item.id, name: item.name }));
+  const wonStage = stages.find((item) => item.kind === "won");
+  const lostStage = stages.find((item) => item.kind === "lost");
+  const dealStages = stages.filter((item) => item.kind !== "unassigned").map((item) => ({ id: item.id, name: item.name }));
+  let assignees: { value: string; label: string }[] = [];
+  if (canAssign) {
+    try {
+      assignees = (await listOrganizationMembers(ctx))
+        .filter((member) => member.status === "active" && (member.role === "company_owner" || member.role === "company_admin" || member.role === "sales_agent"))
+        .map((member) => ({
+          value: member.user_id,
+          label: `${member.user_id === ctx.userId ? tc("assignee.me") : tc("assignee.member", { id: shortIdOf(member.user_id) })} · ${to(`roles.${member.role}`)}`,
+        }));
+    } catch {
+      assignees = [];
+    }
+  }
   const stage = lead ? loaded?.stages.find((item) => item.id === lead.stage_id) : undefined;
   const project = lead ? loaded?.projects.find((item) => item.id === lead.project_id) : undefined;
   const contactName = loaded?.contact?.name ?? t("contact.unnamed");
@@ -157,55 +182,111 @@ export default async function LeadPage({ params }: Props) {
             </Card>
           </div>
 
-          <div className="grid gap-4 md:grid-cols-2">
-            <Card role="region" aria-labelledby="lead-next-title">
+          {canWrite ? (
+            <Card role="region" aria-labelledby="lead-manage-title">
               <CardHeader>
-                <CardTitle id="lead-next-title">
-                  <h2>{t("next.title")}</h2>
+                <CardTitle id="lead-manage-title">
+                  <h2>{t("manage.title")}</h2>
                 </CardTitle>
+                <CardDescription>{t("manage.description")}</CardDescription>
               </CardHeader>
-              <CardContent className="grid gap-1 text-sm">
-                {loaded.next ? (
-                  <>
-                    <p className="font-medium">
-                      <bdi>{typeof loaded.next.metadata.title === "string" ? loaded.next.metadata.title : t("next.untitled")}</bdi>
-                    </p>
-                    <p className="text-muted-foreground text-xs">
-                      {loaded.next.due_at ? t("timeline.due", { date: format.dateTime(new Date(loaded.next.due_at), { dateStyle: "medium" }) }) : t("next.noDue")}
-                    </p>
-                  </>
-                ) : (
-                  <p className="text-muted-foreground">{t("next.none")}</p>
-                )}
+              <CardContent className="grid gap-6 md:grid-cols-2">
+                <LeadStageForm
+                  leadId={lead.id}
+                  organizationId={ctx.organizationId}
+                  idempotencyKey={crypto.randomUUID()}
+                  currentStageId={lead.stage_id}
+                  stages={leadStages.some((item) => item.id === lead.stage_id) ? leadStages : [...leadStages, { id: lead.stage_id, name: stage?.name ?? "—" }]}
+                />
+                {canAssign ? (
+                  <AssignLeadForm
+                    leadId={lead.id}
+                    organizationId={ctx.organizationId}
+                    idempotencyKey={crypto.randomUUID()}
+                    currentAssigneeId={lead.assignee_id}
+                    members={assignees}
+                  />
+                ) : null}
               </CardContent>
             </Card>
+          ) : null}
 
-            <Card role="region" aria-labelledby="lead-deals-title">
-              <CardHeader>
-                <CardTitle id="lead-deals-title">
-                  <h2>{t("deals.title")}</h2>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {loaded.deals.length === 0 ? (
-                  <p className="text-muted-foreground text-sm">{t("deals.none")}</p>
-                ) : (
-                  <ul className="grid gap-2 text-sm">
-                    {loaded.deals.map((deal) => (
-                      <li key={deal.id} className="flex flex-wrap items-center justify-between gap-2">
-                        <span className="font-medium tabular-nums">
+          <Card role="region" aria-labelledby="lead-next-title">
+            <CardHeader>
+              <CardTitle id="lead-next-title">
+                <h2>{t("next.title")}</h2>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="grid gap-1 text-sm">
+              {loaded.next ? (
+                <>
+                  <p className="font-medium">
+                    <bdi>{typeof loaded.next.metadata.title === "string" ? loaded.next.metadata.title : t("next.untitled")}</bdi>
+                  </p>
+                  <p className="text-muted-foreground text-xs">
+                    {loaded.next.due_at ? t("timeline.due", { date: format.dateTime(new Date(loaded.next.due_at), { dateStyle: "medium" }) }) : t("next.noDue")}
+                  </p>
+                </>
+              ) : (
+                <p className="text-muted-foreground">{t("next.none")}</p>
+              )}
+            </CardContent>
+          </Card>
+
+          <Card role="region" aria-labelledby="lead-deals-title">
+            <CardHeader>
+              <CardTitle id="lead-deals-title">
+                <h2>{t("deals.title")}</h2>
+              </CardTitle>
+              {canWrite ? <CardDescription>{t("deals.description")}</CardDescription> : null}
+            </CardHeader>
+            <CardContent className="grid gap-6">
+              {loaded.deals.length === 0 ? (
+                <p className="text-muted-foreground text-sm">{t("deals.none")}</p>
+              ) : (
+                <ul className="grid gap-3">
+                  {loaded.deals.map((deal) => (
+                    <li key={deal.id} className="grid gap-3 rounded-xl border p-4 text-sm">
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <span className="text-base font-semibold tabular-nums">
                           <bdi dir="ltr">{money(deal)}</bdi>
                         </span>
                         <Badge variant={deal.won_at ? "success" : deal.lost_at ? "destructive" : "secondary"}>
                           <bdi>{loaded.stages.find((item) => item.id === deal.stage_id)?.name ?? "—"}</bdi>
                         </Badge>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </CardContent>
-            </Card>
-          </div>
+                      </div>
+                      {deal.expected_close_at ? (
+                        <p className="text-muted-foreground text-xs">{t("deals.expectedClose", { date: format.dateTime(new Date(deal.expected_close_at), { dateStyle: "medium" }) })}</p>
+                      ) : null}
+                      {canWrite ? (
+                        <div className="flex flex-wrap items-start gap-3">
+                          <DealStageForm
+                            dealId={deal.id}
+                            organizationId={ctx.organizationId}
+                            idempotencyKey={crypto.randomUUID()}
+                            currentStageId={deal.stage_id}
+                            stages={dealStages}
+                          />
+                          {wonStage && !deal.won_at ? (
+                            <DealQuickForm dealId={deal.id} organizationId={ctx.organizationId} idempotencyKey={crypto.randomUUID()} stageId={wonStage.id} outcome="won" />
+                          ) : null}
+                          {lostStage && !deal.lost_at ? (
+                            <DealQuickForm dealId={deal.id} organizationId={ctx.organizationId} idempotencyKey={crypto.randomUUID()} stageId={lostStage.id} outcome="lost" />
+                          ) : null}
+                        </div>
+                      ) : null}
+                    </li>
+                  ))}
+                </ul>
+              )}
+              {canWrite && openStages.length > 0 ? (
+                <div className="grid gap-3 border-t pt-4">
+                  <h3 className="text-sm font-semibold">{t("deals.new.title")}</h3>
+                  <CreateDealForm leadId={lead.id} organizationId={ctx.organizationId} idempotencyKey={crypto.randomUUID()} stages={openStages} />
+                </div>
+              ) : null}
+            </CardContent>
+          </Card>
 
           {canWrite ? (
             <Card role="region" aria-labelledby="lead-form-title">

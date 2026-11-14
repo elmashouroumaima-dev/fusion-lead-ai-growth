@@ -4,7 +4,6 @@ import { PlusIcon } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { ProjectList } from "../../../../components/projects/project-list";
 import { Link } from "../../../../i18n/navigation";
 import { requireLocale } from "../../../../i18n/require-locale";
@@ -42,7 +41,7 @@ export default async function ProjectsPage({ params, searchParams }: Props) {
     <div className="mx-auto grid w-full max-w-5xl gap-6">
       <header className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="grid gap-1">
-          <h1 id="projects-title" className="text-2xl font-semibold tracking-tight">
+          <h1 id="projects-title" className="text-2xl font-semibold tracking-tight md:text-3xl">
             {t("title")}
           </h1>
           <p className="text-muted-foreground max-w-prose text-sm">{t("description")}</p>
@@ -58,30 +57,33 @@ export default async function ProjectsPage({ params, searchParams }: Props) {
         ) : null}
       </header>
 
-      <nav aria-label={t("list.filterLabel")} className="flex gap-2">
-        <Button asChild variant={archivedView ? "outline" : "secondary"} size="sm">
-          <Link href="/projects" aria-current={archivedView ? undefined : "page"}>
-            {t("list.active")}
+      <nav aria-label={t("list.filterLabel")} className="bg-muted inline-flex w-fit gap-1 rounded-lg p-1">
+        {[
+          { href: "/projects", current: !archivedView, label: t("list.active") },
+          { href: "/projects?status=archived", current: archivedView, label: t("list.archived") },
+        ].map((tab) => (
+          <Link
+            key={tab.href}
+            href={tab.href}
+            aria-current={tab.current ? "page" : undefined}
+            className={
+              tab.current
+                ? "bg-background text-foreground rounded-md px-4 py-1.5 text-sm font-medium shadow-sm"
+                : "text-muted-foreground hover:text-foreground rounded-md px-4 py-1.5 text-sm font-medium transition"
+            }
+          >
+            {tab.label}
           </Link>
-        </Button>
-        <Button asChild variant={archivedView ? "secondary" : "outline"} size="sm">
-          <Link href="/projects?status=archived" aria-current={archivedView ? "page" : undefined}>
-            {t("list.archived")}
-          </Link>
-        </Button>
+        ))}
       </nav>
 
-      <Card>
-        <CardContent>
-          {projects === null ? (
-            <Alert variant="destructive" role="alert">
-              {t("errors.generic")}
-            </Alert>
-          ) : (
-            <ProjectList locale={locale} projects={projects} archivedView={archivedView} />
-          )}
-        </CardContent>
-      </Card>
+      {projects === null ? (
+        <Alert variant="destructive" role="alert">
+          {t("errors.generic")}
+        </Alert>
+      ) : (
+        <ProjectList locale={locale} projects={projects} archivedView={archivedView} />
+      )}
     </div>
   );
 }

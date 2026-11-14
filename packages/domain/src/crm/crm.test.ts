@@ -118,17 +118,18 @@ describe("export CSV : injection de formule", () => {
 
   it("fichier : BOM, en-tête, CRLF, noms arabes conservés, formules neutralisées dans le nom et l'e-mail", () => {
     const csv = buildLeadsExportCsv([row({ contact_name: "سارة المنصوري" }), row({ contact_name: "=cmd|calc", contact_email: "@x" })]);
-    expect(csv.startsWith("\uFEFFlead_id,created_at,name,email,phone,source,stage,assignee_id,project_id\r\n")).toBe(true);
+    expect(csv.startsWith("\uFEFFsep=,\r\nlead_id,created_at,name,email,phone,source,stage,assignee_id,project_id\r\n")).toBe(true);
     const lines = csv.slice(1).trim().split("\r\n");
-    expect(lines).toHaveLength(3);
-    expect(lines[1]).toContain("سارة المنصوري");
-    expect(lines[2]).toContain("'=cmd|calc");
-    expect(lines[2]).toContain("'@x");
-    expect(lines[1]).toContain("+212612345678");
+    expect(lines[0]).toBe("sep=,");
+    expect(lines).toHaveLength(4);
+    expect(lines[2]).toContain("سارة المنصوري");
+    expect(lines[3]).toContain("'=cmd|calc");
+    expect(lines[3]).toContain("'@x");
+    expect(lines[2]).toContain("+212612345678");
   });
 
   it("aucun lead : seulement l'en-tête", () => {
-    expect(buildLeadsExportCsv([])).toBe("\uFEFFlead_id,created_at,name,email,phone,source,stage,assignee_id,project_id\r\n");
+    expect(buildLeadsExportCsv([])).toBe("\uFEFFsep=,\r\nlead_id,created_at,name,email,phone,source,stage,assignee_id,project_id\r\n");
   });
 });
 

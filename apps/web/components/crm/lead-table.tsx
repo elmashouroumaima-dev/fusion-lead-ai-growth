@@ -3,6 +3,7 @@ import { TargetIcon } from "lucide-react";
 import { getFormatter, getTranslations } from "next-intl/server";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Link } from "../../i18n/navigation";
 
 type Props = {
   locale: AuthLocale;
@@ -58,7 +59,9 @@ export async function LeadTable({ locale, rows, userId, filtered }: Props) {
         {rows.map((row) => (
           <TableRow key={row.id}>
             <TableCell className="font-medium">
-              <bdi>{row.contact_name ?? t("table.noName")}</bdi>
+              <Link href={`/leads/${row.id}`} className="text-foreground hover:text-primary-text underline-offset-2 hover:underline">
+                <bdi>{row.contact_name ?? t("table.noName")}</bdi>
+              </Link>
             </TableCell>
             <TableCell>{row.contact_email ? <bdi dir="ltr">{row.contact_email}</bdi> : null}</TableCell>
             <TableCell>{row.contact_phone ? <bdi dir="ltr">{row.contact_phone}</bdi> : null}</TableCell>

@@ -12,7 +12,7 @@ import { cn } from "@/lib/utils";
 import { getPlatformLogoVersion, getPlatformPalette } from "../../lib/service/platform-config";
 import { getDirection } from "../../i18n/direction";
 import { routing } from "../../i18n/routing";
-import { poppins } from "../fonts/fonts";
+import { inter } from "../fonts/fonts";
 import "../globals.css";
 
 type LayoutProps = {
@@ -54,7 +54,7 @@ export default async function LocaleLayout({ children, params }: LayoutProps) {
   const logoSrc = logoVersion === null ? null : `/api/brand/logo?v=${logoVersion}`;
 
   return (
-    <html lang={locale} dir={dir} suppressHydrationWarning className={cn(poppins.variable, cairoVariable)}>
+    <html lang={locale} dir={dir} suppressHydrationWarning className={cn(inter.variable, cairoVariable)}>
       <body>
         {palette ? <style dangerouslySetInnerHTML={{ __html: paletteToCss(palette) }} /> : null}
         <ThemeProvider>

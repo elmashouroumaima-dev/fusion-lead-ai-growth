@@ -332,7 +332,7 @@ describe("catalogues fr / ar / en : parité", () => {
 
   it("le français et l'anglais ne sont pas des copies l'un de l'autre (valeurs traduites)", () => {
     // Termes identiques en français et en anglais (anglicismes usuels du métier : « Leads », « Deals », « Source », « Contact »).
-    const SAME_OK = new Set(["Fusion Leap", "Fusion Leap AI Growth", "Leads", "Deals", "Source", "Contact", "Pagination", "WhatsApp"]);
+    const SAME_OK = new Set(["Fusion Leap", "Fusion Leap AI Growth", "Leads", "Deals", "Source", "Contact", "Contacts", "E-mail", "Marketing", "Version", "Pagination", "WhatsApp"]);
     const same = [...flat.fr].filter(([k, v]) => v === flat.en.get(k) && /[A-Za-z]{4,}/.test(v) && !SAME_OK.has(v)).map(([k]) => k);
     expect(same).toEqual([]);
   });

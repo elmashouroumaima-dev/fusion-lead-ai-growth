@@ -26,7 +26,8 @@
       "leads": "Leads",
       "deals": "Deals",
       "crmSync": "CRM",
-      "integrations": "Integrations"
+      "integrations": "Integrations",
+      "contacts": "Contacts"
     },
     "sidebar": {
       "toggle": "Show or hide the side menu",
@@ -924,6 +925,146 @@
       "cancel": "Cancel",
       "done": "Integration disconnected.",
       "failed": "The integration could not be disconnected."
+    }
+  },
+  "Contacts": {
+    "title": "Contacts",
+    "description": "Everyone you can contact, with the proof of their consent. Record or withdraw a consent and block a contact from any future message.",
+    "search": {
+      "label": "Search contacts",
+      "placeholder": "Name, e-mail or phone",
+      "submit": "Search",
+      "reset": "Reset"
+    },
+    "count": "Results: {count}",
+    "empty": "No contact yet.",
+    "emptyFiltered": "No contact matches this search.",
+    "table": {
+      "contact": "Contact",
+      "email": "E-mail",
+      "phone": "Phone",
+      "consent": "Consent",
+      "doNotContact": "Do not contact",
+      "created": "Created on",
+      "open": "Open",
+      "openNamed": "Open {name}",
+      "unnamed": "No name"
+    },
+    "status": {
+      "unknown": "No consent",
+      "granted": "Consent given",
+      "revoked": "Consent withdrawn"
+    },
+    "dnc": {
+      "yes": "Blocked",
+      "no": "No"
+    },
+    "pagination": {
+      "label": "Pagination",
+      "previous": "Previous page",
+      "next": "Next page",
+      "status": "Page {page} of {pageCount}"
+    },
+    "detail": {
+      "back": "Back to contacts",
+      "identity": "Contact details",
+      "name": "Name",
+      "email": "E-mail",
+      "phone": "Phone",
+      "language": "Language",
+      "country": "Country",
+      "created": "Created on",
+      "status": "Consent status",
+      "doNotContact": "Do not contact",
+      "blocked": "No message will be sent to this contact.",
+      "notBlocked": "This contact can be messaged if a valid consent exists.",
+      "notFound": "This contact cannot be found."
+    },
+    "history": {
+      "title": "Consent history",
+      "description": "Every consent is kept with its proof. A withdrawal never erases it.",
+      "empty": "No consent recorded for this contact.",
+      "channel": "Channel",
+      "purpose": "Purpose",
+      "source": "Source",
+      "captured": "Recorded on",
+      "state": "State",
+      "active": "Active",
+      "revokedOn": "Withdrawn on {date}",
+      "proof": "Proof",
+      "proofText": "Text shown",
+      "proofVersion": "Version",
+      "noProof": "No proof text recorded"
+    },
+    "record": {
+      "title": "Record a consent",
+      "description": "Use this when a contact gave you their consent outside a form (phone, in person, paper). Describe how it was given.",
+      "channel": "Channel",
+      "purpose": "Purpose",
+      "source": "How it was given",
+      "text": "Text the contact agreed to",
+      "textHint": "Optional, 2000 characters at most.",
+      "version": "Version of the text",
+      "versionHint": "Optional, 50 characters at most.",
+      "submit": "Record the consent",
+      "saving": "Saving…",
+      "needEmail": "This contact has no e-mail address: choose WhatsApp or add one.",
+      "needPhone": "This contact has no phone number: choose e-mail or add one."
+    },
+    "revoke": {
+      "title": "Withdraw a consent",
+      "description": "Takes effect at once: queued messages for this channel are not sent.",
+      "channel": "Channel",
+      "purpose": "Purpose",
+      "allPurposes": "All purposes",
+      "alsoBlock": "Also block this contact from any future message",
+      "submit": "Withdraw the consent",
+      "saving": "Saving…"
+    },
+    "block": {
+      "title": "Do not contact",
+      "descriptionOff": "Blocks every future message to this contact, whatever the consent.",
+      "descriptionOn": "This contact is blocked. Only an owner or an administrator can lift the block.",
+      "set": "Block this contact",
+      "clear": "Lift the block",
+      "clearOnlyAdmin": "Only an owner or an administrator can lift the block.",
+      "saving": "Saving…"
+    },
+    "channels": {
+      "email": "E-mail",
+      "whatsapp": "WhatsApp"
+    },
+    "purposes": {
+      "marketing": "Marketing",
+      "newsletter": "Newsletter"
+    },
+    "sources": {
+      "manual": "Entered by hand",
+      "phone": "By phone",
+      "in_person": "In person",
+      "paper_form": "Paper form",
+      "web_form": "Web form",
+      "csv_import": "CSV import",
+      "other": "Other"
+    },
+    "success": {
+      "consentRecorded": "Consent recorded.",
+      "consentRevoked": "Consent withdrawn.",
+      "doNotContactSet": "Contact blocked.",
+      "doNotContactCleared": "Block lifted."
+    },
+    "errors": {
+      "invalid_input": "Some values are invalid. Check the fields.",
+      "forbidden": "Your role does not allow this action.",
+      "conflict": "This change conflicts with another contact.",
+      "not_found": "This contact cannot be found.",
+      "rate_limited": "Too many attempts. Try again in a moment.",
+      "duplicate_request": "This request was already processed.",
+      "idempotency_in_progress": "The request is being processed.",
+      "idempotency_conflict": "This request was already sent with other values. Reload the page.",
+      "service_unavailable": "Service temporarily unavailable. Try again later.",
+      "generic": "An error occurred. Please try again.",
+      "load": "The contacts could not be loaded. Try again."
     }
   }
 }

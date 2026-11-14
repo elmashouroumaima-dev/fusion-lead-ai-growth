@@ -134,6 +134,7 @@ describe("messages fr/ar/en", () => {
       "Crm.pagination.label", "Integrations.providers.whatsapp",
       "Shell.nav.contacts", "Contacts.title", "Contacts.table.contact", "Contacts.table.email", "Contacts.pagination.label", "Contacts.detail.email",
       "Contacts.history.source", "Contacts.history.proofVersion", "Contacts.channels.email", "Contacts.channels.whatsapp", "Contacts.purposes.marketing",
+      "Inbox.channels.email", "Inbox.channels.whatsapp", "Inbox.pagination.label", "Inbox.thread.email", "Inbox.thread.summary", "Inbox.thread.messages",
     ]);
     const same = [...frFlat].filter(([k, v]) => !allowed.has(k) && enFlat.get(k) === v && /[A-Za-z]{4,}/.test(v));
     expect(same.map(([k]) => k)).toEqual([]);

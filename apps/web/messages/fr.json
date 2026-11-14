@@ -27,7 +27,8 @@
       "deals": "Deals",
       "crmSync": "CRM",
       "integrations": "Intégrations",
-      "contacts": "Contacts"
+      "contacts": "Contacts",
+      "inbox": "Boîte de réception"
     },
     "sidebar": {
       "toggle": "Afficher ou masquer le menu latéral",
@@ -1065,6 +1066,105 @@
       "service_unavailable": "Service momentanément indisponible. Réessayez plus tard.",
       "generic": "Une erreur est survenue. Veuillez réessayer.",
       "load": "Les contacts n’ont pas pu être chargés. Réessayez."
+    }
+  },
+  "Inbox": {
+    "title": "Boîte de réception",
+    "description": "Les conversations e-mail et WhatsApp dans une seule liste, la plus récemment active d’abord. La liste s’actualise toute seule toutes les 15 secondes.",
+    "ownOnlyHint": "Vous ne voyez que les conversations qui vous sont assignées.",
+    "filters": {
+      "label": "Filtrer les conversations",
+      "search": "Recherche",
+      "searchPlaceholder": "Nom, e-mail ou téléphone du contact",
+      "state": "État",
+      "channel": "Canal",
+      "assignee": "Responsable",
+      "all": "Tous",
+      "mine": "Assignées à moi",
+      "unassigned": "Non assignées",
+      "apply": "Appliquer",
+      "reset": "Réinitialiser"
+    },
+    "states": {
+      "open": "Ouverte",
+      "pending": "En attente",
+      "closed": "Fermée",
+      "to_triage": "À trier"
+    },
+    "channels": {
+      "email": "E-mail",
+      "whatsapp": "WhatsApp"
+    },
+    "count": "Résultats : {count}",
+    "empty": "Aucune conversation pour l’instant.",
+    "emptyFiltered": "Aucune conversation ne correspond à ces filtres.",
+    "row": {
+      "unnamed": "Contact inconnu",
+      "openNamed": "Ouvrir la conversation avec {name}",
+      "you": "Vous :",
+      "noMessage": "Aucun message pour l’instant."
+    },
+    "pagination": {
+      "label": "Pagination",
+      "previous": "Page précédente",
+      "next": "Page suivante",
+      "status": "Page {page} sur {pageCount}"
+    },
+    "thread": {
+      "back": "Retour à la boîte de réception",
+      "summary": "Conversation",
+      "channel": "Canal",
+      "stateLabel": "État",
+      "assigneeLabel": "Responsable",
+      "email": "E-mail",
+      "phone": "Téléphone",
+      "openContact": "Ouvrir la fiche du contact",
+      "messages": "Messages",
+      "readOnly": "Vous pouvez lire cette conversation. La réponse sera disponible dans une prochaine mise à jour.",
+      "empty": "Aucun message dans cette conversation.",
+      "older": "Messages plus anciens",
+      "newer": "Messages plus récents",
+      "sent": "Envoyé",
+      "received": "Reçu",
+      "saving": "Enregistrement…",
+      "assign": {
+        "label": "Responsable",
+        "none": "Aucun responsable (retour au tri)",
+        "submit": "Assigner"
+      },
+      "state": {
+        "label": "État",
+        "submit": "Changer l’état"
+      }
+    },
+    "status": {
+      "queued": "En file",
+      "accepted": "Accepté",
+      "sent": "Envoyé",
+      "delivered": "Livré",
+      "read": "Lu",
+      "failed": "Échec",
+      "bounced": "Rebond",
+      "cancelled": "Annulé",
+      "received": "Reçu"
+    },
+    "success": {
+      "assigned": "Conversation assignée.",
+      "unassigned": "Responsable retiré.",
+      "stateChanged": "État modifié."
+    },
+    "errors": {
+      "invalid_input": "Certaines valeurs sont invalides. Vérifiez les champs.",
+      "forbidden": "Votre rôle ne permet pas cette action sur cette conversation.",
+      "conflict": "Ce changement n’est pas possible (par exemple l’état ne correspond pas au responsable).",
+      "not_found": "Cette conversation est introuvable.",
+      "rate_limited": "Trop de tentatives. Réessayez dans un instant.",
+      "duplicate_request": "Cette demande a déjà été traitée.",
+      "idempotency_in_progress": "La demande est en cours de traitement.",
+      "idempotency_conflict": "Cette demande a déjà été envoyée avec d’autres valeurs. Rechargez la page.",
+      "service_unavailable": "Service momentanément indisponible. Réessayez plus tard.",
+      "generic": "Une erreur est survenue. Veuillez réessayer.",
+      "load": "Les conversations n’ont pas pu être chargées. Réessayez."
     }
   }
 }

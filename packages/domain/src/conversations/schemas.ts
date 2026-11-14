@@ -71,3 +71,30 @@ export const messageRowSchema = z.object({
   created_at: z.string(),
 });
 export type MessageRow = z.infer<typeof messageRowSchema>;
+
+/** Canaux de la boîte de réception (même liste que les canaux de contact). */
+export const INBOX_CHANNELS = ["email", "whatsapp"] as const;
+export type InboxChannel = (typeof INBOX_CHANNELS)[number];
+
+/**
+ * Ligne de la liste de la boîte de réception (J37) renvoyée par `search_conversations` : la conversation, le nom du contact, le type du
+ * canal et un APERÇU tronqué (140 caractères) du dernier message, jamais le corps entier.
+ */
+export const inboxRowSchema = z.object({
+  id: uuidSchema,
+  contact_id: uuidSchema,
+  channel_id: uuidSchema,
+  assignee_id: uuidSchema.nullable(),
+  state: z.enum(CONVERSATION_STATES),
+  last_message_at: z.string().nullable(),
+  contact_name: z.string().nullable(),
+  contact_email: z.string().nullable(),
+  contact_phone: z.string().nullable(),
+  channel_type: z.enum(INBOX_CHANNELS),
+  last_direction: z.enum(MESSAGE_DIRECTIONS).nullable(),
+  last_status: z.enum(MESSAGE_STATUSES).nullable(),
+  last_preview: z.string().nullable(),
+  last_truncated: z.boolean().nullable(),
+  total_count: z.number().int(),
+});
+export type InboxRow = z.infer<typeof inboxRowSchema>;

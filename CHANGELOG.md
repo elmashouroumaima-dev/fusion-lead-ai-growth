@@ -3,6 +3,8 @@
 Format : Keep a Changelog. Une entrée par jour de travail.
 
 ## [Non publié]
+### Correctif des scénarios canaux T3 / T4 (CI)
+- Correction : dans la suite d'acceptation complète (CI), le worker de test réclamait aussi les jobs d'AUTRES scénarios restés en file (assignation, import, synchronisation) et les échouait (« expected 9 to be 2 ») ; il met maintenant ces jobs de côté pendant le test (`parkForeignJobs`) et les rend intacts ensuite. Reproduit en local avec 7 jobs étrangers en file, 15 tests verts.
 ### Guide de test exploitation et configuration, correctif des libellés de notification (hors plan)
 - Ajout : `docs/testing/Guide-test-simple-phase3-exploitation-configuration.pdf` (11 pages, captures d'écran, fiche OK / KO : arrêt d'urgence, jobs en échec, clés de formulaire, règles d'assignation, notifications, droits, scénarios automatiques J40) et le jeu de données `docs/testing/fixtures/phase3b-ops-demo.sql`.
 - Correction (J39b) : les libellés des notifications s'affichaient en clair (« Notifications.kind.send.failed ») car une clé de traduction contenait un point ; clés renommées (`leadUnassigned`, `sendFailed`) et test d'acceptation qui vérifie le libellé traduit.

@@ -3,6 +3,10 @@
 Format : Keep a Changelog. Une entrée par jour de travail.
 
 ## [Non publié]
+### Guides de test simples (hors plan)
+- Ajout : quatre guides PDF courts avec captures d'écran et fiche OK / KO (`docs/testing/Guide-test-simple-*.pdf`) : comptes et rôles, CRM, conversations et envoi, boîte de réception et réponses (J37 à J38).
+- Ajout : jeu de données `docs/testing/fixtures/phase4-inbox-demo.sql` (4 conversations pour la boîte de réception et les réponses).
+- Correction : `pnpm test:call` retire le préfixe `C:/Program Files/Git` que Git Bash ajoute aux chemins `/api/...`.
 ### J36b — Retrait de consentement WhatsApp (hors plan)
 - Ajout : migration `20261207100000` (et retour arrière) : un mot d'arrêt reçu d'un contact révoque ses consentements WhatsApp, supprime son numéro, annule ses envois WhatsApp en file ; numéro seul supprimé pour un expéditeur inconnu ; rattrapage des « STOP » déjà reçus.
 - Modification : version de l'API Graph v25.0 (une constante pour toutes les requêtes sortantes).

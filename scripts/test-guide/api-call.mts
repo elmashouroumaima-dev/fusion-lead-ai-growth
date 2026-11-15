@@ -27,7 +27,9 @@ const take = (flag: string): string | undefined => {
 };
 const org = ORGS[take("--org") ?? "alpha"];
 const file = take("--file");
-const [account, method, pathname, json] = args;
+const [account, method, rawPath, json] = args;
+// Git Bash (Windows) transforme `/api/...` en `C:/Program Files/Git/api/...` : on retire ce préfixe ajouté par le shell.
+const pathname = rawPath?.replace(/^[A-Za-z]:[\/].*?(?=\/api\/)/, "");
 if (!account || !method || !pathname || !org) {
   console.error("usage : pnpm test:call <compte> <METHODE> <chemin> [corps-json] [--org alpha|beta] [--file fichier]");
   process.exit(2);

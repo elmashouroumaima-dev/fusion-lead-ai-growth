@@ -3,6 +3,12 @@
 Format : Keep a Changelog. Une entrée par jour de travail.
 
 ## [Non publié]
+### J39b — Écrans de configuration
+- Ajout : routes `POST /api/forms/keys` (+ `/active`, `/origins`), `POST /api/assignment/rules` (+ `/update`, `/delete`), `POST /api/notifications/read` ; pages `/assignment` et `/notifications` ; section « Form keys » dans la page d'un projet ; liens de menu avec compteur de notifications non lues ; ar / en / fr. Aucune migration.
+- Modification : ressource `form_keys` (action `manage`, owner et admin) rattachée à la ligne 16 de l'ADR 014 (amendement J39b) ; le schéma des notifications accepte `send.failed` (J39) en plus de `lead.unassigned`.
+- Sécurité : la clé de formulaire en clair n'existe que dans la réponse de création (`storeResponse: false`, jamais dans l'audit ni dans la page, rejeu = 409).
+- Tests : domain +1, permissions (399), acceptation HTTP `config-screens-flow` (7).
+- Documentation : `docs/api/config-screens.md`, ADR 014 (amendement).
 ### J39 — Exploitation des envois
 - Ajout : migration `20261211100000_send_operations.sql` (et retour arrière) : `set_send_emergency_stop` (owner, admin, marketing manager ; audit `send.emergency_stop`), `operator_replay_dead_letter` (owner, admin ; acteur humain vérifié, comble la limite `p_actor` de l'ADR 003), alerte `send.failed` (déclencheur sur `jobs`, owner et admin, sans donnée de contact), débit horaire compté par (type de canal, entreprise) au lieu de par canal.
 - Ajout : `POST /api/send/emergency-stop`, `POST /api/jobs/dead-letters/replay`, page `/operations` (arrêt d'urgence, liste et rejeu des dead letters), traductions ar / en / fr, lien de menu.

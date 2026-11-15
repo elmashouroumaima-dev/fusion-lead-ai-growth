@@ -3,6 +3,8 @@
 Format : Keep a Changelog. Une entrée par jour de travail.
 
 ## [Non publié]
+### Correctif des scénarios canaux T3 / T4 (CI)
+- Correction : dans la suite d'acceptation complète (CI), le worker de test réclamait aussi les jobs d'AUTRES scénarios restés en file (assignation, import, synchronisation) et les échouait (« expected 9 to be 2 ») ; il met maintenant de côté TOUT ce qui attend dans la file (y compris `process_webhook` / `send_message` d'autres fichiers et les jobs « en cours » au bail expiré, remis en file par la base) pendant le test (`parkForeignJobs`) et le rend intact ensuite. Un premier correctif ne mettait de côté que les autres types de jobs : la CI a encore échoué. Reproduit en local avec des jobs de tous types et des baux expirés, 15 tests verts (deux fois).
 ### Correctif : carte « Retirer un consentement » (écran contact)
 - Correction : le sélecteur de canal (largeur fixe de 16 rem) débordait sur celui de la finalité dans la carte étroite ; les deux sélecteurs sont maintenant empilés et occupent toute la largeur de la carte (cellules à une colonne, sans débordement). Le sélecteur de canal du formulaire d'enregistrement suit la largeur de sa colonne.
 ### Guide de test exploitation et configuration, correctif des libellés de notification (hors plan)

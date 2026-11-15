@@ -99,3 +99,19 @@ export const release = (messageIds: string[]): void => {
   if (messageIds.length === 0) return;
   psql(`update public.jobs set next_run_at = now() - interval '1 second' where kind = 'send_message' and status = 'queued' and payload ->> 'message_id' in (${messageIds.map((m) => `'${m}'`).join(",")})`);
 };
+
+/**
+ * Le worker de test réclame TOUT ce qui est échu, quel que soit le type de job. Dans la suite complète, des jobs d'autres scénarios restent en
+ * file (aucun worker de fond ne tourne) : assignation, import, synchronisation, mais aussi `process_webhook` et `send_message` laissés par
+ * d'autres fichiers, ou des jobs « en cours » dont le bail a expiré (la base les remet en file à la prochaine réclamation). Ce worker les prendrait
+ * et les échouerait. On remet d'abord en file les baux expirés, puis on met TOUT ce qui attend de côté (échéance repoussée d'un jour) et on le
+ * rend intact à la fin. À appeler avant de créer les jobs du test.
+ */
+export function parkForeignJobs(): string[] {
+  const out = psql(`select private.requeue_expired_leases(); update public.jobs set next_run_at = now() + interval '1 day' where status = 'queued' and next_run_at <= now() + interval '2 hours' returning id`);
+  return out.match(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/g) ?? [];
+}
+export function unparkJobs(ids: string[]): void {
+  if (ids.length === 0) return;
+  psql(`update public.jobs set next_run_at = now() where status = 'queued' and id in (${ids.map((id) => `'${id}'`).join(",")})`);
+}

@@ -49,7 +49,7 @@ function ChannelSelect({ id, name, hasEmail, hasPhone }: { id: string; name: str
   const firstAvailable = hasEmail ? "email" : hasPhone ? "whatsapp" : "email";
   return (
     <Select name={name} defaultValue={firstAvailable}>
-      <SelectTrigger id={id} className="w-full sm:w-64">
+      <SelectTrigger id={id} className="w-full">
         <SelectValue />
       </SelectTrigger>
       <SelectContent>
@@ -73,11 +73,11 @@ export function RecordConsentForm({ contactId, organizationId, idempotencyKey, h
     <form action={formAction} className="grid gap-4">
       <Hidden contactId={contactId} organizationId={organizationId} idempotencyKey={idempotencyKey} />
       <div className="grid gap-4 sm:grid-cols-3">
-        <div className="grid gap-1.5">
+        <div className="grid min-w-0 grid-cols-1 gap-1.5">
           <Label htmlFor={`${uid}-channel`}>{t("record.channel")}</Label>
           <ChannelSelect id={`${uid}-channel`} name="channel" hasEmail={hasEmail} hasPhone={hasPhone} />
         </div>
-        <div className="grid gap-1.5">
+        <div className="grid min-w-0 grid-cols-1 gap-1.5">
           <Label htmlFor={`${uid}-purpose`}>{t("record.purpose")}</Label>
           <Select name="purpose" defaultValue={CONSENT_PURPOSES[0]}>
             <SelectTrigger id={`${uid}-purpose`} className="w-full">
@@ -92,7 +92,7 @@ export function RecordConsentForm({ contactId, organizationId, idempotencyKey, h
             </SelectContent>
           </Select>
         </div>
-        <div className="grid gap-1.5">
+        <div className="grid min-w-0 grid-cols-1 gap-1.5">
           <Label htmlFor={`${uid}-source`}>{t("record.source")}</Label>
           <Select name="source" defaultValue={CONSENT_SOURCES[0]}>
             <SelectTrigger id={`${uid}-source`} className="w-full">
@@ -143,12 +143,12 @@ export function RevokeConsentForm({ contactId, organizationId, idempotencyKey, h
   return (
     <form action={formAction} className="grid gap-4">
       <Hidden contactId={contactId} organizationId={organizationId} idempotencyKey={idempotencyKey} />
-      <div className="grid gap-4 sm:grid-cols-2">
-        <div className="grid gap-1.5">
+      <div className="grid gap-4">
+        <div className="grid min-w-0 grid-cols-1 gap-1.5">
           <Label htmlFor={`${uid}-channel`}>{t("revoke.channel")}</Label>
           <ChannelSelect id={`${uid}-channel`} name="channel" hasEmail={hasEmail} hasPhone={hasPhone} />
         </div>
-        <div className="grid gap-1.5">
+        <div className="grid min-w-0 grid-cols-1 gap-1.5">
           <Label htmlFor={`${uid}-purpose`}>{t("revoke.purpose")}</Label>
           {/* Valeur vide = toutes les finalités du canal. */}
           <Select name="purpose" defaultValue={ALL_PURPOSES}>

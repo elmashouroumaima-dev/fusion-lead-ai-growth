@@ -3,6 +3,8 @@
 Format : Keep a Changelog. Une entrée par jour de travail.
 
 ## [Non publié]
+### Correctif : carte « Retirer un consentement » (écran contact)
+- Correction : le sélecteur de canal (largeur fixe de 16 rem) débordait sur celui de la finalité dans la carte étroite ; les deux sélecteurs sont maintenant empilés et occupent toute la largeur de la carte (cellules à une colonne, sans débordement). Le sélecteur de canal du formulaire d'enregistrement suit la largeur de sa colonne.
 ### Guide de test exploitation et configuration, correctif des libellés de notification (hors plan)
 - Ajout : `docs/testing/Guide-test-simple-phase3-exploitation-configuration.pdf` (11 pages, captures d'écran, fiche OK / KO : arrêt d'urgence, jobs en échec, clés de formulaire, règles d'assignation, notifications, droits, scénarios automatiques J40) et le jeu de données `docs/testing/fixtures/phase3b-ops-demo.sql`.
 - Correction (J39b) : les libellés des notifications s'affichaient en clair (« Notifications.kind.send.failed ») car une clé de traduction contenait un point ; clés renommées (`leadUnassigned`, `sendFailed`) et test d'acceptation qui vérifie le libellé traduit.

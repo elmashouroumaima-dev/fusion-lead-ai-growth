@@ -99,3 +99,17 @@ export const release = (messageIds: string[]): void => {
   if (messageIds.length === 0) return;
   psql(`update public.jobs set next_run_at = now() - interval '1 second' where kind = 'send_message' and status = 'queued' and payload ->> 'message_id' in (${messageIds.map((m) => `'${m}'`).join(",")})`);
 };
+
+/**
+ * Le worker de test réclame TOUT ce qui est échu, quel que soit le type : dans la suite complète, des jobs d'autres scénarios (assignation,
+ * import, synchronisation...) attendent encore dans la file (aucun worker de fond ne tourne) et seraient pris puis échoués par ce worker, qui ne
+ * connaît que `send_message` et `process_webhook`. On les met de côté (échéance repoussée d'un jour) et on les rend ensuite, intacts.
+ */
+export function parkForeignJobs(): string[] {
+  const out = psql(`update public.jobs set next_run_at = now() + interval '1 day' where status = 'queued' and next_run_at <= now() and kind not in ('send_message', 'process_webhook') returning id`);
+  return out.match(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/g) ?? [];
+}
+export function unparkJobs(ids: string[]): void {
+  if (ids.length === 0) return;
+  psql(`update public.jobs set next_run_at = now() where status = 'queued' and id in (${ids.map((id) => `'${id}'`).join(",")})`);
+}

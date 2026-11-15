@@ -2,7 +2,7 @@ import { createHmac, randomUUID } from "node:crypto";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { api, ORG, psql, purgeIdempotencyKeys } from "../../../supabase/tests/rls/src/harness";
 import { BASE_URL, postJson, signIn, type Session } from "./app-client";
-import { createSendWorker, drain, providerMock, release, step } from "./channels.testkit";
+import { createSendWorker, drain, parkForeignJobs, providerMock, release, step, unparkJobs } from "./channels.testkit";
 
 /**
  * T4 (spec §13 critère 6 et scénario « conversation WhatsApp démarrée par le client, une autre par un modèle approuvé, webhook en double et
@@ -54,6 +54,7 @@ const hook = (value: unknown) => {
 let integration = "";
 let channel = "";
 let template = "";
+let parked: string[] = [];
 const contact: Record<string, string> = {};
 const conversationOf = (who: Who) => first(`select id from public.conversations where contact_id = '${contact[who]}'`);
 const inboundCount = (who: Who) => Number(first(`select count(*) from public.messages where direction = 'inbound' and conversation_id = '${conversationOf(who)}'`));
@@ -97,6 +98,7 @@ beforeAll(async () => {
   sessions.set("shared", await signIn("shared@seed.test"));
   if (!MASTER) return;
   psql(`delete from public.jobs where status in ('queued', 'running') and kind in ('send_message', 'process_webhook')`);
+  parked = parkForeignJobs();
   expect((await post("/api/integrations", { provider: "whatsapp", external_account_id: PHONE_ID, scopes: [], secret: TOKEN })).status).toBe(201);
   integration = first(`select id from public.integrations where external_account_id = '${PHONE_ID}'`);
   expect((await post("/api/integrations/webhook-secret", { integration_id: integration, secret: APP_SECRET })).status).toBe(200);
@@ -116,7 +118,10 @@ beforeAll(async () => {
   expect((await rpc("service", "message_templates_sync", { p_org: ORG.alpha, p_channel: channel, p_items: items })).status).toBe(200);
   template = first(`select id from public.message_templates where name = 'offre_ete' and channel_id = '${channel}' order by version desc limit 1`);
 });
-afterAll(cleanup);
+afterAll(() => {
+  cleanup();
+  unparkJobs(parked);
+});
 
 describe.skipIf(!MASTER)("T4 : WhatsApp (client, modèle, webhook en double, panne du fournisseur)", () => {
   // c : deux limites de débit (429) puis un succès ; d : un 503 (résultat inconnu)

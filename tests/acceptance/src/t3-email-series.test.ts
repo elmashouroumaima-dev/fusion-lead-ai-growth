@@ -3,7 +3,7 @@ import { createKeyRing, sealOrganizationSecret } from "../../../packages/adapter
 import { createUnsubscribeToken } from "../../../packages/adapters/src/email/unsubscribe";
 import { api, ORG, psql } from "../../../supabase/tests/rls/src/harness";
 import { BASE_URL } from "./app-client";
-import { createSendWorker, drain, holdBack, providerMock, release, step } from "./channels.testkit";
+import { createSendWorker, drain, holdBack, parkForeignJobs, providerMock, release, step, unparkJobs } from "./channels.testkit";
 
 /**
  * T3 (spec §13 critère 5 et scénario « campagne e-mail mini vers une liste consentante, puis désabonnement en cours ») : série de 5 e-mails
@@ -30,6 +30,7 @@ const earlier: Record<string, string> = {};
 const series: Record<string, string> = {};
 let channel = "";
 let integration = "";
+let parked: string[] = [];
 
 const status = (id: string) => first(`select status from public.messages where id = '${id}'`);
 const failure = (id: string) => first(`select coalesce(error_code, '') from public.messages where id = '${id}'`);
@@ -69,6 +70,7 @@ beforeAll(async () => {
   if (!keyRing) return;
   // la file ne contient que les jobs de CE test (le worker de test réclame tout ce qui est échu)
   psql(`delete from public.jobs where kind = 'send_message' and status in ('queued', 'running')`);
+  parked = parkForeignJobs();
   const sealed = sealOrganizationSecret({ organizationId: ORG.alpha, plaintext: SEND_TOKEN, keyRing });
   const created = await rpc<string>("shared", "create_provider_integration", {
     p_org: ORG.alpha, p_provider: "email", p_account: ACCOUNT, p_scopes: [], p_secret_id: sealed.secretId, p_ciphertext: sealed.ciphertext, p_nonce: sealed.nonce, p_key_version: sealed.keyVersion,
@@ -89,7 +91,10 @@ beforeAll(async () => {
       status = 'accepted', provider_message_id = 'pm-${run}-${key}', send_claimed_at = now(), sent_at = now() - interval '2 days' where id = '${earlier[key]}'`);
   }
 });
-afterAll(cleanup);
+afterAll(() => {
+  cleanup();
+  unparkJobs(parked);
+});
 
 const tokenFor = (key: string) => createUnsubscribeToken(keyRing as NonNullable<typeof keyRing>, { organizationId: ORG.alpha, messageId: earlier[key] as string });
 

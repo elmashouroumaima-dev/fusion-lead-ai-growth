@@ -3,6 +3,11 @@
 Format : Keep a Changelog. Une entrée par jour de travail.
 
 ## [Non publié]
+### J39 — Exploitation des envois
+- Ajout : migration `20261211100000_send_operations.sql` (et retour arrière) : `set_send_emergency_stop` (owner, admin, marketing manager ; audit `send.emergency_stop`), `operator_replay_dead_letter` (owner, admin ; acteur humain vérifié, comble la limite `p_actor` de l'ADR 003), alerte `send.failed` (déclencheur sur `jobs`, owner et admin, sans donnée de contact), débit horaire compté par (type de canal, entreprise) au lieu de par canal.
+- Ajout : `POST /api/send/emergency-stop`, `POST /api/jobs/dead-letters/replay`, page `/operations` (arrêt d'urgence, liste et rejeu des dead letters), traductions ar / en / fr, lien de menu.
+- Tests : RLS `send-operations` (11), domain `operations` (3), acceptation HTTP `send-operations-flow` (8).
+- Documentation : `docs/runbooks/emergency-stop.md`, `docs/api/send-operations.md`, `docs/runbooks/jobs-worker.md`, `docs/api/send.md`.
 ### J36b — Retrait de consentement WhatsApp (hors plan)
 - Ajout : migration `20261207100000` (et retour arrière) : un mot d'arrêt reçu d'un contact révoque ses consentements WhatsApp, supprime son numéro, annule ses envois WhatsApp en file ; numéro seul supprimé pour un expéditeur inconnu ; rattrapage des « STOP » déjà reçus.
 - Modification : version de l'API Graph v25.0 (une constante pour toutes les requêtes sortantes).

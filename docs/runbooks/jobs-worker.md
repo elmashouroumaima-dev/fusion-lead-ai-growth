@@ -61,8 +61,8 @@ Règles : la charge utile ne porte que des identifiants de lignes (jamais de jet
 Exécution **au moins une fois** : si l'enregistrement du succès échoue, ou si le worker meurt, le bail expire et le job est repris. Chaque handler doit donc être idempotent (`ctx.idempotencyKey`). À l'arrêt forcé, aucune tentative n'est consommée.
 
 ## Limites connues
-- `cancel_job` et `replay_dead_letter` enregistrent un acteur « système » et font confiance à `p_org` (service_role) : à compléter par un `p_actor` vérifié avant toute exposition à une action humaine (page Exploitation, J39).
+- `cancel_job` et `replay_dead_letter` (service_role) enregistrent un acteur « système » et font confiance à `p_org`. Le rejeu HUMAIN passe par `operator_replay_dead_letter` (J39) : rôle owner / admin vérifié, acteur = `auth.uid()` dans l'audit. L'annulation par un humain n'est pas exposée.
 - Sans plafond de longueur de file : la quantité de jobs par organisation est limitée par les quotas du J14, pas encore par la base.
 - Les lignes `succeeded`, `cancelled` et `dead_letter` ne sont pas purgées : purge et rétention à définir (J57).
-- La page d'exploitation (liste et rejeu des dead letters dans l'interface) est prévue au J39 ; en attendant, SQL.
+- Dead letters : liste et rejeu dans la page Exploitation (J39, `docs/api/send-operations.md`) ; arrêt d'urgence : `docs/runbooks/emergency-stop.md`.
 - Le registre contient seulement `noop` : les handlers métier arrivent avec leurs modules.

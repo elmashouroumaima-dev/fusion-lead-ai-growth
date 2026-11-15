@@ -3,6 +3,10 @@
 Format : Keep a Changelog. Une entrée par jour de travail.
 
 ## [Non publié]
+### Guide de test exploitation et configuration, correctif des libellés de notification (hors plan)
+- Ajout : `docs/testing/Guide-test-simple-phase3-exploitation-configuration.pdf` (11 pages, captures d'écran, fiche OK / KO : arrêt d'urgence, jobs en échec, clés de formulaire, règles d'assignation, notifications, droits, scénarios automatiques J40) et le jeu de données `docs/testing/fixtures/phase3b-ops-demo.sql`.
+- Correction (J39b) : les libellés des notifications s'affichaient en clair (« Notifications.kind.send.failed ») car une clé de traduction contenait un point ; clés renommées (`leadUnassigned`, `sendFailed`) et test d'acceptation qui vérifie le libellé traduit.
+- Rapport d'avancement : données remises à jour (J30b à J40 : 66,2 %, 45 jours sur 68, 8 008 tests) ; une revue de sécurité « pas encore faite » n'est plus présentée comme faite.
 ### J40 — Scénarios canaux (T3 et T4)
 - Ajout : `tests/acceptance/src/t3-email-series.test.ts` (8 tests) et `t4-whatsapp-scenarios.test.ts` (7 tests), outillage `channels.testkit.ts`. Le VRAI worker (Runner piloté pas à pas, handlers `send_message` et `process_webhook`, base locale) contre un Postmark et un Meta SIMULÉS par un `fetch` injecté dans les adaptateurs réels (pas de nouvelle dépendance).
 - T3 : série de 5 e-mails, désabonnement du 3e en cours de série par le vrai lien (annulé, jamais envoyé, refus au contrôle final pour un message ultérieur), 503 deux fois puis 200 sans doublon, lien de désabonnement sur chaque envoi.

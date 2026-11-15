@@ -1125,3 +1125,6 @@ Plan : T3 (série e-mail, désabonnement en cours), T4 (WhatsApp client puis mod
 - Les tests lisent la clé maître de l'environnement (comme les autres flux) ; sans elle ils sont ignorés (`skipIf`).
 - Le test supprime les jobs `send_message` / `process_webhook` en attente de la base locale avant de démarrer (la file ne doit contenir que ses jobs) : acceptable en base de test, jamais à lancer sur une base partagée.
 
+## Correctif J39b — libellés des notifications (branche `docs-guides-phase3-suite`)
+En préparant le guide de test, la capture de la page Notifications a montré des clés brutes (« Notifications.kind.send.failed ») : une clé de traduction contenait un point, que la bibliothèque lit comme un chemin imbriqué. Les tests d'acceptation de J39b vérifiaient le texte du job, pas le libellé, et ne l'avaient pas vu. Clés renommées, assertion ajoutée (libellé traduit, aucune clé brute). Les revues de sécurité indépendantes de J39, J39b et J40 restent à faire.
+

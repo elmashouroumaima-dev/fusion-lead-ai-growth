@@ -137,6 +137,9 @@ describe("notifications", () => {
     const page = await getPage(as("alpha-admin"), "/en/notifications", ORG.alpha);
     expect(page.status).toBe(200);
     expect(visibleText(page)).toContain("send_message");
+    // libellés traduits (une clé de traduction mal formée s'afficherait en clair : « Notifications.kind… »)
+    expect(visibleText(page)).toContain("Failed send");
+    expect(visibleText(page)).not.toMatch(/Notifications\.[a-z]+\./);
     // le commercial ne peut pas marquer la notification d'un autre
     expect((await post("alpha-sales", "/api/notifications/read", { notification_id: mine })).status).toBeGreaterThanOrEqual(400);
     expect(first(`select read_at is null from public.notifications where id = '${mine}'`)).toBe("t");

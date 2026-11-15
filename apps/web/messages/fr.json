@@ -1495,8 +1495,8 @@
     "failed": "Impossible de marquer comme lue. Réessayez.",
     "loadFailed": "Impossible de charger les notifications.",
     "kind": {
-      "lead.unassigned": "Lead non assigné",
-      "send.failed": "Envoi en échec"
+      "leadUnassigned": "Lead non assigné",
+      "sendFailed": "Envoi en échec"
     },
     "reason": {
       "no_rule": "Aucune règle d'assignation",

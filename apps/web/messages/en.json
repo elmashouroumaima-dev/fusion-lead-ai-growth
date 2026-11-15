@@ -1495,8 +1495,8 @@
     "failed": "Could not mark as read. Try again.",
     "loadFailed": "Notifications could not be loaded.",
     "kind": {
-      "lead.unassigned": "Unassigned lead",
-      "send.failed": "Failed send"
+      "leadUnassigned": "Unassigned lead",
+      "sendFailed": "Failed send"
     },
     "reason": {
       "no_rule": "No assignment rule",

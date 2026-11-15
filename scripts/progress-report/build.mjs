@@ -86,7 +86,7 @@ const lastDone = `J${Math.max(
     return start ? Number(start[1]) + Math.max(1, Math.round((m.days * m.progress) / 100)) - 1 : 0;
   }),
 )}`;
-const reviews = data.recent.filter((r) => r.review);
+const reviews = data.recent.filter((r) => r.review);  // `review: false` = revue pas encore faite : exclue du tableau des revues
 const findings = reviews.reduce((n, r) => n + r.review.blocking + r.review.major + r.review.medium, 0);
 
 // historique : une ligne par jour ; « depuis le dernier rapport » = la dernière ligne d'un jour antérieur
@@ -350,13 +350,13 @@ page(
 page(
   "Livré récemment",
   `
-  <h2>Livré récemment <small>J30 à J34 : les canaux e-mail et WhatsApp</small></h2>
-  <div class="sub">Chaque journée est validée par des tests, puis attaquée par une revue de sécurité indépendante avant la fusion.</div>
+  <h2>Livré récemment <small>J36 à J40 : envoi sûr, exploitation, configuration et scénarios canaux</small></h2>
+  <div class="sub">Chaque journée est validée par des tests ; la revue de sécurité indépendante est indiquée jour par jour (certaines journées l'attendent encore).</div>
   ${data.recent
     .map(
       (r) => `<div class="day"><div class="hd"><span class="dn">${esc(r.day)}</span><h3>${esc(r.title)}</h3></div>
     <ul>${r.items.map((t) => `<li>${esc(t)}</li>`).join("")}</ul>
-    <div class="ft"><span>Preuves : ${esc(r.proof)}</span>${r.review ? `<span>· Revue de sécurité :</span>${sevChips(r.review)}` : `<span>· revue de sécurité faite</span>`}</div></div>`,
+    <div class="ft"><span>Preuves : ${esc(r.proof)}</span>${r.review ? `<span>· Revue de sécurité :</span>${sevChips(r.review)}` : (r.review === false ? `<span>· revue de sécurité indépendante : à faire</span>` : `<span>· revue de sécurité faite</span>`)}</div></div>`,
     )
     .join("\n  ")}
   <div class="grid2" style="margin-top:10px;">

@@ -27,6 +27,7 @@
       "deals": "Deals",
       "crmSync": "CRM",
       "integrations": "Integrations",
+      "operations": "Operations",
       "contacts": "Contacts",
       "inbox": "Inbox"
     },
@@ -1389,6 +1390,38 @@
         "dealWon": "Deal marked as won.",
         "dealLost": "Deal marked as lost."
       }
+    }
+  },
+  "Operations": {
+    "title": "Send operations",
+    "description": "Stop all sending in an emergency and replay failed jobs. Nothing is sent while sending is stopped.",
+    "stop": {
+      "title": "Emergency stop",
+      "active": "Sending is STOPPED for this company. No email or WhatsApp message leaves.",
+      "inactive": "Sending is running normally.",
+      "stopButton": "Stop all sending",
+      "resumeButton": "Resume sending",
+      "confirm": "Confirm: stop all sending",
+      "cancel": "Cancel",
+      "stopped": "Sending stopped.",
+      "resumed": "Sending resumed.",
+      "failed": "The action failed. Try again.",
+      "forbidden": "You are not allowed to do this."
+    },
+    "dead": {
+      "title": "Failed jobs (dead letters)",
+      "empty": "No failed job.",
+      "kind": "Job",
+      "attempts": "Attempts",
+      "error": "Last error",
+      "when": "Failed on",
+      "action": "Action",
+      "replay": "Replay",
+      "replayed": "Job put back in the queue.",
+      "failed": "Replay failed.",
+      "gone": "This job is no longer in dead letter.",
+      "readOnly": "Only owners and admins can see and replay failed jobs.",
+      "loadFailed": "Failed jobs could not be loaded."
     }
   }
 }

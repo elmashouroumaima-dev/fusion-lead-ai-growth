@@ -27,6 +27,7 @@
       "deals": "Deals",
       "crmSync": "CRM",
       "integrations": "Intégrations",
+      "operations": "Exploitation",
       "contacts": "Contacts",
       "inbox": "Boîte de réception"
     },
@@ -1389,6 +1390,38 @@
         "dealWon": "Deal marqué comme gagné.",
         "dealLost": "Deal marqué comme perdu."
       }
+    }
+  },
+  "Operations": {
+    "title": "Exploitation des envois",
+    "description": "Arrêter tous les envois en urgence et rejouer les jobs en échec. Rien ne part tant que l'envoi est arrêté.",
+    "stop": {
+      "title": "Arrêt d'urgence",
+      "active": "L'envoi est ARRÊTÉ pour cette entreprise. Aucun e-mail ni message WhatsApp ne part.",
+      "inactive": "L'envoi fonctionne normalement.",
+      "stopButton": "Arrêter tous les envois",
+      "resumeButton": "Reprendre les envois",
+      "confirm": "Confirmer : arrêter tous les envois",
+      "cancel": "Annuler",
+      "stopped": "Envois arrêtés.",
+      "resumed": "Envois repris.",
+      "failed": "L'action a échoué. Réessayez.",
+      "forbidden": "Vous n'avez pas le droit de faire cela."
+    },
+    "dead": {
+      "title": "Jobs en échec (dead letters)",
+      "empty": "Aucun job en échec.",
+      "kind": "Job",
+      "attempts": "Tentatives",
+      "error": "Dernière erreur",
+      "when": "Échec le",
+      "action": "Opération",
+      "replay": "Rejouer",
+      "replayed": "Job remis en file.",
+      "failed": "Le rejeu a échoué.",
+      "gone": "Ce job n'est plus en dead letter.",
+      "readOnly": "Seuls les propriétaires et les administrateurs voient et rejouent les jobs en échec.",
+      "loadFailed": "Impossible de charger les jobs en échec."
     }
   }
 }

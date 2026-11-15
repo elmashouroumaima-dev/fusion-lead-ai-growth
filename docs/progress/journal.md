@@ -1107,3 +1107,21 @@ Plan : clés de formulaire (création, clé montrée une seule fois, révocation
 - Affichage de la clé unique vérifié par les tests HTTP (réponse, base, audit, idempotence) ; non démontré en navigateur dans cette session (capture de la page : section « Form keys » visible, état vide).
 - Compteur de non lues non temps réel.
 
+## J40 — Scénarios canaux T3 et T4 (branche `day-40-scenarios-canaux`)
+Plan : T3 (série e-mail, désabonnement en cours), T4 (WhatsApp client puis modèle, webhook dupliqué, panne 5xx), corrections. Validation : §13-5 et §13-6 ; « 503 deux fois puis 200 sans doublon ».
+
+### Livré
+- `t3-email-series` (8) et `t4-whatsapp-scenarios` (7) : vrai worker et vraie base, fournisseurs simulés par `fetch` injecté dans les adaptateurs réels.
+- Compteurs, statuts et absence de doublon vérifiés (appels fournisseur, messages par statut, identifiants fournisseur, tentatives de job) ; aucun corps de message ni jeton dans l'audit, les en-têtes ou les erreurs de jobs.
+
+### Décisions par défaut (validées « OK défaut »)
+- WhatsApp : un 5xx reste « résultat inconnu » (jamais rejoué, décision J36) ; « 503 ×2 puis 200 » est démontré pour l'e-mail, « 429 ×2 puis 200 » pour WhatsApp. `fetch` simulé, pas de MSW. Test sur comptes sandbox réels : J41.
+
+### Écarts au plan
+- Pas de MSW (pas de dépendance ajoutée) ; le critère « 503 ×2 puis 200 » ne vaut pas pour WhatsApp (décision J36 conservée).
+- « Corrections » (1,5 h) : aucune nécessaire, aucun défaut trouvé.
+
+### À surveiller
+- Les tests lisent la clé maître de l'environnement (comme les autres flux) ; sans elle ils sont ignorés (`skipIf`).
+- Le test supprime les jobs `send_message` / `process_webhook` en attente de la base locale avant de démarrer (la file ne doit contenir que ses jobs) : acceptable en base de test, jamais à lancer sur une base partagée.
+

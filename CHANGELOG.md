@@ -3,6 +3,11 @@
 Format : Keep a Changelog. Une entrée par jour de travail.
 
 ## [Non publié]
+### J40 — Scénarios canaux (T3 et T4)
+- Ajout : `tests/acceptance/src/t3-email-series.test.ts` (8 tests) et `t4-whatsapp-scenarios.test.ts` (7 tests), outillage `channels.testkit.ts`. Le VRAI worker (Runner piloté pas à pas, handlers `send_message` et `process_webhook`, base locale) contre un Postmark et un Meta SIMULÉS par un `fetch` injecté dans les adaptateurs réels (pas de nouvelle dépendance).
+- T3 : série de 5 e-mails, désabonnement du 3e en cours de série par le vrai lien (annulé, jamais envoyé, refus au contrôle final pour un message ultérieur), 503 deux fois puis 200 sans doublon, lien de désabonnement sur chaque envoi.
+- T4 : conversation démarrée par le client, par un modèle approuvé, webhook reçu deux fois (un seul message), statut `delivered` reçu deux fois, 429 deux fois puis 200 sans doublon, 503 = résultat inconnu jamais rejoué.
+- Aucun défaut du produit trouvé ; aucune migration. Exigent la clé maître (comme les autres flux d'acceptation).
 ### J39b — Écrans de configuration
 - Ajout : routes `POST /api/forms/keys` (+ `/active`, `/origins`), `POST /api/assignment/rules` (+ `/update`, `/delete`), `POST /api/notifications/read` ; pages `/assignment` et `/notifications` ; section « Form keys » dans la page d'un projet ; liens de menu avec compteur de notifications non lues ; ar / en / fr. Aucune migration.
 - Modification : ressource `form_keys` (action `manage`, owner et admin) rattachée à la ligne 16 de l'ADR 014 (amendement J39b) ; le schéma des notifications accepte `send.failed` (J39) en plus de `lead.unassigned`.

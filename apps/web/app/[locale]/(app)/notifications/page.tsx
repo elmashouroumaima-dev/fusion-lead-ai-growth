@@ -54,7 +54,7 @@ export default async function NotificationsPage({ params }: { params: Promise<{ 
                 <CardContent className="flex flex-wrap items-center justify-between gap-3 py-3">
                   <div className="grid gap-1">
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className="font-medium">{t(`kind.${item.kind}`)}</span>
+                      <span className="font-medium">{t(item.kind === "lead.unassigned" ? "kind.leadUnassigned" : "kind.sendFailed")}</span>
                       {item.read_at === null ? <Badge>{t("unread")}</Badge> : null}
                     </div>
                     <p className="text-muted-foreground text-xs">

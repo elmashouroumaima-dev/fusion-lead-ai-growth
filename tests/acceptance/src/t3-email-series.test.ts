@@ -69,7 +69,6 @@ beforeAll(async () => {
   cleanup();
   if (!keyRing) return;
   // la file ne contient que les jobs de CE test (le worker de test réclame tout ce qui est échu)
-  psql(`delete from public.jobs where kind = 'send_message' and status in ('queued', 'running')`);
   parked = parkForeignJobs();
   const sealed = sealOrganizationSecret({ organizationId: ORG.alpha, plaintext: SEND_TOKEN, keyRing });
   const created = await rpc<string>("shared", "create_provider_integration", {

@@ -101,12 +101,14 @@ export const release = (messageIds: string[]): void => {
 };
 
 /**
- * Le worker de test réclame TOUT ce qui est échu, quel que soit le type : dans la suite complète, des jobs d'autres scénarios (assignation,
- * import, synchronisation...) attendent encore dans la file (aucun worker de fond ne tourne) et seraient pris puis échoués par ce worker, qui ne
- * connaît que `send_message` et `process_webhook`. On les met de côté (échéance repoussée d'un jour) et on les rend ensuite, intacts.
+ * Le worker de test réclame TOUT ce qui est échu, quel que soit le type de job. Dans la suite complète, des jobs d'autres scénarios restent en
+ * file (aucun worker de fond ne tourne) : assignation, import, synchronisation, mais aussi `process_webhook` et `send_message` laissés par
+ * d'autres fichiers, ou des jobs « en cours » dont le bail a expiré (la base les remet en file à la prochaine réclamation). Ce worker les prendrait
+ * et les échouerait. On remet d'abord en file les baux expirés, puis on met TOUT ce qui attend de côté (échéance repoussée d'un jour) et on le
+ * rend intact à la fin. À appeler avant de créer les jobs du test.
  */
 export function parkForeignJobs(): string[] {
-  const out = psql(`update public.jobs set next_run_at = now() + interval '1 day' where status = 'queued' and next_run_at <= now() and kind not in ('send_message', 'process_webhook') returning id`);
+  const out = psql(`select private.requeue_expired_leases(); update public.jobs set next_run_at = now() + interval '1 day' where status = 'queued' and next_run_at <= now() + interval '2 hours' returning id`);
   return out.match(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/g) ?? [];
 }
 export function unparkJobs(ids: string[]): void {

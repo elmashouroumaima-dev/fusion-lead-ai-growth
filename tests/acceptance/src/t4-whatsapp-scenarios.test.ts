@@ -97,7 +97,6 @@ beforeAll(async () => {
   cleanup();
   sessions.set("shared", await signIn("shared@seed.test"));
   if (!MASTER) return;
-  psql(`delete from public.jobs where status in ('queued', 'running') and kind in ('send_message', 'process_webhook')`);
   parked = parkForeignJobs();
   expect((await post("/api/integrations", { provider: "whatsapp", external_account_id: PHONE_ID, scopes: [], secret: TOKEN })).status).toBe(201);
   integration = first(`select id from public.integrations where external_account_id = '${PHONE_ID}'`);

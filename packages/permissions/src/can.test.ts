@@ -143,6 +143,7 @@ const UNCONDITIONAL: Record<string, Role[]> = {
   "unassigned_leads.read": [OWN, ADM, MKT],
   "unassigned_leads.assign": [OWN, ADM],
   "assignment_rules.manage": [OWN, ADM],
+  "form_keys.manage": [OWN, ADM],
   "pipelines.manage": [OWN, ADM],
   "crm_mappings.manage": [OWN, ADM],
   "conversations.read": [OWN, ADM],

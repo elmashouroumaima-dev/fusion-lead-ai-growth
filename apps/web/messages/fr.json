@@ -28,6 +28,8 @@
       "crmSync": "CRM",
       "integrations": "Intégrations",
       "operations": "Exploitation",
+      "assignment": "Assignation",
+      "notifications": "Alertes",
       "contacts": "Contacts",
       "inbox": "Boîte de réception"
     },
@@ -1423,5 +1425,86 @@
       "readOnly": "Seuls les propriétaires et les administrateurs voient et rejouent les jobs en échec.",
       "loadFailed": "Impossible de charger les jobs en échec."
     }
+  },
+  "FormKeys": {
+    "title": "Clés de formulaire",
+    "description": "Clés qui permettent aux formulaires de votre site d'envoyer des leads à ce projet. Une clé n'est montrée qu'une fois, à la création.",
+    "empty": "Aucune clé de formulaire.",
+    "originsLabel": "Origines autorisées (une par ligne)",
+    "originsHelp": "Origines https exactes, par exemple https://www.exemple.com. Une clé ne fonctionne que depuis ces origines.",
+    "create": "Créer une clé",
+    "created": "Clé créée.",
+    "showOnce": "Copiez cette clé maintenant. Elle ne sera plus jamais affichée.",
+    "copy": "Copier",
+    "copied": "Clé copiée.",
+    "copyFailed": "Copie impossible : sélectionnez la clé et copiez-la à la main.",
+    "hide": "Masquer",
+    "active": "En service",
+    "revokedBadge": "Révoquée",
+    "revoke": "Révoquer",
+    "confirmRevoke": "Confirmer : révoquer cette clé",
+    "reactivate": "Réactiver",
+    "cancel": "Annuler",
+    "revoked": "Clé révoquée.",
+    "reactivated": "Clé réactivée.",
+    "forbidden": "Seuls les propriétaires et les administrateurs gèrent les clés de formulaire.",
+    "invalid": "Vérifiez les origines : https seulement, de une à dix, sans chemin.",
+    "limit": "Limite atteinte : cinq clés actives au plus par projet.",
+    "failed": "L'action a échoué. Réessayez.",
+    "readOnly": "Seuls les propriétaires et les administrateurs gèrent les clés de formulaire."
+  },
+  "Assignment": {
+    "title": "Règles d'assignation",
+    "description": "Qui reçoit les nouveaux leads. Une règle de projet l'emporte sur la règle par défaut de l'entreprise.",
+    "empty": "Aucune règle : les nouveaux leads restent non assignés et les propriétaires et administrateurs sont alertés.",
+    "defaultRule": "Règle par défaut (tous les projets)",
+    "projectUnknown": "Projet inconnu",
+    "memberUnknown": "Membre inconnu",
+    "strategy": {
+      "round_robin": "Tour de rôle",
+      "fixed": "Membre fixe"
+    },
+    "strategyLabel": "Stratégie",
+    "fixedHelp": "Une règle fixe exige exactement un membre.",
+    "project": "Projet",
+    "membersLabel": "Membres éligibles",
+    "active": "Activée",
+    "inactive": "Désactivée",
+    "new": "Nouvelle règle",
+    "newTitle": "Nouvelle règle",
+    "editTitle": "Modifier la règle",
+    "edit": "Modifier",
+    "delete": "Supprimer",
+    "confirmDelete": "Confirmer : supprimer cette règle",
+    "cancel": "Annuler",
+    "save": "Enregistrer",
+    "created": "Règle créée.",
+    "updated": "Règle modifiée.",
+    "deleted": "Règle supprimée.",
+    "forbidden": "Seuls les propriétaires et les administrateurs gèrent les règles d'assignation.",
+    "invalid": "Vérifiez la règle : au moins un membre, exactement un pour une règle fixe.",
+    "conflict": "Une règle existe déjà pour ce projet ou la limite est atteinte.",
+    "failed": "L'action a échoué. Réessayez."
+  },
+  "Notifications": {
+    "title": "Alertes",
+    "description": "Alertes pour les propriétaires et les administrateurs : leads non assignés et envois en échec.",
+    "empty": "Aucune notification.",
+    "unread": "Non lue",
+    "markRead": "Marquer comme lue",
+    "failed": "Impossible de marquer comme lue. Réessayez.",
+    "loadFailed": "Impossible de charger les notifications.",
+    "kind": {
+      "lead.unassigned": "Lead non assigné",
+      "send.failed": "Envoi en échec"
+    },
+    "reason": {
+      "no_rule": "Aucune règle d'assignation",
+      "no_eligible": "Aucun membre éligible",
+      "failed": "Assignation échouée"
+    },
+    "openLead": "Ouvrir le lead",
+    "openOperations": "Ouvrir l'exploitation",
+    "job": "Tâche"
   }
 }

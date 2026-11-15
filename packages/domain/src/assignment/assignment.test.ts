@@ -46,6 +46,13 @@ describe("notifications et résultat d'assignation", () => {
     expect(notificationRowSchema.safeParse({ ...row, kind: "autre", payload: { lead_id: UUID(4), reason: "no_rule" } }).success).toBe(false);
   });
 
+  it("send.failed (J39) : identifiant de job et nature seulement, jamais de donnée de contact", () => {
+    const row = { id: UUID(1), organization_id: UUID(2), recipient_id: UUID(3), kind: "send.failed", read_at: null, created_at: "2026-11-08T00:00:00Z" };
+    expect(notificationRowSchema.safeParse({ ...row, payload: { job_id: UUID(4), job_kind: "send_message" } }).success).toBe(true);
+    expect(notificationRowSchema.safeParse({ ...row, payload: { lead_id: UUID(4), reason: "no_rule" } }).success).toBe(false);
+    expect(notificationRowSchema.safeParse({ ...row, payload: { job_id: "x", job_kind: "send_message" } }).success).toBe(false);
+  });
+
   it("résultat : assigned avec responsable, unassigned / skipped avec motif", () => {
     expect(autoAssignResultSchema.safeParse({ outcome: "assigned", assignee_id: UUID(1) }).success).toBe(true);
     expect(autoAssignResultSchema.safeParse({ outcome: "assigned" }).success).toBe(false);

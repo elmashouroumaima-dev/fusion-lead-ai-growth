@@ -1088,3 +1088,22 @@ Plan : rate limit par (provider, organisation), tableau dead letter + rejeu, arr
 - Alertes `send.failed` : pas encore de panneau dans l'interface.
 - Le marketing manager peut arrêter les envois mais ne voit pas les dead letters (page filtrée par rôle).
 
+## J39b — Écrans de configuration (branche `day-39b-ecrans-configuration`)
+Plan : clés de formulaire (création, clé montrée une seule fois, révocation), règles d'assignation, notifications « lead non assigné ». Validation : aucune clé relisible après création ; seules owner et admin accèdent ; l'alerte est visible.
+
+### Livré
+- Routes HTTP et écrans (voir `docs/api/config-screens.md`) ; les fonctions SQL et services existaient (J21, J22) : aucune migration.
+- Amendement ADR 014 : `form_keys:manage` à la ligne 16 (OWN, ADM). Oracle et matrice de `packages/permissions` mis à jour (399 tests).
+- Correctif de fond : `notificationRowSchema` n'acceptait que `lead.unassigned`. Les alertes `send.failed` du J39 auraient fait échouer la lecture des notifications (`rows_unreadable`) ; le schéma est maintenant une union.
+
+### Décisions par défaut (validées « OK défaut »)
+- `form_keys` ajouté à la matrice ; clés dans la page du projet ; règles dans `/assignment` ; notifications = page + compteur dans le menu (et non un panneau d'en-tête).
+
+### Écarts au plan
+- Notifications : page et compteur au lieu d'un panneau déroulant d'en-tête.
+
+### À surveiller
+- Amendement de la matrice à valider par la responsable technique.
+- Affichage de la clé unique vérifié par les tests HTTP (réponse, base, audit, idempotence) ; non démontré en navigateur dans cette session (capture de la page : section « Form keys » visible, état vide).
+- Compteur de non lues non temps réel.
+

@@ -30,6 +30,9 @@ export type AppShellProps = {
   showCrmSync?: boolean;
   /** Lien « Exploitation » (arrêt d'urgence, dead letters). */
   showOperations?: boolean;
+  /** Liens « Assignation » et « Notifications » (owner, admin) et nombre de notifications non lues. */
+  showConfig?: boolean;
+  unreadNotifications?: number;
   showSettings?: boolean;
   showAdmin?: boolean;
   /** Organisations actives de l'utilisateur ; le sélecteur n'apparaît qu'à partir de deux. */
@@ -63,7 +66,7 @@ function pageKeyOf(pathname: string): PageKey | null {
  * sélecteur d'organisation, langue, thème, compte). Sur les pages d'onboarding et de sélection, aucune
  * navigation d'organisation : un en-tête réduit et le contenu centré.
  */
-export function AppShell({ children, email, showMembers, showCrm = false, showContacts = false, showInbox = false, showCrmSync = false, showOperations = false, showSettings = false, showAdmin = false, organizations, selectedOrganizationId, activeOrganizationName }: AppShellProps) {
+export function AppShell({ children, email, showMembers, showCrm = false, showContacts = false, showInbox = false, showCrmSync = false, showOperations = false, showConfig = false, unreadNotifications = 0, showSettings = false, showAdmin = false, organizations, selectedOrganizationId, activeOrganizationName }: AppShellProps) {
   const t = useTranslations("Shell");
   const pathname = usePathname();
   const chromeless = isSwitcherHiddenPath(pathname);
@@ -96,7 +99,7 @@ export function AppShell({ children, email, showMembers, showCrm = false, showCo
 
   return (
     <SidebarProvider>
-      <AppSidebar showMembers={showMembers} showCrm={showCrm} showContacts={showContacts} showInbox={showInbox} showCrmSync={showCrmSync} showOperations={showOperations} showSettings={showSettings} showAdmin={showAdmin} />
+      <AppSidebar showMembers={showMembers} showCrm={showCrm} showContacts={showContacts} showInbox={showInbox} showCrmSync={showCrmSync} showOperations={showOperations} showConfig={showConfig} unreadNotifications={unreadNotifications} showSettings={showSettings} showAdmin={showAdmin} />
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="bg-background/95 supports-[backdrop-filter]:bg-background/60 sticky top-0 z-20 flex h-14 shrink-0 items-center gap-2 border-b px-4 backdrop-blur">
           <SidebarTrigger label={t("sidebar.toggle")} className="-ms-1" />

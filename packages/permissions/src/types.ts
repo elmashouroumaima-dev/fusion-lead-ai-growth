@@ -29,6 +29,7 @@ export const RESOURCES = [
   "deals",
   "unassigned_leads",
   "assignment_rules",
+  "form_keys",
   "pipelines",
   "crm_mappings",
   "conversations",

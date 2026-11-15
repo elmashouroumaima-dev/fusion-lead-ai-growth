@@ -55,7 +55,7 @@ export const PERMISSION_MATRIX: readonly PermissionRule[] = Object.freeze([
   rule(14, "Leads / deals", false, ["leads", "deals"], ["update", "change_stage", "manage_tasks"], g(A, A, D, "own", D)),
   rule(15, "Leads non assignés", true, ["unassigned_leads"], ["read"], g(A, A, A, D, D)),
   rule(15, "Leads non assignés", true, ["unassigned_leads"], ["assign"], g(A, A, D, D, D)),
-  rule(16, "Règles d'assignation, pipelines, mappings CRM", true, ["assignment_rules", "pipelines", "crm_mappings"], ["manage"], g(A, A, D, D, D)),
+  rule(16, "Règles d'assignation, clés de formulaire, pipelines, mappings CRM", true, ["assignment_rules", "form_keys", "pipelines", "crm_mappings"], ["manage"], g(A, A, D, D, D)),
   rule(17, "Conversations", false, ["conversations"], ["read"], g(A, A, D, "own", D)),
   rule(18, "Conversations", false, ["conversations"], ["reply"], g(A, A, D, "own", D)),
   rule(19, "Consentement", true, ["consent"], ["revoke", "mark_do_not_contact"], g(A, A, A, "own", D)),

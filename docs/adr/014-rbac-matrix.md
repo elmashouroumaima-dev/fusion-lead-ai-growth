@@ -30,7 +30,7 @@ Légende : ✔ autorisé · ✘ refusé · `own` = seulement les enregistrements
 | **Contacts / leads** : créer (manuel, import CSV) | ✔ | ✔ | ✔ | ✔ (assigné à soi) | ✘ | §5.3 [P] |
 | **Leads / deals** : modifier, changer d'étape, tâches | ✔ | ✔ | ✘ | `own` | ✘ | §2 (SAL met à jour le deal) |
 | **Leads non assignés** : voir / assigner | ✔ | ✔ | ✔ voir | ✘ | ✘ | §9.1 [P] |
-| **Règles d'assignation, pipelines, mappings CRM** | ✔ | ✔ | ✘ | ✘ | ✘ | §5.3 [P] |
+| **Règles d'assignation, clés de formulaire, pipelines, mappings CRM** | ✔ | ✔ | ✘ | ✘ | ✘ | §5.3 [P] |
 | **Conversations** : lire | ✔ | ✔ | ✘ | `own` | ✘ | §2 |
 | **Conversations** : répondre (1:1) | ✔ | ✔ | ✘ | `own` | ✘ | §2, §13-2 |
 | **Consentement** : révoquer / marquer do_not_contact | ✔ | ✔ | ✔ | `own` | ✘ | §9.3 [P] (toujours autorisé : bloque l'envoi) |
@@ -73,3 +73,6 @@ Cases de la matrice appliquées côté base (RLS) pour les tables du noyau : mem
 - **Invitations** : table `invitations` (ADR 007, G-R8), jeton aléatoire de 256 bits, **seul son hash sha256 est stocké** et il n'est pas lisible via l'API (GRANT de colonnes) ; validité 7 jours ; le lien est affiché une seule fois à l'inviteur (aucun e-mail envoyé avant J31–J33). `accept_invitation` exige que l'e-mail **confirmé** du compte soit celui de l'invitation et que l'inviteur soit toujours owner/admin actif ; toutes les causes d'échec renvoient la même erreur. Réinviter une adresse révoque l'invitation en attente et en crée une nouvelle (atomique). `already_member` révèle à owner/admin l'appartenance d'une adresse à **leur** organisation (accepté).
 - **Écarts au plan** : migration modifiée sur place après revue de sécurité (jamais commitée ni appliquée hors base locale) ; la dépendance `@fusion-leap/permissions` a été déclarée dans `apps/web`.
 - **Reste** : audit (J12), couche service et idempotence générique (J11), limitation de débit sur l'acceptation et plafond d'invitations en attente (J57), e-mails d'invitation (J31–J33).
+
+## Amendement J39b (2026-11-15) — clés de formulaire
+- La ressource `form_keys` (action `manage`) est rattachée à la **ligne 16** (règles d'assignation, pipelines, mappings CRM) : OWN et ADM seulement, comme la base (`create_form_key`, `set_form_key_active`, `set_form_key_origins`, RLS ADR 007). Aucune autre case ne change. À valider par la responsable technique.

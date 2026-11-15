@@ -63,19 +63,25 @@ export const assignmentRuleRowSchema = z.object({
 });
 export type AssignmentRuleRow = z.infer<typeof assignmentRuleRowSchema>;
 
-export const NOTIFICATION_KINDS = ["lead.unassigned"] as const;
+export const NOTIFICATION_KINDS = ["lead.unassigned", "send.failed"] as const;
 export const UNASSIGNED_REASONS = ["no_rule", "no_eligible", "failed"] as const;
 
-/** Notification in-app : la charge utile ne contient que des identifiants et un motif. */
-export const notificationRowSchema = z.object({
+const notificationBase = {
   id: uuidSchema,
   organization_id: uuidSchema,
   recipient_id: uuidSchema.nullable(),
-  kind: z.enum(NOTIFICATION_KINDS),
-  payload: z.object({ lead_id: uuidSchema, reason: z.enum(UNASSIGNED_REASONS) }),
   read_at: z.string().nullable(),
   created_at: z.string(),
-});
+};
+
+/**
+ * Notification in-app : la charge utile ne contient que des identifiants (et un motif pour « lead non assigné »), jamais de donnée de
+ * contact ni de corps de message. `send.failed` (J39) : job d'envoi en dead letter.
+ */
+export const notificationRowSchema = z.discriminatedUnion("kind", [
+  z.object({ ...notificationBase, kind: z.literal("lead.unassigned"), payload: z.object({ lead_id: uuidSchema, reason: z.enum(UNASSIGNED_REASONS) }) }),
+  z.object({ ...notificationBase, kind: z.literal("send.failed"), payload: z.object({ job_id: uuidSchema, job_kind: z.string().max(64) }) }),
+]);
 export type NotificationRow = z.infer<typeof notificationRowSchema>;
 
 /** Résultat de `auto_assign_lead`. */

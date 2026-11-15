@@ -34,7 +34,7 @@ const TABLE: ReadonlyArray<readonly [number, readonly string[], readonly string[
   [14, ["leads", "deals"], ["update", "change_stage", "manage_tasks"], ["Y", "Y", "N", "own", "N"]],
   [15, ["unassigned_leads"], ["read"], ["Y", "Y", "Y", "N", "N"]],
   [15, ["unassigned_leads"], ["assign"], ["Y", "Y", "N", "N", "N"]],
-  [16, ["assignment_rules", "pipelines", "crm_mappings"], ["manage"], ["Y", "Y", "N", "N", "N"]],
+  [16, ["assignment_rules", "form_keys", "pipelines", "crm_mappings"], ["manage"], ["Y", "Y", "N", "N", "N"]],
   [17, ["conversations"], ["read"], ["Y", "Y", "N", "own", "N"]],
   [18, ["conversations"], ["reply"], ["Y", "Y", "N", "own", "N"]],
   [19, ["consent"], ["revoke", "mark_do_not_contact"], ["Y", "Y", "Y", "own", "N"]],

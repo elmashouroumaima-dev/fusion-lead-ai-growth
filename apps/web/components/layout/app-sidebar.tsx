@@ -2,6 +2,8 @@
 
 import {
   ActivityIcon,
+  BellIcon,
+  ShuffleIcon,
   ChevronDownIcon,
   CircleUserIcon,
   InboxIcon,
@@ -38,9 +40,11 @@ import {
 import { Link, usePathname } from "../../i18n/navigation";
 
 type NavItem = {
-  href: "/dashboard" | "/projects" | "/leads" | "/contacts" | "/inbox" | "/deals" | "/crm" | "/members" | "/admin/organizations" | "/integrations" | "/operations";
-  labelKey: "dashboard" | "projects" | "leads" | "contacts" | "inbox" | "deals" | "crmSync" | "members" | "admin" | "integrations" | "operations";
+  href: "/dashboard" | "/projects" | "/leads" | "/contacts" | "/inbox" | "/deals" | "/crm" | "/members" | "/admin/organizations" | "/integrations" | "/operations" | "/assignment" | "/notifications";
+  labelKey: "dashboard" | "projects" | "leads" | "contacts" | "inbox" | "deals" | "crmSync" | "members" | "admin" | "integrations" | "operations" | "assignment" | "notifications";
   icon: typeof UsersIcon;
+  /** Compteur affiché à droite du libellé (notifications non lues). */
+  badge?: number;
 };
 
 /** Sous-menu « Paramétrage » (liste déroulante). SMTP : administrateurs de la plateforme seulement. */
@@ -65,6 +69,8 @@ export function AppSidebar({
   showInbox = false,
   showCrmSync = false,
   showOperations = false,
+  showConfig = false,
+  unreadNotifications = 0,
   showSettings = false,
   showAdmin = false,
 }: {
@@ -78,6 +84,8 @@ export function AppSidebar({
   /** « CRM » (synchronisation) et « Intégrations » : owner et admin (commodité d'affichage ; la page et la base décident). */
   showCrmSync?: boolean;
   showOperations?: boolean;
+  showConfig?: boolean;
+  unreadNotifications?: number;
   showSettings?: boolean;
   showAdmin?: boolean;
 }) {
@@ -102,6 +110,12 @@ export function AppSidebar({
         ]
       : []),
     ...(showOperations ? [{ href: "/operations", labelKey: "operations", icon: ActivityIcon } satisfies NavItem] : []),
+    ...(showConfig
+      ? [
+          { href: "/assignment", labelKey: "assignment", icon: ShuffleIcon } satisfies NavItem,
+          { href: "/notifications", labelKey: "notifications", icon: BellIcon, badge: unreadNotifications } satisfies NavItem,
+        ]
+      : []),
     ...(showMembers
       ? [{ href: "/members", labelKey: "members", icon: UsersIcon } satisfies NavItem]
       : []),
@@ -163,6 +177,7 @@ export function AppSidebar({
                         <Link href={item.href} aria-current={active ? "page" : undefined}>
                           <item.icon aria-hidden="true" />
                           <span>{label}</span>
+                          {item.badge ? <span className="bg-primary text-primary-foreground ms-auto rounded-full px-1.5 text-xs">{item.badge}</span> : null}
                         </Link>
                       </SidebarMenuButton>
                     </SidebarMenuItem>

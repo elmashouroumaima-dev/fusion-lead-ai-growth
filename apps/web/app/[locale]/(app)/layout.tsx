@@ -4,6 +4,7 @@ import { AppShell } from "@/components/layout/app-shell";
 import { requireLocale } from "../../../i18n/require-locale";
 import { isPlatformAdmin } from "../../../lib/admin/queries";
 import { requireClaims } from "../../../lib/auth/require-claims";
+import { createClient } from "../../../lib/supabase/server";
 import { canManagePlatformConfig } from "../../../lib/settings/queries";
 import { readActiveOrgCookie } from "../../../lib/tenant/active-org-cookie";
 import { listMyMemberships, type ActiveMembership } from "../../../lib/tenant/memberships";
@@ -48,6 +49,9 @@ export default async function AppLayout({ children, params }: Props) {
   let showCrmSync = false;
   // Exploitation des envois (J39) : arrêt d'urgence (owner, admin, marketing) et dead letters (owner, admin). Commodité d'affichage.
   let showOperations = false;
+  // Configuration (J39b) : règles d'assignation et notifications, owner et admin. Compteur de non lues = commodité d'affichage.
+  let showConfig = false;
+  let unreadNotifications = 0;
   // Paramétrage (palette globale) : owner / admin d'organisation seulement ; commodité d'affichage.
   const showSettings = await canManagePlatformConfig();
   // Administration de la plateforme (plans, abonnements) : administrateurs de la plateforme seulement.
@@ -61,6 +65,15 @@ export default async function AppLayout({ children, params }: Props) {
     showInbox = can(active.role, "read", "conversations", { isOwnRecord: true });
     showCrmSync = can(active.role, "view_status", "integrations");
     showOperations = can(active.role, "emergency_stop", "sending") || can(active.role, "view", "dead_letter");
+    showConfig = can(active.role, "manage", "assignment_rules");
+    if (showConfig) {
+      try {
+        const counted = await (await createClient()).from("notifications").select("id", { count: "exact", head: true }).eq("organization_id", active.organizationId).is("read_at", null);
+        unreadNotifications = counted.error ? 0 : (counted.count ?? 0);
+      } catch {
+        unreadNotifications = 0;
+      }
+    }
     activeOrganizationName = active.organization.name;
   } catch {
     showMembers = false;
@@ -69,6 +82,8 @@ export default async function AppLayout({ children, params }: Props) {
     showInbox = false;
     showCrmSync = false;
     showOperations = false;
+    showConfig = false;
+    unreadNotifications = 0;
   }
 
   // Structure stable : la coquille ne dépend que de ces propriétés ; les enfants ne sont pas remontés
@@ -82,6 +97,8 @@ export default async function AppLayout({ children, params }: Props) {
       showInbox={showInbox}
       showCrmSync={showCrmSync}
       showOperations={showOperations}
+      showConfig={showConfig}
+      unreadNotifications={unreadNotifications}
       showSettings={showSettings}
       showAdmin={showAdmin}
       organizations={switchable.map((m) => ({ id: m.organizationId, name: m.organization.name }))}

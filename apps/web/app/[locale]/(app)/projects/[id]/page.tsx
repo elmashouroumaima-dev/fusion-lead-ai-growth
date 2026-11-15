@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { Alert } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { FormKeysCard, type FormKeyView } from "../../../../../components/forms/form-keys-card";
 import { ProductDialog } from "../../../../../components/projects/product-dialog";
 import { ProductList } from "../../../../../components/projects/product-list";
 import { ProjectForm } from "../../../../../components/projects/project-form";
@@ -12,6 +13,7 @@ import { ProjectStatusButton } from "../../../../../components/projects/project-
 import { Link } from "../../../../../i18n/navigation";
 import { requireLocale } from "../../../../../i18n/require-locale";
 import { requireClaims } from "../../../../../lib/auth/require-claims";
+import { listFormKeys } from "../../../../../lib/forms/service";
 import { getProject, listProducts } from "../../../../../lib/projects/queries";
 import { createClient } from "../../../../../lib/supabase/server";
 import { requireTenantContext } from "../../../../../lib/tenant/context";
@@ -33,6 +35,7 @@ export default async function ProjectPage({ params, searchParams }: Props) {
   const { id } = await params;
   const locale = localeSchema.parse(await requireLocale(params));
   const t = await getTranslations({ locale, namespace: "Projects" });
+  const tKeys = await getTranslations({ locale, namespace: "FormKeys" });
   const format = await getFormatter({ locale });
   await requireClaims(locale);
   const ctx = await requireTenantContext(locale);
@@ -43,9 +46,20 @@ export default async function ProjectPage({ params, searchParams }: Props) {
   const supabase = await createClient();
   let project;
   let products;
+  let formKeys: FormKeyView[] = [];
   try {
     project = await getProject(supabase, ctx.organizationId, parsedId.data);
     products = project ? await listProducts(supabase, ctx.organizationId, project.id) : [];
+    // Clés de formulaire (J39b) : owner et admin seulement ; seul le préfixe non secret est lu.
+    if (project && can(ctx.role, "manage", "form_keys")) {
+      formKeys = (await listFormKeys(supabase, ctx.organizationId, project.id)).map((key) => ({
+        id: key.id,
+        keyPrefix: key.key_prefix,
+        origins: key.allowed_origins,
+        active: key.active,
+        createdLabel: format.dateTime(new Date(key.created_at), { dateStyle: "medium" }),
+      }));
+    }
   } catch {
     return (
       <div className="mx-auto grid w-full max-w-5xl gap-6">
@@ -107,6 +121,20 @@ export default async function ProjectPage({ params, searchParams }: Props) {
           />
         </CardContent>
       </Card>
+
+      {can(ctx.role, "manage", "form_keys") ? (
+        <Card role="region" aria-labelledby="form-keys-title">
+          <CardHeader>
+            <h2 id="form-keys-title" tabIndex={-1} className={sectionTitleClass}>
+              {tKeys("title")}
+            </h2>
+            <p className="text-muted-foreground text-sm">{tKeys("description")}</p>
+          </CardHeader>
+          <CardContent>
+            <FormKeysCard projectId={project.id} keys={formKeys} disabled={archived} />
+          </CardContent>
+        </Card>
+      ) : null}
 
       <Card role="region" aria-labelledby="products-title">
         <CardHeader className="flex flex-row items-center justify-between gap-3">

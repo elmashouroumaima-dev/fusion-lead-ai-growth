@@ -28,6 +28,8 @@
       "crmSync": "CRM",
       "integrations": "Integrations",
       "operations": "Operations",
+      "assignment": "Assignment",
+      "notifications": "Notifications",
       "contacts": "Contacts",
       "inbox": "Inbox"
     },
@@ -1423,5 +1425,86 @@
       "readOnly": "Only owners and admins can see and replay failed jobs.",
       "loadFailed": "Failed jobs could not be loaded."
     }
+  },
+  "FormKeys": {
+    "title": "Form keys",
+    "description": "Keys that let your website forms send leads to this project. A key is shown once, when created.",
+    "empty": "No form key yet.",
+    "originsLabel": "Allowed origins (one per line)",
+    "originsHelp": "Exact https origins, for example https://www.example.com. A key only works from these origins.",
+    "create": "Create a key",
+    "created": "Key created.",
+    "showOnce": "Copy this key now. It will not be shown again.",
+    "copy": "Copy",
+    "copied": "Key copied.",
+    "copyFailed": "Copy failed: select the key and copy it manually.",
+    "hide": "Hide",
+    "active": "Active",
+    "revokedBadge": "Revoked",
+    "revoke": "Revoke",
+    "confirmRevoke": "Confirm: revoke this key",
+    "reactivate": "Reactivate",
+    "cancel": "Cancel",
+    "revoked": "Key revoked.",
+    "reactivated": "Key reactivated.",
+    "forbidden": "Only owners and admins can manage form keys.",
+    "invalid": "Check the origins: https only, one to ten, no path.",
+    "limit": "Limit reached: at most five active keys per project.",
+    "failed": "The action failed. Try again.",
+    "readOnly": "Only owners and admins can manage form keys."
+  },
+  "Assignment": {
+    "title": "Assignment rules",
+    "description": "Who receives new leads. A project rule wins over the default rule of the company.",
+    "empty": "No rule yet: new leads stay unassigned and owners and admins are alerted.",
+    "defaultRule": "Default rule (all projects)",
+    "projectUnknown": "Unknown project",
+    "memberUnknown": "Unknown member",
+    "strategy": {
+      "round_robin": "Round robin",
+      "fixed": "Fixed member"
+    },
+    "strategyLabel": "Strategy",
+    "fixedHelp": "A fixed rule needs exactly one member.",
+    "project": "Project",
+    "membersLabel": "Eligible members",
+    "active": "Active",
+    "inactive": "Inactive",
+    "new": "New rule",
+    "newTitle": "New rule",
+    "editTitle": "Edit rule",
+    "edit": "Edit",
+    "delete": "Delete",
+    "confirmDelete": "Confirm: delete this rule",
+    "cancel": "Cancel",
+    "save": "Save",
+    "created": "Rule created.",
+    "updated": "Rule updated.",
+    "deleted": "Rule deleted.",
+    "forbidden": "Only owners and admins can manage assignment rules.",
+    "invalid": "Check the rule: at least one member, exactly one for a fixed rule.",
+    "conflict": "A rule already exists for this project or the limit is reached.",
+    "failed": "The action failed. Try again."
+  },
+  "Notifications": {
+    "title": "Notifications",
+    "description": "Alerts for owners and admins: unassigned leads and failed sends.",
+    "empty": "No notification.",
+    "unread": "Unread",
+    "markRead": "Mark as read",
+    "failed": "Could not mark as read. Try again.",
+    "loadFailed": "Notifications could not be loaded.",
+    "kind": {
+      "lead.unassigned": "Unassigned lead",
+      "send.failed": "Failed send"
+    },
+    "reason": {
+      "no_rule": "No assignment rule",
+      "no_eligible": "No eligible member",
+      "failed": "Assignment failed"
+    },
+    "openLead": "Open the lead",
+    "openOperations": "Open Operations",
+    "job": "Job"
   }
 }

@@ -1,11 +1,11 @@
 {
   "title": "Rapport d'avancement",
   "intro": "Fusion Leap AI Growth : plateforme SaaS multi-tenant de croissance (CRM, canaux, campagnes, agents IA). Les fondations, le CRM (projets, contacts, leads, deals, capture, import) et le socle des canaux e-mail (intégrations, webhooks, conversations, envoi sous contrôles, statuts et réception, désabonnement) sont en place ; le désabonnement est en revue.",
-  "summary": "Les phases 0 à 2 sont terminées et fusionnées ; la phase 3 (canaux) est bien engagée : un e-mail ne part qu'avec une approbation humaine et un contrôle final dans le worker, les statuts du fournisseur et les réponses sont rattachés sans jamais créer de contact. Chaque e-mail porte maintenant un lien de désabonnement signé. Rien ne peut encore partir pour de vrai : il manque l'écran contacts et consentement (J30b), l'activation d'un canal et le compte d'essai du fournisseur (checkpoint C3).",
+  "summary": "Les phases 0 à 2 sont terminées et fusionnées ; la phase 3 (canaux) est avancée : un message ne part qu'avec une approbation humaine et un contrôle final dans le worker, pour l'e-mail comme pour WhatsApp, avec désabonnement et retrait de consentement. Les journées 38 à 40 sont fusionnées : réponses avec verrou humain / IA, arrêt d'urgence d'envoi, jobs en échec rejouables, alertes, écrans de configuration (clés de formulaire, règles d'assignation, notifications) et scénarios automatiques des canaux (série d'e-mails avec désabonnement, WhatsApp avec webhook en double et pannes du fournisseur). Rien n'a encore été envoyé pour de vrai : il manque les comptes d'essai réels (checkpoint C3, J41) et l'écran d'import (J39c).",
   "tests": [
     {
       "label": "Web (application)",
-      "value": 2566,
+      "value": 2714,
       "note": "Écrans, routes HTTP et services de l'application"
     },
     {
@@ -15,17 +15,17 @@
     },
     {
       "label": "Permissions (RBAC)",
-      "value": 394,
+      "value": 399,
       "note": "Qui a le droit de faire quoi, rôle par rôle"
     },
     {
       "label": "Domaine (règles métier)",
-      "value": 656,
+      "value": 660,
       "note": "Règles métier pures (contrôles d'envoi, consentement...)"
     },
     {
       "label": "RLS via l'API réelle",
-      "value": 485,
+      "value": 496,
       "note": "Isolation entre entreprises, vérifiée par la vraie API"
     },
     {
@@ -34,9 +34,9 @@
       "note": "Tâches de fond et adaptateurs de fournisseurs"
     },
     {
-      "label": "Acceptation (T1, T5)",
-      "value": 220,
-      "note": "Parcours complets en HTTP réel sur l'application construite"
+      "label": "Acceptation (T1 à T5, canaux)",
+      "value": 283,
+      "note": "Parcours complets en HTTP réel, dont les scénarios des canaux (série e-mail, WhatsApp)"
     }
   ],
   "adrCount": 14,
@@ -252,33 +252,33 @@
           "day": "J34–J37",
           "days": 4,
           "name": "WhatsApp Cloud API",
-          "progress": 75,
+          "progress": 100,
           "status": "review",
-          "note": "J34 connexion, J35 réception et J36 envoi conforme faits (fixtures, aucun compte Meta) ; J37 boîte de réception à faire."
+          "note": "J34 connexion, J35 réception, J36 envoi conforme et J37 boîte de réception faits (fixtures, aucun compte Meta réel)."
         },
         {
           "day": "J38–J41",
           "days": 4,
-          "name": "Inbox unifiée · Gate G3",
-          "progress": 0,
-          "status": "todo",
-          "note": "Envoi, réception, arrêt sûrs"
+          "name": "Réponses, exploitation, scénarios · Gate G3",
+          "progress": 75,
+          "status": "part",
+          "note": "J38 réponses avec verrou humain / IA, J39 exploitation des envois et J40 scénarios canaux faits ; J41 (checkpoint C3, comptes d'essai réels) à faire."
         },
         {
           "day": "J30b–J30d",
           "days": 3,
           "name": "Écrans CRM : contacts et fiche lead (décision C2)",
-          "progress": 0,
-          "status": "todo",
-          "note": "Avant le premier envoi (contacts) et avant la boîte de réception (fiche lead)"
+          "progress": 100,
+          "status": "review",
+          "note": "Contacts et consentement, fiche lead (décision C2)."
         },
         {
           "day": "J39b–J39c",
           "days": 2,
           "name": "Écrans CRM : configuration et import (décision C2)",
-          "progress": 0,
-          "status": "todo",
-          "note": "Clés de formulaire, règles d'assignation, notifications, import ; avant G3"
+          "progress": 50,
+          "status": "part",
+          "note": "J39b faite (clés de formulaire, règles d'assignation, notifications) ; J39c (import CSV) à faire, avant G3."
         }
       ]
     },
@@ -409,6 +409,18 @@
       "progress": 100,
       "status": "review",
       "note": "STOP et variantes : consentement révoqué, numéro supprimé, envois en file annulés ; prérequis d'un envoi marketing WhatsApp réel."
+    },
+    {
+      "name": "Guides de test simples (phases 1 à 3)",
+      "progress": 100,
+      "status": "done",
+      "note": "Pas à pas avec captures d'écran et fiche OK / KO : comptes et rôles, CRM, conversations et envoi, boîte de réponses, exploitation et configuration."
+    },
+    {
+      "name": "Jeux de données de démonstration pour les guides",
+      "progress": 100,
+      "status": "done",
+      "note": "Contacts, leads, conversations, jobs en échec et alertes, chargés par une commande."
     }
   ],
   "controls": "Lint, typecheck, tests unitaires, base de données (pgTAP), isolation par l'API réelle (RLS), acceptation en HTTP réel, build de production et recherche de fuites de secrets dans le bundle navigateur : tous verts. La CI GitHub exécute trois jobs à chaque PR.",
@@ -423,11 +435,6 @@
       "text": "Aucun flux n'active encore un canal ou une intégration e-mail : sans lui, ni envoi ni réception réels.",
       "owner": "Équipe",
       "urgency": "Avant C3"
-    },
-    {
-      "text": "Écran contacts et consentement (J30b), avec la levée d'une désinscription : prérequis d'un premier envoi marketing.",
-      "owner": "Équipe",
-      "urgency": "Avant le premier envoi"
     },
     {
       "text": "Q1 (API du CRM Fusion Leap) et Q5 (marché, région) : toujours sans réponse.",
@@ -452,7 +459,7 @@
     {
       "text": "Purge des contenus conservés (événements de webhook, file de tri) et rétention du journal d'audit : sinon croissance sans limite.",
       "owner": "Équipe",
-      "urgency": "J39 / J57"
+      "urgency": "J57 / J58"
     },
     {
       "text": "Paramétrage de la palette et du logo : réservé aux administrateurs de la plateforme avant de vrais clients (condition de l'ADR 016).",
@@ -478,24 +485,39 @@
       "text": "Retrait de consentement WhatsApp en texte libre (traitement humain, boîte J37) et réabonnement (écran contacts J30b) ; waba_id à enregistrer et vérifier à la connexion.",
       "owner": "Équipe",
       "urgency": "Avant le premier envoi"
+    },
+    {
+      "text": "Revue de sécurité indépendante des journées 39, 39b et 40 : pas encore faite.",
+      "owner": "Équipe",
+      "urgency": "Avant la fusion de G3"
+    },
+    {
+      "text": "Amendement de l'ADR 014 : la ressource « clés de formulaire » rattachée à la ligne 16 (propriétaire, administrateur). À valider.",
+      "owner": "Responsable technique",
+      "urgency": "Avant G3"
+    },
+    {
+      "text": "WhatsApp : une panne 5xx est « résultat inconnu » et n'est jamais rejouée (décision J36) ; la validation « 503 puis 200 sans doublon » vaut donc pour l'e-mail seulement. À confirmer.",
+      "owner": "Responsable technique",
+      "urgency": "Avant C3"
     }
   ],
   "nextSteps": [
     {
       "when": "Maintenant",
-      "action": "Recette des phases 2 et 3 avec le guide de tests (PDF), par une personne qui n'a pas écrit le code."
+      "action": "Recette des phases 2 et 3 avec les guides de test (PDF), par une personne qui n'a pas écrit le code ; revue de sécurité indépendante des journées 39 à 40."
     },
     {
-      "when": "J30b à J30d",
-      "action": "Écrans contacts et consentement (avant le premier envoi), puis fiche lead (avant la boîte de réception)."
+      "when": "À valider",
+      "action": "Amendement de la matrice des droits (clés de formulaire), version fusionnée de la réclamation d'envoi, ADR 010, 012 et 013 : décisions de la responsable technique."
     },
     {
-      "when": "J34 à J37",
-      "action": "WhatsApp Cloud API et boîte de réception : dépend du compte Meta."
+      "when": "J39c",
+      "action": "Écran d'import CSV (assistant en trois étapes, rapport sans donnée de contact), avant G3."
     },
     {
-      "when": "J38 à J41",
-      "action": "Envoi et réception sûrs sur la boîte unifiée, jalon G3 le 18 janvier 2027."
+      "when": "J41",
+      "action": "Checkpoint C3 et gate G3 : test manuel sur les comptes d'essai réels (e-mail, WhatsApp), jalon le 18 janvier 2027."
     }
   ],
   "milestones": [
@@ -538,62 +560,6 @@
   ],
   "recent": [
     {
-      "day": "J32",
-      "title": "Statuts et réception d'e-mail",
-      "items": [
-        "Livré, rebond dur (adresse supprimée) et plainte (adresse supprimée et « ne plus contacter »).",
-        "Une réponse est rattachée à la bonne conversation ; un expéditeur inconnu ou usurpé va dans une file de tri, jamais dans un contact."
-      ],
-      "proof": "114 tests de base, 9 tests API, acceptation HTTP réelle",
-      "review": {
-        "blocking": 1,
-        "major": 1,
-        "medium": 5
-      }
-    },
-    {
-      "day": "J33",
-      "title": "Désabonnement",
-      "items": [
-        "Chaque e-mail porte un lien signé (sans donnée personnelle), les en-têtes de désabonnement en un clic et un pied de page ; sans clé de signature, rien ne part.",
-        "Le lien ouvre une page de confirmation (jamais de désabonnement à l'ouverture) : consentements e-mail révoqués, adresse supprimée, envois en file annulés avec leurs jobs."
-      ],
-      "proof": "42 tests de base, 8 tests d'acceptation HTTP réelle, adaptateurs et web",
-      "review": {
-        "blocking": 0,
-        "major": 1,
-        "medium": 3
-      }
-    },
-    {
-      "day": "J34",
-      "title": "Connexion WhatsApp",
-      "items": [
-        "Un numéro WhatsApp se connecte depuis l'écran Intégrations ; le serveur essaie le jeton auprès de Meta avant de déclarer l'intégration active.",
-        "Les événements de Meta sont reçus avec une signature vérifiée ; une signature fausse ou un numéro inconnu reçoivent le même refus."
-      ],
-      "proof": "30 tests de base, 9 tests d'acceptation HTTP réelle, adaptateurs et web (aucun compte Meta réel)",
-      "review": {
-        "blocking": 0,
-        "major": 0,
-        "medium": 4
-      }
-    },
-    {
-      "day": "J35",
-      "title": "Réception WhatsApp",
-      "items": [
-        "Les messages reçus sont rattachés au contact par son numéro ; un expéditeur inconnu va dans une file de tri, jamais dans un contact ; un même message n'est jamais enregistré deux fois.",
-        "Les statuts de nos messages (envoyé, livré, lu, échec) n'avancent que dans l'ordre, même si Meta les envoie dans le désordre."
-      ],
-      "proof": "44 tests de base, 7 tests d'acceptation HTTP réelle, adaptateurs et worker (aucun compte Meta réel)",
-      "review": {
-        "blocking": 0,
-        "major": 1,
-        "medium": 5
-      }
-    },
-    {
       "day": "J36",
       "title": "Envoi WhatsApp conforme",
       "items": [
@@ -606,6 +572,36 @@
         "major": 2,
         "medium": 7
       }
+    },
+    {
+      "day": "J39",
+      "title": "Exploitation des envois",
+      "items": [
+        "Arrêt d'urgence d'envoi par entreprise (propriétaire, administrateur, responsable marketing) : le worker le relit à chaque envoi, rien ne part tant qu'il est actif.",
+        "Jobs en échec visibles et rejouables par un humain identifié ; un job d'envoi qui échoue définitivement alerte propriétaires et administrateurs ; débit horaire compté par type de canal et par entreprise."
+      ],
+      "proof": "11 tests de base (API réelle), 8 tests d'acceptation HTTP réelle, domaine et web",
+      "review": false
+    },
+    {
+      "day": "J39b",
+      "title": "Écrans de configuration",
+      "items": [
+        "Clés de formulaire : la clé complète n'est montrée qu'une fois, à la création ; elle ne se relit plus, ni dans la base, ni dans l'audit, ni dans la page.",
+        "Règles d'assignation (créer, modifier, supprimer) et notifications avec compteur ; correction d'un défaut : les alertes d'échec d'envoi auraient empêché de lire les notifications."
+      ],
+      "proof": "7 tests d'acceptation HTTP réelle, 399 tests de permissions, web (amendement de la matrice des droits à valider)",
+      "review": false
+    },
+    {
+      "day": "J40",
+      "title": "Scénarios canaux",
+      "items": [
+        "Série de 5 e-mails : le 3e contact se désabonne en cours de série, ne reçoit rien ; une panne 503 deux fois puis un succès ne crée aucun doublon.",
+        "WhatsApp : conversation démarrée par le client et par un modèle approuvé, webhook reçu deux fois (un seul message), limite de débit puis succès sans doublon, panne 5xx jamais rejouée."
+      ],
+      "proof": "15 tests d'acceptation HTTP réelle (vrai worker, fournisseurs simulés)",
+      "review": false
     }
   ],
   "capabilities": {
@@ -614,13 +610,16 @@
       "Connecter un numéro WhatsApp et recevoir des événements signés de Meta (essayé sur des fixtures, pas sur un compte réel).",
       "Recevoir des messages WhatsApp et leurs statuts, rattachés au bon contact (essayé sur des fixtures).",
       "Préparer un message WhatsApp sous contrôles : approbation humaine, fenêtre de 24 h, modèle approuvé (essayé sur des fixtures).",
-      "Un « STOP » reçu sur WhatsApp retire le consentement et bloque les envois (essayé sur des fixtures)."
+      "Un « STOP » reçu sur WhatsApp retire le consentement et bloque les envois (essayé sur des fixtures).",
+      "Arrêter tous les envois d'une entreprise d'un clic, puis les reprendre ; le worker le respecte à chaque envoi.",
+      "Voir les jobs en échec, les rejouer, et être alerté d'un envoi en échec.",
+      "Créer une clé de formulaire (montrée une seule fois), la révoquer ; configurer les règles d'assignation ; lire ses notifications.",
+      "Rejouer deux scénarios complets des canaux (série d'e-mails avec désabonnement, WhatsApp avec webhook en double et pannes) sur des fournisseurs simulés."
     ],
     "notYet": [
-      "Envoyer ou recevoir un vrai e-mail : il manque l'activation d'un canal et un compte d'essai (C3).",
-      "Se réabonner : aucune action pour lever une désinscription (écran contacts, J30b).",
-      "Gérer les contacts et le consentement à l'écran (J30b) et lire les conversations (boîte de réception, J37).",
-      "WhatsApp (J34 à J37) : en attente du compte Meta."
+      "Envoyer ou recevoir un vrai e-mail ou un vrai message WhatsApp : il manque les comptes d'essai réels (checkpoint C3, J41).",
+      "Importer un fichier de contacts depuis l'écran (J39c).",
+      "Se réabonner : aucune action pour lever une désinscription."
     ]
   },
   "journal": {
@@ -628,34 +627,42 @@
     "intro": "Le travail du jour raconté étape par étape : ce qui a été fait, les vérifications menées et le volume de code touché.",
     "steps": [
       {
-        "sentence": "J'ai ajouté en base le retrait de consentement WhatsApp par mot d'arrêt : consentement révoqué, numéro supprimé, envois en file annulés.",
+        "sentence": "J'ai ajouté l'exploitation des envois : arrêt d'urgence, rejeu des jobs en échec, alertes d'échec et débit par type de canal.",
         "actions": [
-          "Migration, retour arrière et rattrapage",
-          "Tests pgTAP lancés"
+          "Migration et retour arrière",
+          "Tests de base et d'API réelle lancés"
         ],
-        "grep": "feat\\(db\\).*J36b"
+        "grep": "feat\\(db\\): exploitation"
       },
       {
-        "sentence": "J'ai aligné la version de l'API Graph sur celle de l'app Meta de test.",
+        "sentence": "J'ai ajouté les routes et les écrans de configuration : clés de formulaire, règles d'assignation, notifications.",
         "actions": [
-          "Une seule constante"
+          "Clé montrée une seule fois",
+          "Traductions arabe, anglais et français"
         ],
-        "grep": "feat\\(adapters\\).*J36b"
+        "grep": "feat\\(web\\)"
       },
       {
-        "sentence": "J'ai écrit les tests pgTAP et d'acceptation, puis fait attaquer le tout par une revue de sécurité indépendante.",
+        "sentence": "J'ai écrit les scénarios T3 (e-mails) et T4 (WhatsApp) avec le vrai worker et des fournisseurs simulés.",
         "actions": [
-          "Variantes de mots d'arrêt testées",
-          "Failles corrigées avec un test"
+          "Désabonnement en cours de série",
+          "Webhook en double et pannes du fournisseur"
         ],
-        "grep": "test:.*J36b"
+        "grep": "test\\(acceptance\\)"
       },
       {
-        "sentence": "J'ai documenté le retrait par mot d'arrêt, le journal et le CHANGELOG.",
+        "sentence": "J'ai corrigé les libellés des notifications et rédigé le guide de test pas à pas avec captures d'écran.",
+        "actions": [
+          "Guide PDF et jeu de données de démonstration"
+        ],
+        "grep": "docs\\(testing\\)"
+      },
+      {
+        "sentence": "J'ai documenté le journal, le CHANGELOG, le modèle de menaces et la stratégie de test.",
         "actions": [
           "Documentation mise à jour"
         ],
-        "grep": "docs: J36b"
+        "grep": "docs: J3|docs: J4"
       }
     ]
   }

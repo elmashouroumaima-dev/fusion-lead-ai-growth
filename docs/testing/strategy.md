@@ -40,8 +40,8 @@
 |---|---|---|
 | T1 | 2 entreprises, utilisateur à 2 rôles, 2 projets par entreprise : aucune fuite (UI, API, RLS, worker) | J15 (fait : `tests/acceptance`), complété au J16 (2 projets et un produit par entreprise dans le seed, tables découvertes automatiquement), J59 |
 | T2 | 100 leads importés avec doublons et formats de téléphone variés, puis assignation et rapports | J26 (fait : `tests/acceptance/src/t2-sales.test.ts`) |
-| T3 | Série d'e-mails vers liste consentante, désabonnement en cours | J40 |
-| T4 | WhatsApp client + template, webhook dupliqué, panne 503 | J40 |
+| T3 | Série d'e-mails vers liste consentante, désabonnement en cours | J40 (fait : `tests/acceptance/src/t3-email-series.test.ts`) |
+| T4 | WhatsApp client + template, webhook dupliqué, panne 503 | J40 (fait : `tests/acceptance/src/t4-whatsapp-scenarios.test.ts`) |
 | T5 | Changement d'entreprise en session, puis lien profond de l'ancienne entreprise | J15 (fait : `tests/acceptance`), J59 |
 
 Exécution locale des scénarios T1, T2 et T5 : `pnpm db:start`, `pnpm db:reset`, `pnpm dev`, puis `pnpm test:e2e` (adresse de l'application : `E2E_BASE_URL`, défaut `http://localhost:3000`). Les comptes sont ceux du seed local, le mot de passe est lu dans `supabase/seed.sql`.

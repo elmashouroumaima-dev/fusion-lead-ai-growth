@@ -47,7 +47,7 @@ Frontières : navigateur ↔ Next.js ; navigateur ↔ Data API (RLS) ; fournisse
 | C4 | D | Payload énorme ou rafale de webhooks | Limite de taille (3 Mo WhatsApp), ACK 200 rapide, traitement différé, rate limit | Test payload trop gros (J29) |
 | C5 | R | Webhook accepté mais non traçable | `webhook_events` conservé (statut, signature_valid) ; logs sans payload sensible | Test de journalisation (J29) |
 | C6 | T | Mise à jour hors ordre d'un statut (read avant delivered) | Machine d'états de statut monotone | Test statuts hors ordre (J35) |
-| C7 | D | Fournisseur en panne (503) provoque doublon ou perte | Retry avec backoff, `idempotency_key`, lease | Test 503 ×2 puis 200 sans doublon (J40) |
+| C7 | D | Fournisseur en panne (503) provoque doublon ou perte | Retry avec backoff, `idempotency_key`, lease | Test 503 ×2 puis 200 sans doublon : e-mail, T3 (J40). WhatsApp : 429 ×2 puis 200 sans doublon ; un 5xx est « résultat inconnu », jamais rejoué (J36, T4 J40) |
 | C8 | S | Reprise de l'app Salla : refresh token réutilisé → invalidation | Mutex par (organisation, boutique), mise à jour atomique du `secret_ref` | Test de concurrence refresh (J55, si option retenue) |
 
 ### D. Secrets et jetons (invariant 12)
@@ -74,7 +74,7 @@ Frontières : navigateur ↔ Next.js ; navigateur ↔ Data API (RLS) ; fournisse
 | ID | STRIDE | Menace | Contrôle | Test (jour) |
 |---|---|---|---|---|
 | F1 | T | Envoi à un contact sans consentement ou `do_not_contact` | Chaîne `assertCanSend` exécutée **dans le worker juste avant l'appel fournisseur** | Tests négatifs par contrôle (J31, J36) |
-| F2 | R | Envoi après désabonnement en cours de campagne | `revokeConsent()` met à jour consentement + `do_not_contact` et annule les jobs en attente | T3 (J33, J40) |
+| F2 | R | Envoi après désabonnement en cours de campagne | `revokeConsent()` met à jour consentement + `do_not_contact` et annule les jobs en attente | T3 : désabonnement du 3e contact en cours de série, J33 et J40 |
 | F3 | T | WhatsApp initié hors fenêtre sans template approuvé | Contrôle de fenêtre + template `APPROVED` | Message bloqué (J36) |
 | F4 | T | Modification d'une campagne approuvée puis envoi sans revue | Retour en `pending_approval` à toute modification ; version et diff | Test J44 ; E2E J53 |
 | F5 | D | Double envoi (retry, course pause/envoi, fan-out rejoué) | `idempotency_key` par message, lease, transactions de pause/arrêt | Fan-out rejoué, arrêt à mi-parcours (J45) |

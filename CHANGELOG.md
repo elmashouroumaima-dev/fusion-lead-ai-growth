@@ -8,6 +8,10 @@ Format : Keep a Changelog. Une entrée par jour de travail.
 - Ajout : `POST /api/send/emergency-stop`, `POST /api/jobs/dead-letters/replay`, page `/operations` (arrêt d'urgence, liste et rejeu des dead letters), traductions ar / en / fr, lien de menu.
 - Tests : RLS `send-operations` (11), domain `operations` (3), acceptation HTTP `send-operations-flow` (8).
 - Documentation : `docs/runbooks/emergency-stop.md`, `docs/api/send-operations.md`, `docs/runbooks/jobs-worker.md`, `docs/api/send.md`.
+### Guides de test simples (hors plan)
+- Ajout : quatre guides PDF courts avec captures d'écran et fiche OK / KO (`docs/testing/Guide-test-simple-*.pdf`) : comptes et rôles, CRM, conversations et envoi, boîte de réception et réponses (J37 à J38).
+- Ajout : jeu de données `docs/testing/fixtures/phase4-inbox-demo.sql` (4 conversations pour la boîte de réception et les réponses).
+- Correction : `pnpm test:call` retire le préfixe `C:/Program Files/Git` que Git Bash ajoute aux chemins `/api/...`.
 ### J36b — Retrait de consentement WhatsApp (hors plan)
 - Ajout : migration `20261207100000` (et retour arrière) : un mot d'arrêt reçu d'un contact révoque ses consentements WhatsApp, supprime son numéro, annule ses envois WhatsApp en file ; numéro seul supprimé pour un expéditeur inconnu ; rattrapage des « STOP » déjà reçus.
 - Modification : version de l'API Graph v25.0 (une constante pour toutes les requêtes sortantes).

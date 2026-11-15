@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  ActivityIcon,
   ChevronDownIcon,
   CircleUserIcon,
   InboxIcon,
@@ -37,8 +38,8 @@ import {
 import { Link, usePathname } from "../../i18n/navigation";
 
 type NavItem = {
-  href: "/dashboard" | "/projects" | "/leads" | "/contacts" | "/inbox" | "/deals" | "/crm" | "/members" | "/admin/organizations" | "/integrations";
-  labelKey: "dashboard" | "projects" | "leads" | "contacts" | "inbox" | "deals" | "crmSync" | "members" | "admin" | "integrations";
+  href: "/dashboard" | "/projects" | "/leads" | "/contacts" | "/inbox" | "/deals" | "/crm" | "/members" | "/admin/organizations" | "/integrations" | "/operations";
+  labelKey: "dashboard" | "projects" | "leads" | "contacts" | "inbox" | "deals" | "crmSync" | "members" | "admin" | "integrations" | "operations";
   icon: typeof UsersIcon;
 };
 
@@ -63,6 +64,7 @@ export function AppSidebar({
   showContacts = false,
   showInbox = false,
   showCrmSync = false,
+  showOperations = false,
   showSettings = false,
   showAdmin = false,
 }: {
@@ -75,6 +77,7 @@ export function AppSidebar({
   showInbox?: boolean;
   /** « CRM » (synchronisation) et « Intégrations » : owner et admin (commodité d'affichage ; la page et la base décident). */
   showCrmSync?: boolean;
+  showOperations?: boolean;
   showSettings?: boolean;
   showAdmin?: boolean;
 }) {
@@ -98,6 +101,7 @@ export function AppSidebar({
           { href: "/integrations", labelKey: "integrations", icon: PlugIcon } satisfies NavItem,
         ]
       : []),
+    ...(showOperations ? [{ href: "/operations", labelKey: "operations", icon: ActivityIcon } satisfies NavItem] : []),
     ...(showMembers
       ? [{ href: "/members", labelKey: "members", icon: UsersIcon } satisfies NavItem]
       : []),

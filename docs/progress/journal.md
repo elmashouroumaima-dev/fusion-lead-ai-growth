@@ -1067,3 +1067,24 @@ Prérequis relevé par les revues J35 et J36 avant tout envoi marketing WhatsApp
 
 ## Fusion J36 × J38 — `message_send_claim` (branche `day-36-whatsapp-send`)
 Les migrations `20261206100000_whatsapp_send.sql` (J36) et `20261210100000_replies_lock.sql` (J38) remplacent chacune `private.message_send_claim` depuis la version J31 ; appliquées dans l'ordre, J38 effaçait les changements WhatsApp. Nouvelle migration `20261210120000_message_send_claim_merge.sql` : la version J36 plus exactement les deux changements de J38 (approbateur commercial pour une réponse, consentement conversationnel de 30 jours) ; rollback fourni (retour à la version J38). Vérifié par la CI (pgTAP J36 et J38, acceptation).
+
+## J39 — Exploitation des envois (branche `day-39-exploitation-envois`)
+Plan : rate limit par (provider, organisation), tableau dead letter + rejeu, arrêt d'urgence par organisation et canal, alertes d'échec. Validation : l'arrêt d'urgence bloque tout envoi en moins d'un cycle de worker.
+
+### Livré
+- Migration `20261211100000_send_operations.sql` (+ retour arrière) : arrêt d'urgence (`set_send_emergency_stop`), rejeu humain (`operator_replay_dead_letter`), alerte `send.failed`, débit par (type de canal, entreprise).
+- API : `POST /api/send/emergency-stop`, `POST /api/jobs/dead-letters/replay` ; page `/operations` ; traductions ar / en / fr.
+- Runbook `docs/runbooks/emergency-stop.md`, API `docs/api/send-operations.md`.
+
+### Décisions prises par défaut (validées « OK défaut »)
+- Quota `messages_per_month` : J57 (plan), pas J39. Rejeu : owner et admin. Purge des payloads de webhooks : J58.
+- L'arrêt d'urgence suit l'ADR 014 ligne 9 (owner, admin, marketing manager) ; le rejeu et la liste suivent les lignes 29 et 30 (owner, admin).
+
+### Écarts à la spec / plan
+- « Par fournisseur » est lu comme « par type de canal » (email, whatsapp) ; un plafond par fournisseur d'intégration reste à décider.
+- La validation « moins d'un cycle de worker » repose sur la relecture du drapeau à chaque `message_send_claim` ; non mesurée avec un worker réel dans ce jour.
+
+### À surveiller
+- Alertes `send.failed` : pas encore de panneau dans l'interface.
+- Le marketing manager peut arrêter les envois mais ne voit pas les dead letters (page filtrée par rôle).
+

@@ -40,7 +40,7 @@ Charge utile stricte `{ message_id }`. Entreprise = celle de la ligne du job. Or
 - **Aucun flux n'active un canal ou une intégration e-mail** (validation des identifiants auprès du fournisseur) : la chaîne exige les deux « actifs », donc le premier envoi réel attend ce flux (J32).
 - **Pas de lien de désabonnement ni de pied de message** : aucun envoi marketing réel avant le J33 (`List-Unsubscribe`).
 - **Objet de l'e-mail** : première ligne du corps (120 caractères au plus), en attendant les modèles du J40 (pas de colonne `subject`).
-- **Pas de quota `messages_per_month`** consommé à l'envoi (J39) ; la limite de débit horaire est provisoire.
+- **Pas de quota `messages_per_month`** consommé à l'envoi (J57, plan) ; la limite de débit horaire est provisoire, comptée depuis le J39 par type de canal et par entreprise (`docs/api/send-operations.md`).
 - Un message `failed` / `send_outcome_unknown` peut avoir été livré : le J32 doit rapprocher l'événement du fournisseur (l'identifiant du fournisseur manque) et peut le passer à `accepted`.
 - Un message approuvé dont le job est annulé reste `queued` sans retour possible : fonction d'annulation à prévoir (J38).
 - Les lecteurs d'une conversation voient les colonnes d'approbation (`approved_by`, `approved_purpose`, `send_claimed_at`) : acceptable, à revoir si un rôle ne doit pas les voir.

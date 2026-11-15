@@ -3,6 +3,11 @@
 Format : Keep a Changelog. Une entrée par jour de travail.
 
 ## [Non publié]
+### J39 — Exploitation des envois
+- Ajout : migration `20261211100000_send_operations.sql` (et retour arrière) : `set_send_emergency_stop` (owner, admin, marketing manager ; audit `send.emergency_stop`), `operator_replay_dead_letter` (owner, admin ; acteur humain vérifié, comble la limite `p_actor` de l'ADR 003), alerte `send.failed` (déclencheur sur `jobs`, owner et admin, sans donnée de contact), débit horaire compté par (type de canal, entreprise) au lieu de par canal.
+- Ajout : `POST /api/send/emergency-stop`, `POST /api/jobs/dead-letters/replay`, page `/operations` (arrêt d'urgence, liste et rejeu des dead letters), traductions ar / en / fr, lien de menu.
+- Tests : RLS `send-operations` (11), domain `operations` (3), acceptation HTTP `send-operations-flow` (8).
+- Documentation : `docs/runbooks/emergency-stop.md`, `docs/api/send-operations.md`, `docs/runbooks/jobs-worker.md`, `docs/api/send.md`.
 ### Guides de test simples (hors plan)
 - Ajout : quatre guides PDF courts avec captures d'écran et fiche OK / KO (`docs/testing/Guide-test-simple-*.pdf`) : comptes et rôles, CRM, conversations et envoi, boîte de réception et réponses (J37 à J38).
 - Ajout : jeu de données `docs/testing/fixtures/phase4-inbox-demo.sql` (4 conversations pour la boîte de réception et les réponses).

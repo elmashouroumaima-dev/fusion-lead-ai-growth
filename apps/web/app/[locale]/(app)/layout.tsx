@@ -46,6 +46,8 @@ export default async function AppLayout({ children, params }: Props) {
   let showInbox = false;
   // Synchronisation CRM : owner et admin (matrice : état des intégrations). Commodité d'affichage.
   let showCrmSync = false;
+  // Exploitation des envois (J39) : arrêt d'urgence (owner, admin, marketing) et dead letters (owner, admin). Commodité d'affichage.
+  let showOperations = false;
   // Paramétrage (palette globale) : owner / admin d'organisation seulement ; commodité d'affichage.
   const showSettings = await canManagePlatformConfig();
   // Administration de la plateforme (plans, abonnements) : administrateurs de la plateforme seulement.
@@ -58,6 +60,7 @@ export default async function AppLayout({ children, params }: Props) {
     showContacts = can(active.role, "read", "contacts");
     showInbox = can(active.role, "read", "conversations", { isOwnRecord: true });
     showCrmSync = can(active.role, "view_status", "integrations");
+    showOperations = can(active.role, "emergency_stop", "sending") || can(active.role, "view", "dead_letter");
     activeOrganizationName = active.organization.name;
   } catch {
     showMembers = false;
@@ -65,6 +68,7 @@ export default async function AppLayout({ children, params }: Props) {
     showContacts = false;
     showInbox = false;
     showCrmSync = false;
+    showOperations = false;
   }
 
   // Structure stable : la coquille ne dépend que de ces propriétés ; les enfants ne sont pas remontés
@@ -77,6 +81,7 @@ export default async function AppLayout({ children, params }: Props) {
       showContacts={showContacts}
       showInbox={showInbox}
       showCrmSync={showCrmSync}
+      showOperations={showOperations}
       showSettings={showSettings}
       showAdmin={showAdmin}
       organizations={switchable.map((m) => ({ id: m.organizationId, name: m.organization.name }))}

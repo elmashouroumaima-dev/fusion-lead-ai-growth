@@ -51,6 +51,8 @@ export default async function AppLayout({ children, params }: Props) {
   let showOperations = false;
   // Configuration (J39b) : règles d'assignation et notifications, owner et admin. Compteur de non lues = commodité d'affichage.
   let showConfig = false;
+  // Import CSV (J39c) : owner et admin (comme l'API). Commodité d'affichage.
+  let showImports = false;
   let unreadNotifications = 0;
   // Paramétrage (palette globale) : owner / admin d'organisation seulement ; commodité d'affichage.
   const showSettings = await canManagePlatformConfig();
@@ -66,6 +68,7 @@ export default async function AppLayout({ children, params }: Props) {
     showCrmSync = can(active.role, "view_status", "integrations");
     showOperations = can(active.role, "emergency_stop", "sending") || can(active.role, "view", "dead_letter");
     showConfig = can(active.role, "manage", "assignment_rules");
+    showImports = can(active.role, "create", "projects");
     if (showConfig) {
       try {
         const counted = await (await createClient()).from("notifications").select("id", { count: "exact", head: true }).eq("organization_id", active.organizationId).is("read_at", null);
@@ -83,6 +86,7 @@ export default async function AppLayout({ children, params }: Props) {
     showCrmSync = false;
     showOperations = false;
     showConfig = false;
+    showImports = false;
     unreadNotifications = 0;
   }
 
@@ -98,6 +102,7 @@ export default async function AppLayout({ children, params }: Props) {
       showCrmSync={showCrmSync}
       showOperations={showOperations}
       showConfig={showConfig}
+      showImports={showImports}
       unreadNotifications={unreadNotifications}
       showSettings={showSettings}
       showAdmin={showAdmin}

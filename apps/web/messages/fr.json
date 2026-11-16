@@ -30,6 +30,7 @@
       "operations": "Exploitation",
       "assignment": "Assignation",
       "notifications": "Alertes",
+      "imports": "Import CSV",
       "contacts": "Contacts",
       "inbox": "Boîte de réception"
     },
@@ -1506,5 +1507,110 @@
     "openLead": "Ouvrir le lead",
     "openOperations": "Ouvrir l'exploitation",
     "job": "Tâche"
+  },
+  "Imports": {
+    "title": "Import CSV",
+    "description": "Importez des leads depuis un tableur en trois étapes. Rien n'est écrit dans vos contacts avant votre confirmation.",
+    "wizardTitle": "Nouvel import",
+    "noProject": "Créez d'abord un projet actif : un import arrive toujours dans un projet.",
+    "steps": {
+      "label": "Étapes de l'import",
+      "upload": "Envoi",
+      "mapping": "Correspondance des colonnes",
+      "confirm": "Confirmation"
+    },
+    "upload": {
+      "project": "Projet",
+      "file": "Fichier CSV",
+      "help": "UTF-8, 10 Mo au plus, 10 000 lignes au plus. L'envoi ne fait que lire le fichier : aucun contact n'est créé.",
+      "send": "Envoyer le fichier",
+      "sending": "Envoi en cours…",
+      "read": "Fichier lu : {rows} lignes et {columns} colonnes."
+    },
+    "mapping": {
+      "help": "Indiquez quelle colonne contient chaque champ. Une adresse e-mail ou un numéro de téléphone est obligatoire.",
+      "none": "Non utilisée",
+      "identifierRequired": "Choisissez la colonne de l'e-mail ou du téléphone pour continuer.",
+      "fields": {
+        "name": "Nom",
+        "email": "Adresse e-mail",
+        "phone": "Téléphone",
+        "language": "Langue",
+        "country": "Pays"
+      },
+      "defaultCountry": "Pays par défaut (2 lettres, par exemple MA)",
+      "defaultCountryHelp": "Sert à lire les numéros écrits sans indicatif de pays.",
+      "preview": "Aperçu (rien n'est écrit)",
+      "previewing": "Vérification…"
+    },
+    "preview": {
+      "noneWritten": "Ce n'est qu'un aperçu. Rien n'a encore été écrit dans vos contacts.",
+      "rows": "Lignes",
+      "valid": "Lignes valides",
+      "newContacts": "Nouveaux contacts",
+      "existing": "Déjà connus",
+      "duplicates": "Doublons dans le fichier",
+      "errors": "Lignes refusées",
+      "errorsByReason": "Refus par motif",
+      "sample": "Premières lignes",
+      "row": "Ligne",
+      "status": "Résultat",
+      "back": "Modifier la correspondance"
+    },
+    "status": {
+      "new": "Nouveau",
+      "existing": "Connu",
+      "duplicate_in_file": "Doublon",
+      "error": "Refusée"
+    },
+    "confirm": {
+      "warn": "{valid, plural, one {# ligne sera importée.} other {# lignes seront importées.}} Les contacts déjà connus sont rapprochés, jamais écrasés.",
+      "button": "Confirmer l'import",
+      "confirming": "Mise en file…",
+      "queued": "Import mis en file : il s'exécute en arrière-plan. Suivez-le dans la liste ci-dessous.",
+      "cancel": "Annuler cet import",
+      "cancelled": "Import annulé.",
+      "another": "Importer un autre fichier"
+    },
+    "errors": {
+      "forbidden": "Seuls les propriétaires et les administrateurs importent des contacts.",
+      "invalid": "Le fichier ou la correspondance n'est pas valide. Vérifiez le fichier et réessayez.",
+      "tooLarge": "Le fichier est vide ou dépasse 10 Mo.",
+      "conflict": "Trop d'imports en cours, ou cet import ne peut plus être modifié.",
+      "notFound": "Cet import n'existe plus.",
+      "generic": "L'action a échoué. Réessayez."
+    },
+    "batches": {
+      "title": "Vos imports",
+      "empty": "Aucun import pour le moment.",
+      "refresh": "Actualiser",
+      "projectUnknown": "Projet inconnu",
+      "counts": "{rows} lignes · {created} créés · {matched} rapprochés · {skipped} ignorés · {errors} refusés",
+      "errorCode": "Échec : {code}",
+      "report": "Télécharger le rapport",
+      "cancel": "Annuler",
+      "cannotCancel": "Cet import ne peut plus être annulé.",
+      "status": {
+        "uploaded": "Envoyé",
+        "queued": "En file",
+        "running": "En cours",
+        "done": "Terminé",
+        "failed": "Échec",
+        "cancelled": "Annulé"
+      }
+    },
+    "reasons": {
+      "no_identifier": "Ni e-mail ni téléphone",
+      "invalid_email": "E-mail invalide",
+      "invalid_phone": "Numéro de téléphone invalide",
+      "invalid_name": "Nom invalide",
+      "invalid_language": "Langue invalide",
+      "invalid_country": "Pays invalide",
+      "duplicate_in_file": "Doublon dans le fichier",
+      "do_not_contact": "Ne plus contacter",
+      "quota_exceeded": "Quota de contacts atteint",
+      "too_many_leads": "Trop de leads pour ce contact",
+      "failed": "Échec"
+    }
   }
 }

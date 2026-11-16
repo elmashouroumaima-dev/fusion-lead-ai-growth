@@ -3,6 +3,9 @@
 Format : Keep a Changelog. Une entrée par jour de travail.
 
 ## [Non publié]
+### Guide de test : import CSV et fichier d'exemple (hors plan)
+- Ajout : `docs/testing/fixtures/import-demo.csv` (14 lignes : 7 nouveaux contacts, 2 déjà connus, 1 doublon, 4 refus : e-mail invalide, ni e-mail ni téléphone, numéro invalide, pays invalide ; deux numéros sans indicatif qui exigent le pays par défaut « MA »). Résultat attendu à l'aperçu : 14 / 10 valides / 7 nouveaux / 2 connus / 1 doublon / 4 refusés ; après traitement : 7 créés, 3 rapprochés, 4 refusés.
+- Modification : `Guide-test-simple-phase3-exploitation-configuration.pdf` (17 pages) : partie F « Import d'un fichier CSV » (étapes 15 à 20 avec captures : envoi, correspondance des colonnes, aperçu, confirmation, suivi et rapport, contacts créés sans consentement) ; la partie des scénarios automatiques devient la partie G ; fiche de résultat étendue.
 ### Icône de l'onglet (hors plan)
 - Ajout : `app/icon.png` (512 px), `app/apple-icon.png` (180 px) et `app/favicon.ico` : le « F » du logo officiel en noir de marque sur le vert `--brand` (#00d4a4), lisible sur onglet clair comme sombre. Avant : globe générique du navigateur. Next ajoute les trois liens `<link rel="icon">` dans l'en-tête ; le proxy d'authentification n'intercepte pas ces chemins (extension).
 - Test : `app-icons.test.ts` (forme des fichiers).

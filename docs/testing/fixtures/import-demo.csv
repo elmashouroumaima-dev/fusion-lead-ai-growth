@@ -1,0 +1,15 @@
+Nom,E-mail,Téléphone,Langue,Pays
+Salma Berrada,salma.berrada@import-demo.test,+212 600 00 00 01,fr,MA
+Youssef Alami,youssef.alami@import-demo.test,0600000002,fr,MA
+Karim Idrissi,karim.idrissi@import-demo.test,,fr,MA
+Aicha Lahlou,,+212600000004,ar,MA
+Nadia Benali,nadia@demo.test,,fr,MA
+Karim Alaoui,karim@demo.test,,fr,MA
+Doublon Salma,salma.berrada@import-demo.test,,fr,MA
+Mauvais E-mail,pas-un-email,,fr,MA
+Sans Identifiant,,,fr,MA
+Téléphone invalide,tel.invalide@import-demo.test,12,fr,MA
+Omar Tazi,omar.tazi@import-demo.test,+212600000005,fr,MA
+Lina Benkirane,lina.benkirane@import-demo.test,06 00 00 00 06,fr,MA
+Pays invalide,pays.invalide@import-demo.test,,fr,MAROC
+Hamza Test,hamza.test@import-demo.test,,fr,MA

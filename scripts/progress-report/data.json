@@ -1,11 +1,11 @@
 {
   "title": "Rapport d'avancement",
   "intro": "Fusion Leap AI Growth : plateforme SaaS multi-tenant de croissance (CRM, canaux, campagnes, agents IA). Les fondations, le CRM (projets, contacts, leads, deals, capture, import) et le socle des canaux e-mail (intégrations, webhooks, conversations, envoi sous contrôles, statuts et réception, désabonnement) sont en place ; le désabonnement est en revue.",
-  "summary": "Les phases 0 à 2 sont terminées et fusionnées ; la phase 3 (canaux) est avancée : un message ne part qu'avec une approbation humaine et un contrôle final dans le worker, pour l'e-mail comme pour WhatsApp, avec désabonnement et retrait de consentement. Les journées 38 à 40 sont fusionnées : réponses avec verrou humain / IA, arrêt d'urgence d'envoi, jobs en échec rejouables, alertes, écrans de configuration (clés de formulaire, règles d'assignation, notifications) et scénarios automatiques des canaux (série d'e-mails avec désabonnement, WhatsApp avec webhook en double et pannes du fournisseur). Rien n'a encore été envoyé pour de vrai : il manque les comptes d'essai réels (checkpoint C3, J41) et l'écran d'import (J39c).",
+  "summary": "Les phases 0 à 2 sont terminées et fusionnées ; la phase 3 (canaux) est avancée : un message ne part qu'avec une approbation humaine et un contrôle final dans le worker, pour l'e-mail comme pour WhatsApp, avec désabonnement et retrait de consentement. Les journées 38 à 40 sont fusionnées : réponses avec verrou humain / IA, arrêt d'urgence d'envoi, jobs en échec rejouables, alertes, écrans de configuration (clés de formulaire, règles d'assignation, notifications) et scénarios automatiques des canaux (série d'e-mails avec désabonnement, WhatsApp avec webhook en double et pannes du fournisseur). Rien n'a encore été envoyé pour de vrai : il manque les comptes d'essai réels (checkpoint C3, J41) .",
   "tests": [
     {
       "label": "Web (application)",
-      "value": 2714,
+      "value": 2730,
       "note": "Écrans, routes HTTP et services de l'application"
     },
     {
@@ -35,7 +35,7 @@
     },
     {
       "label": "Acceptation (T1 à T5, canaux)",
-      "value": 283,
+      "value": 293,
       "note": "Parcours complets en HTTP réel, dont les scénarios des canaux (série e-mail, WhatsApp)"
     }
   ],
@@ -276,9 +276,9 @@
           "day": "J39b–J39c",
           "days": 2,
           "name": "Écrans CRM : configuration et import (décision C2)",
-          "progress": 50,
-          "status": "part",
-          "note": "J39b faite (clés de formulaire, règles d'assignation, notifications) ; J39c (import CSV) à faire, avant G3."
+          "progress": 100,
+          "status": "review",
+          "note": "J39b (clés de formulaire, règles d'assignation, notifications) et J39c (écran d'import CSV en trois étapes) faites."
         }
       ]
     },
@@ -512,10 +512,6 @@
       "action": "Amendement de la matrice des droits (clés de formulaire), version fusionnée de la réclamation d'envoi, ADR 010, 012 et 013 : décisions de la responsable technique."
     },
     {
-      "when": "J39c",
-      "action": "Écran d'import CSV (assistant en trois étapes, rapport sans donnée de contact), avant G3."
-    },
-    {
       "when": "J41",
       "action": "Checkpoint C3 et gate G3 : test manuel sur les comptes d'essai réels (e-mail, WhatsApp), jalon le 18 janvier 2027."
     }
@@ -602,6 +598,16 @@
       ],
       "proof": "15 tests d'acceptation HTTP réelle (vrai worker, fournisseurs simulés)",
       "review": false
+    },
+    {
+      "day": "J39c",
+      "title": "Écran d'import CSV",
+      "items": [
+        "Un fichier CSV s'importe en trois étapes : envoi, correspondance des colonnes avec aperçu, confirmation ; rien n'est écrit dans les contacts avant la confirmation.",
+        "Suivi des imports, annulation d'un import non confirmé et rapport téléchargeable sans aucune donnée de contact."
+      ],
+      "proof": "10 tests d'acceptation HTTP réelle (vrai worker), 4 tests unitaires, parcours vérifié dans un navigateur",
+      "review": false
     }
   ],
   "capabilities": {
@@ -614,11 +620,11 @@
       "Arrêter tous les envois d'une entreprise d'un clic, puis les reprendre ; le worker le respecte à chaque envoi.",
       "Voir les jobs en échec, les rejouer, et être alerté d'un envoi en échec.",
       "Créer une clé de formulaire (montrée une seule fois), la révoquer ; configurer les règles d'assignation ; lire ses notifications.",
-      "Rejouer deux scénarios complets des canaux (série d'e-mails avec désabonnement, WhatsApp avec webhook en double et pannes) sur des fournisseurs simulés."
+      "Rejouer deux scénarios complets des canaux (série d'e-mails avec désabonnement, WhatsApp avec webhook en double et pannes) sur des fournisseurs simulés.",
+      "Importer un fichier de contacts depuis l'écran, avec aperçu avant d'écrire, suivi et rapport sans donnée de contact."
     ],
     "notYet": [
       "Envoyer ou recevoir un vrai e-mail ou un vrai message WhatsApp : il manque les comptes d'essai réels (checkpoint C3, J41).",
-      "Importer un fichier de contacts depuis l'écran (J39c).",
       "Se réabonner : aucune action pour lever une désinscription."
     ]
   },

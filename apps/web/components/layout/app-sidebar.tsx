@@ -2,6 +2,7 @@
 
 import {
   ActivityIcon,
+  UploadIcon,
   BellIcon,
   ShuffleIcon,
   ChevronDownIcon,
@@ -40,8 +41,8 @@ import {
 import { Link, usePathname } from "../../i18n/navigation";
 
 type NavItem = {
-  href: "/dashboard" | "/projects" | "/leads" | "/contacts" | "/inbox" | "/deals" | "/crm" | "/members" | "/admin/organizations" | "/integrations" | "/operations" | "/assignment" | "/notifications";
-  labelKey: "dashboard" | "projects" | "leads" | "contacts" | "inbox" | "deals" | "crmSync" | "members" | "admin" | "integrations" | "operations" | "assignment" | "notifications";
+  href: "/dashboard" | "/projects" | "/leads" | "/contacts" | "/inbox" | "/deals" | "/crm" | "/members" | "/admin/organizations" | "/integrations" | "/operations" | "/assignment" | "/notifications" | "/imports";
+  labelKey: "dashboard" | "projects" | "leads" | "contacts" | "inbox" | "deals" | "crmSync" | "members" | "admin" | "integrations" | "operations" | "assignment" | "notifications" | "imports";
   icon: typeof UsersIcon;
   /** Compteur affiché à droite du libellé (notifications non lues). */
   badge?: number;
@@ -70,6 +71,7 @@ export function AppSidebar({
   showCrmSync = false,
   showOperations = false,
   showConfig = false,
+  showImports = false,
   unreadNotifications = 0,
   showSettings = false,
   showAdmin = false,
@@ -85,6 +87,7 @@ export function AppSidebar({
   showCrmSync?: boolean;
   showOperations?: boolean;
   showConfig?: boolean;
+  showImports?: boolean;
   unreadNotifications?: number;
   showSettings?: boolean;
   showAdmin?: boolean;
@@ -110,6 +113,7 @@ export function AppSidebar({
         ]
       : []),
     ...(showOperations ? [{ href: "/operations", labelKey: "operations", icon: ActivityIcon } satisfies NavItem] : []),
+    ...(showImports ? [{ href: "/imports", labelKey: "imports", icon: UploadIcon } satisfies NavItem] : []),
     ...(showConfig
       ? [
           { href: "/assignment", labelKey: "assignment", icon: ShuffleIcon } satisfies NavItem,

@@ -1139,4 +1139,22 @@ En préparant la validation de `message_send_claim` par la responsable technique
 - **Écart relevé** : il n'existe aujourd'hui aucun chemin humain pour répondre sur WhatsApp dans la fenêtre de 24 h sans consentement enregistré (le composeur est limité à l'e-mail). Le test T4 (J40) utilisait la faille pour le simuler ; il approuve maintenant avec la finalité « service ». Étendre `conversation_reply` à WhatsApp est un travail à planifier (hors plan).
 - À surveiller : si une réponse WhatsApp est ajoutée au composeur, elle doit passer par une fonction qui pose `reply` elle-même (pas par `message_approve`).
 - Décision restante pour la responsable technique : durée de 30 jours et qualification juridique d'une réponse à un message reçu.
+## J39c — Écran d'import CSV (branche `day-39c-import-csv`)
+Plan : assistant en 3 étapes (envoi, correspondance, aperçu et confirmation), suivi du lot et rapport téléchargeable, tests HTTP. Validation : rien n'est écrit avant la confirmation ; le rapport ne contient aucune donnée de contact ; avant G3.
+
+### Livré
+- Page `/imports` (owner et admin), composants `import-wizard` et `import-batches`, `guessMapping`, traductions ar / en / fr. L'API, le worker et la base existaient (J23, J26) : aucune migration.
+- Démonstration : parcours complet vérifié dans un navigateur (fichier de 8 lignes : 5 valides, 3 nouveaux, 1 connu, 1 doublon, 3 refusés ; confirmation, lot « Queued » ; annulation).
+- Tests : 4 unitaires + 10 d'acceptation HTTP (voir CHANGELOG).
+
+### Décisions par défaut (validées « OK défaut »)
+- Entrée de menu propre « CSV import » ; aperçu sur les données réelles (comme l'API) ; owner et admin seulement.
+
+### Écarts au plan / à la spec
+- Rôles plus restrictifs que l'ADR 014 (marketing et commercial) : écart déjà documenté.
+- Pas de mise à jour en direct de l'état d'un lot (bouton « Actualiser »).
+
+### À surveiller
+- Les cellules de l'aperçu sont des données de contact affichées à l'écran (owner et admin) ; elles ne sont ni stockées ni journalisées.
+- Revue de sécurité indépendante de J39, J39b, J39c et J40 : pas encore faite.
 

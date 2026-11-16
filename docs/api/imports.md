@@ -1,6 +1,6 @@
 # Import CSV de leads (J23)
 
-Migration `20261125100000_imports.sql` (retour arrière : `supabase/rollbacks/20261125100000_imports.sql`). Spec §9.1 (CSV avec aperçu et déduplication), §13 scénario 2, ADR 007 (addendum J23), ADR 014. Pas d'écran (J24) : l'API suffit à piloter l'assistant.
+Migration `20261125100000_imports.sql` (retour arrière : `supabase/rollbacks/20261125100000_imports.sql`). Spec §9.1 (CSV avec aperçu et déduplication), §13 scénario 2, ADR 007 (addendum J23), ADR 014. Écran depuis le J39c (`/imports`, voir « Écran » ci-dessous) ; l'API reste la référence.
 
 ## Assistant en 3 étapes
 1. **Envoi** `POST /api/imports?project_id=<uuid>` : corps = le fichier BRUT, `Content-Type: text/csv` (ou `text/plain`).
@@ -57,8 +57,26 @@ Documentés ci-dessous et dans l'ADR 007 : purge du Storage, écart avec l'ADR 0
 - `create_import_batch` ne compare pas `p_size` à la taille réelle de l'objet (le worker revalide tout) ; le plafond de 10 lots en cours n'est pas sérialisé entre deux projets (dépassement léger possible).
 - Un job rejoué pendant que le premier worker finit échoue sur la clé primaire de la ligne et consomme une tentative (non démontré en pratique : battement de bail toutes les 20 s).
 - `import_rows.contact_id` en `on delete restrict` : une future suppression de contact (effacement) devra purger ou détacher le rapport.
-- Pas d'écran (J24) ni de téléchargement du fichier d'origine.
+- Pas de téléchargement du fichier d'origine.
 - Fichier lu en mémoire (10 Mo au plus) par le worker et par l'aperçu ; analyse en continu mais pas de lecture du Storage en flux.
 - L'aperçu ne détecte pas que deux lignes (e-mail d'un côté, téléphone de l'autre) désignent le même contact déjà connu ; le worker, lui, le signale (`duplicate_in_file`).
 - Un lot **jamais confirmé** laisse son fichier dans le Storage : pas de purge au J23 (à planifier avec le worker, comme `rate_limit_purge`).
 - Pas de consentement importé : un import ne permet aucun envoi marketing tant que le double opt-in n'est pas décidé.
+
+## Écran (J39c)
+Page `/[locale]/imports` (menu « CSV import »), **owner et admin seulement** : les autres rôles reviennent au tableau de bord ; un anonyme à la connexion. Aucune nouvelle route, aucune migration : l'écran pilote les routes ci-dessus avec la session de l'utilisateur.
+
+1. **Envoi** : choix du projet actif et du fichier (CSV, UTF-8, 10 Mo, 10 000 lignes). `POST /api/imports?project_id=` avec le fichier brut. Le lot est « envoyé », aucun contact n'est créé. L'écran affiche « N lignes, M colonnes ».
+2. **Correspondance et aperçu** : une proposition de correspondance est faite à partir des en-têtes (`guessMapping`, français, anglais, arabe), à vérifier et corriger ; un champ ne prend qu'une colonne, l'e-mail ou le téléphone est obligatoire ; pays par défaut en deux lettres. `POST /api/imports/preview` : compteurs (lignes, valides, nouveaux, déjà connus, doublons, refus par motif) et les 20 premières lignes avec leur résultat. **Rien n'est écrit.**
+3. **Confirmation** : `POST /api/imports/confirm` avec une `Idempotency-Key` neuve ; le lot est mis en file, le worker le traite. « Annuler » (`POST /api/imports/cancel`, clé d'idempotence aussi) abandonne un lot non confirmé.
+
+**Suivi** : liste des 20 derniers lots (statut, projet, date, compteurs, code d'échec), bouton « Actualiser » (pas de mise à jour en direct), « Annuler » pour un lot envoyé ou en file, « Télécharger le rapport » pour un lot terminé ou en échec (`GET /api/imports/report` : `row,outcome,reason,lead_created`, **aucune donnée de contact**).
+
+**Données affichées.** L'aperçu montre 20 lignes du fichier (cellules réelles : nom, e-mail, téléphone). Elles restent dans l'état de la page : ni URL, ni stockage du navigateur, ni journal ; elles disparaissent quand on quitte l'assistant. La page n'affiche jamais le chemin du fichier ni le mapping d'un lot. L'aperçu est réservé à owner et admin comme l'API.
+
+**Limites connues**
+- Pas de mise à jour en direct de l'état d'un lot (bouton « Actualiser »).
+- Un numéro écrit sans indicatif est refusé tant qu'aucun pays par défaut n'est choisi (motif « Invalid phone number »).
+- Le fichier est lu par le navigateur et envoyé tel quel (10 Mo au plus) ; l'aperçu est calculé par le serveur.
+- Rôles : owner et admin seulement, plus restrictif que l'ADR 014 (marketing et commercial peuvent « créer par import CSV ») ; écart déjà documenté, décision de la responsable technique.
+

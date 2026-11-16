@@ -1131,3 +1131,23 @@ En préparant le guide de test, la capture de la page Notifications a montré de
 ## Correctif J40 — T3 / T4 dans la suite complète (branche `fix-t3-t4-foreign-jobs`)
 La CI de `main` (fusion de J40) a échoué sur T3 : `drain` exécutait 9 jobs au lieu de 2. En local la file était vide ; en CI la suite complète laisse des jobs d'autres scénarios que le worker de test (qui ne connaît que `send_message` et `process_webhook`) réclamait puis échouait. Les jobs étrangers sont mis de côté pendant le test et rendus intacts à la fin. Leçon : un test qui pilote un vrai worker doit être lancé avec la file telle qu'elle est après les autres tests, pas sur une base fraîche ; je ne l'avais fait qu'en local avant la fusion.
 - Second correctif : le premier ne parquait que les jobs d'autres types ; la CI a échoué à l'identique (9 jobs au lieu de 2). Les jobs `process_webhook` / `send_message` d'autres fichiers et les jobs « en cours » dont le bail a expiré (remis en file avec un recul de quelques secondes par la base) étaient réclamés aussi. Tout ce qui attend est maintenant parqué, après remise en file des baux expirés ; reproduit avec ces cas avant de pousser.
+
+## J39c — Écran d'import CSV (branche `day-39c-import-csv`)
+Plan : assistant en 3 étapes (envoi, correspondance, aperçu et confirmation), suivi du lot et rapport téléchargeable, tests HTTP. Validation : rien n'est écrit avant la confirmation ; le rapport ne contient aucune donnée de contact ; avant G3.
+
+### Livré
+- Page `/imports` (owner et admin), composants `import-wizard` et `import-batches`, `guessMapping`, traductions ar / en / fr. L'API, le worker et la base existaient (J23, J26) : aucune migration.
+- Démonstration : parcours complet vérifié dans un navigateur (fichier de 8 lignes : 5 valides, 3 nouveaux, 1 connu, 1 doublon, 3 refusés ; confirmation, lot « Queued » ; annulation).
+- Tests : 4 unitaires + 10 d'acceptation HTTP (voir CHANGELOG).
+
+### Décisions par défaut (validées « OK défaut »)
+- Entrée de menu propre « CSV import » ; aperçu sur les données réelles (comme l'API) ; owner et admin seulement.
+
+### Écarts au plan / à la spec
+- Rôles plus restrictifs que l'ADR 014 (marketing et commercial) : écart déjà documenté.
+- Pas de mise à jour en direct de l'état d'un lot (bouton « Actualiser »).
+
+### À surveiller
+- Les cellules de l'aperçu sont des données de contact affichées à l'écran (owner et admin) ; elles ne sont ni stockées ni journalisées.
+- Revue de sécurité indépendante de J39, J39b, J39c et J40 : pas encore faite.
+

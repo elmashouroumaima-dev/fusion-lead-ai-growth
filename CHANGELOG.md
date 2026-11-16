@@ -3,6 +3,11 @@
 Format : Keep a Changelog. Une entrée par jour de travail.
 
 ## [Non publié]
+### J39c — Écran d'import CSV
+- Ajout : page `/imports` (menu « CSV import », owner et admin) : assistant en trois étapes (envoi, correspondance des colonnes avec aperçu, confirmation), suivi des lots, annulation et rapport CSV téléchargeable sans donnée de contact ; proposition de correspondance à partir des en-têtes ; ar / en / fr. Aucune migration, aucune nouvelle route.
+- Tests : `lib/imports/guess-mapping` (4), acceptation HTTP `import-screen-flow` (10 : rôles, rien d'écrit avant la confirmation, lot traité par le vrai handler, rapport sans donnée de contact, annulation, isolation Alpha / Beta).
+- Correction pendant le jour : les boutons « Annuler » n'envoyaient pas d'`Idempotency-Key` (la route l'exige : 400) ; trouvé par le test, corrigé et vérifié dans un navigateur.
+- Documentation : `docs/api/imports.md` (section Écran).
 ### Correctif des scénarios canaux T3 / T4 (CI)
 - Correction : dans la suite d'acceptation complète (CI), le worker de test réclamait aussi les jobs d'AUTRES scénarios restés en file (assignation, import, synchronisation) et les échouait (« expected 9 to be 2 ») ; il met maintenant de côté TOUT ce qui attend dans la file (y compris `process_webhook` / `send_message` d'autres fichiers et les jobs « en cours » au bail expiré, remis en file par la base) pendant le test (`parkForeignJobs`) et le rend intact ensuite. Un premier correctif ne mettait de côté que les autres types de jobs : la CI a encore échoué. Reproduit en local avec des jobs de tous types et des baux expirés, 15 tests verts (deux fois).
 ### Correctif : carte « Retirer un consentement » (écran contact)

@@ -3,6 +3,9 @@
 Format : Keep a Changelog. Une entrée par jour de travail.
 
 ## [Non publié]
+### Icône de l'onglet (hors plan)
+- Ajout : `app/icon.png` (512 px), `app/apple-icon.png` (180 px) et `app/favicon.ico` : le « F » du logo officiel en noir de marque sur le vert `--brand` (#00d4a4), lisible sur onglet clair comme sombre. Avant : globe générique du navigateur. Next ajoute les trois liens `<link rel="icon">` dans l'en-tête ; le proxy d'authentification n'intercepte pas ces chemins (extension).
+- Test : `app-icons.test.ts` (forme des fichiers).
 ### Durcissement J38 — la finalité « reply » est réservée à la réponse
 - Faille corrigée : `message_approve` (owner et admin) acceptait n'importe quelle finalité, `reply` comprise ; un message promotionnel approuvé « reply » était alors couvert par le consentement conversationnel de 30 jours (un message entrant du contact) sans consentement marketing. Migration `20261212100000_reply_purpose_reserved.sql` (et retour arrière) : `message_approve` refuse `reply` (`purpose_reserved`) ; `conversation_reply` (le composeur) la pose toujours.
 - Tests : pgTAP `310_reply_purpose` (14) ; écrit avant la migration : les 4 tests de la faille échouaient, les 10 autres (le commercial n'approuve jamais, entrant d'un autre fil ne couvre pas, « ne plus contacter » et suppression restent bloquants) passaient déjà.

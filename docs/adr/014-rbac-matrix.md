@@ -76,3 +76,14 @@ Cases de la matrice appliquées côté base (RLS) pour les tables du noyau : mem
 
 ## Amendement J39b (2026-11-15) — clés de formulaire
 - La ressource `form_keys` (action `manage`) est rattachée à la **ligne 16** (règles d'assignation, pipelines, mappings CRM) : OWN et ADM seulement, comme la base (`create_form_key`, `set_form_key_active`, `set_form_key_origins`, RLS ADR 007). Aucune autre case ne change. À valider par la responsable technique.
+
+## Amendement J38 (2026-11-16) — la finalité « reply » est réservée à la réponse
+Contexte : une **réponse** à un message reçu est couverte par un consentement conversationnel (un message ENTRANT du contact dans le MÊME fil depuis 30 jours au plus), sans consentement marketing enregistré. Ce n'est pas un envoi marketing.
+Règle :
+- La finalité `reply` n'est posée que par `conversation_reply` (le composeur de la boîte de réception) : l'envoi vaut approbation de CE message, l'adresse du contact est figée, l'auteur est revalidé par le worker à l'envoi (owner et admin, ou le commercial encore responsable du fil).
+- `message_approve` (owner et admin) **refuse** `reply` (`purpose_reserved`, SQLSTATE 22023). Sans ce refus, un message promotionnel approuvé « reply » aurait été couvert par le consentement conversationnel (faille trouvée en préparant la validation de la responsable technique ; migration `20261212100000_reply_purpose_reserved.sql`).
+- Inchangé : `do_not_contact`, liste de suppression, désabonnement, pauses, expéditeur, plafond horaire, fenêtre de 24 h et modèle WhatsApp bloquent toujours une réponse (contrôle final du worker). Un message entrant d'un AUTRE fil du même contact ne couvre pas la réponse.
+- Le commercial n'approuve jamais par `message_approve` (fonction réservée à owner et admin) ; il n'approuve que sa propre réponse, en l'envoyant.
+Limite actuelle : le composeur (`conversation_reply`) ne gère que l'e-mail ; une réponse WhatsApp dans la fenêtre de 24 h n'a pas encore de chemin dédié (à planifier : étendre `conversation_reply`, qui posera `reply` elle-même).
+À valider par la responsable technique : la durée de 30 jours (délai raisonnable pour l'e-mail ; la fenêtre WhatsApp de 24 h reste appliquée séparément) et, pour la conformité, la qualification d'une réponse à un message reçu comme échange à l'initiative du contact (conseil juridique si le marché l'exige).
+

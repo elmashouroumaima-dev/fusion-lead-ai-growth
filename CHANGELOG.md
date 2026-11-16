@@ -3,6 +3,11 @@
 Format : Keep a Changelog. Une entrée par jour de travail.
 
 ## [Non publié]
+### Durcissement J38 — la finalité « reply » est réservée à la réponse
+- Faille corrigée : `message_approve` (owner et admin) acceptait n'importe quelle finalité, `reply` comprise ; un message promotionnel approuvé « reply » était alors couvert par le consentement conversationnel de 30 jours (un message entrant du contact) sans consentement marketing. Migration `20261212100000_reply_purpose_reserved.sql` (et retour arrière) : `message_approve` refuse `reply` (`purpose_reserved`) ; `conversation_reply` (le composeur) la pose toujours.
+- Tests : pgTAP `310_reply_purpose` (14) ; écrit avant la migration : les 4 tests de la faille échouaient, les 10 autres (le commercial n'approuve jamais, entrant d'un autre fil ne couvre pas, « ne plus contacter » et suppression restent bloquants) passaient déjà.
+- Conséquence révélée : le scénario T4 (J40) simulait une réponse WhatsApp humaine avec `message_approve(..., 'reply')`, c'est-à-dire par la faille elle-même ; le composeur ne gère que l'e-mail (`channel_unsupported` pour WhatsApp). T4 approuve maintenant avec la finalité « service » (consentement WhatsApp enregistré), fenêtre de 24 h inchangée.
+- Documentation : amendement J38 de l'ADR 014, `docs/api/conversations.md`, `docs/api/send.md`.
 ### J39c — Écran d'import CSV
 - Ajout : page `/imports` (menu « CSV import », owner et admin) : assistant en trois étapes (envoi, correspondance des colonnes avec aperçu, confirmation), suivi des lots, annulation et rapport CSV téléchargeable sans donnée de contact ; proposition de correspondance à partir des en-têtes ; ar / en / fr. Aucune migration, aucune nouvelle route.
 - Tests : `lib/imports/guess-mapping` (4), acceptation HTTP `import-screen-flow` (10 : rôles, rien d'écrit avant la confirmation, lot traité par le vrai handler, rapport sans donnée de contact, annulation, isolation Alpha / Beta).

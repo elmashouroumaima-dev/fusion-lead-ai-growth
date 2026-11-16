@@ -110,6 +110,11 @@ beforeAll(async () => {
     psql(`insert into public.contacts (organization_id, name, email_raw, email_normalized, phone_e164) values ('${ORG.alpha}', 'T4 ${who} ${run}', '${who}@t4${run}.test', '${who}@t4${run}.test', '${PHONES[who]}')`);
     contact[who] = first(`select id from public.contacts where organization_id = '${ORG.alpha}' and email_normalized = '${who}@t4${run}.test'`);
   }
+  // a, c, d : ont écrit (fenêtre de 24 h ouverte) ET ont un consentement WhatsApp « service ». La finalité « reply » est réservée à la réponse du composeur de la boîte
+  // de réception, qui ne gère que l'e-mail : un message WhatsApp dans la fenêtre s'approuve donc avec une finalité à consentement enregistré.
+  for (const who of ["a", "c", "d"] as const) {
+    psql(`insert into public.consent_events (organization_id, contact_id, channel, purpose, source) values ('${ORG.alpha}', '${contact[who]}', 'whatsapp', 'service', 'form')`);
+  }
   // b : contact joint par MODÈLE (aucun message reçu) : consentement WhatsApp marketing enregistré ; conversation créée à la main
   psql(`insert into public.consent_events (organization_id, contact_id, channel, purpose, source) values ('${ORG.alpha}', '${contact.b}', 'whatsapp', 'marketing', 'form')`);
   await rpc("service", "conversation_get_or_create", { p_org: ORG.alpha, p_contact: contact.b, p_channel: channel });
@@ -159,9 +164,9 @@ describe.skipIf(!MASTER)("T4 : WhatsApp (client, modèle, webhook en double, pan
     expect(inboundCount("a")).toBe(1);
   });
 
-  it("réponse humaine dans la fenêtre de 24 h : un TEXTE part vers le bon numéro, message accepté avec l'identifiant Meta", async () => {
+  it("message humain dans la fenêtre de 24 h : un TEXTE part vers le bon numéro, message accepté avec l'identifiant Meta", async () => {
     const reply = await outbound("a", "reponse");
-    await approve(reply, "reply");
+    await approve(reply, "service");
     expect(await drain(worker)).toBe(1);
     const calls = provider.toRecipient(digits("a"));
     expect(calls).toHaveLength(1);
@@ -199,7 +204,7 @@ describe.skipIf(!MASTER)("T4 : WhatsApp (client, modèle, webhook en double, pan
     await hook(wrap({ contacts: [{ profile: { name: "C" }, wa_id: digits("c") }], messages: [inboundMessage(wamid("c1"), "c", "Allo")] }));
     await drain(worker);
     const reply = await outbound("c", "reponse");
-    await approve(reply, "reply");
+    await approve(reply, "service");
     expect(await step(worker)).toBe(1);
     expect(status(reply)).toBe("queued");
     expect(provider.toRecipient(digits("c"))).toHaveLength(1);
@@ -223,7 +228,7 @@ describe.skipIf(!MASTER)("T4 : WhatsApp (client, modèle, webhook en double, pan
     await hook(wrap({ contacts: [{ profile: { name: "D" }, wa_id: digits("d") }], messages: [inboundMessage(wamid("d1"), "d", "Bonjour")] }));
     await drain(worker);
     const reply = await outbound("d", "reponse");
-    await approve(reply, "reply");
+    await approve(reply, "service");
     expect(await step(worker)).toBe(1);
     expect(provider.toRecipient(digits("d"))).toHaveLength(1);
     expect(status(reply)).toBe("failed");

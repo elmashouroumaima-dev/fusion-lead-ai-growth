@@ -3,6 +3,11 @@
 Format : Keep a Changelog. Une entrée par jour de travail.
 
 ## [Non publié]
+### Durcissement J38 — la finalité « reply » est réservée à la réponse
+- Faille corrigée : `message_approve` (owner et admin) acceptait n'importe quelle finalité, `reply` comprise ; un message promotionnel approuvé « reply » était alors couvert par le consentement conversationnel de 30 jours (un message entrant du contact) sans consentement marketing. Migration `20261212100000_reply_purpose_reserved.sql` (et retour arrière) : `message_approve` refuse `reply` (`purpose_reserved`) ; `conversation_reply` (le composeur) la pose toujours.
+- Tests : pgTAP `310_reply_purpose` (14) ; écrit avant la migration : les 4 tests de la faille échouaient, les 10 autres (le commercial n'approuve jamais, entrant d'un autre fil ne couvre pas, « ne plus contacter » et suppression restent bloquants) passaient déjà.
+- Conséquence révélée : le scénario T4 (J40) simulait une réponse WhatsApp humaine avec `message_approve(..., 'reply')`, c'est-à-dire par la faille elle-même ; le composeur ne gère que l'e-mail (`channel_unsupported` pour WhatsApp). T4 approuve maintenant avec la finalité « service » (consentement WhatsApp enregistré), fenêtre de 24 h inchangée.
+- Documentation : amendement J38 de l'ADR 014, `docs/api/conversations.md`, `docs/api/send.md`.
 ### Correctif des scénarios canaux T3 / T4 (CI)
 - Correction : dans la suite d'acceptation complète (CI), le worker de test réclamait aussi les jobs d'AUTRES scénarios restés en file (assignation, import, synchronisation) et les échouait (« expected 9 to be 2 ») ; il met maintenant de côté TOUT ce qui attend dans la file (y compris `process_webhook` / `send_message` d'autres fichiers et les jobs « en cours » au bail expiré, remis en file par la base) pendant le test (`parkForeignJobs`) et le rend intact ensuite. Un premier correctif ne mettait de côté que les autres types de jobs : la CI a encore échoué. Reproduit en local avec des jobs de tous types et des baux expirés, 15 tests verts (deux fois).
 ### Correctif : carte « Retirer un consentement » (écran contact)

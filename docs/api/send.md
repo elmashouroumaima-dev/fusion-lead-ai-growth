@@ -14,6 +14,8 @@ Un message sortant naît `queued` (J30). Un humain habilité l'**approuve** pour
 | Fonction | Rôle | Effet |
 |---|---|---|
 | `message_approve(p_org, p_message, p_purpose)` | owner, admin (jamais service_role) | approuve un message sortant `queued` pour une finalité, fige l'adresse du contact, trace `approved_by = auth.uid()`, met le job `send_message` en file (clé `send-message:<id>`, charge utile : l'identifiant du message seulement) ; audit `message.approved` |
+
+> `message_approve` **refuse la finalité `reply`** (`purpose_reserved`, 22023) : elle est réservée à la réponse de la boîte de réception (`conversation_reply`). Voir `docs/api/conversations.md` et l'amendement J38 de l'ADR 014.
 | `message_send_claim(p_org, p_message)` | **service_role** | relit l'état dans une transaction verrouillée et pose la tentative. Statuts : `missing`, `not_queued`, `in_progress` (tentative de moins de 5 minutes), `ambiguous` (plus ancienne), `claimed` (avec corps, destinataire, canal, consentement, suppression, pause, approbation revalidée, débit) |
 | `message_mark_accepted(p_org, p_message, p_provider_message_id)` | **service_role** | `queued` (ou `failed` / `send_outcome_unknown`) vers `accepted` ; audit `message.accepted` |
 | `message_mark_failed(p_org, p_message, p_code)` | **service_role** | `queued` vers `failed` avec un code court |

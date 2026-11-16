@@ -30,6 +30,7 @@
       "operations": "Operations",
       "assignment": "Assignment",
       "notifications": "Notifications",
+      "imports": "CSV import",
       "contacts": "Contacts",
       "inbox": "Inbox"
     },
@@ -1506,5 +1507,110 @@
     "openLead": "Open the lead",
     "openOperations": "Open Operations",
     "job": "Job"
+  },
+  "Imports": {
+    "title": "CSV import",
+    "description": "Bring leads from a spreadsheet in three steps. Nothing is written to your contacts until you confirm.",
+    "wizardTitle": "New import",
+    "noProject": "Create an active project first: an import always lands in a project.",
+    "steps": {
+      "label": "Import steps",
+      "upload": "Upload",
+      "mapping": "Match columns",
+      "confirm": "Confirm"
+    },
+    "upload": {
+      "project": "Project",
+      "file": "CSV file",
+      "help": "UTF-8, 10 MB at most, 10,000 rows at most. Uploading only reads the file: no contact is created.",
+      "send": "Upload the file",
+      "sending": "Uploading…",
+      "read": "File read: {rows} rows and {columns} columns."
+    },
+    "mapping": {
+      "help": "Say which column holds each field. An e-mail or a phone number is required.",
+      "none": "Not used",
+      "identifierRequired": "Choose the e-mail or the phone column to continue.",
+      "fields": {
+        "name": "Name",
+        "email": "E-mail",
+        "phone": "Phone",
+        "language": "Language",
+        "country": "Country"
+      },
+      "defaultCountry": "Default country (2 letters, for example MA)",
+      "defaultCountryHelp": "Used to read phone numbers written without a country code.",
+      "preview": "Preview (nothing is written)",
+      "previewing": "Checking…"
+    },
+    "preview": {
+      "noneWritten": "This is only a preview. Nothing has been written to your contacts yet.",
+      "rows": "Rows",
+      "valid": "Valid rows",
+      "newContacts": "New contacts",
+      "existing": "Already known",
+      "duplicates": "Duplicates in the file",
+      "errors": "Rejected rows",
+      "errorsByReason": "Rejections by reason",
+      "sample": "First rows",
+      "row": "Row",
+      "status": "Result",
+      "back": "Change the matching"
+    },
+    "status": {
+      "new": "New",
+      "existing": "Known",
+      "duplicate_in_file": "Duplicate",
+      "error": "Rejected"
+    },
+    "confirm": {
+      "warn": "{valid, plural, one {# row will be imported.} other {# rows will be imported.}} Known contacts are matched, never overwritten.",
+      "button": "Confirm the import",
+      "confirming": "Queuing…",
+      "queued": "Import queued: it runs in the background. Follow it in the list below.",
+      "cancel": "Cancel this import",
+      "cancelled": "Import cancelled.",
+      "another": "Import another file"
+    },
+    "errors": {
+      "forbidden": "Only owners and admins can import contacts.",
+      "invalid": "The file or the matching is not valid. Check the file and try again.",
+      "tooLarge": "The file is empty or larger than 10 MB.",
+      "conflict": "Too many imports in progress, or this import can no longer be changed.",
+      "notFound": "This import no longer exists.",
+      "generic": "The action failed. Try again."
+    },
+    "batches": {
+      "title": "Your imports",
+      "empty": "No import yet.",
+      "refresh": "Refresh",
+      "projectUnknown": "Unknown project",
+      "counts": "{rows} rows · {created} created · {matched} matched · {skipped} skipped · {errors} rejected",
+      "errorCode": "Failure: {code}",
+      "report": "Download the report",
+      "cancel": "Cancel",
+      "cannotCancel": "This import can no longer be cancelled.",
+      "status": {
+        "uploaded": "Uploaded",
+        "queued": "Queued",
+        "running": "Running",
+        "done": "Done",
+        "failed": "Failed",
+        "cancelled": "Cancelled"
+      }
+    },
+    "reasons": {
+      "no_identifier": "No e-mail or phone",
+      "invalid_email": "Invalid e-mail",
+      "invalid_phone": "Invalid phone number",
+      "invalid_name": "Invalid name",
+      "invalid_language": "Invalid language",
+      "invalid_country": "Invalid country",
+      "duplicate_in_file": "Duplicate in the file",
+      "do_not_contact": "Do not contact",
+      "quota_exceeded": "Contact quota reached",
+      "too_many_leads": "Too many leads for this contact",
+      "failed": "Failed"
+    }
   }
 }

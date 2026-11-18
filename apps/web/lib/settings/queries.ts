@@ -1,8 +1,8 @@
 import { createClient } from "../supabase/server";
 
 /**
- * L'utilisateur courant peut-il modifier la palette globale ? (owner ou admin actif d'une organisation ; la base
- * décide d'après auth.uid()). Erreur de lecture => false : on ne devine jamais un droit. Simple commodité
+ * L'utilisateur courant peut-il modifier la palette et le logo globaux ? (administrateur de la plateforme ; la base
+ * décide d'après auth.uid(), ADR 016). Erreur de lecture => false : on ne devine jamais un droit. Simple commodité
  * d'affichage : set_platform_config revérifie à l'écriture.
  */
 export async function canManagePlatformConfig(): Promise<boolean> {

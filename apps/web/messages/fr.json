@@ -382,7 +382,11 @@
   },
   "Settings": {
     "title": "Paramétrage",
-    "description": "Personnalisez les couleurs de toute la plateforme (connexion comprise). Réservé aux propriétaires et administrateurs ; le changement s’applique à tous les utilisateurs.",
+    "description": "Personnalisez les couleurs de toute la plateforme (connexion comprise). Réservé aux administrateurs de la plateforme ; le changement s’applique à tous les utilisateurs.",
+    "restricted": {
+      "title": "Réservé aux administrateurs de la plateforme",
+      "body": "Les couleurs et le logo sont communs à toute la plateforme. Seuls les administrateurs de la plateforme peuvent les modifier ; votre rôle d’organisation ne le permet pas. Contactez un administrateur de la plateforme pour toute modification."
+    },
     "save": "Enregistrer la palette",
     "saving": "Enregistrement…",
     "saved": "Palette enregistrée.",

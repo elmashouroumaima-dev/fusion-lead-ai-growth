@@ -8,9 +8,9 @@ import { withAction, type ActionFailure } from "../service/with-service";
 import type { SettingsActionState } from "./types";
 
 /*
- * Server Actions du Paramétrage GLOBAL (palette de la plateforme, ADR 016). Réservées aux owner / admin
- * d'organisation : la vérification décisive est faite par la base (set_platform_config / reset_platform_config
- * lisent auth.uid() dans organization_members) ; ici, pipeline commun (zod, session, limitation de débit).
+ * Server Actions du Paramétrage GLOBAL (palette de la plateforme, ADR 016). Réservées aux administrateurs
+ * de la plateforme (ADR 016) : la vérification décisive est faite par la base (set_platform_config /
+ * reset_platform_config lisent auth.uid() dans private.platform_admins ; un owner / admin d'organisation reçoit 42501) ; ici, pipeline commun (zod, session, limitation de débit).
  * Aucune organisation n'est concernée : tout organization_id posté est refusé. L'écriture est un upsert
  * naturellement idempotent (clé d'idempotence sans objet : l'idempotence est rattachée à une organisation).
  */

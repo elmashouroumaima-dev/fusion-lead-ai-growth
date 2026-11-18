@@ -14,6 +14,7 @@ import { Breadcrumb, BreadcrumbItem, BreadcrumbList, BreadcrumbPage, BreadcrumbS
 import { Separator } from "@/components/ui/separator";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { Link, usePathname } from "../../i18n/navigation";
+import { isNavPageKey, pageKeyOf } from "./page-key";
 
 export type AppShellProps = {
   children: ReactNode;
@@ -44,25 +45,6 @@ export type AppShellProps = {
   activeOrganizationName?: string | undefined;
 };
 
-type PageKey = "dashboard" | "projects" | "leads" | "contacts" | "inbox" | "deals" | "crmSync" | "members" | "settings" | "admin" | "onboarding" | "selectOrganization";
-
-function pageKeyOf(pathname: string): PageKey | null {
-  const is = (base: string) => pathname === base || pathname.startsWith(`${base}/`);
-  if (is("/dashboard")) return "dashboard";
-  if (is("/projects")) return "projects";
-  if (is("/leads")) return "leads";
-  if (is("/contacts")) return "contacts";
-  if (is("/inbox")) return "inbox";
-  if (is("/deals")) return "deals";
-  if (is("/crm")) return "crmSync";
-  if (is("/members")) return "members";
-  if (is("/settings")) return "settings";
-  if (is("/admin")) return "admin";
-  if (is("/onboarding")) return "onboarding";
-  if (is("/select-organization")) return "selectOrganization";
-  return null;
-}
-
 /**
  * Coquille de l'application (routes `(app)`) : barre latérale repliable + en-tête (fil d'Ariane,
  * sélecteur d'organisation, langue, thème, compte). Sur les pages d'onboarding et de sélection, aucune
@@ -73,7 +55,7 @@ export function AppShell({ children, email, showMembers, showCrm = false, showCo
   const pathname = usePathname();
   const chromeless = isSwitcherHiddenPath(pathname);
   const pageKey = pageKeyOf(pathname);
-  const pageLabel = pageKey === null ? null : pageKey === "dashboard" || pageKey === "projects" || pageKey === "leads" || pageKey === "contacts" || pageKey === "inbox" || pageKey === "deals" || pageKey === "crmSync" || pageKey === "members" || pageKey === "settings" || pageKey === "admin" ? t(`nav.${pageKey}`) : t(`pages.${pageKey}`);
+  const pageLabel = pageKey === null ? null : isNavPageKey(pageKey) ? t(`nav.${pageKey}`) : t(`pages.${pageKey}`);
 
   const switcher =
     organizations.length >= 2 ? <OrganizationSwitcher options={organizations} selectedId={selectedOrganizationId} /> : null;

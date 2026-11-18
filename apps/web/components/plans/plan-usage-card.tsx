@@ -20,6 +20,8 @@ export async function PlanUsageCard({ rows, locale }: { rows: UsageRow[]; locale
   const limited = rows.filter((r) => r.limit !== null);
   if (limited.length === 0) return null;
   const warnings = limited.filter((r) => r.near_limit);
+  // séparateur de milliers de la langue (« 50 000 »), chiffres latins aussi en arabe comme ailleurs dans l'application
+  const number = new Intl.NumberFormat(locale === "ar" ? "ar-u-nu-latn" : locale);
 
   return (
     <Card role="region" aria-labelledby="dash-usage-title" className="md:col-span-2">
@@ -48,7 +50,7 @@ export async function PlanUsageCard({ rows, locale }: { rows: UsageRow[]; locale
                 <div className="flex items-baseline justify-between gap-3 text-sm">
                   <span>{t(`usage.metrics.${row.metric}`)}</span>
                   <span className="text-muted-foreground tabular-nums" dir="ltr">
-                    {row.used} / {limit}
+                    {number.format(row.used)} / {number.format(limit)}
                   </span>
                 </div>
                 <div

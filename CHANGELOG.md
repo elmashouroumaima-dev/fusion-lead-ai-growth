@@ -3,6 +3,11 @@
 Format : Keep a Changelog. Une entrée par jour de travail.
 
 ## [Non publié]
+### J41 — Checkpoint C3 (brouillon, audit sans comptes réels)
+- Ajout : `docs/checkpoints/C3.md` : audit de conformité de la Phase 3 (invariants du CLAUDE.md par recherche, utilisation de `service_role`, preuves par critère §13, balayage de la base et des journaux, registre de 15 écarts) et **verdict proposé : NO-GO à G3 tant que le test sur comptes réels n'est pas fait** ; section 5 à remplir.
+- Ajout : `docs/testing/Guide-test-manuel-C3-comptes-reels.pdf` (7 pages) et scripts `docs/testing/fixtures/c3-setup.sql` (canaux, contact de test, conversations), `c3-approve.sql` (envoi approuvé par le propriétaire), `c3-leak-scan.sql` (balayage en lecture seule) ; essayés avec des données factices (aucun fournisseur réel).
+- Modification : `pnpm test:call` accepte `--json-file` (corps JSON lu dans un fichier : un jeton ne passe pas par la ligne de commande).
+- Constats : aucun écran ni route pour créer un canal (SQL seulement) ; pas de réponse WhatsApp depuis la boîte de réception ; une migration modifiée après sa création (commentaire seulement). Balayage de la base après la suite complète : 1 984 lignes d'audit, 0 adresse, 0 numéro, 0 jeton, 0 contenu ; journaux de l'application et du worker : 0.
 ### Guide de test : import CSV et fichier d'exemple (hors plan)
 - Ajout : `docs/testing/fixtures/import-demo.csv` (14 lignes : 7 nouveaux contacts, 2 déjà connus, 1 doublon, 4 refus : e-mail invalide, ni e-mail ni téléphone, numéro invalide, pays invalide ; deux numéros sans indicatif qui exigent le pays par défaut « MA »). Résultat attendu à l'aperçu : 14 / 10 valides / 7 nouveaux / 2 connus / 1 doublon / 4 refusés ; après traitement : 7 créés, 3 rapprochés, 4 refusés.
 - Modification : `Guide-test-simple-phase3-exploitation-configuration.pdf` (17 pages) : partie F « Import d'un fichier CSV » (étapes 15 à 20 avec captures : envoi, correspondance des colonnes, aperçu, confirmation, suivi et rapport, contacts créés sans consentement) ; la partie des scénarios automatiques devient la partie G ; fiche de résultat étendue.

@@ -1158,3 +1158,21 @@ Plan : assistant en 3 étapes (envoi, correspondance, aperçu et confirmation), 
 - Les cellules de l'aperçu sont des données de contact affichées à l'écran (owner et admin) ; elles ne sont ni stockées ni journalisées.
 - Revue de sécurité indépendante de J39, J39b, J39c et J40 : pas encore faite.
 
+## J41 — Checkpoint C3 / Gate G3 (branche `day-41-checkpoint-c3`) — partie sans comptes réels
+Plan : test manuel e-mail et WhatsApp sur comptes d'essai (2 h), corrections (2 h), audit de conformité de la Phase 3 (2 h). Livrable `docs/checkpoints/C3.md`. **Dépend de comptes réels** (Postmark, Meta, URL publique) : non disponibles ; fait ce qui ne les exige pas.
+
+### Livré
+- Audit mené par l'auteur du code (donc non indépendant) : recherches sur les interdits absolus, `service_role`, hôtes sortants, journalisation ; balayage de la base après la suite complète ; `C3.md` avec registre des écarts et verdict proposé (NO-GO tant que la section 5 n'est pas faite).
+- Guide du test réel et trois scripts SQL essayés avec des données factices ; option `--json-file` de `pnpm test:call`.
+- Suites complètes relancées (worker arrêté, base neuve pour pgTAP) : pgTAP 3 264, RLS 496, acceptation 292 verts + 1 ignoré, unitaires verts.
+
+### Décisions par défaut (validées « ok default »)
+- Audit mené par moi, signalé comme non indépendant ; GO / NO-GO seulement proposé ; guide livré pour que le test réel se fasse dès que les comptes existent.
+
+### Écarts relevés (voir `C3.md` §6)
+- Aucun écran ni route pour créer un canal ; pas de réponse WhatsApp depuis la boîte de réception ; une migration modifiée après sa création (commentaire) ; pgTAP `190_crm_search` sensible aux données de démonstration.
+
+### Reste à faire
+- Test réel (E1 à E7, W1 à W7, A1, A2), puis corrections et décision de la responsable technique.
+- Revue de sécurité indépendante de J39 à J40 et du durcissement `reply`.
+

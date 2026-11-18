@@ -961,6 +961,31 @@
         "unavailable": "Meta is unavailable. Please try again in a moment.",
         "failed": "The verification failed."
       }
+    },
+    "channelsUi": {
+      "failed": "The operation failed. Try again in a moment.",
+      "pause": "Pause",
+      "resume": "Resume",
+      "add": "Add",
+      "added": "Channel added.",
+      "addEmail": "Add a sender address",
+      "addPhone": "Add a number (format +212…)",
+      "email": {
+        "title": "Connect e-mail (Postmark)",
+        "description": "E-mails are sent through Postmark. The server token is encrypted, written once and never displayed. The channel becomes active once Postmark accepts the token.",
+        "sender": "Sender address",
+        "senderHint": "Must be confirmed at Postmark (Sender Signature), otherwise sends will be refused.",
+        "token": "Postmark server token",
+        "submit": "Connect and verify",
+        "duplicate": "This address or account is already connected.",
+        "invalid": "Invalid address or token."
+      },
+      "verify": {
+        "ok": "Connection verified: the channel is active.",
+        "auth": "Token refused by Postmark.",
+        "unreadable": "Unreadable response from Postmark.",
+        "unavailable": "Postmark is unavailable. Try again in a moment."
+      }
     }
   },
   "Unsubscribe": {

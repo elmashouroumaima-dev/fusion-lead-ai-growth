@@ -961,6 +961,31 @@
         "unavailable": "Meta est indisponible. Réessayez dans un instant.",
         "failed": "La vérification a échoué."
       }
+    },
+    "channelsUi": {
+      "failed": "L'opération a échoué. Réessayez dans un instant.",
+      "pause": "Mettre en pause",
+      "resume": "Reprendre",
+      "add": "Ajouter",
+      "added": "Canal ajouté.",
+      "addEmail": "Ajouter une adresse d'expéditeur",
+      "addPhone": "Ajouter un numéro (format +212…)",
+      "email": {
+        "title": "Connecter un e-mail (Postmark)",
+        "description": "Les e-mails partent par Postmark. Le jeton du serveur est chiffré, écrit une seule fois et ne s'affiche jamais. Le canal devient actif quand Postmark accepte le jeton.",
+        "sender": "Adresse d'expéditeur",
+        "senderHint": "Doit être confirmée chez Postmark (Sender Signature), sinon les envois seront refusés.",
+        "token": "Jeton du serveur Postmark",
+        "submit": "Connecter et vérifier",
+        "duplicate": "Cette adresse ou ce compte est déjà connecté.",
+        "invalid": "Adresse ou jeton invalide."
+      },
+      "verify": {
+        "ok": "Connexion vérifiée : le canal est actif.",
+        "auth": "Jeton refusé par Postmark.",
+        "unreadable": "Réponse de Postmark inexploitable.",
+        "unavailable": "Postmark est indisponible. Réessayez dans un instant."
+      }
     }
   },
   "Unsubscribe": {

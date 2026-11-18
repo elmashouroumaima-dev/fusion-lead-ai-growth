@@ -6,6 +6,7 @@ import { redirect } from "next/navigation";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { AddChannel, ChannelPause, ConnectEmail } from "../../../../components/integrations/channel-actions";
 import { IntegrationActions } from "../../../../components/integrations/integration-actions";
 import { ConnectWhatsApp, VerifyConnection } from "../../../../components/integrations/whatsapp-connect";
 import { requireLocale } from "../../../../i18n/require-locale";
@@ -53,6 +54,7 @@ export default async function IntegrationsPage({ params }: { params: Promise<{ l
         </Alert>
       ) : null}
 
+      <ConnectEmail encryptionConfigured={encryptionConfigured} />
       <ConnectWhatsApp encryptionConfigured={encryptionConfigured} />
 
       {views === null ? (
@@ -122,12 +124,14 @@ export default async function IntegrationsPage({ params }: { params: Promise<{ l
                             <li key={channel.id} className="flex flex-wrap items-center gap-2">
                               <bdi dir="ltr">{channel.sender_identity}</bdi>
                               <Badge variant="outline">{t(`channelStatus.${channel.send_paused && channel.status !== "disconnected" ? "paused" : channel.status}`)}</Badge>
+                              {channel.status !== "disconnected" ? <ChannelPause channelId={channel.id} paused={channel.send_paused} /> : null}
                             </li>
                           ))}
                         </ul>
                       )}
                     </div>
-                    {integration.provider === "whatsapp" && integration.status !== "disconnected" && integration.has_secret ? <VerifyConnection integrationId={integration.id} /> : null}
+                    {integration.status !== "disconnected" && integration.has_secret ? <VerifyConnection integrationId={integration.id} /> : null}
+                    {integration.status !== "disconnected" && (integration.provider === "email" || integration.provider === "whatsapp") ? <AddChannel integrationId={integration.id} type={integration.provider} /> : null}
                     <IntegrationActions integrationId={integration.id} encryptionConfigured={encryptionConfigured} disconnected={integration.status === "disconnected"} />
                   </>
                 ) : (

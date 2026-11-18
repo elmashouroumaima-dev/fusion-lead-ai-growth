@@ -2,12 +2,14 @@
 -- date de version. Tout est annulé en fin de test.
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(15);
+select plan(18);
 
--- U1 owner · U2 sales
+-- U1 owner · U2 sales · U3 administrateur de la plateforme (ADR 016, migration 20261214100000)
 insert into auth.users (id, instance_id, aud, role, email, email_confirmed_at) values
   ('74000000-0000-4000-8000-000000000001', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'u1@pl.test', now()),
-  ('74000000-0000-4000-8000-000000000002', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'u2@pl.test', now());
+  ('74000000-0000-4000-8000-000000000002', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'u2@pl.test', now()),
+  ('74000000-0000-4000-8000-000000000003', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'u3@pl.test', now());
+insert into private.platform_admins (user_id) values ('74000000-0000-4000-8000-000000000003');
 insert into public.organizations (id, name, slug) values ('75000000-0000-4000-8000-000000000001', 'PL Alpha', 'pl-alpha-test');
 insert into public.organization_members (organization_id, user_id, role, status) values
   ('75000000-0000-4000-8000-000000000001', '74000000-0000-4000-8000-000000000001', 'company_owner', 'active'),
@@ -28,7 +30,12 @@ $f$;
 grant execute on function pg_temp.png() to public;
 
 select pg_temp.as_user('74000000-0000-4000-8000-000000000001');
-select lives_ok($$select public.set_platform_config('appearance.logo', pg_temp.png())$$, 'owner : enregistre un PNG valide');
+select throws_ok($$select public.set_platform_config('appearance.logo', pg_temp.png())$$, '42501', 'forbidden', 'owner d''organisation : set refusé');
+select throws_ok($$select public.reset_platform_config('appearance.logo')$$, '42501', 'forbidden', 'owner d''organisation : reset refusé');
+reset role;
+select is((select count(*)::int from public.platform_config where key = 'appearance.logo'), 0, 'aucun logo créé par les refus');
+select pg_temp.as_user('74000000-0000-4000-8000-000000000003');
+select lives_ok($$select public.set_platform_config('appearance.logo', pg_temp.png())$$, 'administrateur de la plateforme : enregistre un PNG valide');
 reset role;
 select is((select value ->> 'mime' from public.platform_config where key = 'appearance.logo'), 'image/png', 'logo enregistré');
 
@@ -41,7 +48,7 @@ select throws_ok($$select public.get_platform_config_updated_at('appearance.logo
 select throws_ok($$select public.set_platform_config('appearance.logo', pg_temp.png())$$, '42501', 'forbidden', 'sales_agent : refusé');
 reset role;
 
-select pg_temp.as_user('74000000-0000-4000-8000-000000000001');
+select pg_temp.as_user('74000000-0000-4000-8000-000000000003');
 select throws_ok($$select public.set_platform_config('appearance.logo', jsonb_build_object('mime', 'image/png', 'data', encode('<svg><script>1</script></svg>'::bytea, 'base64')))$$,
   '22023', 'validation_failed', 'SVG déguisé en PNG : refusé (signature)');
 select throws_ok($$select public.set_platform_config('appearance.logo', jsonb_build_object('mime', 'image/svg+xml', 'data', (pg_temp.png()) ->> 'data'))$$,
@@ -55,7 +62,7 @@ select throws_ok($$select public.set_platform_config('appearance.logo', jsonb_bu
 select throws_ok($$select public.set_platform_config('appearance.logo', jsonb_build_object('mime', 'image/png',
   'data', replace(encode('\x89504e470d0a1a0a'::bytea || decode(repeat('00', 131073), 'hex'), 'base64'), E'\n', '')))$$,
   '22023', 'validation_failed', 'image décodée > 128 Ko : refusée');
-select lives_ok($$select public.reset_platform_config('appearance.logo')$$, 'owner : reset du logo');
+select lives_ok($$select public.reset_platform_config('appearance.logo')$$, 'administrateur de la plateforme : reset du logo');
 reset role;
 select is((select count(*)::int from public.platform_config where key = 'appearance.logo'), 0, 'reset : ligne supprimée');
 select pg_temp.as_user('74000000-0000-4000-8000-000000000001');

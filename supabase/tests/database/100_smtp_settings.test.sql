@@ -2,7 +2,7 @@
 -- du secret, lecture serveur (service_role) du chiffré seulement. Tout est annulé en fin de test.
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(65);
+select plan(66);
 
 -- U1 administrateur de la plateforme · U2 owner d'organisation (pas administrateur) · U3 sans adhésion
 insert into auth.users (id, instance_id, aud, role, email, email_confirmed_at) values
@@ -103,8 +103,11 @@ select pg_temp.as_user('7a000000-0000-4000-8000-000000000002');
 select throws_ok($$select public.set_smtp_settings(pg_temp.cfg('evil.example.test'), null, null, null, null)$$, '42501', 'forbidden', 'owner d''organisation : écriture refusée');
 select throws_ok($$select public.get_smtp_settings()$$, '42501', 'forbidden', 'owner d''organisation : lecture refusée');
 select throws_ok($$select public.reset_smtp_settings()$$, '42501', 'forbidden', 'owner d''organisation : suppression refusée');
-select throws_ok($$select public.set_platform_config('smtp.settings', pg_temp.cfg())$$, '22023', 'validation_failed', 'set_platform_config ne permet pas d''écrire smtp.settings');
+select throws_ok($$select public.set_platform_config('smtp.settings', pg_temp.cfg())$$, '42501', 'forbidden', 'owner d''organisation : set_platform_config refusé (ADR 016, administrateur de la plateforme seulement)');
 select throws_ok($$insert into public.platform_config (key, value) values ('smtp.settings', '{}'::jsonb)$$, '42501', null, 'écriture directe refusée');
+reset role;
+select pg_temp.as_user('7a000000-0000-4000-8000-000000000001');
+select throws_ok($$select public.set_platform_config('smtp.settings', pg_temp.cfg())$$, '22023', 'validation_failed', 'même l''administrateur : set_platform_config ne permet pas d''écrire smtp.settings');
 reset role;
 select pg_temp.as_user('7a000000-0000-4000-8000-000000000003');
 select throws_ok($$select public.set_smtp_settings(pg_temp.cfg('evil.example.test'), null, null, null, null)$$, '42501', 'forbidden', 'sans adhésion : refusé');

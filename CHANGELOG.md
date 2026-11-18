@@ -3,6 +3,11 @@
 Format : Keep a Changelog. Une entrée par jour de travail.
 
 ## [Non publié]
+### Paramétrage (palette, logo) réservé aux administrateurs de la plateforme (ADR 016, condition levée)
+- Modification : migration `20261214100000_platform_config_admin_only.sql` (+ retour arrière) : `private.can_manage_platform_config()` devient `private.is_platform_admin()` ; `set_platform_config` / `reset_platform_config` refusent (42501) tout owner / admin d'organisation. Aucune donnée touchée ; fonctions publiques et droits inchangés.
+- Modification : pages `settings/appearance` et `settings/logo` : message « Réservé aux administrateurs de la plateforme » en lecture seule (ar / en / fr) à la place de la redirection ; menu « Paramétrage » visible pour les seuls administrateurs de la plateforme.
+- **À valider par la responsable technique** : changement de qui peut écrire (owner / admin d'organisation → administrateurs de la plateforme). La matrice RBAC 014 et `packages/permissions` ne changent pas (la palette et le logo n'y figurent pas).
+- Tests : pgTAP 070 (41) et 071 (18) ; RLS `platform-config` ; unitaires `lib/settings/actions.test.ts` ; acceptation HTTP `settings-platform-admin` (4).
 ### Page Membres : présentation responsive (retour de test)
 - Correction : débordement horizontal de la page Membres sur mobile (+304 px) et tablette (+175 px) ; `min-w-0` sur la page et les cartes, plus de largeur minimale forcée sur les tableaux.
 - Ajout : sous 1024 px, une carte par membre et par invitation (motif de la liste des projets) ; le tableau reste à partir de `lg`. Actions inchangées (rôle, transfert, retrait, annulation d'invitation), aucune modification d'API ni de clé i18n.

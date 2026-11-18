@@ -1,11 +1,11 @@
 # API — Paramétrage (palette de couleurs globale)
 
-Pages : `/{locale}/settings/appearance` (palette) et `/{locale}/settings/logo` (menu latéral déroulant « Paramétrage ») ; `/{locale}/settings/smtp` (serveur SMTP, administrateurs de la plateforme seulement). Palette et logo : (owner et admin d'organisation ; les autres utilisateurs sont redirigés vers le tableau de bord). La palette s'applique à toute la plateforme, page de connexion comprise : **un owner/admin la modifie pour tous les clients** (risque assumé, ADR 016).
+Pages : `/{locale}/settings/appearance` (palette) et `/{locale}/settings/logo` (menu latéral déroulant « Paramétrage ») ; `/{locale}/settings/smtp` (serveur SMTP, administrateurs de la plateforme seulement). Palette et logo : **administrateurs de la plateforme seulement** (ADR 016, condition levée par la migration `20261214100000`) ; un owner / admin / autre rôle d'organisation voit un message « Réservé aux administrateurs de la plateforme » en lecture seule (aucun éditeur). La palette s'applique à toute la plateforme, page de connexion comprise.
 
 ## Server Actions (`apps/web/lib/settings/actions.ts`)
 | Action | Champs | Droit | Effet |
 |---|---|---|---|
-| `savePaletteAction` | `palette` (JSON), `uiLocale` | owner / admin actif (vérifié par la base) | enregistre `appearance.palette` (upsert) |
+| `savePaletteAction` | `palette` (JSON), `uiLocale` | administrateur de la plateforme (vérifié par la base) | enregistre `appearance.palette` (upsert) |
 | `resetPaletteAction` | `uiLocale` | idem | supprime la ligne : retour aux couleurs par défaut |
 
 Réponse : `{ status: "idle" | "error" | "success", code? }` avec `code` ∈ `invalid_input`, `forbidden`, `rate_limited`, `duplicate_request`, `idempotency_in_progress`, `idempotency_conflict`, `service_unavailable`, `generic`. Débit : `mutation`. Aucune organisation : `organization_id` est refusé. Idempotence sans objet (upsert naturellement idempotent).
@@ -16,12 +16,12 @@ Réponse : `{ status: "idle" | "error" | "success", code? }` avec `code` ∈ `in
 | `saveLogoAction` | `logo` (JSON `{ mime, data }` base64), `uiLocale` | enregistre `appearance.logo` |
 | `resetLogoAction` | `uiLocale` | supprime le logo (retour au logo par défaut) |
 
-PNG / JPEG / WebP, ≤ 128 Ko décodés, type reconnu par les octets (SVG refusé). Affichage : `GET /api/brand/logo` (public, 404 sans logo). Mêmes droits et mêmes codes d'erreur que la palette.
+PNG / JPEG / WebP, ≤ 128 Ko décodés, type reconnu par les octets (SVG refusé). Affichage : `GET /api/brand/logo` (public, 404 sans logo). Mêmes droits et mêmes codes d'erreur que la palette (`forbidden` pour un non-administrateur de la plateforme).
 
 ## Fonctions SQL
-- `set_platform_config(p_key text, p_value jsonb)` — `authenticated` ; `42501 forbidden` si l'appelant n'est pas owner/admin actif d'une organisation ; `22023 validation_failed` si clé hors liste blanche ou forme invalide.
+- `set_platform_config(p_key text, p_value jsonb)` — `authenticated` ; `42501 forbidden` si l'appelant n'est pas administrateur de la plateforme (un owner / admin d'organisation est refusé) ; `22023 validation_failed` si clé hors liste blanche ou forme invalide.
 - `reset_platform_config(p_key text)` — idem.
-- `can_manage_platform_config()` — `authenticated` ; `true` si `auth.uid()` est owner/admin actif d'une organisation.
+- `can_manage_platform_config()` — `authenticated` ; `true` si `auth.uid()` figure dans `private.platform_admins`.
 - `get_platform_config(p_key text)` — **`service_role` seulement** (lecture serveur) ; `null` si absente ou clé hors liste blanche (`appearance.palette`, `appearance.logo`).
 - `get_platform_config_updated_at(p_key text)` — **`service_role` seulement** ; date de dernière modification (version de l'URL du logo).
 - Aucun accès direct à la table `platform_config`.

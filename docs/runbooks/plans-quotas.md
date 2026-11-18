@@ -32,7 +32,7 @@ Table `private.platform_admins` : **aucun droit d'API**, gérée uniquement par 
 insert into private.platform_admins (user_id) values ('<uuid auth.users>');
 delete from private.platform_admins where user_id = '<uuid>';
 ```
-En local, `shared@seed.test` est administrateur (seed). L'écran est `/{locale}/admin/organizations` (lien « Administration » dans le menu, visible seulement pour eux).
+En local, `shared@seed.test` est administrateur (seed). Les administrateurs de la plateforme sont aussi les seuls à modifier la palette et le logo (ADR 016) : sans ligne dans cette table, personne ne peut les régler ; en ajouter un par SQL avant l'ouverture à un client. L'écran est `/{locale}/admin/organizations` (lien « Administration » dans le menu, visible seulement pour eux).
 
 Le rôle Platform Admin n'ouvre **aucun accès aux données d'une organisation** (ADR 005 §10 : sessions de support, hors périmètre J14) : il ne voit que le nom, le slug, le plan, l'abonnement et le nombre de membres actifs.
 

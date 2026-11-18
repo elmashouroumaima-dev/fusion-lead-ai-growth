@@ -1200,3 +1200,12 @@ Plan : test manuel e-mail et WhatsApp sur comptes d'essai (2 h), corrections (2 
 - Textes : instructions Deals dédoublonnées, nombres du plan formatés, libellé de langue précisé, salutation par le début de l'adresse (décision « préfixe e-mail »).
 ### Reste à faire
 - Vrai champ « Nom » de la personne (table de profil) : ADR et validation de la responsable technique. Améliorations ultérieures : barre de filtres unifiée, deux largeurs de page, menu latéral par sections, graphique et activité récente du tableau de bord.
+
+## Paramétrage réservé aux administrateurs de la plateforme (ADR 016, hors plan)
+### Fait
+- Migration `20261214100000` : l'écriture de la palette et du logo exige `private.is_platform_admin()` (base) ; refus 42501 pour owner / admin d'organisation, relayé en `forbidden` par les actions. Pages en lecture seule avec message ar / en / fr pour les autres ; menu masqué.
+- Tests refus d'abord : pgTAP 070 / 071, RLS, unitaires des actions, acceptation HTTP.
+### Décisions
+- Changement de qui peut écrire : **à valider par la responsable technique**. Matrice 014 inchangée (hors matrice, comme le SMTP et l'administration des plans). Page SMTP laissée en redirection (hors périmètre).
+### Reste à faire
+- Avant l'ouverture à un vrai client : insérer l'administrateur de la plateforme en SQL (runbook `plans-quotas.md`) ; appliquer la migration sur la base hébergée avec les autres.

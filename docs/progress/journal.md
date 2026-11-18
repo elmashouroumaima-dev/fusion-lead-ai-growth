@@ -1183,3 +1183,9 @@ Plan : test manuel e-mail et WhatsApp sur comptes d'essai (2 h), corrections (2 
 - Canal `active` si et seulement si l'intégration est `active` ; validation e-mail par `GET /server` ; owner et admin seulement.
 ### Reste à faire
 - Confirmer `GET /server` et l'envoi sur un compte Postmark réel (C3, E1) ; réponse WhatsApp depuis la boîte de réception ; décisions de la responsable technique.
+
+## Correctifs rapides (retour de test)
+### Fait
+- `aria-pressed` remplacé par `aria-current` sur le lien de la file non assignée (Leads) ; fil d'Ariane rendu sur Intégrations, Exploitation, Assignation, Alertes et Import CSV (module `page-key.ts` + test).
+### Reste à faire
+- Remarque « une PR par jour » et dates réelles des migrations : décision de la responsable technique (voir la conversation).

@@ -78,7 +78,7 @@ export default async function LeadsPage({ params, searchParams }: Props) {
         </div>
         <div className="flex flex-wrap gap-2">
           <Button asChild variant={filters.unassigned ? "secondary" : "outline"}>
-            <Link href={`/leads?${leadListQuery({ ...filters, unassigned: !filters.unassigned })}`} aria-pressed={filters.unassigned}>
+            <Link href={`/leads?${leadListQuery({ ...filters, unassigned: !filters.unassigned })}`} aria-current={filters.unassigned ? "true" : undefined}>
               <InboxIcon aria-hidden="true" />
               {filters.unassigned ? t("leads.queueActive") : t("leads.queue")}
             </Link>

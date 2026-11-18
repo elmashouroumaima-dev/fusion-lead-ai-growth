@@ -3,6 +3,9 @@
 Format : Keep a Changelog. Une entrée par jour de travail.
 
 ## [Non publié]
+### Correctifs rapides d'accessibilité et de fil d'Ariane (retour de test)
+- Correction : `leads/page.tsx` : le lien « File non assignée » utilisait `aria-pressed` (réservé aux boutons) ; il utilise `aria-current`.
+- Correction : le fil d'Ariane était vide sur Intégrations, Exploitation, Assignation, Alertes et Import CSV : `pageKeyOf` (extrait dans `components/layout/page-key.ts`) connaît maintenant ces routes. Un test vérifie que chaque entrée de la barre latérale a une page.
 ### Écran de canaux (hors plan, validé « ok default »)
 - Ajout : migration `20261213100000_channels_activation.sql` (+ retour arrière) : un canal est `active` si et seulement si son intégration est validée par le fournisseur (création et `integration_set_validation`) ; pgTAP `320_channels_activation` (23 tests, refus d'abord).
 - Ajout : `createPostmarkValidator` (`GET /server`, adresse fixe, codes courts) ; la vérification de connexion gère l'e-mail.

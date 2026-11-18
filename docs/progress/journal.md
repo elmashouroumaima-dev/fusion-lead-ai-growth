@@ -1184,6 +1184,14 @@ Plan : test manuel e-mail et WhatsApp sur comptes d'essai (2 h), corrections (2 
 ### Reste à faire
 - Confirmer `GET /server` et l'envoi sur un compte Postmark réel (C3, E1) ; réponse WhatsApp depuis la boîte de réception ; décisions de la responsable technique.
 
+## Page Membres responsive (retour de test, hors plan)
+### Fait
+- Cartes sous 1024 px pour les membres et les invitations, tableau conservé à partir de `lg`, `min-w-0` sur la page ; actions et API inchangées. Mesuré au navigateur : aucun défilement horizontal de la page à 375 px et 768 px (en, ar RTL).
+### Décisions
+- Seuil `lg` et non `md` : à 768 px la barre latérale laisse trop peu de largeur au tableau (défilement interne).
+### Reste à faire
+- Vérification visuelle d'une invitation en attente à 375 px (aucune invitation dans la base locale ; couverte par les tests de composant).
+
 ## Correctifs rapides (retour de test)
 ### Fait
 - `aria-pressed` remplacé par `aria-current` sur le lien de la file non assignée (Leads) ; fil d'Ariane rendu sur Intégrations, Exploitation, Assignation, Alertes et Import CSV (module `page-key.ts` + test).

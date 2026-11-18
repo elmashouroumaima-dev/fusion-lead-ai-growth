@@ -3,6 +3,11 @@
 Format : Keep a Changelog. Une entrée par jour de travail.
 
 ## [Non publié]
+### Page Membres : présentation responsive (retour de test)
+- Correction : débordement horizontal de la page Membres sur mobile (+304 px) et tablette (+175 px) ; `min-w-0` sur la page et les cartes, plus de largeur minimale forcée sur les tableaux.
+- Ajout : sous 1024 px, une carte par membre et par invitation (motif de la liste des projets) ; le tableau reste à partir de `lg`. Actions inchangées (rôle, transfert, retrait, annulation d'invitation), aucune modification d'API ni de clé i18n.
+- Tests : `components/members/lists.responsive.test.tsx` (7). Vérifié au navigateur à 375 px et 768 px, en anglais et en arabe (RTL) : pas de défilement horizontal de la page.
+
 ### Correctifs rapides d'accessibilité, de fil d'Ariane et de textes (retour de test)
 - Correction : instructions Deals en double (la description se limite à « Vos opportunités par étape. » ; l'indication de glisser-déposer reste) ; `0 / 50000` devient `0 / 50 000` (nombres de la carte d'utilisation du plan formatés selon la langue) ; « Langue » devient « Langue par défaut de l'entreprise » (c'est la langue de l'entreprise, pas celle de l'interface) ; le tableau de bord salue la personne connectée (début de son adresse de connexion, en attendant un vrai champ « Nom » : ADR à venir) et non plus l'entreprise.
 - Correction : `leads/page.tsx` : le lien « File non assignée » utilisait `aria-pressed` (réservé aux boutons) ; il utilise `aria-current`.

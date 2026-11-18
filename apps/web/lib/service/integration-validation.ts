@@ -1,5 +1,5 @@
 import "server-only";
-import { createWhatsAppCloudClient, type WhatsAppValidation } from "@fusion-leap/adapters";
+import { createPostmarkValidator, createWhatsAppCloudClient, type PostmarkValidation, type WhatsAppValidation } from "@fusion-leap/adapters";
 import { createAdminClient } from "../supabase/admin";
 import type { ServerSupabase } from "../tenant/identity";
 import { ServiceError } from "./errors";
@@ -15,12 +15,14 @@ import { readIntegrationSecret } from "./integration-secrets";
 export type ValidationDeps = {
   readSecret: (organizationId: string, integrationId: string) => Promise<string | null>;
   validate: (input: { phoneNumberId: string; accessToken: string }) => Promise<WhatsAppValidation>;
+  validateEmail: (input: { serverToken: string }) => Promise<PostmarkValidation>;
   setValidation: (input: { organizationId: string; integrationId: string; ok: boolean; code: string | null; actorId: string }) => Promise<void>;
 };
 
 export const defaultValidationDeps: ValidationDeps = {
   readSecret: readIntegrationSecret,
   validate: (input) => createWhatsAppCloudClient().validate(input),
+  validateEmail: (input) => createPostmarkValidator().validate(input),
   async setValidation({ organizationId, integrationId, ok, code, actorId }) {
     const { error } = await createAdminClient().rpc("integration_set_validation", { p_org: organizationId, p_integration: integrationId, p_ok: ok, p_code: code, p_actor: actorId });
     if (!error) return;
@@ -48,7 +50,7 @@ export async function validateIntegrationConnection(
   if (error) throw new ServiceError("service_unavailable");
   if (!data) throw new ServiceError("not_found");
   const row = data as { provider: string; status: string; external_account_id: string; has_secret: boolean };
-  if (row.provider !== "whatsapp" || !row.has_secret || !["pending", "active", "error"].includes(row.status)) throw new ServiceError("validation_failed");
+  if ((row.provider !== "whatsapp" && row.provider !== "email") || !row.has_secret || !["pending", "active", "error"].includes(row.status)) throw new ServiceError("validation_failed");
 
   let token: string | null;
   try {
@@ -58,7 +60,7 @@ export async function validateIntegrationConnection(
   }
   if (token === null) throw new ServiceError("validation_failed");
 
-  const outcome = await deps.validate({ phoneNumberId: row.external_account_id, accessToken: token });
+  const outcome = row.provider === "email" ? await deps.validateEmail({ serverToken: token }) : await deps.validate({ phoneNumberId: row.external_account_id, accessToken: token });
   if (outcome.kind === "invalid" && outcome.code === "provider_unavailable") throw new ServiceError("service_unavailable");
   await deps.setValidation({ organizationId, integrationId, ok: outcome.kind === "valid", code: outcome.kind === "valid" ? null : outcome.code, actorId });
   return outcome.kind === "valid" ? { status: "active" } : { status: "error", code: outcome.code };

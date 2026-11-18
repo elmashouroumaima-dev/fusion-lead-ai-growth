@@ -31,6 +31,7 @@ function deps(overrides: Partial<ValidationDeps> = {}) {
   const value: ValidationDeps = {
     readSecret: async () => TOKEN,
     validate: async () => ({ kind: "valid" }),
+    validateEmail: async () => ({ kind: "valid" }),
     setValidation: async (input) => {
       written.push({ ok: input.ok, code: input.code });
       actors.push(input.actorId);
@@ -74,9 +75,10 @@ describe("vérification d'une connexion WhatsApp (J34)", () => {
     expect(validate).not.toHaveBeenCalled();
   });
 
-  it("autre fournisseur, sans jeton, déconnectée ou désactivée : validation_failed, aucun appel", async () => {
+  it("fournisseur non vérifiable (csv, interne), sans jeton, déconnectée ou désactivée : validation_failed, aucun appel", async () => {
     for (const row of [
-      { ...whatsapp, provider: "email" },
+      { ...whatsapp, provider: "csv" },
+      { ...whatsapp, provider: "internal" },
       { ...whatsapp, has_secret: false },
       { ...whatsapp, status: "disconnected" },
       { ...whatsapp, status: "disabled" },
@@ -100,5 +102,37 @@ describe("vérification d'une connexion WhatsApp (J34)", () => {
   it("le jeton n'apparaît dans aucun résultat", async () => {
     const out = await validateIntegrationConnection(supabase(whatsapp).client, ORG, INT, USER, deps({ validate: async () => ({ kind: "invalid", code: "provider_auth" }) }).deps);
     expect(JSON.stringify(out)).not.toContain(TOKEN);
+  });
+});
+
+describe("vérification d'une connexion e-mail (Postmark)", () => {
+  const email = { provider: "email", status: "pending", external_account_id: "mon-compte-postmark", has_secret: true };
+
+  it("jeton accepté : essaie le jeton du serveur (pas de numéro), enregistre « ok » avec l'acteur et renvoie active", async () => {
+    const validateEmail = vi.fn(async () => ({ kind: "valid" as const }));
+    const validate = vi.fn();
+    const d = deps({ validateEmail, validate });
+    expect(await validateIntegrationConnection(supabase(email).client, ORG, INT, USER, d.deps)).toEqual({ status: "active" });
+    expect(validateEmail).toHaveBeenCalledWith({ serverToken: TOKEN });
+    expect(validate).not.toHaveBeenCalled();
+    expect(d.written).toEqual([{ ok: true, code: null }]);
+    expect(d.actors).toEqual([USER]);
+  });
+
+  it("jeton refusé : enregistre l'échec avec un code court et renvoie error (jamais un texte du fournisseur)", async () => {
+    const d = deps({ validateEmail: async () => ({ kind: "invalid", code: "provider_auth" }) });
+    expect(await validateIntegrationConnection(supabase(email).client, ORG, INT, USER, d.deps)).toEqual({ status: "error", code: "provider_auth" });
+    expect(d.written).toEqual([{ ok: false, code: "provider_auth" }]);
+  });
+
+  it("panne de Postmark : 503 et RIEN n'est écrit (une intégration active ne devient pas « en erreur » pour une coupure)", async () => {
+    const d = deps({ validateEmail: async () => ({ kind: "invalid", code: "provider_unavailable" }) });
+    await expect(validateIntegrationConnection(supabase(email).client, ORG, INT, USER, d.deps)).rejects.toMatchObject({ code: "service_unavailable" });
+    expect(d.written).toEqual([]);
+  });
+
+  it("une intégration e-mail déjà active peut être revérifiée (jeton remplacé)", async () => {
+    const d = deps();
+    expect(await validateIntegrationConnection(supabase({ ...email, status: "active" }).client, ORG, INT, USER, d.deps)).toEqual({ status: "active" });
   });
 });

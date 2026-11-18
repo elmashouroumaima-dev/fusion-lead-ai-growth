@@ -143,7 +143,7 @@
     },
     "preferences": {
       "title": "Langue et fuseau horaire",
-      "language": "Langue",
+      "language": "Langue par défaut de l'entreprise",
       "timezone": "Fuseau horaire",
       "languages": {
         "fr": "Français",
@@ -799,7 +799,7 @@
     },
     "deals": {
       "title": "Deals",
-      "description": "Vos opportunités par étape. Glissez une carte ou utilisez le menu pour la déplacer.",
+      "description": "Vos opportunités par étape.",
       "empty": "Aucun deal pour l'instant.",
       "columnEmpty": "Aucun deal",
       "dragHint": "Glissez-déposez une carte vers une autre colonne, ou choisissez l'étape dans le menu de la carte.",

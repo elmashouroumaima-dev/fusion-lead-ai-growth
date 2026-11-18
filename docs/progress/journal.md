@@ -1189,3 +1189,6 @@ Plan : test manuel e-mail et WhatsApp sur comptes d'essai (2 h), corrections (2 
 - `aria-pressed` remplacé par `aria-current` sur le lien de la file non assignée (Leads) ; fil d'Ariane rendu sur Intégrations, Exploitation, Assignation, Alertes et Import CSV (module `page-key.ts` + test).
 ### Reste à faire
 - Remarque « une PR par jour » et dates réelles des migrations : décision de la responsable technique (voir la conversation).
+- Textes : instructions Deals dédoublonnées, nombres du plan formatés, libellé de langue précisé, salutation par le début de l'adresse (décision « préfixe e-mail »).
+### Reste à faire
+- Vrai champ « Nom » de la personne (table de profil) : ADR et validation de la responsable technique. Améliorations ultérieures : barre de filtres unifiée, deux largeurs de page, menu latéral par sections, graphique et activité récente du tableau de bord.

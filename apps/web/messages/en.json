@@ -143,7 +143,7 @@
     },
     "preferences": {
       "title": "Language and time zone",
-      "language": "Language",
+      "language": "Organization default language",
       "timezone": "Time zone",
       "languages": {
         "fr": "French",
@@ -799,7 +799,7 @@
     },
     "deals": {
       "title": "Deals",
-      "description": "Your opportunities by stage. Drag a card or use its menu to move it.",
+      "description": "Your opportunities by stage.",
       "empty": "No deals yet.",
       "columnEmpty": "No deals",
       "dragHint": "Drag and drop a card onto another column, or pick the stage in the card menu.",

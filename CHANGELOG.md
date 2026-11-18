@@ -3,6 +3,10 @@
 Format : Keep a Changelog. Une entrée par jour de travail.
 
 ## [Non publié]
+### Page Membres : présentation responsive (retour de test)
+- Correction : débordement horizontal de la page Membres sur mobile (+304 px) et tablette (+175 px) ; `min-w-0` sur la page et les cartes, plus de largeur minimale forcée sur les tableaux.
+- Ajout : sous 1024 px, une carte par membre et par invitation (motif de la liste des projets) ; le tableau reste à partir de `lg`. Actions inchangées (rôle, transfert, retrait, annulation d'invitation), aucune modification d'API ni de clé i18n.
+- Tests : `components/members/lists.responsive.test.tsx` (7). Vérifié au navigateur à 375 px et 768 px, en anglais et en arabe (RTL) : pas de défilement horizontal de la page.
 ### Écran de canaux (hors plan, validé « ok default »)
 - Ajout : migration `20261213100000_channels_activation.sql` (+ retour arrière) : un canal est `active` si et seulement si son intégration est validée par le fournisseur (création et `integration_set_validation`) ; pgTAP `320_channels_activation` (23 tests, refus d'abord).
 - Ajout : `createPostmarkValidator` (`GET /server`, adresse fixe, codes courts) ; la vérification de connexion gère l'e-mail.

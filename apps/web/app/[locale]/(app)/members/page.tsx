@@ -52,7 +52,7 @@ export default async function MembersPage({ params }: { params: Promise<{ locale
 
   if (!loaded.ok) {
     return (
-      <div className="mx-auto grid w-full max-w-5xl gap-6">
+      <div className="mx-auto grid w-full max-w-5xl min-w-0 gap-6">
         <PageHeader title={t("title")} description={t("description")} />
         <Alert variant="destructive" role="alert">
           {t("errors.loadFailed")}
@@ -62,13 +62,13 @@ export default async function MembersPage({ params }: { params: Promise<{ locale
   }
 
   return (
-    <div className="mx-auto grid w-full max-w-5xl gap-6">
+    <div className="mx-auto grid w-full max-w-5xl min-w-0 gap-6">
       <MembersPageFeedback>
         <PageHeader title={t("title")} description={t("description")}>
           <InviteForm organizationId={ctx.organizationId} idempotencyKey={crypto.randomUUID()} roleOptions={assignableRoles(ctx.role)} />
         </PageHeader>
 
-        <Card role="region" aria-labelledby="pending-title">
+        <Card role="region" aria-labelledby="pending-title" className="min-w-0">
           <CardHeader>
             <h2 id="pending-title" tabIndex={-1} className={sectionTitleClass}>
               {t("invitations.title")}
@@ -85,7 +85,7 @@ export default async function MembersPage({ params }: { params: Promise<{ locale
           </CardContent>
         </Card>
 
-        <Card role="region" aria-labelledby="members-title">
+        <Card role="region" aria-labelledby="members-title" className="min-w-0">
           <CardHeader>
             <h2 id="members-title" tabIndex={-1} className={sectionTitleClass}>
               {t("list.title")}

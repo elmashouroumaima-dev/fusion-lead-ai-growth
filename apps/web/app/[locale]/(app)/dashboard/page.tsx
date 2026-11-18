@@ -9,6 +9,7 @@ import { StatCard } from "@/components/dashboard/stat-card";
 import { PlanUsageCard } from "@/components/plans/plan-usage-card";
 import { requireLocale } from "../../../../i18n/require-locale";
 import { requireClaims } from "../../../../lib/auth/require-claims";
+import { greetingName } from "../../../../lib/dashboard/greeting-name";
 import { dayPart, getDashboardCounts } from "../../../../lib/dashboard/queries";
 import { getOrganizationUsage } from "../../../../lib/plans/queries";
 import { createClient } from "../../../../lib/supabase/server";
@@ -21,7 +22,8 @@ export default async function DashboardPage({ params }: { params: Promise<{ loca
   const t = await getTranslations({ locale, namespace: "Dashboard" });
   const to = await getTranslations({ locale, namespace: "Org" });
   // Authentification vérifiée ici ; l'adresse de connexion se lit dans le menu utilisateur.
-  await requireClaims(locale);
+  const claims = await requireClaims(locale);
+  const firstName = greetingName(claims.email);
   // Contexte revérifié en base à chaque requête ; redirige vers onboarding / sélection si besoin.
   const tenant = await requireTenantContext(locale);
   const role = tenant.role;
@@ -55,7 +57,12 @@ export default async function DashboardPage({ params }: { params: Promise<{ loca
     <div className="mx-auto grid w-full max-w-6xl gap-6">
       <GreetingHeader locale={locale} timeZone={tenant.organization.timezone} roleLabel={to(`roles.${role}`)}>
         <h1 className="text-2xl font-semibold tracking-tight md:text-3xl">
-          {t(`greeting.${dayPart(new Date(), tenant.organization.timezone)}`)}, <bdi>{tenant.organization.name}</bdi>
+          {t(`greeting.${dayPart(new Date(), tenant.organization.timezone)}`)}
+          {firstName ? (
+            <>
+              , <bdi>{firstName}</bdi>
+            </>
+          ) : null}
         </h1>
       </GreetingHeader>
 

@@ -54,7 +54,7 @@ export default async function AppLayout({ children, params }: Props) {
   // Import CSV (J39c) : owner et admin (comme l'API). Commodité d'affichage.
   let showImports = false;
   let unreadNotifications = 0;
-  // Paramétrage (palette globale) : owner / admin d'organisation seulement ; commodité d'affichage.
+  // Paramétrage (palette et logo globaux) : administrateurs de la plateforme seulement (ADR 016) ; commodité d'affichage.
   const showSettings = await canManagePlatformConfig();
   // Administration de la plateforme (plans, abonnements) : administrateurs de la plateforme seulement.
   const showAdmin = await isPlatformAdmin();

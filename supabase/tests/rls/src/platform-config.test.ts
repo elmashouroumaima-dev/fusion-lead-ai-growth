@@ -4,9 +4,10 @@ import { api, apiAsUser, cleanupTestUsers, createTestUser, isDenied, psql } from
 
 /**
  * platform_config par la Data API : aucun accès direct à la table (anon, authenticated, service_role),
- * écriture uniquement par set_platform_config / reset_platform_config pour les owner / admin ACTIFS d'une
- * organisation, lecture par get_platform_config réservée à service_role (lecture serveur). La palette locale
- * éventuelle est sauvegardée puis restaurée.
+ * écriture uniquement par set_platform_config / reset_platform_config pour les ADMINISTRATEURS DE LA PLATEFORME
+ * (ADR 016, condition levée : migration 20261214100000) ; un owner d'organisation est refusé. Lecture par
+ * get_platform_config réservée à service_role (lecture serveur). La palette locale éventuelle est sauvegardée
+ * puis restaurée.
  */
 
 type Account = { id: string; email: string };
@@ -29,12 +30,14 @@ const stored = (): string =>
     .pop() ?? "";
 
 let owner: Account;
+let platformAdmin: Account;
 let sales: Account;
 let outsider: Account;
 let backup = "";
 
 beforeAll(async () => {
-  [owner, sales, outsider] = await Promise.all([newAccount("pc-owner"), newAccount("pc-sales"), newAccount("pc-outsider")]);
+  [owner, sales, outsider, platformAdmin] = await Promise.all([newAccount("pc-owner"), newAccount("pc-sales"), newAccount("pc-outsider"), newAccount("pc-padmin")]);
+  psql(`insert into private.platform_admins (user_id) values ('${platformAdmin.id}')`);
   backup = psql("select coalesce((select value::text from public.platform_config where key = 'appearance.palette'), '')").trim();
   psql("delete from public.platform_config");
 
@@ -47,30 +50,40 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
+  psql(`delete from private.platform_admins where user_id = '${platformAdmin.id}'`);
   psql("delete from public.platform_config");
   const json = backup.split("\n").filter((l) => l.trim().startsWith("{")).pop();
   if (json) psql(`insert into public.platform_config (key, value) values ('${KEY}', '${json.replace(/'/g, "''")}'::jsonb)`);
   await cleanupTestUsers(createdUsers);
 });
 
-describe("owner / admin d'organisation", () => {
-  it("can_manage_platform_config : true pour l'owner, false pour sales et pour un compte sans adhésion", async () => {
-    expect((await rpc(owner, "can_manage_platform_config", {})).body).toBe(true);
+describe("administrateur de la plateforme", () => {
+  it("can_manage_platform_config : true pour l'administrateur de la plateforme ; false pour l'owner d'organisation, sales et un compte sans adhésion", async () => {
+    expect((await rpc(owner, "can_manage_platform_config", {})).body).toBe(false);
     expect((await rpc(sales, "can_manage_platform_config", {})).body).toBe(false);
     expect((await rpc(outsider, "can_manage_platform_config", {})).body).toBe(false);
+    expect((await rpc(platformAdmin, "can_manage_platform_config", {})).body).toBe(true);
   });
 
-  it("l'owner enregistre, remplace puis réinitialise la palette", async () => {
-    expect((await rpc(owner, "set_platform_config", { p_key: KEY, p_value: pal("#1d4ed8") })).status).toBeLessThan(300);
+  it("l'owner d'organisation est refusé (écriture et reset) ; la valeur ne change pas", async () => {
+    expect((await rpc(owner, "set_platform_config", { p_key: KEY, p_value: pal("#c2410c") })).status).toBeGreaterThanOrEqual(400);
+    expect((await rpc(owner, "reset_platform_config", { p_key: KEY })).status).toBeGreaterThanOrEqual(400);
+    expect(stored()).toBe("-");
+  });
+
+  it("l'administrateur de la plateforme enregistre, remplace puis réinitialise la palette", async () => {
+    expect((await rpc(platformAdmin, "set_platform_config", { p_key: KEY, p_value: pal("#1d4ed8") })).status).toBeLessThan(300);
     expect(stored()).toBe("#1d4ed8");
-    expect((await rpc(owner, "set_platform_config", { p_key: KEY, p_value: pal("#6d28d9") })).status).toBeLessThan(300);
+    expect((await rpc(platformAdmin, "set_platform_config", { p_key: KEY, p_value: pal("#6d28d9") })).status).toBeLessThan(300);
     expect(stored()).toBe("#6d28d9");
-    expect((await rpc(owner, "reset_platform_config", { p_key: KEY })).status).toBeLessThan(300);
+    expect((await rpc(owner, "reset_platform_config", { p_key: KEY })).status).toBeGreaterThanOrEqual(400);
+    expect(stored()).toBe("#6d28d9");
+    expect((await rpc(platformAdmin, "reset_platform_config", { p_key: KEY })).status).toBeLessThan(300);
     expect(stored()).toBe("-");
   });
 
   it("valeurs invalides refusées (clé, hex, injection CSS, jeton, forme)", async () => {
-    await rpc(owner, "set_platform_config", { p_key: KEY, p_value: pal("#6d28d9") });
+    await rpc(platformAdmin, "set_platform_config", { p_key: KEY, p_value: pal("#6d28d9") });
     const bad: Array<[string, unknown]> = [
       ["other.key", pal("#000000")],
       [KEY, pal("red")],
@@ -80,16 +93,16 @@ describe("owner / admin d'organisation", () => {
       [KEY, []],
     ];
     for (const [key, value] of bad) {
-      const r = await rpc(owner, "set_platform_config", { p_key: key, p_value: value });
+      const r = await rpc(platformAdmin, "set_platform_config", { p_key: key, p_value: value });
       expect(r.status, JSON.stringify(value)).toBeGreaterThanOrEqual(400);
     }
     expect(stored()).toBe("#6d28d9");
   });
 });
 
-describe("membre ordinaire, étranger et anonyme", () => {
+describe("owner d'organisation, membre ordinaire, étranger et anonyme", () => {
   it("refusés : écriture et reset ; la valeur ne change pas", async () => {
-    for (const who of [sales, outsider]) {
+    for (const who of [owner, sales, outsider]) {
       expect((await rpc(who, "set_platform_config", { p_key: KEY, p_value: pal("#c2410c") })).status).toBeGreaterThanOrEqual(400);
       expect((await rpc(who, "reset_platform_config", { p_key: KEY })).status).toBeGreaterThanOrEqual(400);
     }
@@ -125,8 +138,10 @@ describe("logo (appearance.logo)", () => {
   const PNG = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR4nGP4z8DwHwAFAAH/q842iQAAAABJRU5ErkJggg==";
   const LOGO_KEY = "appearance.logo";
 
-  it("l'owner enregistre un PNG ; le serveur le relit ; la version est disponible", async () => {
-    expect((await rpc(owner, "set_platform_config", { p_key: LOGO_KEY, p_value: { mime: "image/png", data: PNG } })).status).toBeLessThan(300);
+  it("l'administrateur de la plateforme enregistre un PNG ; le serveur le relit ; la version est disponible", async () => {
+    expect((await rpc(owner, "set_platform_config", { p_key: LOGO_KEY, p_value: { mime: "image/png", data: PNG } })).status).toBeGreaterThanOrEqual(400);
+    expect((await api<unknown>("service", "POST", "rpc/get_platform_config", { p_key: LOGO_KEY })).body).toBeNull();
+    expect((await rpc(platformAdmin, "set_platform_config", { p_key: LOGO_KEY, p_value: { mime: "image/png", data: PNG } })).status).toBeLessThan(300);
     const read = await api<{ mime: string }>("service", "POST", "rpc/get_platform_config", { p_key: LOGO_KEY });
     expect(read.body.mime).toBe("image/png");
     const ver = await api<string>("service", "POST", "rpc/get_platform_config_updated_at", { p_key: LOGO_KEY });
@@ -134,17 +149,19 @@ describe("logo (appearance.logo)", () => {
     expect(Number.isFinite(Date.parse(ver.body))).toBe(true);
   });
 
-  it("refus : sales, SVG déguisé, SVG annoncé ; anon et authenticated ne lisent pas", async () => {
+  it("refus : sales, SVG déguisé, SVG annoncé (même par l'administrateur) ; anon et authenticated ne lisent pas", async () => {
     const svg = Buffer.from("<svg><script>1</script></svg>").toString("base64");
     expect((await rpc(sales, "set_platform_config", { p_key: LOGO_KEY, p_value: { mime: "image/png", data: PNG } })).status).toBeGreaterThanOrEqual(400);
-    expect((await rpc(owner, "set_platform_config", { p_key: LOGO_KEY, p_value: { mime: "image/png", data: svg } })).status).toBeGreaterThanOrEqual(400);
-    expect((await rpc(owner, "set_platform_config", { p_key: LOGO_KEY, p_value: { mime: "image/svg+xml", data: PNG } })).status).toBeGreaterThanOrEqual(400);
+    expect((await rpc(platformAdmin, "set_platform_config", { p_key: LOGO_KEY, p_value: { mime: "image/png", data: svg } })).status).toBeGreaterThanOrEqual(400);
+    expect((await rpc(platformAdmin, "set_platform_config", { p_key: LOGO_KEY, p_value: { mime: "image/svg+xml", data: PNG } })).status).toBeGreaterThanOrEqual(400);
     expect(isDenied(await api("anon", "POST", "rpc/get_platform_config_updated_at", { p_key: LOGO_KEY }))).toBe(true);
     expect((await rpc(sales, "get_platform_config_updated_at", { p_key: LOGO_KEY })).status).toBeGreaterThanOrEqual(400);
   });
 
-  it("l'owner réinitialise le logo", async () => {
-    expect((await rpc(owner, "reset_platform_config", { p_key: LOGO_KEY })).status).toBeLessThan(300);
+  it("l'owner ne réinitialise pas le logo ; l'administrateur de la plateforme oui", async () => {
+    expect((await rpc(owner, "reset_platform_config", { p_key: LOGO_KEY })).status).toBeGreaterThanOrEqual(400);
+    expect((await api<unknown>("service", "POST", "rpc/get_platform_config", { p_key: LOGO_KEY })).body).not.toBeNull();
+    expect((await rpc(platformAdmin, "reset_platform_config", { p_key: LOGO_KEY })).status).toBeLessThan(300);
     expect((await api<unknown>("service", "POST", "rpc/get_platform_config", { p_key: LOGO_KEY })).body).toBeNull();
   });
 });

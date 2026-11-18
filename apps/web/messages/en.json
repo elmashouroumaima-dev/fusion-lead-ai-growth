@@ -382,7 +382,11 @@
   },
   "Settings": {
     "title": "Settings",
-    "description": "Customize the colors of the whole platform (login included). Owners and administrators only; the change applies to every user.",
+    "description": "Customize the colors of the whole platform (login included). Platform administrators only; the change applies to every user.",
+    "restricted": {
+      "title": "Reserved for platform administrators",
+      "body": "The colors and the logo are shared by the whole platform. Only platform administrators can change them; your organization role does not allow it. Contact a platform administrator to request a change."
+    },
     "save": "Save palette",
     "saving": "Saving…",
     "saved": "Palette saved.",

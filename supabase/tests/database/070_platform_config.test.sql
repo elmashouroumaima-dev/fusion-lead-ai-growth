@@ -1,16 +1,19 @@
 -- J12b — platform_config : aucun droit direct, lecture par fonction réservée à service_role, écriture réservée aux
--- owner / admin ACTIFS d'une organisation, validation de la palette. Tout est annulé en fin de test.
+-- ADMINISTRATEURS DE LA PLATEFORME (ADR 016, condition levée : migration 20261214100000), validation de la palette.
+-- Un owner / admin d'organisation est refusé. Tout est annulé en fin de test.
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(35);
+select plan(41);
 
--- U1 owner Alpha · U2 admin Alpha · U3 sales Alpha · U4 sans adhésion · U5 owner suspendu Alpha
+-- U1 owner Alpha · U2 admin Alpha · U3 sales Alpha · U4 sans adhésion · U5 owner suspendu Alpha · U6 administrateur de la plateforme (sans adhésion)
 insert into auth.users (id, instance_id, aud, role, email, email_confirmed_at) values
   ('72000000-0000-4000-8000-000000000001', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'u1@pc.test', now()),
   ('72000000-0000-4000-8000-000000000002', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'u2@pc.test', now()),
   ('72000000-0000-4000-8000-000000000003', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'u3@pc.test', now()),
   ('72000000-0000-4000-8000-000000000004', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'u4@pc.test', now()),
-  ('72000000-0000-4000-8000-000000000005', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'u5@pc.test', now());
+  ('72000000-0000-4000-8000-000000000005', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'u5@pc.test', now()),
+  ('72000000-0000-4000-8000-000000000006', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'u6@pc.test', now());
+insert into private.platform_admins (user_id) values ('72000000-0000-4000-8000-000000000006');
 insert into public.organizations (id, name, slug) values ('73000000-0000-4000-8000-000000000001', 'PC Alpha', 'pc-alpha-test');
 insert into public.organization_members (organization_id, user_id, role, status) values
   ('73000000-0000-4000-8000-000000000001', '72000000-0000-4000-8000-000000000001', 'company_owner', 'active'),
@@ -47,11 +50,12 @@ select hasnt_table('public', 'platform_admins', 'pas de table platform_admins pu
 select pg_temp.as_user('72000000-0000-4000-8000-000000000001');
 select throws_ok($$insert into public.platform_config (key, value) values ('appearance.palette', '{}'::jsonb)$$, '42501', null, 'INSERT direct refusé (même owner)');
 
--- 3. can_manage_platform_config
-select is(public.can_manage_platform_config(), true, 'owner actif : true');
+-- 3. can_manage_platform_config : administrateur de la plateforme SEULEMENT (refus d'abord)
+select pg_temp.as_user('72000000-0000-4000-8000-000000000001');
+select is(public.can_manage_platform_config(), false, 'owner actif d''une organisation : false');
 reset role;
 select pg_temp.as_user('72000000-0000-4000-8000-000000000002');
-select is(public.can_manage_platform_config(), true, 'admin actif : true');
+select is(public.can_manage_platform_config(), false, 'admin actif d''une organisation : false');
 reset role;
 select pg_temp.as_user('72000000-0000-4000-8000-000000000003');
 select is(public.can_manage_platform_config(), false, 'sales_agent : false');
@@ -62,16 +66,24 @@ reset role;
 select pg_temp.as_user('72000000-0000-4000-8000-000000000005');
 select is(public.can_manage_platform_config(), false, 'owner suspendu : false');
 reset role;
+select pg_temp.as_user('72000000-0000-4000-8000-000000000006');
+select is(public.can_manage_platform_config(), true, 'administrateur de la plateforme : true');
+reset role;
 
--- 4. Écriture par owner et admin
+-- 4. Écriture : owner et admin d'organisation refusés, administrateur de la plateforme autorisé
 select pg_temp.as_user('72000000-0000-4000-8000-000000000001');
-select lives_ok($$select public.set_platform_config('appearance.palette', pg_temp.pal())$$, 'owner : set_platform_config');
+select throws_ok($$select public.set_platform_config('appearance.palette', pg_temp.pal())$$, '42501', 'forbidden', 'owner d''organisation : set refusé');
 reset role;
 select pg_temp.as_user('72000000-0000-4000-8000-000000000002');
-select lives_ok($$select public.set_platform_config('appearance.palette', pg_temp.pal('#6d28d9'))$$, 'admin : upsert');
+select throws_ok($$select public.set_platform_config('appearance.palette', pg_temp.pal('#6d28d9'))$$, '42501', 'forbidden', 'admin d''organisation : set refusé');
+reset role;
+select is((select count(*)::int from public.platform_config), 0, 'aucune ligne créée par les refus');
+select pg_temp.as_user('72000000-0000-4000-8000-000000000006');
+select lives_ok($$select public.set_platform_config('appearance.palette', pg_temp.pal())$$, 'administrateur de la plateforme : set_platform_config');
+select lives_ok($$select public.set_platform_config('appearance.palette', pg_temp.pal('#6d28d9'))$$, 'administrateur de la plateforme : upsert');
 reset role;
 select is((select count(*)::int from public.platform_config), 1, 'une seule ligne');
-select is((select updated_by from public.platform_config), '72000000-0000-4000-8000-000000000002'::uuid, 'updated_by = auth.uid()');
+select is((select updated_by from public.platform_config), '72000000-0000-4000-8000-000000000006'::uuid, 'updated_by = auth.uid()');
 
 -- 5. Lecture : service_role seulement
 set local role service_role;
@@ -94,13 +106,19 @@ reset role;
 select pg_temp.as_user('72000000-0000-4000-8000-000000000005');
 select throws_ok($$select public.set_platform_config('appearance.palette', pg_temp.pal('#c2410c'))$$, '42501', 'forbidden', 'owner suspendu : refusé');
 reset role;
+select pg_temp.as_user('72000000-0000-4000-8000-000000000001');
+select throws_ok($$select public.reset_platform_config('appearance.palette')$$, '42501', 'forbidden', 'owner d''organisation : reset refusé');
+reset role;
+select pg_temp.as_user('72000000-0000-4000-8000-000000000002');
+select throws_ok($$select public.reset_platform_config('appearance.palette')$$, '42501', 'forbidden', 'admin d''organisation : reset refusé');
+reset role;
 set local role anon;
 select throws_ok($$select public.set_platform_config('appearance.palette', pg_temp.pal())$$, '42501', null, 'anon : EXECUTE refusé');
 reset role;
 select is((select value #>> '{light,primary}' from public.platform_config), '#6d28d9', 'aucune tentative refusée n''a modifié la valeur');
 
--- 7. Validation (owner)
-select pg_temp.as_user('72000000-0000-4000-8000-000000000001');
+-- 7. Validation (administrateur de la plateforme)
+select pg_temp.as_user('72000000-0000-4000-8000-000000000006');
 select throws_ok($$select public.set_platform_config('other.key', pg_temp.pal())$$, '22023', 'validation_failed', 'clé hors liste blanche refusée');
 select throws_ok($$select public.set_platform_config('appearance.palette', pg_temp.pal('red'))$$, '22023', 'validation_failed', 'couleur non hex refusée');
 select throws_ok($$select public.set_platform_config('appearance.palette', pg_temp.pal('#FFFFFF'))$$, '22023', 'validation_failed', 'majuscules refusées');
@@ -109,7 +127,7 @@ select throws_ok($$select public.set_platform_config('appearance.palette', '{"li
 select throws_ok($$select public.set_platform_config('appearance.palette', '[]'::jsonb)$$, '22023', 'validation_failed', 'valeur non objet refusée');
 
 -- 8. Reset
-select lives_ok($$select public.reset_platform_config('appearance.palette')$$, 'owner : reset');
+select lives_ok($$select public.reset_platform_config('appearance.palette')$$, 'administrateur de la plateforme : reset');
 reset role;
 select is((select count(*)::int from public.platform_config), 0, 'reset : ligne supprimée');
 

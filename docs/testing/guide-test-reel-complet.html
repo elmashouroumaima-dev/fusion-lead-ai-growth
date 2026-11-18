@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Guide complet du test réel (C3)</title>
+<style>
+  @page { size: A4; margin: 16mm 14mm 16mm 14mm; }
+  * { box-sizing: border-box; }
+  body { font-family: "Segoe UI", Arial, sans-serif; font-size: 10.5pt; line-height: 1.45; color: #1b2430; margin: 0; }
+  h1 { font-size: 22pt; margin: 0 0 4px; color: #123a63; }
+  h2 { font-size: 14pt; color: #fff; background: #123a63; padding: 6px 10px; border-radius: 4px; margin: 22px 0 8px; break-after: avoid; }
+  h3 { font-size: 11.5pt; color: #123a63; margin: 14px 0 4px; break-after: avoid; }
+  p { margin: 4px 0 6px; }
+  .sub { color: #51607a; margin-bottom: 10px; }
+  .box { border: 1px solid #c9d3e0; border-radius: 6px; padding: 8px 10px; margin: 8px 0; break-inside: avoid; }
+  .warn { background: #fff4e0; border-color: #f0b44c; }
+  .ok { background: #e8f6ec; border-color: #7cc48f; }
+  .info { background: #eaf2fb; border-color: #8fb5e0; }
+  .step { display: flex; gap: 8px; margin: 7px 0; break-inside: avoid; }
+  .n { flex: 0 0 24px; height: 24px; border-radius: 50%; background: #123a63; color: #fff; text-align: center; font-weight: 700; line-height: 24px; font-size: 10pt; }
+  .step > div { flex: 1; min-width: 0; }
+  .res { color: #1d6b34; }
+  .res b, .ko b { font-weight: 700; }
+  .ko { color: #9a2a1f; }
+  pre { background: #0f1b2b; color: #e6edf7; padding: 7px 9px; border-radius: 4px; font-family: Consolas, "Courier New", monospace; font-size: 8.6pt; white-space: pre-wrap; word-break: break-all; margin: 5px 0; break-inside: avoid; }
+  code { font-family: Consolas, monospace; font-size: 9.2pt; background: #eef1f6; padding: 0 3px; border-radius: 3px; }
+  table { border-collapse: collapse; width: 100%; margin: 6px 0; font-size: 9.6pt; }
+  th, td { border: 1px solid #c9d3e0; padding: 4px 6px; vertical-align: top; text-align: left; }
+  th { background: #eef1f6; }
+  tr { break-inside: avoid; }
+  .tag { display: inline-block; font-size: 8.5pt; padding: 0 6px; border-radius: 8px; background: #dfe7f2; color: #123a63; margin-left: 4px; }
+  .tag.opt { background: #f3e6c8; color: #7a5710; }
+  .pb { break-before: page; }
+  .small { font-size: 9pt; color: #51607a; }
+</style>
+</head>
+<body>
+
+<h1>Guide complet du test réel (C3)</h1>
+<p class="sub">Fusion Leap AI Growth · Checkpoint C3 / Gate G3 · envoi, réception et arrêt sûrs sur le vrai Postmark et le vrai WhatsApp (Meta). Version du 18 novembre, avec l'écran de canaux (PR 64).</p>
+
+<div class="box warn">
+<b>Règles de sécurité (à lire d'abord)</b>
+<ul>
+<li>Ce test envoie de <b>vrais messages</b> : n'utiliser que <b>vos</b> adresses et <b>vos</b> numéros de test, jamais ceux d'un client.</li>
+<li>Les jetons (Postmark, Meta), le secret de l'app Meta et les secrets de webhook <b>ne se collent jamais</b> dans une conversation, une capture d'écran ou une commande. Ils se saisissent dans les champs de l'application (écriture seule) ou dans des fichiers hors du dépôt (<code>C:/secrets/</code>).</li>
+<li>Ne pas utiliser votre numéro WhatsApp personnel comme numéro d'envoi de l'application.</li>
+<li>Après le test : <b>révoquer ou remplacer</b> tous les jetons et supprimer <code>C:/secrets/</code>. En cas de doute pendant un envoi : <b>Operations → Stop all sending</b> (test A1).</li>
+</ul>
+</div>
+
+<h2>Vue d'ensemble : 6 parties, dans cet ordre</h2>
+<table>
+<tr><th>Partie</th><th>Contenu</th><th>Durée</th><th>Obligatoire ?</th></tr>
+<tr><td>1</td><td>Préparer la machine (base, application, worker)</td><td>10 min</td><td>Oui</td></tr>
+<tr><td>2</td><td>Compte Postmark : adresse d'expéditeur et jeton</td><td>15 min</td><td>Oui (e-mail)</td></tr>
+<tr><td>3</td><td>Connecter l'e-mail dans l'application, contact de test</td><td>10 min</td><td>Oui (e-mail)</td></tr>
+<tr><td>4</td><td>Tests e-mail E1 à E4 (sans tunnel) puis E5 à E7 (avec tunnel)</td><td>30 min</td><td>Oui</td></tr>
+<tr><td>5</td><td>WhatsApp : numéro de test Meta, connexion, tests W1 à W7</td><td>60 min</td><td>Oui pour G3 (peut venir après l'e-mail)</td></tr>
+<tr><td>6</td><td>Arrêt d'urgence (A1), recherche de fuites (A2), fiche de résultat</td><td>20 min</td><td>Oui</td></tr>
+</table>
+<div class="box info"><b>On peut s'arrêter après la partie 4</b> : l'e-mail seul se teste en une séance ; WhatsApp se fait ensuite, dès que le numéro de test est prêt. Le checkpoint C3 ne passe en « GO avec réserves » qu'avec les deux.</div>
+
+<h2>Partie 1 · Préparer la machine</h2>
+<div class="step"><div class="n">1</div><div><b>Docker Desktop</b> démarré (icône verte). Ouvrir <b>Git Bash</b> dans le dossier du projet.</div></div>
+<div class="step"><div class="n">2</div><div>Base locale neuve avec les comptes de démonstration :
+<pre>pnpm db:start
+pnpm db:reset</pre>
+<span class="res"><b>Attendu :</b> « Finished supabase db reset ». Les données de test précédentes sont effacées.</span></div></div>
+<div class="step"><div class="n">3</div><div>Fichier <code>.env.local</code> à la racine : <code>SECRETS_MASTER_KEY</code> doit déjà y être (sinon l'écran affiche « chiffrement non configuré »). Les deux autres variables viendront à la partie 4.</div></div>
+<div class="step"><div class="n">4</div><div>Deux terminaux séparés (Git Bash), gardés ouverts pendant tout le test :
+<pre>Terminal 2 :  pnpm dev
+Terminal 3 :  pnpm worker:dev</pre>
+<span class="res"><b>Attendu :</b> l'application répond sur http://localhost:3000. Se connecter par <code>http://localhost:3000/en/login</code> avec <code>shared@seed.test</code> (propriétaire d'Alpha), <b>pas</b> par l'adresse du tunnel.</span><br>
+<span class="small">Après chaque modification de <code>.env.local</code> : arrêter puis relancer les terminaux 2 et 3.</span></div></div>
+
+<h2>Partie 2 · Compte Postmark</h2>
+<p>Vous avez déjà un compte Postmark en mode test. Il manque l'adresse d'expéditeur <b>réelle</b> (le « toi@domaine.com » affiché par Postmark est un exemple, pas une adresse).</p>
+<div class="step"><div class="n">1</div><div><b>Sender Signature</b> : Postmark → Sender Signatures → Add a sender signature → saisir <b>une adresse que vous possédez</b> (par exemple votre boîte Gmail ou celle de votre domaine) → Postmark envoie un e-mail de confirmation → cliquer le lien dedans.<br>
+<span class="res"><b>Attendu :</b> l'adresse est « Confirmed » (verte) chez Postmark.</span></div></div>
+<div class="step"><div class="n">2</div><div><b>Jeton du serveur</b> : Postmark → Servers → votre serveur → API Tokens → copier le « Server API token ». Ne le collez nulle part sauf dans le champ de l'application (partie 3).</div></div>
+<div class="step"><div class="n">3</div><div><b>Mode test de Postmark</b> : tant que le compte n'est pas approuvé, Postmark limite les destinataires (en général, aux adresses du <b>même domaine</b> que l'expéditeur) <span class="small">(à confirmer dans votre tableau de bord Postmark)</span>. Pour le test, utiliser comme destinataire une <b>seconde adresse sur le même domaine</b>, ou demander l'approbation du compte à Postmark.</div></div>
+<div class="box info"><b>Boîtes de test</b> : l'adresse d'expéditeur (étape 1) et l'adresse de destination (votre « Testeur ») doivent être deux boîtes que vous pouvez ouvrir. Si une seule boîte est disponible : un envoi à soi-même fonctionne si Postmark l'accepte.</div>
+
+<h2 class="pb">Partie 3 · Connecter l'e-mail dans l'application</h2>
+<div class="step"><div class="n">1</div><div>Menu <b>Integrations</b> → carte « <b>Connecter un e-mail (Postmark)</b> » (en anglais : « Connect e-mail (Postmark) »).</div></div>
+<div class="step"><div class="n">2</div><div>Saisir l'<b>adresse d'expéditeur</b> confirmée (partie 2, étape 1) et le <b>jeton du serveur Postmark</b>, puis <b>Connecter et vérifier</b>.<br>
+<span class="res"><b>Attendu :</b> « Connexion vérifiée : le canal est actif. » ; une carte « E-mail » apparaît avec l'état <b>Connectée</b>, le canal <b>Actif</b>, « Jeton enregistré et chiffré ».</span><br>
+<span class="ko"><b>Si « Jeton refusé par Postmark » :</b> mauvais jeton (prendre celui du <i>serveur</i>, pas celui du compte). <b>Si « Postmark est indisponible » :</b> réessayer. <b>Si « Cette adresse ou ce compte est déjà connecté » :</b> le domaine est déjà pris par une autre entreprise.</span></div></div>
+<div class="box warn"><b>Point à confirmer pendant ce test</b> : la vérification utilise la route <code>GET /server</code> de Postmark. C'est une hypothèse du code, jamais essayée sur un vrai compte : si la vérification échoue alors que le jeton est bon, notez le message exact et ne tentez rien d'autre (c'est un constat pour C3).</div>
+<div class="step"><div class="n">3</div><div><b>Secret du webhook e-mail</b> (nécessaire pour les statuts « delivered » et les rebonds ; pas d'écran pour l'instant). Créer un secret et le mettre dans un fichier hors dépôt :
+<pre>node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+# copier la ligne affichée ; créer C:/secrets/webhook.json :
+{"integration_id":"&lt;identifiant de l'intégration e-mail&gt;","secret":"&lt;le secret&gt;"}
+pnpm test:call shared POST /api/integrations/webhook-secret --json-file C:/secrets/webhook.json</pre>
+<span class="res"><b>Attendu :</b> HTTP 200 et <code>{ "replaced": true }</code>.</span><br>
+<span class="small">Identifiant de l'intégration : <code>pnpm test:call shared GET /api/integrations</code>. Gardez le même secret pour l'URL du webhook (partie 4).</span></div></div>
+<div class="step"><div class="n">4</div><div><b>Contact de test et conversation</b> (remplacer les valeurs entre chevrons ; <code>wa_sender</code> reste vide tant que WhatsApp n'est pas connecté) :
+<pre>docker exec -i supabase_db_fusion-leap psql -U postgres -v ON_ERROR_STOP=1 \
+ -v mail_sender='&lt;adresse d expéditeur du canal&gt;' -v wa_sender='' \
+ -v tester_name='Testeur C3' -v tester_email='&lt;votre adresse de destination&gt;' \
+ -v tester_phone='' \
+ &lt; docs/testing/fixtures/c3-contact.sql</pre>
+<span class="res"><b>Attendu :</b> « NOTICE: canal e-mail …, contact … » puis COMMIT. Dans <b>Inbox</b> : une conversation « Testeur C3 » avec un message reçu. Relancer le script avec la même adresse est refusé (« déjà exécuté »).</span></div></div>
+
+<h2>Partie 4 · Tests e-mail</h2>
+<h3>Sans tunnel (E1, E3)</h3>
+<div class="step"><div class="n">E1</div><div><b>Jeton chiffré, jamais relu.</b>
+<pre>pnpm test:call shared GET /api/integrations</pre>
+<span class="res"><b>Attendu :</b> <code>has_secret: true</code> ; aucune valeur de jeton dans la réponse ni sur l'écran.</span></div></div>
+<div class="step"><div class="n">E3</div><div><b>Réponse envoyée depuis la boîte de réception.</b> Inbox → conversation « Testeur C3 » → écrire une réponse → <b>Send reply</b>. Le worker (terminal 3) l'envoie à Postmark ; ouvrir votre boîte de destination.<br>
+<span class="res"><b>Attendu :</b> « Reply queued » ; l'e-mail arrive, expéditeur = l'adresse confirmée, avec pied de page et lien de désabonnement ; la bulle passe à « Sent ».</span><br>
+<span class="ko"><b>« Failed » :</b> lire le code (partie 6, tableau de dépannage). <code>provider_rejected</code> = Postmark refuse (adresse non confirmée, ou destinataire interdit en mode test).</span></div></div>
+
+<h3 class="pb">Avec un tunnel (E4, E5, E6, E7)</h3>
+<p>Postmark ne peut pas appeler « localhost » : il faut une adresse publique HTTPS.</p>
+<div class="step"><div class="n">1</div><div>Dans un 4<sup>e</sup> terminal : <pre>cloudflared tunnel --url http://localhost:3000</pre> (ou <code>ngrok http 3000</code>). Noter l'adresse <code>https://xxxx.trycloudflare.com</code> : elle change à chaque lancement.</div></div>
+<div class="step"><div class="n">2</div><div>Dans <code>.env.local</code> :
+<pre>SITE_URL=https://xxxx.trycloudflare.com
+WHATSAPP_VERIFY_TOKEN=&lt;16 à 200 caractères sans espace, inventés&gt;</pre>
+Puis relancer les terminaux 2 et 3. (<code>SITE_URL</code> sert au lien de désabonnement de chaque e-mail.)</div></div>
+<div class="step"><div class="n">3</div><div>Postmark → votre serveur → <b>Webhooks</b> → ajouter :
+<pre>https://&lt;identifiant du compte&gt;:&lt;secret du webhook&gt;@xxxx.trycloudflare.com/api/webhooks/email</pre>
+Événements : Delivery, Bounce, Spam complaint. <span class="small">L'identifiant du compte est celui affiché sur la carte (« postmark-… ») ; le secret est celui de la partie 3, étape 3.</span><br>
+<span class="res"><b>Attendu :</b> le bouton de test de Postmark répond 200. 401 = mauvais identifiant ou secret.</span></div></div>
+<div class="step"><div class="n">E4</div><div><b>Statut « delivered ».</b> Quelques secondes après un envoi (E3) :
+<pre>docker exec supabase_db_fusion-leap psql -U postgres -c "select status, provider_message_id is not null as id_fournisseur from public.messages where direction='outbound' order by created_at desc limit 3"</pre>
+<span class="res"><b>Attendu :</b> « delivered » et un identifiant de fournisseur.</span></div></div>
+<div class="step"><div class="n">E5</div><div><b>Réponse du contact</b> (si le flux Inbound de Postmark est configuré pour votre domaine). Répondre à l'e-mail depuis votre boîte.<br>
+<span class="res"><b>Attendu :</b> la réponse apparaît dans la conversation. Si Inbound n'est pas configuré : noter « non testé » (ce n'est pas un échec).</span></div></div>
+<div class="step"><div class="n">E6</div><div><b>Désabonnement.</b> Dans l'e-mail reçu, cliquer le lien de désabonnement et confirmer. Puis demander un nouvel envoi :
+<pre>docker exec -i supabase_db_fusion-leap psql -U postgres -v ON_ERROR_STOP=1 \
+ -v channel=email -v tester_email='&lt;votre adresse de destination&gt;' \
+ -v body='Message après désabonnement' &lt; docs/testing/fixtures/c3-approve.sql</pre>
+<span class="res"><b>Attendu :</b> la page confirme ; le message est refusé par le worker (<code>refused_suppressed</code> ou <code>refused_no_consent</code>) ; rien n'arrive dans la boîte.</span></div></div>
+<div class="step"><div class="n">E7</div><div><b>Rebond ou plainte</b> <span class="tag opt">facultatif</span> : si Postmark propose une adresse d'essai de rebond, l'utiliser pour un autre contact. <span class="res"><b>Attendu :</b> l'adresse est supprimée de la liste d'envoi.</span> Sinon : « non testé ».</div></div>
+
+<h2 class="pb">Partie 5 · WhatsApp</h2>
+<div class="box warn"><b>Choix du numéro (décision à prendre avant de commencer).</b><br>
+<b>Option A (recommandée) : numéro de test de Meta.</b> Meta for Developers → votre app → WhatsApp → API Setup : Meta fournit un numéro de test gratuit, un <i>Phone number ID</i>, un jeton temporaire et un <i>WABA ID</i>. Vous ajoutez <b>votre téléphone</b> comme destinataire autorisé (il reçoit un code). Aucun numéro réel n'est nécessaire. Le jeton temporaire expire en 24 h : à régénérer au besoin.<br>
+<b>Option B : numéro réel via un prestataire (Kapso).</b> <b>Non supporté par le code actuel</b> (adresse de l'API et signature des webhooks différentes) : cela demande un ADR validé par la responsable technique, puis du développement. À ne pas tenter pour C3.<br>
+<b>Ne pas utiliser</b> un numéro déjà inscrit sur WhatsApp (personnel ou Business app) : Meta le refuse (« numéro déjà enregistré »).</div>
+<div class="step"><div class="n">1</div><div>Récupérer dans Meta : <b>Phone number ID</b>, <b>jeton d'accès</b>, <b>WABA ID</b>, et le <b>secret de l'application</b> (Paramètres de l'app → De base → App secret → Afficher).</div></div>
+<div class="step"><div class="n">2</div><div>Application → Integrations → carte « <b>Connecter un numéro WhatsApp</b> » : coller Phone number ID, jeton d'accès, secret de l'app → <b>Connecter et vérifier</b>.<br>
+<span class="res"><b>Attendu :</b> « Connexion vérifiée : l'intégration est active ». <span class="ko">Codes d'échec : <code>provider_auth</code> (jeton refusé), <code>provider_account</code> (numéro introuvable).</span></span></div></div>
+<div class="step"><div class="n">3</div><div><b>Canal WhatsApp</b> : sur la carte WhatsApp, rubrique « Ajouter un numéro » : saisir le <b>numéro de test de Meta</b> au format <code>+15550783881</code> → <b>Ajouter</b> → puis <b>Vérifier la connexion</b>. Le canal doit passer à <b>Actif</b>.</div></div>
+<div class="step"><div class="n">4</div><div><b>Webhook Meta</b> (nécessite le tunnel de la partie 4) : Meta → WhatsApp → Configuration → Webhook : URL <code>https://xxxx.trycloudflare.com/api/webhooks/whatsapp</code>, jeton de vérification = <code>WHATSAPP_VERIFY_TOKEN</code> ; abonner le champ <b>messages</b>.<br>
+<span class="res"><b>Attendu :</b> Meta valide l'URL. 403 = jeton de vérification différent.</span></div></div>
+<div class="step"><div class="n">5</div><div>Ajouter le numéro WhatsApp à votre contact de test : relancer le script contact avec <b>une nouvelle adresse</b> de test, <code>wa_sender='+15550783881'</code> et <code>tester_phone='&lt;votre téléphone, E.164&gt;'</code>.</div></div>
+
+<h3>Tests WhatsApp</h3>
+<div class="step"><div class="n">W1</div><div><b>Numéro connecté.</b> <span class="res"><b>Attendu :</b> statut « Connectée / Actif » sur la page Integrations.</span></div></div>
+<div class="step"><div class="n">W2</div><div><b>Message entrant.</b> Depuis votre téléphone, envoyer « Bonjour » au numéro de test Meta. <span class="res"><b>Attendu :</b> dans Inbox, la conversation WhatsApp contient votre message (contact reconnu par son numéro).</span></div></div>
+<div class="step"><div class="n">W3</div><div><b>Webhook rejoué</b> : renvoyer l'événement depuis l'outil de test de Meta si possible. <span class="res"><b>Attendu :</b> toujours un seul message.</span> Sinon : « couvert par T4 (automatique) ».</div></div>
+<div class="step"><div class="n">W4</div><div><b>Envoi dans la fenêtre de 24 h.</b> La boîte de réception ne répond pas encore sur WhatsApp (écart connu n° 3) : le script fait approuver le message par le propriétaire.
+<pre>docker exec -i supabase_db_fusion-leap psql -U postgres -v ON_ERROR_STOP=1 \
+ -v channel=whatsapp -v tester_email='&lt;adresse du contact&gt;' \
+ -v body='Bonjour, test C3 WhatsApp.' &lt; docs/testing/fixtures/c3-approve.sql</pre>
+<span class="res"><b>Attendu :</b> le message arrive sur votre téléphone en quelques secondes.</span></div></div>
+<div class="step"><div class="n">W6</div><div><b>Statuts dans l'ordre</b> (ouvrir le message sur le téléphone) :
+<pre>docker exec supabase_db_fusion-leap psql -U postgres -c "select status from public.messages where direction='outbound' order by created_at desc limit 1"</pre>
+<span class="res"><b>Attendu :</b> accepted → sent → delivered → read, sans jamais reculer.</span></div></div>
+<div class="step"><div class="n">W5</div><div><b>Hors fenêtre : refus sans modèle.</b> Vieillir le message reçu puis redemander un envoi (comme W4) :
+<pre>docker exec supabase_db_fusion-leap psql -U postgres -c "update public.messages set received_at = now() - interval '2 days' where direction='inbound' and conversation_id in (select c.id from public.conversations c join public.channels ch on ch.id=c.channel_id where ch.type='whatsapp')"</pre>
+<span class="res"><b>Attendu :</b> refusé (<code>refused_template_missing</code>), rien n'est envoyé.</span></div></div>
+<div class="step"><div class="n">W7</div><div><b>Mot d'arrêt STOP.</b> Depuis le téléphone, envoyer « STOP » au numéro de test, puis redemander un envoi (comme W4). <span class="res"><b>Attendu :</b> consentement retiré, envoi refusé par le worker, rien n'arrive.</span></div></div>
+
+<h2 class="pb">Partie 6 · Arrêt d'urgence, fuites, clôture</h2>
+<div class="step"><div class="n">A1</div><div><b>Tout s'arrête (le test le plus important).</b> Préparer un contact valide (script contact, nouvelle adresse). Menu <b>Operations → Stop all sending</b> → confirmer. Demander un envoi.<br>
+<span class="res"><b>Attendu :</b> refus <code>refused_organization_paused</code> en moins d'un cycle du worker, rien n'est envoyé. « Resume sending » remet l'envoi en marche.</span></div></div>
+<div class="step"><div class="n">A2</div><div><b>Aucune fuite de secret ou de message dans les journaux et la base.</b> Copier le contenu des terminaux 2 et 3 dans des fichiers hors dépôt, puis :
+<pre># journaux : remplacer par le début de vos jetons / un texte de message ; AUCUNE ligne attendue
+grep -c -E "&lt;début du jeton&gt;|&lt;début du secret&gt;|&lt;texte d un message&gt;" C:/secrets/journal-app.txt C:/secrets/journal-worker.txt
+# base : tous les compteurs FUITES doivent valoir 0
+docker exec -i supabase_db_fusion-leap psql -U postgres -A -t -F ' | ' &lt; docs/testing/fixtures/c3-leak-scan.sql</pre>
+<span class="res"><b>Attendu :</b> aucune ligne dans les journaux ; tous les compteurs « FUITES » à 0.</span></div></div>
+
+<h3>Si quelque chose ne marche pas</h3>
+<table>
+<tr><th>Constat</th><th>Cause probable</th><th>Que faire</th></tr>
+<tr><td>Rien ne part, message « queued » qui reste</td><td>Worker arrêté</td><td>Lancer <code>pnpm worker:dev</code></td></tr>
+<tr><td>« failed » : <code>no_credentials</code></td><td>Jeton absent, ou clé maître différente entre l'application et le worker</td><td>Même <code>.env.local</code> pour les deux, puis les relancer</td></tr>
+<tr><td><code>provider_auth</code></td><td>Jeton refusé ou expiré</td><td>Remplacer le jeton (« Remplacer le jeton » sur la carte)</td></tr>
+<tr><td><code>provider_rejected</code></td><td>Postmark refuse (adresse non confirmée, destinataire interdit en mode test)</td><td>Vérifier la Sender Signature et le mode test (partie 2)</td></tr>
+<tr><td>Webhook Postmark en 401</td><td>Identifiant ou secret différent de celui enregistré</td><td>Refaire la partie 3 étape 3, mettre l'URL à jour chez Postmark</td></tr>
+<tr><td>Aucun entrant WhatsApp</td><td>Tunnel arrêté ou URL changée, champ « messages » non abonné, signature refusée</td><td>Vérifier tunnel, URL, abonnement et secret de l'app</td></tr>
+<tr><td>Un événement reste « received »</td><td>Worker arrêté</td><td>Lancer le worker</td></tr>
+<tr><td>Lien de désabonnement en localhost</td><td><code>SITE_URL</code> non défini</td><td>Le définir sur l'adresse du tunnel, relancer</td></tr>
+</table>
+
+<h3>Après le test</h3>
+<ul>
+<li>Révoquer ou remplacer <b>tous</b> les jetons de test et le secret de webhook ; supprimer <code>C:/secrets/</code>.</li>
+<li>Remplir la section 5 de <code>docs/checkpoints/C3.md</code> (OK / KO / non testé + une preuve sans donnée sensible).</li>
+<li>Ne rien envoyer au dépôt qui contienne un jeton, une adresse réelle ou un numéro réel. <code>pnpm db:reset</code> efface les données de test.</li>
+</ul>
+
+<h2>Fiche de résultat</h2>
+<table>
+<tr><th>Test</th><th>Quoi</th><th>OK</th><th>KO</th><th>Non testé</th><th>Remarque</th></tr>
+<tr><td>E1</td><td>Jeton chiffré, jamais relu</td><td></td><td></td><td></td><td></td></tr>
+<tr><td>E3</td><td>Réponse envoyée, e-mail reçu</td><td></td><td></td><td></td><td></td></tr>
+<tr><td>E4</td><td>Statut « delivered »</td><td></td><td></td><td></td><td></td></tr>
+<tr><td>E5</td><td>Réponse du contact reçue</td><td></td><td></td><td></td><td></td></tr>
+<tr><td>E6</td><td>Désabonnement : envoi suivant refusé</td><td></td><td></td><td></td><td></td></tr>
+<tr><td>E7</td><td>Rebond / plainte</td><td></td><td></td><td></td><td></td></tr>
+<tr><td>W1</td><td>Numéro connecté</td><td></td><td></td><td></td><td></td></tr>
+<tr><td>W2</td><td>Message entrant</td><td></td><td></td><td></td><td></td></tr>
+<tr><td>W3</td><td>Webhook rejoué : un seul message</td><td></td><td></td><td></td><td></td></tr>
+<tr><td>W4</td><td>Envoi dans la fenêtre</td><td></td><td></td><td></td><td></td></tr>
+<tr><td>W5</td><td>Hors fenêtre : refus</td><td></td><td></td><td></td><td></td></tr>
+<tr><td>W6</td><td>Statuts dans l'ordre</td><td></td><td></td><td></td><td></td></tr>
+<tr><td>W7</td><td>STOP : envoi suivant refusé</td><td></td><td></td><td></td><td></td></tr>
+<tr><td>A1</td><td>Arrêt d'urgence</td><td></td><td></td><td></td><td></td></tr>
+<tr><td>A2</td><td>Aucune fuite (journaux et base)</td><td></td><td></td><td></td><td></td></tr>
+</table>
+
+</body>
+</html>

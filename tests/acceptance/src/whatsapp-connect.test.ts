@@ -153,9 +153,13 @@ describe.skipIf(!MASTER)("vérification de la connexion (sans appel à Meta)", (
     expect(psql(`select status from public.integrations where id = '${integration}'`)).toBe("pending");
   });
 
-  it("intégration e-mail : 400 (seul WhatsApp est vérifiable), statut inchangé ; un utilisateur ne peut pas se déclarer « actif » par la fonction SQL", async () => {
-    expect((await post("shared", "/api/integrations/validate", { integration_id: emailIntegration })).status).toBe(400);
-    expect(psql(`select status from public.integrations where id = '${emailIntegration}'`)).toBe("pending");
+  it("intégration e-mail : un jeton inenvoyable (tabulation) est refusé SANS appel sortant : 200 « error / provider_auth », statut « error » ; un utilisateur ne peut pas se déclarer « actif » par la fonction SQL", async () => {
+    // la tabulation passe le schéma des secrets mais le validateur Postmark ne l'envoie jamais : aucun appel vers Postmark depuis ce test
+    expect((await post("shared", "/api/integrations/secret", { integration_id: emailIntegration, secret: "jeton	inenvoyable-0123456789" })).status).toBe(200);
+    const result = await post("shared", "/api/integrations/validate", { integration_id: emailIntegration });
+    expect(result.status).toBe(200);
+    expect(result.json).toEqual({ status: "error", code: "provider_auth" });
+    expect(psql(`select status from public.integrations where id = '${emailIntegration}'`)).toBe("error");
     const denied = await api("alphaAdmin", "POST", "rpc/integration_set_validation", { p_org: ORG.alpha, p_integration: integration, p_ok: true, p_code: null, p_actor: ORG.alpha });
     expect([401, 403]).toContain(denied.status);
     expect(psql(`select status from public.integrations where id = '${integration}'`)).toBe("pending");

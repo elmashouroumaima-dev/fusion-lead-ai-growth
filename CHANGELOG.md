@@ -3,6 +3,12 @@
 Format : Keep a Changelog. Une entrée par jour de travail.
 
 ## [Non publié]
+### Écran de canaux (hors plan, validé « ok default »)
+- Ajout : migration `20261213100000_channels_activation.sql` (+ retour arrière) : un canal est `active` si et seulement si son intégration est validée par le fournisseur (création et `integration_set_validation`) ; pgTAP `320_channels_activation` (23 tests, refus d'abord).
+- Ajout : `createPostmarkValidator` (`GET /server`, adresse fixe, codes courts) ; la vérification de connexion gère l'e-mail.
+- Ajout : routes `POST /api/channels` et `POST /api/channels/update` ; page Intégrations : « Connecter un e-mail (Postmark) », ajout d'un canal, pause / reprise, « Vérifier la connexion » pour l'e-mail ; textes ar / en / fr.
+- Tests : unitaires (adaptateur 6, service 11), acceptation HTTP `channels-flow` (7), pgTAP 320 (23).
+- Réserve : `GET /server` de Postmark est une hypothèse à confirmer au test réel (C3, E1). Corrige l'écart n° 2 de C3.
 ### J41 — Checkpoint C3 (brouillon, audit sans comptes réels)
 - Ajout : `docs/checkpoints/C3.md` : audit de conformité de la Phase 3 (invariants du CLAUDE.md par recherche, utilisation de `service_role`, preuves par critère §13, balayage de la base et des journaux, registre de 15 écarts) et **verdict proposé : NO-GO à G3 tant que le test sur comptes réels n'est pas fait** ; section 5 à remplir.
 - Ajout : `docs/testing/Guide-test-manuel-C3-comptes-reels.pdf` (7 pages) et scripts `docs/testing/fixtures/c3-setup.sql` (canaux, contact de test, conversations), `c3-approve.sql` (envoi approuvé par le propriétaire), `c3-leak-scan.sql` (balayage en lecture seule) ; essayés avec des données factices (aucun fournisseur réel).

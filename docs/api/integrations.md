@@ -30,13 +30,22 @@ Owner et admin ; entreprise du contexte vérifié ; `Idempotency-Key` obligatoir
 - `POST /api/integrations` `{ provider: "email" | "whatsapp", external_account_id, scopes?, secret }` : 201 `{ integration: { id } }`.
 - `POST /api/integrations/secret` `{ integration_id, secret }` : 200 `{ replaced: true }` (rotation ou reconnexion).
 - `POST /api/integrations/disconnect` `{ integration_id }` : 200 `{ disconnected: true }`.
+
+## Canaux (écran de canaux, migration `20261213100000_channels_activation.sql`)
+Owner et admin (`connect` sur `integrations`) ; `Idempotency-Key` obligatoire ; corps stricts (un `organization_id` du client est refusé).
+- `POST /api/channels` `{ integration_id, type: "email" | "whatsapp", sender_identity, project_scope? }` : 201 `{ channel: { id } }`. Le canal naît `pending` ; il naît `active` seulement si son intégration est déjà `active`.
+- `POST /api/channels/update` `{ channel_id, project_scope?, send_paused? }` : 200 `{ updated: true }` (pause d'envoi, portée par projets).
+- **Activation** : `private.integration_set_validation` (service_role) met les canaux `pending` de l'intégration à `active` quand la vérification réussit, et les `active` à `pending` quand elle échoue. Une panne du fournisseur n'écrit rien.
+- `POST /api/integrations/validate` gère maintenant **l'e-mail** : le jeton du serveur est essayé sur `GET https://api.postmarkapp.com/server` (adresse fixe, aucune redirection, codes courts `provider_auth` / `provider_unavailable` / `provider_unreadable`). Un jeton valide ne prouve pas que l'adresse d'expéditeur est confirmée chez Postmark (Sender Signature) : sinon l'envoi est refusé à l'envoi.
+- Rollback : `supabase/rollbacks/20261213100000_channels_activation.sql`.
+
 Sans clé maître (`SECRETS_MASTER_KEY`) : **503**, rien n'est créé. Un secret fait 8 caractères au moins et **4096 octets UTF-8** au plus.
 
 ## Audit
 `integration.created`, `integration.secret_set`, `integration.secret_rotated`, `integration.reconnected`, `integration.disconnected`, `channel.created`, `channel.updated` (noms de champs). **Jamais** le secret, le chiffré, le nonce, l'identité de l'expéditeur.
 
 ## Limites connues
-- **Pas de validation par le fournisseur** (J31 e-mail, J34 WhatsApp) : une intégration reste `pending` et un canal ne doit passer `active` qu'après cette validation. La chaîne d'envoi (J31) devra exiger un canal `active` et non en pause, un consentement et `do_not_contact`.
+- ~~Pas de validation par le fournisseur~~ (corrigé : voir « Canaux ») ; ancien libellé : (J31 e-mail, J34 WhatsApp) : une intégration reste `pending` et un canal ne doit passer `active` qu'après cette validation. La chaîne d'envoi (J31) devra exiger un canal `active` et non en pause, un consentement et `do_not_contact`.
 - **Squat de compte** : un compte `email` ou `whatsapp` est réservé globalement dès la création, sans preuve de propriété, et le refus (409) révèle qu'il est pris ailleurs (ADR 005, décision 9). À arbitrer avec la validation par le fournisseur (libérer un compte `pending` non validé après un délai).
 - **Appel direct de la Data API** : un owner ou admin peut écrire un chiffré de format valide mais illisible par ses propres fonctions ; il ne nuit qu'à son entreprise (l'AAD l'empêche d'atteindre une autre). Le worker traitera un secret illisible comme une erreur d'intégration (statut `error`).
 - **Pas de rotation de la clé maître** (re-chiffrement par `key_version` dans un job du worker) : prévue avec les runbooks (J58 et J59). La rotation d'un SECRET (remplacement) est livrée et testée.

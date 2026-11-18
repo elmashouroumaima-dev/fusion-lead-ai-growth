@@ -1176,3 +1176,10 @@ Plan : test manuel e-mail et WhatsApp sur comptes d'essai (2 h), corrections (2 
 - Test réel (E1 à E7, W1 à W7, A1, A2), puis corrections et décision de la responsable technique.
 - Revue de sécurité indépendante de J39 à J40 et du durcissement `reply`.
 
+## Écran de canaux (hors plan)
+### Fait
+- Activation automatique des canaux liée à la validation du fournisseur (migration + pgTAP 320), validateur Postmark, routes `/api/channels` et `/api/channels/update`, interface sur la page Intégrations (ar / en / fr), test d'acceptation HTTP.
+### Décisions par défaut (« ok default »)
+- Canal `active` si et seulement si l'intégration est `active` ; validation e-mail par `GET /server` ; owner et admin seulement.
+### Reste à faire
+- Confirmer `GET /server` et l'envoi sur un compte Postmark réel (C3, E1) ; réponse WhatsApp depuis la boîte de réception ; décisions de la responsable technique.

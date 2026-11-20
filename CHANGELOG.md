@@ -3,6 +3,10 @@
 Format : Keep a Changelog. Une entrée par jour de travail.
 
 ## [Non publié]
+### Passation : base hébergée, administrateur de la plateforme, décisions à trancher
+- Ajout : `docs/runbooks/hosted-database.md` : appliquer les migrations manquantes sur la base hébergée (sauvegarde, essai à blanc, vérification, jamais de remise à zéro) et enregistrer l'administrateur de la plateforme (ADR 016) ; à faire par la personne qui possède le projet.
+- Modification : `docs/product/taches-responsable-technique` (HTML et PDF) mis à jour au 20 novembre : tout fusionné (PR 41 à 67), huit nouvelles décisions avec options et recommandation (droits de la palette, amendements ADR 014, réclamation d'envoi, dates des migrations, revue de sécurité, nom de la personne, numéro WhatsApp, base hébergée).
+- Modification : rapport d'avancement du 20 novembre (tests mesurés : 8 245 ; résumé, points ouverts, étapes suivantes mis à jour).
 ### Paramétrage (palette, logo) réservé aux administrateurs de la plateforme (ADR 016, condition levée)
 - Modification : migration `20261214100000_platform_config_admin_only.sql` (+ retour arrière) : `private.can_manage_platform_config()` devient `private.is_platform_admin()` ; `set_platform_config` / `reset_platform_config` refusent (42501) tout owner / admin d'organisation. Aucune donnée touchée ; fonctions publiques et droits inchangés.
 - Modification : pages `settings/appearance` et `settings/logo` : message « Réservé aux administrateurs de la plateforme » en lecture seule (ar / en / fr) à la place de la redirection ; menu « Paramétrage » visible pour les seuls administrateurs de la plateforme.

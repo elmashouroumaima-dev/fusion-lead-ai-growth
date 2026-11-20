@@ -1209,3 +1209,9 @@ Plan : test manuel e-mail et WhatsApp sur comptes d'essai (2 h), corrections (2 
 - Changement de qui peut écrire : **à valider par la responsable technique**. Matrice 014 inchangée (hors matrice, comme le SMTP et l'administration des plans). Page SMTP laissée en redirection (hors périmètre).
 ### Reste à faire
 - Avant l'ouverture à un vrai client : insérer l'administrateur de la plateforme en SQL (runbook `plans-quotas.md`) ; appliquer la migration sur la base hébergée avec les autres.
+
+## Passation (20 novembre)
+### Fait
+- Runbook de la base hébergée et de l'enregistrement de l'administrateur de la plateforme ; document des tâches de la responsable technique mis à jour avec huit décisions (options et recommandation) ; rapport d'avancement actualisé (le contenu manuel n'avait pas bougé depuis le 16 novembre).
+### Reste à faire
+- Appliquer les migrations sur la base hébergée (personne qui possède le projet), trancher les décisions C1 à C8, test réel C3.

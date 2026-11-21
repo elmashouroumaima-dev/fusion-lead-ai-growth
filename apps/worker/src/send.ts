@@ -16,7 +16,7 @@ export type SendClaim =
       status: "claimed";
       message: { body: string; approved: boolean; purpose: string | null; approverValid: boolean; approvalAgeSeconds: number | null; recipientUnchanged: boolean };
       contact: { email: string | null; phone: string | null; doNotContact: boolean };
-      channel: { type: string; status: string; sendPaused: boolean; sender: string; integrationId: string; integrationStatus: string; account: string | null };
+      channel: { type: string; status: string; sendPaused: boolean; sender: string; integrationId: string; integrationStatus: string; account: string | null; gateway: "meta" | "kapso" };
       /** Fenêtre de conversation WhatsApp : le contact a écrit il y a moins de 24 h dans ce fil. */
       windowOpen: boolean;
       template: { status: string; name: string; language: string; category: string; version: number; variables: string[] } | null;
@@ -60,7 +60,7 @@ const claimSchema = z.discriminatedUnion("status", [
     window_open: z.boolean().default(false),
     template: z.object({ status: z.string(), name: z.string(), language: z.string(), category: z.string(), version: z.number().int(), variables: z.array(z.string()) }).nullable().default(null),
     channel: z.object({
-      type: z.string(), status: z.string(), send_paused: z.boolean(), sender: z.string(), integration_id: z.uuid(), integration_status: z.string().nullable(), account: z.string().nullable().default(null),
+      type: z.string(), status: z.string(), send_paused: z.boolean(), sender: z.string(), integration_id: z.uuid(), integration_status: z.string().nullable(), account: z.string().nullable().default(null), gateway: z.enum(["meta", "kapso"]).default("meta"),
     }),
     organization_active: z.boolean(),
     organization_send_paused: z.boolean(),
@@ -101,7 +101,7 @@ export function createSupabaseSendGateway(env: SendEnv): SendGateway {
         template: row.template,
         channel: {
           type: row.channel.type, status: row.channel.status, sendPaused: row.channel.send_paused, sender: row.channel.sender,
-          integrationId: row.channel.integration_id, integrationStatus: row.channel.integration_status ?? "unknown", account: row.channel.account,
+          integrationId: row.channel.integration_id, integrationStatus: row.channel.integration_status ?? "unknown", account: row.channel.account, gateway: row.channel.gateway,
         },
         organizationActive: row.organization_active,
         organizationSendPaused: row.organization_send_paused,

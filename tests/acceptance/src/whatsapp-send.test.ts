@@ -55,7 +55,7 @@ beforeAll(async () => {
   cleanup();
   for (const name of ["shared", "alpha-admin", "alpha-marketing", "alpha-sales", "alpha-analyst", "beta-owner"]) sessions.set(name, await signIn(`${name}@seed.test`));
   if (!MASTER) return;
-  expect((await post("shared", "/api/integrations", { provider: "whatsapp", external_account_id: PHONE_ID, scopes: [], secret: `EAAG-jeton-${run}-0123456789` })).status).toBe(201);
+  expect((await post("shared", "/api/integrations", { provider: "whatsapp", gateway: "meta", external_account_id: PHONE_ID, scopes: [], secret: `EAAG-jeton-${run}-0123456789` })).status).toBe(201);
   integration = psql(`select id from public.integrations where external_account_id = '${PHONE_ID}'`);
   psql(`
     update public.integrations set status = 'active' where id = '${integration}';

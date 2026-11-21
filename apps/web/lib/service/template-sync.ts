@@ -43,14 +43,15 @@ export async function syncWhatsAppTemplates(
 ): Promise<TemplateSyncResult> {
   const { data: integration, error: integrationError } = await supabase
     .from("integrations")
-    .select("id, provider, status, has_secret")
+    .select("id, provider, status, gateway, has_secret")
     .eq("organization_id", organizationId)
     .eq("id", input.integrationId)
     .maybeSingle();
   if (integrationError) throw new ServiceError("service_unavailable");
   if (!integration) throw new ServiceError("not_found");
-  const row = integration as { provider: string; status: string; has_secret: boolean };
-  if (row.provider !== "whatsapp" || !row.has_secret || !["pending", "active", "error"].includes(row.status)) throw new ServiceError("validation_failed");
+  const row = integration as { provider: string; status: string; gateway?: string; has_secret: boolean };
+  // Kapso : la synchronisation des modèles n'est pas branchée (indisponible en sandbox, route non confirmée : ADR 017) ; refus net plutôt qu'un appel Meta avec une clé Kapso
+  if (row.provider !== "whatsapp" || row.gateway === "kapso" || !row.has_secret || !["pending", "active", "error"].includes(row.status)) throw new ServiceError("validation_failed");
 
   // le canal doit appartenir à CETTE intégration, dans cette entreprise
   const { data: channel, error: channelError } = await supabase

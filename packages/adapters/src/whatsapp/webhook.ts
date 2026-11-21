@@ -16,6 +16,7 @@ import { normalizeWhatsAppPayload, readWhatsAppPayload } from "./events";
  */
 export const whatsappWebhookAdapter: WebhookAdapter = {
   provider: "whatsapp",
+  gateway: "meta",
   maxBytes: 3 * 1024 * 1024,
   parse(rawBody) {
     try {

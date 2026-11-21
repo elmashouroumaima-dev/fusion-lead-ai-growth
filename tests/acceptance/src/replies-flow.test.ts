@@ -64,7 +64,7 @@ const gateway: SendGateway = {
       template: raw.template ?? null,
       channel: {
         type: raw.channel.type, status: raw.channel.status, sendPaused: raw.channel.send_paused, sender: raw.channel.sender,
-        integrationId: raw.channel.integration_id, integrationStatus: raw.channel.integration_status ?? "unknown", account: raw.channel.account ?? null,
+        integrationId: raw.channel.integration_id, integrationStatus: raw.channel.integration_status ?? "unknown", account: raw.channel.account ?? null, gateway: "meta" as const,
       },
       organizationActive: raw.organization_active === true,
       organizationSendPaused: raw.organization_send_paused === true,

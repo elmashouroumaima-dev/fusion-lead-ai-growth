@@ -32,6 +32,7 @@ function deps(overrides: Partial<ValidationDeps> = {}) {
     readSecret: async () => TOKEN,
     validate: async () => ({ kind: "valid" }),
     validateEmail: async () => ({ kind: "valid" }),
+    validateKapso: async () => ({ kind: "valid" }),
     setValidation: async (input) => {
       written.push({ ok: input.ok, code: input.code });
       actors.push(input.actorId);
@@ -134,5 +135,36 @@ describe("vérification d'une connexion e-mail (Postmark)", () => {
   it("une intégration e-mail déjà active peut être revérifiée (jeton remplacé)", async () => {
     const d = deps();
     expect(await validateIntegrationConnection(supabase({ ...email, status: "active" }).client, ORG, INT, USER, d.deps)).toEqual({ status: "active" });
+  });
+});
+
+describe("vérification d'une intégration WhatsApp de passerelle Kapso", () => {
+  const kapso = { ...whatsapp, gateway: "kapso" };
+
+  it("passerelle Kapso : essaie la clé d'API par Kapso (jamais par Meta), enregistre « ok » et renvoie active", async () => {
+    const validateKapso = vi.fn(async () => ({ kind: "valid" as const }));
+    const validate = vi.fn();
+    const d = deps({ validateKapso, validate });
+    expect(await validateIntegrationConnection(supabase(kapso).client, ORG, INT, USER, d.deps)).toEqual({ status: "active" });
+    expect(validateKapso).toHaveBeenCalledTimes(1);
+    expect(validate).not.toHaveBeenCalled();
+    expect(d.written).toEqual([{ ok: true, code: null }]);
+  });
+
+  it("passerelle Meta (ou colonne absente) : comportement historique, aucun appel à Kapso", async () => {
+    const validateKapso = vi.fn();
+    const d = deps({ validateKapso });
+    await validateIntegrationConnection(supabase({ ...whatsapp, gateway: "meta" }).client, ORG, INT, USER, d.deps);
+    await validateIntegrationConnection(supabase(whatsapp).client, ORG, INT, USER, d.deps);
+    expect(validateKapso).not.toHaveBeenCalled();
+  });
+
+  it("clé refusée par Kapso : échec enregistré avec un code court ; panne de Kapso : 503 et rien n'est écrit", async () => {
+    const refused = deps({ validateKapso: async () => ({ kind: "invalid", code: "provider_auth" }) });
+    expect(await validateIntegrationConnection(supabase(kapso).client, ORG, INT, USER, refused.deps)).toEqual({ status: "error", code: "provider_auth" });
+    expect(refused.written).toEqual([{ ok: false, code: "provider_auth" }]);
+    const down = deps({ validateKapso: async () => ({ kind: "invalid", code: "provider_unavailable" }) });
+    await expect(validateIntegrationConnection(supabase(kapso).client, ORG, INT, USER, down.deps)).rejects.toMatchObject({ code: "service_unavailable" });
+    expect(down.written).toEqual([]);
   });
 });

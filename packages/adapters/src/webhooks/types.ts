@@ -4,13 +4,19 @@
  * utilisateur : une requête de webhook est authentifiée par sa signature et rattachée à une entreprise par l'identité du COMPTE
  * fournisseur, jamais par un champ libre du payload.
  */
-export type WebhookProvider = "email" | "whatsapp";
+export type WebhookProvider = "email" | "whatsapp" | "kapso";
+/** Fournisseur sous lequel les événements sont CONSERVÉS (`webhook_events.provider`) : `kapso` est une passerelle de `whatsapp`, pas un fournisseur à part. */
+export type WebhookStoreProvider = "email" | "whatsapp";
 
 /** En-têtes en minuscules ; une valeur absente est `undefined`. */
 export type WebhookHeaders = Readonly<Record<string, string | undefined>>;
 
 export interface WebhookAdapter {
   readonly provider: WebhookProvider;
+  /** Fournisseur de stockage et de résolution (défaut : `provider`). */
+  readonly storeProvider?: WebhookStoreProvider;
+  /** Passerelle exigée de l'intégration retrouvée (`integrations.gateway`) : un webhook Kapso ne retrouve pas une intégration Meta, et inversement. */
+  readonly gateway?: "meta" | "kapso";
   /** Taille maximale du corps brut, en octets (WhatsApp : 3 Mo). */
   readonly maxBytes: number;
   /** Corps brut -> valeur JSON, ou `null` si illisible (jamais d'exception). */
@@ -34,9 +40,9 @@ export interface WebhookAdapter {
 
 /** Accès à la base, réservé au serveur (fonctions service_role). */
 export interface WebhookStore {
-  resolve(provider: WebhookProvider, account: string): Promise<{ organizationId: string; integrationId: string } | null>;
-  record(input: { organizationId: string; integrationId: string; provider: WebhookProvider; externalEventId: string; payload: unknown }): Promise<{ eventId: string; duplicate: boolean }>;
-  recordRejection(input: { organizationId: string; integrationId: string; provider: WebhookProvider }): Promise<void>;
+  resolve(provider: WebhookStoreProvider, account: string, gateway?: "meta" | "kapso"): Promise<{ organizationId: string; integrationId: string } | null>;
+  record(input: { organizationId: string; integrationId: string; provider: WebhookStoreProvider; externalEventId: string; payload: unknown }): Promise<{ eventId: string; duplicate: boolean }>;
+  recordRejection(input: { organizationId: string; integrationId: string; provider: WebhookStoreProvider }): Promise<void>;
 }
 
 /** Secret de vérification d'une intégration (celui du J28) ; `null` si l'intégration n'en a pas. */

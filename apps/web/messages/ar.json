@@ -990,6 +990,36 @@
         "unreadable": "استجابة Postmark غير مفهومة.",
         "unavailable": "Postmark غير متاح. حاول مرة أخرى بعد قليل."
       }
+    },
+    "kapso": {
+      "connect": {
+        "title": "ربط رقم واتساب (Kapso)",
+        "description": "يمرّر Kapso واجهة واتساب الرسمية. يُشفَّر مفتاح الواجهة والسر ويُكتبان مرة واحدة ولا يُعرضان أبدًا.",
+        "phoneId": "معرّف الرقم (Phone number ID)",
+        "apiKey": "مفتاح واجهة Kapso",
+        "webhookSecret": "سر الـ webhook (تختاره أنت)",
+        "generate": "توليد",
+        "webhookSecretHint": "32 حرفًا على الأقل ودون مسافات. انسخه عند Kapso في webhook الرقم (حقل «secret key»).",
+        "webhookUrl": "عنوان الـ webhook المطلوب تسجيله عند Kapso",
+        "webhookUrlHint": "يجب أن يكون عنوانًا عامًا بـ https (المتغيّر SITE_URL). نوع الـ webhook: «kapso».",
+        "submit": "ربط وتحقق",
+        "duplicate": "هذا الرقم مربوط بالفعل.",
+        "invalid": "معرّف أو مفتاح غير صالح.",
+        "secretInvalid": "سر webhook غير صالح (من 32 إلى 200 حرف دون مسافات). أُنشئ الرقم: استبدل السر ثم تحقق.",
+        "failed": "فشل الربط. حاول مرة أخرى بعد قليل."
+      },
+      "verify": {
+        "button": "التحقق من الاتصال",
+        "ok": "تم التحقق من الاتصال: التكامل نشط.",
+        "auth": "رفض Kapso مفتاح الواجهة.",
+        "account": "الرقم غير موجود أو غير مسموح لهذا المفتاح.",
+        "unreadable": "استجابة Kapso غير مفهومة.",
+        "unavailable": "Kapso غير متاح. حاول مرة أخرى بعد قليل.",
+        "failed": "فشل التحقق."
+      }
+    },
+    "gateway": {
+      "meta": "Meta (مباشر)"
     }
   },
   "Unsubscribe": {

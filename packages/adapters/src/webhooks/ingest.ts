@@ -1,4 +1,4 @@
-import type { WebhookAdapter, WebhookHeaders, WebhookSecretReader, WebhookStore } from "./types";
+import type { WebhookAdapter, WebhookHeaders, WebhookSecretReader, WebhookStore, WebhookStoreProvider } from "./types";
 
 /**
  * Pipeline commun de réception d'un webhook (J29). Fonction PURE (aucune session, aucune base : le `store` et le lecteur de secret sont
@@ -61,7 +61,8 @@ export async function ingestWebhook(input: IngestInput): Promise<WebhookOutcome>
     }
   };
 
-  const target = await store.resolve(adapter.provider, account);
+  const storeProvider = adapter.storeProvider ?? adapter.provider;
+  const target = await store.resolve(storeProvider as WebhookStoreProvider, account, adapter.gateway);
   if (!target) {
     // même travail et même réponse qu'une signature invalide : un inconnu ne distingue pas un compte inexistant d'un compte existant
     verify(DUMMY_SECRET);
@@ -69,7 +70,7 @@ export async function ingestWebhook(input: IngestInput): Promise<WebhookOutcome>
   }
 
   const reject = async (): Promise<WebhookOutcome> => {
-    await store.recordRejection({ organizationId: target.organizationId, integrationId: target.integrationId, provider: adapter.provider });
+    await store.recordRejection({ organizationId: target.organizationId, integrationId: target.integrationId, provider: storeProvider as WebhookStoreProvider });
     return { kind: "invalid_signature" };
   };
 
@@ -102,7 +103,7 @@ export async function ingestWebhook(input: IngestInput): Promise<WebhookOutcome>
   const recorded = await store.record({
     organizationId: target.organizationId,
     integrationId: target.integrationId,
-    provider: adapter.provider,
+    provider: storeProvider as WebhookStoreProvider,
     externalEventId,
     payload,
   });

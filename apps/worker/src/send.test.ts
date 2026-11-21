@@ -283,7 +283,7 @@ describe("send_message : WhatsApp (J36)", () => {
     await run();
     expect(provider.sent).toHaveLength(0);
     expect(whatsapp.sent).toHaveLength(1);
-    expect(whatsapp.sent[0]?.input).toEqual({ kind: "text", phoneNumberId: "106540352242922", to: "212600000001", text: "Bonjour Karim\nVoici notre offre." });
+    expect(whatsapp.sent[0]?.input).toEqual({ kind: "text", phoneNumberId: "106540352242922", to: "212600000001", text: "Bonjour Karim\nVoici notre offre.", gateway: "meta" });
     expect(whatsapp.sent[0]?.secret).toBe("tok-SECRET-0123456789");
     expect(gateway.accepted).toEqual([{ providerMessageId: "wamid.TEST" }]);
   });
@@ -300,8 +300,23 @@ describe("send_message : WhatsApp (J36)", () => {
     const { gateway, whatsapp, run } = setup();
     gateway.claimResult = wa({ windowOpen: false, template });
     await run();
-    expect(whatsapp.sent[0]?.input).toEqual({ kind: "template", phoneNumberId: "106540352242922", to: "212600000001", template: { name: "offre_ete", language: "fr", variables: ["Nadia"] } });
+    expect(whatsapp.sent[0]?.input).toEqual({ kind: "template", phoneNumberId: "106540352242922", to: "212600000001", template: { name: "offre_ete", language: "fr", variables: ["Nadia"] }, gateway: "meta" });
     expect(gateway.failed).toEqual([]);
+  });
+
+  it("passerelle Kapso (ADR 017) : la réclamation la désigne, le worker la transmet à l'envoi (texte et modèle) ; sans indication, Meta", async () => {
+    const { gateway, whatsapp, run } = setup();
+    const claim = wa({ windowOpen: true });
+    if (claim.status !== "claimed") throw new Error("réclamation attendue");
+    gateway.claimResult = { ...claim, channel: { ...claim.channel, gateway: "kapso" } };
+    await run();
+    expect(whatsapp.sent[0]?.input).toMatchObject({ kind: "text", gateway: "kapso" });
+    const templated = setup();
+    const claim2 = wa({ windowOpen: false, template });
+    if (claim2.status !== "claimed") throw new Error("réclamation attendue");
+    templated.gateway.claimResult = { ...claim2, channel: { ...claim2.channel, gateway: "kapso" } };
+    await templated.run();
+    expect(templated.whatsapp.sent[0]?.input).toMatchObject({ kind: "template", gateway: "kapso" });
   });
 
   it("modèle rattaché mais plus approuvé (suspendu depuis), même dans la fenêtre : refusé (template_missing)", async () => {

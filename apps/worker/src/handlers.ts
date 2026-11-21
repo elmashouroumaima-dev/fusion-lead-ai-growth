@@ -451,8 +451,8 @@ export function createSendMessageHandler(deps: SendDeps): JobHandler {
         // juste avant l'appel : aucun autre accès base entre le contrôle final et le fournisseur
         outcome = await deps.whatsapp.send(
           claim.template
-            ? { kind: "template", phoneNumberId, to, template: { name: claim.template.name, language: claim.template.language, variables: claim.template.variables } }
-            : { kind: "text", phoneNumberId, to, text: claim.message.body },
+            ? { kind: "template", phoneNumberId, to, template: { name: claim.template.name, language: claim.template.language, variables: claim.template.variables }, gateway: claim.channel.gateway }
+            : { kind: "text", phoneNumberId, to, text: claim.message.body, gateway: claim.channel.gateway },
           secret,
         );
       } else {

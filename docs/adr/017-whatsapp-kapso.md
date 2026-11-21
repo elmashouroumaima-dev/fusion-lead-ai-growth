@@ -76,3 +76,10 @@ Documentation officielle de Kapso : vue d'ensemble et sécurité des webhooks, �
 
 ## Mise en œuvre prévue (après validation du plan)
 Migration `gateway` (retour arrière) ; constante d'adresse de Kapso et authentification `X-API-Key` ; vérification de signature et analyseur d'événements Kapso ; connexion d'un numéro Kapso depuis l'écran ; tests refus d'abord ; guide du test réel (C3) en sandbox ; runbook et documentation de l'API.
+
+## Confirmé sur le sandbox réel (2026-11-21)
+Trois appels sortants, avec la clé du projet du testeur (aucun message envoyé, aucune donnée de client) :
+- `GET https://api.kapso.ai/meta/whatsapp/v24.0/{phone_number_id}?fields=id` avec `X-API-Key` : **200** `{"id":"<phone_number_id>"}` : l'adresse, la version `v24.0`, l'en-tête et la route de vérification utilisés par l'adaptateur sont **bons** ;
+- même appel avec une clé invalide : **401** (`provider_auth`) ; avec la bonne clé et un autre numéro : **404** (`provider_account`) : les codes courts de la vérification se comportent comme prévu ;
+- l'API de plateforme (`/platform/v1/whatsapp/phone_numbers`, même clé) liste le numéro « Sandbox WhatsApp ».
+**Reste à confirmer** : envoi réel d'un message à la session du testeur, événements réels reçus sur le webhook (messages, statuts), codes d'erreur d'un envoi refusé, STOP, modèles.

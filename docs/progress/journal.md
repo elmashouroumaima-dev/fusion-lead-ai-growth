@@ -1209,3 +1209,12 @@ Plan : test manuel e-mail et WhatsApp sur comptes d'essai (2 h), corrections (2 
 - Changement de qui peut écrire : **à valider par la responsable technique**. Matrice 014 inchangée (hors matrice, comme le SMTP et l'administration des plans). Page SMTP laissée en redirection (hors périmètre).
 ### Reste à faire
 - Avant l'ouverture à un vrai client : insérer l'administrateur de la plateforme en SQL (runbook `plans-quotas.md`) ; appliquer la migration sur la base hébergée avec les autres.
+
+## ADR 017 : Kapso (21 novembre)
+### Fait
+- ADR 017 rédigée (Proposed) après lecture de la documentation de Kapso : envoi compatible Meta avec une autre adresse et `X-API-Key`, webhooks signés en HMAC-SHA256 hexadécimal (`X-Webhook-Signature`) pour le type `kapso`, signature du type `meta` non établie.
+- Sandbox Kapso activée côté testeur (session sur son numéro) ; fichier de secrets hors dépôt vérifié par forme seulement (aucune valeur lue).
+### Décisions par défaut
+- Meta direct reste le chemin par défaut ; Kapso choisi par intégration ; aucune adresse configurable ; test réel d'abord en sandbox.
+### Reste à faire
+- Décision de la responsable technique (quatre questions de l'ADR) ; ensuite seulement : migration `gateway`, adaptateur, signature, écran, tests, guide C3 en sandbox.

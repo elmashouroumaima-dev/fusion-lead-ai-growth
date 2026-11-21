@@ -3,6 +3,8 @@
 Format : Keep a Changelog. Une entrée par jour de travail.
 
 ## [Non publié]
+### ADR 017 : passerelle WhatsApp Kapso (proposition, aucun code)
+- Ajout : `docs/adr/017-whatsapp-kapso.md` (statut Proposed) : Kapso comme second fournisseur de passerelle WhatsApp, choisi par intégration, à côté de Meta en direct. Options A (Meta direct), B (Kapso, webhooks de type `meta`) et C (Kapso, webhooks de type `kapso`), recommandation, conséquences (colonne `gateway`, secrets, adaptateur, tests refus d'abord), risques (sous-traitant supplémentaire) et quatre questions pour la responsable technique. Hypothèses à confirmer au test réel (C3).
 ### Paramétrage (palette, logo) réservé aux administrateurs de la plateforme (ADR 016, condition levée)
 - Modification : migration `20261214100000_platform_config_admin_only.sql` (+ retour arrière) : `private.can_manage_platform_config()` devient `private.is_platform_admin()` ; `set_platform_config` / `reset_platform_config` refusent (42501) tout owner / admin d'organisation. Aucune donnée touchée ; fonctions publiques et droits inchangés.
 - Modification : pages `settings/appearance` et `settings/logo` : message « Réservé aux administrateurs de la plateforme » en lecture seule (ar / en / fr) à la place de la redirection ; menu « Paramétrage » visible pour les seuls administrateurs de la plateforme.

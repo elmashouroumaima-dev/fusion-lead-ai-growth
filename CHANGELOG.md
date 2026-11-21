@@ -3,6 +3,12 @@
 Format : Keep a Changelog. Une entrée par jour de travail.
 
 ## [Non publié]
+### Passerelle WhatsApp Kapso (ADR 017, acceptée le 21 novembre)
+- Ajout : migration `20261215100000_integration_gateway.sql` (+ retour arrière) : `integrations.gateway` (`meta` | `kapso`), `create_provider_integration(p_gateway)`, `webhook_resolve_integration(p_gateway)`, `message_send_claim` renvoie `channel.gateway`.
+- Ajout : `packages/adapters/src/whatsapp/kapso.ts` : envoi et vérification par Kapso (`X-API-Key`, adresse fixe), routeur de passerelle, adaptateur de webhook (`X-Webhook-Signature`), analyseur d'événements vers la forme normalisée commune ; le worker envoie par la passerelle de l'intégration ; `POST /api/webhooks/kapso`.
+- Ajout : écran Intégrations « Connecter un numéro WhatsApp (Kapso) » (clé d'API, secret de webhook généré ou choisi, adresse du webhook) ; passerelle affichée sur la carte ; textes ar / en / fr. L'ancien formulaire Meta n'est plus proposé (code conservé).
+- Tests : adaptateur Kapso (22), service de validation (3), schéma (1), worker (1), pgTAP `330_integration_gateway` (16, refus d'abord), acceptation HTTP `kapso-gateway` (8) ; signatures mises à jour dans les pgTAP 210 et 220 et passerelle `meta` explicite dans les scénarios Meta. Vérifiés : migration appliquée, retour arrière puis réapplication, pgTAP 3 313, RLS 497, acceptation 311 (+ 1 ignoré), unitaires verts.
+- Réserves : adresse et version de l'API, route de vérification, codes d'erreur, charges utiles réelles, STOP / préférence marketing et modèles sont des hypothèses à confirmer au test réel (C3).
 ### ADR 017 : passerelle WhatsApp Kapso (proposition, aucun code)
 - Ajout : `docs/adr/017-whatsapp-kapso.md` (statut Proposed) : Kapso comme second fournisseur de passerelle WhatsApp, choisi par intégration, à côté de Meta en direct. Options A (Meta direct), B (Kapso, webhooks de type `meta`) et C (Kapso, webhooks de type `kapso`), recommandation, conséquences (colonne `gateway`, secrets, adaptateur, tests refus d'abord), risques (sous-traitant supplémentaire) et quatre questions pour la responsable technique. Hypothèses à confirmer au test réel (C3).
 ### Paramétrage (palette, logo) réservé aux administrateurs de la plateforme (ADR 016, condition levée)

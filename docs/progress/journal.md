@@ -1218,3 +1218,11 @@ Plan : test manuel e-mail et WhatsApp sur comptes d'essai (2 h), corrections (2 
 - Meta direct reste le chemin par défaut ; Kapso choisi par intégration ; aucune adresse configurable ; test réel d'abord en sandbox.
 ### Reste à faire
 - Décision de la responsable technique (quatre questions de l'ADR) ; ensuite seulement : migration `gateway`, adaptateur, signature, écran, tests, guide C3 en sandbox.
+
+## Passerelle Kapso : mise en œuvre (21 novembre)
+### Fait
+- Adaptateur, routeur de passerelle, webhook `kapso`, analyseur, worker, service, écran, textes, documentation ; unitaires verts (domaine, adaptateurs, worker, web).
+### Vérifié (après relance de Docker)
+- Migration `20261215100000` appliquée par `db:reset`, retour arrière puis réapplication ; pgTAP 3 313 (dont 330, 16 tests), RLS 497, acceptation HTTP 311 (+ 1 ignoré, dont `kapso-gateway` : 8), unitaires verts. Aucun appel sortant vers Kapso.
+### Reste à faire
+- Guide du test réel (C3) en sandbox Kapso ; confirmation des hypothèses de l'ADR 017 en test réel ; STOP et modèles avec Kapso.

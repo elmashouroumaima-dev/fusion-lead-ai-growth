@@ -1,4 +1,21 @@
-# Runbook — Configurer WhatsApp (Meta) pour une entreprise
+# Runbook — Configurer WhatsApp pour une entreprise
+
+> **Depuis l'ADR 017 (2026-11-21), la passerelle WhatsApp est Kapso** (qui relaie l'API officielle de Meta). La section « Kapso » ci-dessous est la procédure à suivre ; la section « Meta en direct » plus bas décrit l'ancien chemin, conservé dans le code mais sans écran de connexion.
+
+## Kapso (procédure actuelle)
+Pré-requis : un compte Kapso et un projet. Pour un essai : le **sandbox** (numéro de test partagé, sans numéro réel) ; pour un numéro réel : un numéro NEUF non inscrit sur WhatsApp, une entreprise vérifiée chez Meta et un plan payant (le plan gratuit n'offre qu'un numéro).
+1. **Kapso → WhatsApp / Phone numbers → Sandbox → Add session** : saisir VOTRE numéro de téléphone de test (format `+212…`) ; envoyer le code d'activation (valable 15 minutes) au numéro du sandbox depuis ce téléphone. Seuls les numéros enregistrés peuvent échanger avec le sandbox ; il n'y a pas de synchronisation de modèles.
+2. **Récupérer** : le **Phone number ID** (liste des numéros) et une **clé d'API** (Kapso → Integrate → API keys). Ne jamais les coller dans une conversation ni dans le dépôt.
+3. **Plateforme** : `SITE_URL` en https public (en local : un tunnel, par exemple `cloudflared tunnel --url http://localhost:3000`, dont l'adresse change à chaque lancement). Pas de `WHATSAPP_VERIFY_TOKEN` : Kapso n'a pas de poignée de main d'abonnement.
+4. **Application** : page Intégrations → « Connecter un numéro WhatsApp (Kapso) » : Phone number ID, clé d'API, et un **secret de webhook** (bouton « Générer » : 64 caractères hexadécimaux, ou le vôtre : 32 à 200 caractères sans espace). L'écran enregistre la clé et le secret (chiffrés), puis vérifie la clé auprès de Kapso. L'adresse du webhook s'affiche à l'écran.
+5. **Kapso → webhook du numéro** : créer un webhook de type **`kapso`**, URL `https://<SITE_URL>/api/webhooks/kapso`, `secret_key` = le MÊME secret qu'à l'étape 4, événements de messages (reçu, envoyé, délivré, lu, échec). Si la mise en lot est activée, elle est comprise.
+6. **Ajouter le canal** : sur la carte de l'intégration, « Ajouter un numéro » (le numéro WhatsApp du canal, format `+…`), puis « Vérifier la connexion » : le canal devient actif quand la clé est acceptée.
+7. **Dépannage** : `provider_auth` = clé refusée (la remplacer : « Remplacer le jeton ») ; `provider_account` = numéro introuvable pour cette clé ; webhook en 401 = secret différent entre l'écran et Kapso ; aucun événement entrant = tunnel arrêté, adresse changée ou numéro non enregistré comme session (sandbox).
+8. **Hypothèses à confirmer au checkpoint C3** : adresse et version de l'API (`v24.0` cité par Kapso), route de vérification d'un numéro (`GET /{phone_number_id}?fields=id`), codes d'erreur relayés tels quels de Meta, charges utiles réelles (messages, statuts, lot), valeur de `X-Idempotency-Key` (non utilisée), STOP / préférence marketing (l'événement `contact.marketing_preference_changed` n'est pas encore traité), synchronisation des modèles (non branchée avec Kapso).
+
+---
+
+## Meta en direct (ancien chemin, sans écran de connexion)
 
 Pré-requis (chemin critique externe, plan §6) : une **app Meta**, un **compte WhatsApp Business** et un **numéro** (un numéro de test suffit pour C3). Tant qu'ils n'existent pas, tout est testé contre des fixtures ; rien de ce runbook n'a été exécuté contre Meta.
 

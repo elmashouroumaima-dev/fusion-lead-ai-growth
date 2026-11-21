@@ -75,6 +75,11 @@ const whatsappGateway: WhatsAppEventGateway = {
     if (result.status !== 200) throw new Error(`whatsapp_status_${result.status}`);
     return result.body;
   },
+  async applyMarketingPreference(org, integrationId, event) {
+    const result = await rpc<{ outcome: "applied" | "ignored"; reason?: string }>("whatsapp_marketing_preference_apply", { p_org: org, p_integration: integrationId, p_from: event.from, p_status: event.status });
+    if (result.status !== 200) throw new Error(`whatsapp_marketing_preference_${result.status}`);
+    return result.body;
+  },
 };
 const handler = createProcessWebhookHandler(webhookGateway, new Map([["whatsapp", createWhatsAppWebhookProcessor(whatsappGateway)]]));
 const processEvents = async (): Promise<void> => {

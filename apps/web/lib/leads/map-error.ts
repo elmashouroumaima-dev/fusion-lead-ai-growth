@@ -36,6 +36,7 @@ const CONFLICTS = [
   "channel_unsupported",
   "channel_inactive",
   "message_not_approvable",
+  "window_closed",
 ] as const;
 
 export function mapLeadsDbError(error: DbError): ServiceErrorCode {

@@ -56,7 +56,7 @@
 <tr><td>2</td><td>Compte Postmark : adresse d'expéditeur et jeton</td><td>15 min</td><td>Oui (e-mail)</td></tr>
 <tr><td>3</td><td>Connecter l'e-mail dans l'application, contact de test</td><td>10 min</td><td>Oui (e-mail)</td></tr>
 <tr><td>4</td><td>Tests e-mail E1 à E4 (sans tunnel) puis E5 à E7 (avec tunnel)</td><td>30 min</td><td>Oui</td></tr>
-<tr><td>5</td><td>WhatsApp : numéro de test Meta, connexion, tests W1 à W7</td><td>60 min</td><td>Oui pour G3 (peut venir après l'e-mail)</td></tr>
+<tr><td>5</td><td>WhatsApp (Kapso, sandbox) : session, connexion, webhook, tests W1 à W7</td><td>60 min</td><td>Oui pour G3 (peut venir après l'e-mail)</td></tr>
 <tr><td>6</td><td>Arrêt d'urgence (A1), recherche de fuites (A2), fiche de résultat</td><td>20 min</td><td>Oui</td></tr>
 </table>
 <div class="box info"><b>On peut s'arrêter après la partie 4</b> : l'e-mail seul se teste en une séance ; WhatsApp se fait ensuite, dès que le numéro de test est prêt. Le checkpoint C3 ne passe en « GO avec réserves » qu'avec les deux.</div>
@@ -80,6 +80,7 @@ Terminal 3 :  pnpm worker:dev</pre>
 <span class="res"><b>Attendu :</b> l'adresse est « Confirmed » (verte) chez Postmark.</span></div></div>
 <div class="step"><div class="n">2</div><div><b>Jeton du serveur</b> : Postmark → Servers → votre serveur → API Tokens → copier le « Server API token ». Ne le collez nulle part sauf dans le champ de l'application (partie 3).</div></div>
 <div class="step"><div class="n">3</div><div><b>Mode test de Postmark</b> : tant que le compte n'est pas approuvé, Postmark limite les destinataires (en général, aux adresses du <b>même domaine</b> que l'expéditeur) <span class="small">(à confirmer dans votre tableau de bord Postmark)</span>. Pour le test, utiliser comme destinataire une <b>seconde adresse sur le même domaine</b>, ou demander l'approbation du compte à Postmark.</div></div>
+<div class="box warn"><b>Adresse d'expéditeur :</b> Postmark refuse les adresses de domaines publics (Gmail, Yahoo). Utiliser une adresse d'un domaine à vous (par exemple <code>test@votre-domaine</code>) : soit une « Sender Signature » (Postmark envoie un e-mail de confirmation à cette adresse, qu'il faut donc pouvoir lire), soit la vérification du domaine entier (deux enregistrements DNS chez qui gère le DNS du domaine, puis n'importe quelle adresse du domaine convient, sans boîte).</div>
 <div class="box info"><b>Boîtes de test</b> : l'adresse d'expéditeur (étape 1) et l'adresse de destination (votre « Testeur ») doivent être deux boîtes que vous pouvez ouvrir. Si une seule boîte est disponible : un envoi à soi-même fonctionne si Postmark l'accepte.</div>
 
 <h2 class="pb">Partie 3 · Connecter l'e-mail dans l'application</h2>
@@ -135,35 +136,38 @@ Puis relancer les terminaux 2 et 3. (<code>SITE_URL</code> sert au lien de désa
 <span class="res"><b>Attendu :</b> la page confirme ; le message est refusé par le worker (<code>refused_suppressed</code> ou <code>refused_no_consent</code>) ; rien n'arrive dans la boîte.</span></div></div>
 <div class="step"><div class="n">E7</div><div><b>Rebond ou plainte</b> <span class="tag opt">facultatif</span> : si Postmark propose une adresse d'essai de rebond, l'utiliser pour un autre contact. <span class="res"><b>Attendu :</b> l'adresse est supprimée de la liste d'envoi.</span> Sinon : « non testé ».</div></div>
 
-<h2 class="pb">Partie 5 · WhatsApp</h2>
-<div class="box warn"><b>Choix du numéro (décision à prendre avant de commencer).</b><br>
-<b>Option A (recommandée) : numéro de test de Meta.</b> Meta for Developers → votre app → WhatsApp → API Setup : Meta fournit un numéro de test gratuit, un <i>Phone number ID</i>, un jeton temporaire et un <i>WABA ID</i>. Vous ajoutez <b>votre téléphone</b> comme destinataire autorisé (il reçoit un code). Aucun numéro réel n'est nécessaire. Le jeton temporaire expire en 24 h : à régénérer au besoin.<br>
-<b>Option B : numéro réel via un prestataire (Kapso).</b> <b>Non supporté par le code actuel</b> (adresse de l'API et signature des webhooks différentes) : cela demande un ADR validé par la responsable technique, puis du développement. À ne pas tenter pour C3.<br>
-<b>Ne pas utiliser</b> un numéro déjà inscrit sur WhatsApp (personnel ou Business app) : Meta le refuse (« numéro déjà enregistré »).</div>
-<div class="step"><div class="n">1</div><div>Récupérer dans Meta : <b>Phone number ID</b>, <b>jeton d'accès</b>, <b>WABA ID</b>, et le <b>secret de l'application</b> (Paramètres de l'app → De base → App secret → Afficher).</div></div>
-<div class="step"><div class="n">2</div><div>Application → Integrations → carte « <b>Connecter un numéro WhatsApp</b> » : coller Phone number ID, jeton d'accès, secret de l'app → <b>Connecter et vérifier</b>.<br>
-<span class="res"><b>Attendu :</b> « Connexion vérifiée : l'intégration est active ». <span class="ko">Codes d'échec : <code>provider_auth</code> (jeton refusé), <code>provider_account</code> (numéro introuvable).</span></span></div></div>
-<div class="step"><div class="n">3</div><div><b>Canal WhatsApp</b> : sur la carte WhatsApp, rubrique « Ajouter un numéro » : saisir le <b>numéro de test de Meta</b> au format <code>+15550783881</code> → <b>Ajouter</b> → puis <b>Vérifier la connexion</b>. Le canal doit passer à <b>Actif</b>.</div></div>
-<div class="step"><div class="n">4</div><div><b>Webhook Meta</b> (nécessite le tunnel de la partie 4) : Meta → WhatsApp → Configuration → Webhook : URL <code>https://xxxx.trycloudflare.com/api/webhooks/whatsapp</code>, jeton de vérification = <code>WHATSAPP_VERIFY_TOKEN</code> ; abonner le champ <b>messages</b>.<br>
-<span class="res"><b>Attendu :</b> Meta valide l'URL. 403 = jeton de vérification différent.</span></div></div>
-<div class="step"><div class="n">5</div><div>Ajouter le numéro WhatsApp à votre contact de test : relancer le script contact avec <b>une nouvelle adresse</b> de test, <code>wa_sender='+15550783881'</code> et <code>tester_phone='&lt;votre téléphone, E.164&gt;'</code>.</div></div>
+<h2 class="pb">Partie 5 · WhatsApp (Kapso)</h2>
+<div class="box info"><b>Passerelle : Kapso</b> (ADR 017, décision du 21 novembre). Kapso relaie l'API officielle de WhatsApp. Pour l'essai, on utilise le <b>sandbox de Kapso</b> : un numéro de test <b>partagé</b>, sans compte développeur Meta, sans numéro réel. Seul <b>votre téléphone</b> (enregistré comme « session ») peut échanger avec lui. Ne jamais l'utiliser avec un client.</div>
+<div class="box warn"><b>Limites du sandbox</b> : numéro partagé avec d'autres testeurs ; pas de modèles de messages (W5 se vérifie par le refus) ; la session d'activation expire (code valable 15 minutes). Ne jamais coller la clé d'API ni le secret du webhook dans une conversation ou une capture : les saisir seulement dans l'écran de l'application.</div>
+
+<div class="step"><div class="n">1</div><div><b>Activer votre téléphone sur le sandbox.</b> Kapso → <b>Phone numbers</b> → « Sandbox WhatsApp » → onglet <b>Sessions</b> → <b>Add session</b> : saisir votre numéro de test au format <code>+212…</code> → <b>Create</b>. Kapso affiche un code de 6 caractères : l'envoyer depuis ce téléphone, sur WhatsApp, au numéro du sandbox affiché (ou utiliser « Open WhatsApp with Code »).<br>
+<span class="res"><b>Attendu :</b> vous recevez « Your WhatsApp sandbox session has been activated! » ; la session passe à « active ».</span></div></div>
+<div class="step"><div class="n">2</div><div><b>Récupérer</b> : le <b>Phone number ID</b> (liste <b>Phone numbers</b>, colonne « Phone number ID ») et une <b>clé d'API</b> (Kapso → <b>Integrate → API keys</b>). Les garder dans un fichier hors dépôt (par exemple <code>C:/secret/kapso.json</code>), jamais dans une conversation.</div></div>
+<div class="step"><div class="n">3</div><div><b>Tunnel et adresse publique</b> (partie 4, étapes 1 et 2) : <code>SITE_URL=https://xxxx.trycloudflare.com</code> dans <code>.env.local</code> ; relancer l'application (terminal 2) et le worker (terminal 3). Pas de <code>WHATSAPP_VERIFY_TOKEN</code> : Kapso n'a pas de poignée de main d'abonnement.</div></div>
+<div class="step"><div class="n">4</div><div><b>Connecter le numéro dans l'application.</b> <b>Integrations</b> → « <b>Connecter un numéro WhatsApp (Kapso)</b> » : Phone number ID, clé d'API Kapso, et un <b>secret de webhook</b> (bouton <b>Générer</b> : copiez-le pour l'étape 5). <b>Connecter et vérifier</b>.<br>
+<span class="res"><b>Attendu :</b> « Connexion vérifiée : l'intégration est active ». L'écran affiche l'adresse du webhook à enregistrer chez Kapso.</span><br>
+<span class="ko"><b>« Clé d'API refusée par Kapso » :</b> mauvaise clé (copier sans espace ni retour à la ligne). <b>« Numéro introuvable » :</b> mauvais Phone number ID. <b>« Kapso est indisponible » :</b> réessayer.</span></div></div>
+<div class="step"><div class="n">5</div><div><b>Webhook chez Kapso.</b> Kapso → <b>Phone numbers</b> → « Sandbox WhatsApp » → onglet <b>Webhooks</b> → ajouter : type <b>kapso</b>, URL <code>https://xxxx.trycloudflare.com/api/webhooks/kapso</code> (celle affichée par l'écran), <code>secret key</code> = le <b>même</b> secret qu'à l'étape 4, événements de messages (reçu, envoyé, délivré, lu, échec).<br>
+<span class="small">L'adresse du tunnel change à chaque lancement : la mettre à jour chez Kapso et dans <code>SITE_URL</code>.</span></div></div>
+<div class="step"><div class="n">6</div><div><b>Ajouter le canal.</b> Sur la carte WhatsApp, « Ajouter un numéro » : le numéro du sandbox au format <code>+…</code> (affiché par Kapso, par exemple <code>+5692…</code>) → <b>Ajouter</b> → <b>Vérifier la connexion</b>.<br>
+<span class="res"><b>Attendu :</b> le canal passe à <b>Actif</b>.</span></div></div>
+<div class="step"><div class="n">7</div><div><b>Contact de test.</b> Relancer le script contact avec <b>une nouvelle adresse</b> de test, <code>wa_sender='&lt;numéro du canal&gt;'</code> et <code>tester_phone='&lt;votre téléphone, E.164&gt;'</code> (le même numéro que la session de l'étape 1).</div></div>
 
 <h3>Tests WhatsApp</h3>
-<div class="step"><div class="n">W1</div><div><b>Numéro connecté.</b> <span class="res"><b>Attendu :</b> statut « Connectée / Actif » sur la page Integrations.</span></div></div>
-<div class="step"><div class="n">W2</div><div><b>Message entrant.</b> Depuis votre téléphone, envoyer « Bonjour » au numéro de test Meta. <span class="res"><b>Attendu :</b> dans Inbox, la conversation WhatsApp contient votre message (contact reconnu par son numéro).</span></div></div>
-<div class="step"><div class="n">W3</div><div><b>Webhook rejoué</b> : renvoyer l'événement depuis l'outil de test de Meta si possible. <span class="res"><b>Attendu :</b> toujours un seul message.</span> Sinon : « couvert par T4 (automatique) ».</div></div>
-<div class="step"><div class="n">W4</div><div><b>Envoi dans la fenêtre de 24 h.</b> La boîte de réception ne répond pas encore sur WhatsApp (écart connu n° 3) : le script fait approuver le message par le propriétaire.
-<pre>docker exec -i supabase_db_fusion-leap psql -U postgres -v ON_ERROR_STOP=1 \
- -v channel=whatsapp -v tester_email='&lt;adresse du contact&gt;' \
- -v body='Bonjour, test C3 WhatsApp.' &lt; docs/testing/fixtures/c3-approve.sql</pre>
-<span class="res"><b>Attendu :</b> le message arrive sur votre téléphone en quelques secondes.</span></div></div>
+<div class="step"><div class="n">W1</div><div><b>Numéro connecté.</b> <span class="res"><b>Attendu :</b> « Connectée » / « Actif » sur la page Integrations, passerelle « Kapso ».</span></div></div>
+<div class="step"><div class="n">W2</div><div><b>Message entrant.</b> Depuis votre téléphone, envoyer « Bonjour » au numéro du sandbox. <span class="res"><b>Attendu :</b> dans <b>Inbox</b>, la conversation WhatsApp contient votre message (contact reconnu par son numéro).</span><br>
+<span class="ko"><b>Rien n'arrive :</b> tunnel arrêté ou adresse changée, session sandbox expirée, secret différent entre l'écran et Kapso (voir « Si quelque chose ne marche pas »).</span></div></div>
+<div class="step"><div class="n">W3</div><div><b>Webhook rejoué.</b> Kapso réessaie lui-même s'il ne reçoit pas de réponse. <span class="res"><b>Attendu :</b> toujours un seul message.</span> Sinon : « couvert par les tests automatiques ».</div></div>
+<div class="step"><div class="n">W4</div><div><b>Réponse depuis la boîte de réception, dans la fenêtre de 24 h.</b> Inbox → conversation WhatsApp → écrire une réponse → <b>Send reply</b> (le champ n'apparaît que si le contact a écrit depuis moins de 24 h).<br>
+<span class="res"><b>Attendu :</b> « Reply queued » ; le message arrive sur votre téléphone en quelques secondes. (Variante par script : <code>c3-approve.sql</code> avec <code>channel=whatsapp</code>.)</span></div></div>
 <div class="step"><div class="n">W6</div><div><b>Statuts dans l'ordre</b> (ouvrir le message sur le téléphone) :
 <pre>docker exec supabase_db_fusion-leap psql -U postgres -c "select status from public.messages where direction='outbound' order by created_at desc limit 1"</pre>
 <span class="res"><b>Attendu :</b> accepted → sent → delivered → read, sans jamais reculer.</span></div></div>
-<div class="step"><div class="n">W5</div><div><b>Hors fenêtre : refus sans modèle.</b> Vieillir le message reçu puis redemander un envoi (comme W4) :
+<div class="step"><div class="n">W5</div><div><b>Hors fenêtre : refus, jamais de texte libre.</b> Vieillir le message reçu :
 <pre>docker exec supabase_db_fusion-leap psql -U postgres -c "update public.messages set received_at = now() - interval '2 days' where direction='inbound' and conversation_id in (select c.id from public.conversations c join public.channels ch on ch.id=c.channel_id where ch.type='whatsapp')"</pre>
-<span class="res"><b>Attendu :</b> refusé (<code>refused_template_missing</code>), rien n'est envoyé.</span></div></div>
-<div class="step"><div class="n">W7</div><div><b>Mot d'arrêt STOP.</b> Depuis le téléphone, envoyer « STOP » au numéro de test, puis redemander un envoi (comme W4). <span class="res"><b>Attendu :</b> consentement retiré, envoi refusé par le worker, rien n'arrive.</span></div></div>
+Recharger la conversation dans l'Inbox. <span class="res"><b>Attendu :</b> pas de champ de réponse, mais « La fenêtre de 24 h est fermée… ». Une demande d'envoi par script (<code>c3-approve.sql</code>) est refusée par le worker (<code>refused_template_missing</code>) et rien n'est envoyé. (Sans modèle approuvé, rien ne peut partir hors fenêtre ; le sandbox n'a pas de modèles.)</span></div></div>
+<div class="step"><div class="n">W7</div><div><b>Mot d'arrêt STOP.</b> Depuis le téléphone, remettre la fenêtre en état (envoyer « Bonjour »), puis envoyer « STOP » au numéro du sandbox, puis redemander un envoi (réponse depuis l'Inbox ou <code>c3-approve.sql</code>). <span class="res"><b>Attendu :</b> consentement retiré, numéro supprimé, envoi refusé par le worker, rien n'arrive.</span><br>
+<span class="small">Variante Kapso : si le contact arrête les messages marketing depuis WhatsApp, Kapso envoie un événement « marketing_preference_changed » ; l'application applique la même désinscription. Cet événement est une hypothèse à confirmer : noter sa forme réelle si vous le voyez.</span></div></div>
 
 <h2 class="pb">Partie 6 · Arrêt d'urgence, fuites, clôture</h2>
 <div class="step"><div class="n">A1</div><div><b>Tout s'arrête (le test le plus important).</b> Préparer un contact valide (script contact, nouvelle adresse). Menu <b>Operations → Stop all sending</b> → confirmer. Demander un envoi.<br>
@@ -183,6 +187,7 @@ docker exec -i supabase_db_fusion-leap psql -U postgres -A -t -F ' | ' &lt; docs
 <tr><td><code>provider_auth</code></td><td>Jeton refusé ou expiré</td><td>Remplacer le jeton (« Remplacer le jeton » sur la carte)</td></tr>
 <tr><td><code>provider_rejected</code></td><td>Postmark refuse (adresse non confirmée, destinataire interdit en mode test)</td><td>Vérifier la Sender Signature et le mode test (partie 2)</td></tr>
 <tr><td>Webhook Postmark en 401</td><td>Identifiant ou secret différent de celui enregistré</td><td>Refaire la partie 3 étape 3, mettre l'URL à jour chez Postmark</td></tr>
+<tr><td>Webhook Kapso en 401</td><td>Secret différent entre l'écran et le webhook de Kapso, ou type de webhook « meta » au lieu de « kapso »</td><td>Mettre le même secret des deux côtés, type « kapso »</td></tr>
 <tr><td>Aucun entrant WhatsApp</td><td>Tunnel arrêté ou URL changée, champ « messages » non abonné, signature refusée</td><td>Vérifier tunnel, URL, abonnement et secret de l'app</td></tr>
 <tr><td>Un événement reste « received »</td><td>Worker arrêté</td><td>Lancer le worker</td></tr>
 <tr><td>Lien de désabonnement en localhost</td><td><code>SITE_URL</code> non défini</td><td>Le définir sur l'adresse du tunnel, relancer</td></tr>
@@ -207,8 +212,8 @@ docker exec -i supabase_db_fusion-leap psql -U postgres -A -t -F ' | ' &lt; docs
 <tr><td>W1</td><td>Numéro connecté</td><td></td><td></td><td></td><td></td></tr>
 <tr><td>W2</td><td>Message entrant</td><td></td><td></td><td></td><td></td></tr>
 <tr><td>W3</td><td>Webhook rejoué : un seul message</td><td></td><td></td><td></td><td></td></tr>
-<tr><td>W4</td><td>Envoi dans la fenêtre</td><td></td><td></td><td></td><td></td></tr>
-<tr><td>W5</td><td>Hors fenêtre : refus</td><td></td><td></td><td></td><td></td></tr>
+<tr><td>W4</td><td>Réponse depuis l'Inbox dans la fenêtre</td><td></td><td></td><td></td><td></td></tr>
+<tr><td>W5</td><td>Hors fenêtre : pas de champ, envoi refusé</td><td></td><td></td><td></td><td></td></tr>
 <tr><td>W6</td><td>Statuts dans l'ordre</td><td></td><td></td><td></td><td></td></tr>
 <tr><td>W7</td><td>STOP : envoi suivant refusé</td><td></td><td></td><td></td><td></td></tr>
 <tr><td>A1</td><td>Arrêt d'urgence</td><td></td><td></td><td></td><td></td></tr>

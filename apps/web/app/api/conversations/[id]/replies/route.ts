@@ -11,7 +11,7 @@ export const dynamic = "force-dynamic";
  * C'est le WORKER qui envoie, après le contrôle final (consentement, do_not_contact, suppression, pauses, expéditeur). Rôles (ADR 014
  * ligne 18) : owner et admin sur toute conversation, commercial sur celles qui lui sont assignées (la base le revérifie : sinon 404),
  * marketing et analyste 403. `Idempotency-Key` obligatoire (le rejeu renvoie le même `message_id`). Verrou : 409 si un autre membre
- * rédige ou si l'IA tient la conversation. E-mail uniquement (WhatsApp : 409 `conflict`). Le corps n'est ni journalisé ni audité.
+ * rédige ou si l'IA tient la conversation. E-mail, et WhatsApp en TEXTE LIBRE dans la fenêtre de 24 h seulement (fenêtre fermée : 409 `conflict`, aucun message créé). Le corps n'est ni journalisé ni audité.
  * L'identifiant de conversation vient de l'adresse ; l'entreprise, du contexte vérifié.
  */
 export const POST = withRoute(

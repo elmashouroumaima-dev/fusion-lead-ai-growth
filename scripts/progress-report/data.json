@@ -5,12 +5,12 @@
   "tests": [
     {
       "label": "Web (application)",
-      "value": 2784,
+      "value": 2788,
       "note": "Écrans, routes HTTP et services de l'application"
     },
     {
       "label": "Base de données (pgTAP)",
-      "value": 3313,
+      "value": 3347,
       "note": "Tables, droits et règles de la base de données"
     },
     {
@@ -30,12 +30,12 @@
     },
     {
       "label": "Worker et adaptateurs",
-      "value": 331,
+      "value": 338,
       "note": "Tâches de fond et adaptateurs de fournisseurs"
     },
     {
       "label": "Acceptation (T1 à T5, canaux)",
-      "value": 311,
+      "value": 317,
       "note": "Parcours complets en HTTP réel, dont les scénarios des canaux (série e-mail, WhatsApp)"
     }
   ],
@@ -590,16 +590,6 @@
   ],
   "recent": [
     {
-      "day": "J39c",
-      "title": "Écran d'import CSV",
-      "items": [
-        "Un fichier CSV s'importe en trois étapes : envoi, correspondance des colonnes avec aperçu, confirmation ; rien n'est écrit dans les contacts avant la confirmation.",
-        "Suivi des imports, annulation d'un import non confirmé et rapport téléchargeable sans aucune donnée de contact."
-      ],
-      "proof": "10 tests d'acceptation HTTP réelle (vrai worker), 4 tests unitaires, parcours vérifié dans un navigateur",
-      "review": false
-    },
-    {
       "day": "J41",
       "title": "Checkpoint C3 (brouillon)",
       "items": [
@@ -638,6 +628,16 @@
       ],
       "proof": "22 tests d'adaptateur, 16 tests de base (refus d'abord), 8 tests d'acceptation HTTP réelle, retour arrière vérifié ; aucun appel réel vers Kapso",
       "review": false
+    },
+    {
+      "day": "WhatsApp",
+      "title": "Réponse depuis l'Inbox et STOP Kapso",
+      "items": [
+        "Réponse WhatsApp depuis la boîte de réception : texte libre dans la fenêtre de 24 h seulement ; hors fenêtre, refus immédiat et message clair, jamais d'envoi sans modèle ; approbation habilitée et contrôles d'envoi inchangés.",
+        "STOP avec Kapso : un STOP tapé sur un bouton ou une liste est pris en compte, et l'événement de préférence marketing de Kapso applique la désinscription complète (la reprise ne réactive rien). Guide du test réel réécrit pour le sandbox Kapso."
+      ],
+      "proof": "34 tests de base (refus d'abord), 14 tests d'acceptation HTTP réelle, adaptateur et worker ; retours arrière vérifiés ; la forme réelle de l'événement de préférence reste à confirmer au test réel",
+      "review": false
     }
   ],
   "capabilities": {
@@ -653,7 +653,8 @@
       "Rejouer deux scénarios complets des canaux (série d'e-mails avec désabonnement, WhatsApp avec webhook en double et pannes) sur des fournisseurs simulés.",
       "Importer un fichier de contacts depuis l'écran, avec aperçu avant d'écrire, suivi et rapport sans donnée de contact.",
       "Connecter un e-mail Postmark depuis l'écran et activer le canal après vérification du jeton ; ajouter un canal, le mettre en pause (essayé sur des fixtures, pas sur un compte réel).",
-      "Page Membres lisible sur mobile et tablette ; fil d'Ariane sur toutes les pages de la navigation."
+      "Page Membres lisible sur mobile et tablette ; fil d'Ariane sur toutes les pages de la navigation.",
+      "Répondre à un contact WhatsApp depuis la boîte de réception dans la fenêtre de 24 h ; un STOP (texte, bouton, liste ou préférence marketing de Kapso) désinscrit le numéro (essayé sur des fixtures)."
     ],
     "notYet": [
       "Envoyer ou recevoir un vrai e-mail ou un vrai message WhatsApp : il manque les comptes d'essai réels et le test manuel (checkpoint C3, J41).",

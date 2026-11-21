@@ -3,6 +3,13 @@
 Format : Keep a Changelog. Une entrée par jour de travail.
 
 ## [Non publié]
+### Phase 3 : réponse WhatsApp, STOP Kapso, guide du test réel (écart n° 3 de C3)
+- Ajout : migration `20261216100000_whatsapp_reply.sql` (+ retour arrière) : `conversation_reply` accepte WhatsApp en **texte libre dans la fenêtre de 24 h seulement** (destinataire = numéro du contact, finalité `reply`, aucun modèle) ; hors fenêtre : refus `window_closed` avant toute écriture. Page Inbox : le champ de réponse apparaît pour WhatsApp dans la fenêtre, un message clair hors fenêtre (ar / en / fr).
+- Ajout : migration `20261217100000_whatsapp_marketing_optout.sql` (+ retour arrière) : `whatsapp_marketing_preference_apply` (service_role seulement) ; l'événement Kapso `marketing_preference_changed` « stopped » applique la désinscription complète (comme un STOP), « resumed » ne réactive rien ; l'analyseur Kapso lit aussi le texte des boutons et des listes (un « STOP » tapé sur un bouton n'est plus perdu).
+- Tests : pgTAP `340_whatsapp_reply` (17) et `350_whatsapp_marketing_optout` (17), `270` adapté ; analyseur Kapso, worker, fenêtre de l'Inbox ; acceptation `whatsapp-reply` (5) et `kapso-gateway` (9). Vérifiés : retours arrière, pgTAP 3 347, RLS 497, acceptation 317 (+ 1 ignoré), unitaires verts.
+- Documentation : guide du test réel (C3) réécrit pour WhatsApp en sandbox Kapso (PDF et PDF « toutes phases » régénérés) ; note sur les adresses d'expéditeur refusées par Postmark (domaines publics).
+- Réserve : la forme exacte de l'événement `marketing_preference_changed` n'a pas d'exemple dans la documentation de Kapso ; l'analyse est prudente (champ manquant : événement ignoré, jamais une erreur) ; à confirmer au test réel.
+
 ### Passation : base hébergée, administrateur de la plateforme, décisions à trancher
 - Ajout : `docs/runbooks/hosted-database.md` : appliquer les migrations manquantes sur la base hébergée (sauvegarde, essai à blanc, vérification, jamais de remise à zéro) et enregistrer l'administrateur de la plateforme (ADR 016) ; à faire par la personne qui possède le projet.
 - Modification : `docs/product/taches-responsable-technique` (HTML et PDF) mis à jour au 20 novembre : tout fusionné (PR 41 à 67), huit nouvelles décisions avec options et recommandation (droits de la palette, amendements ADR 014, réclamation d'envoi, dates des migrations, revue de sécurité, nom de la personne, numéro WhatsApp, base hébergée).

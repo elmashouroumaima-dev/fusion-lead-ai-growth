@@ -1303,7 +1303,8 @@
         "rate_limited": "Too many attempts. Try again in a moment.",
         "invalid_input": "The reply is empty, too long or contains disallowed characters.",
         "generic": "An error occurred. Please try again."
-      }
+      },
+      "windowClosed": "The 24-hour window is closed: the contact has not written for more than 24 hours. A free-text message cannot be sent. Wait for their reply or use an approved template."
     }
   },
   "Lead": {

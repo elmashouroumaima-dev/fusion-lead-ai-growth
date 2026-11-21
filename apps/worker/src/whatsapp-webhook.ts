@@ -13,6 +13,7 @@ import type { WebhookProcessor, WebhookProcessorInput } from "./webhooks";
  */
 export type MessageEvent = Extract<WhatsAppEvent, { kind: "message" }>;
 export type StatusEvent = Extract<WhatsAppEvent, { kind: "status" }>;
+export type MarketingPreferenceEvent = Extract<WhatsAppEvent, { kind: "marketing_preference" }>;
 
 export type StatusResult = { outcome: "applied" | "ignored"; reason?: string };
 export type InboundResult = { outcome: "recorded" | "duplicate" | "unmatched" | "dropped"; reason?: string };
@@ -20,6 +21,8 @@ export type InboundResult = { outcome: "recorded" | "duplicate" | "unmatched" | 
 export interface WhatsAppEventGateway {
   applyMessage(organizationId: string, integrationId: string, event: MessageEvent): Promise<InboundResult>;
   applyStatus(organizationId: string, integrationId: string, event: StatusEvent): Promise<StatusResult>;
+  /** Désinscription annoncée par la passerelle (Kapso) : « stopped » applique la désinscription complète ; « resumed » ne réactive rien. */
+  applyMarketingPreference(organizationId: string, integrationId: string, event: MarketingPreferenceEvent): Promise<StatusResult>;
 }
 
 export class WhatsAppGatewayError extends Error {
@@ -55,6 +58,9 @@ export function createWhatsAppWebhookProcessor(gateway: WhatsAppEventGateway): W
             continue;
           }
           processed = true;
+        } else if (event.kind === "marketing_preference") {
+          const result = await gateway.applyMarketingPreference(input.organizationId, input.integrationId, event);
+          if (result.outcome === "applied") processed = true;
         } else {
           const result = await gateway.applyStatus(input.organizationId, input.integrationId, event);
           if (result.outcome === "applied") processed = true;
@@ -102,6 +108,18 @@ export function createSupabaseWhatsAppEventGateway(env: WhatsAppEnv): WhatsAppEv
       if (error) throw gatewayError("status", error.code);
       const parsed = statusSchema.safeParse(data);
       if (!parsed.success) throw new WhatsAppGatewayError("status");
+      return parsed.data.reason === undefined ? { outcome: parsed.data.outcome } : { outcome: parsed.data.outcome, reason: parsed.data.reason };
+    },
+    async applyMarketingPreference(organizationId, integrationId, event) {
+      const { data, error } = await client.rpc("whatsapp_marketing_preference_apply", {
+        p_org: organizationId,
+        p_integration: integrationId,
+        p_from: event.from,
+        p_status: event.status,
+      });
+      if (error) throw gatewayError("marketing_preference", error.code);
+      const parsed = statusSchema.safeParse(data);
+      if (!parsed.success) throw new WhatsAppGatewayError("marketing_preference");
       return parsed.data.reason === undefined ? { outcome: parsed.data.outcome } : { outcome: parsed.data.outcome, reason: parsed.data.reason };
     },
   };

@@ -145,7 +145,7 @@ describe("fil d'une conversation", () => {
     }
   });
 
-  it("commandes : owner et admin assignent et changent l'état ; le commercial seulement l'état de SA conversation ; réponse WhatsApp non disponible", async () => {
+  it("commandes : owner et admin assignent et changent l'état ; le commercial seulement l'état de SA conversation ; réponse WhatsApp : fenêtre de 24 h fermée", async () => {
     for (const who of ["shared", "alpha-admin"]) {
       const text = visibleText(await page(who, `/fr/inbox/${ids.Nadia}`));
       expect(text, who).toContain("Assigner");
@@ -154,7 +154,7 @@ describe("fil d'une conversation", () => {
     const sales = visibleText(await page("alpha-sales", `/fr/inbox/${ids.Youssef}`));
     expect(sales).toContain("Changer l’état");
     expect(sales).not.toContain("Assigner");
-    // J38 : le composeur existe ; la conversation WhatsApp annonce que la réponse WhatsApp n’est pas encore disponible
-    expect(sales).toContain("La réponse par WhatsApp n’est pas encore disponible");
+    // le dernier message du contact date de plus de 24 h : pas de champ de réponse, un message clair (la réponse WhatsApp dans la fenêtre est couverte par whatsapp-reply)
+    expect(sales).toContain("La fenêtre de 24 h est fermée");
   });
 });

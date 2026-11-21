@@ -1,5 +1,5 @@
 -- J38 — Réponses et verrou : `conversation_reply` (message sortant + approbation de l'auteur + job d'envoi dans UNE transaction ; droits : owner et
--- admin partout, le commercial sur SES conversations, jamais marketing ni analyste ; idempotence ; e-mail seulement ; validation du texte), bail
+-- admin partout, le commercial sur SES conversations, jamais marketing ni analyste ; idempotence ; e-mail et WhatsApp dans la fenêtre de 24 h ; validation du texte), bail
 -- humain (acquérir, un seul détenteur, expiration, libération à l'envoi), exclusion IA / humain (aucune réponse simultanée), reprise en main, et la
 -- chaîne d'envoi adaptée (`message_send_claim` : approbateur commercial pour une réponse, consentement conversationnel de 30 jours, autres finalités
 -- inchangées). Tout est annulé en fin de test.
@@ -130,8 +130,8 @@ select throws_ok($$select public.conversation_reply('eb200000-0000-4000-8000-000
 select throws_ok($$select public.conversation_reply('eb200000-0000-4000-8000-00000000000a', (select id from public.conversations where contact_id = 'ec200000-0000-4000-8000-0000000000a2'), repeat('x', 10001), 'reply-key-0009')$$, '22023', 'validation_failed', 'corps de plus de 10 000 caractères refusé');
 select throws_ok($$select public.conversation_reply('eb200000-0000-4000-8000-00000000000a', (select id from public.conversations where contact_id = 'ec200000-0000-4000-8000-0000000000a2'), 'Texte' || chr(1) || 'piégé', 'reply-key-0010')$$, '22023', 'validation_failed', 'caractère de contrôle refusé');
 select throws_ok($$select public.conversation_reply('eb200000-0000-4000-8000-00000000000a', (select id from public.conversations where contact_id = 'ec200000-0000-4000-8000-0000000000a2'), 'Texte', 'court')$$, '22023', 'validation_failed', 'clé d''idempotence mal formée refusée');
-select throws_ok($$select public.conversation_reply('eb200000-0000-4000-8000-00000000000a', (select id from public.conversations where contact_id = 'ec200000-0000-4000-8000-0000000000a4'), 'Réponse WhatsApp', 'reply-key-0011')$$, 'P0001', 'channel_unsupported', 'WhatsApp : pas encore (le worker n''envoie que de l''e-mail)');
-select is((select count(*)::int from public.messages where idempotency_key in ('reply-key-0008', 'reply-key-0009', 'reply-key-0010', 'reply-key-0011')), 0, 'aucun message n''est créé par un refus');
+select is((select (public.conversation_reply('eb200000-0000-4000-8000-00000000000a', (select id from public.conversations where contact_id = 'ec200000-0000-4000-8000-0000000000a4'), 'Réponse WhatsApp', 'reply-key-0011') ->> 'duplicate')), 'false', 'WhatsApp dans la fenêtre de 24 h : réponse acceptée (texte libre ; les refus hors fenêtre sont dans 340_whatsapp_reply)');
+select is((select count(*)::int from public.messages where idempotency_key in ('reply-key-0008', 'reply-key-0009', 'reply-key-0010')), 0, 'aucun message n''est créé par un refus');
 reset role;
 
 -- ---------------------------------------------------------------------------

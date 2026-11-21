@@ -150,6 +150,21 @@ describe.skipIf(!MASTER)("webhook Kapso", () => {
     expect(psql(`select count(*) from public.audit_logs where (coalesce(before::text,'') || coalesce(after::text,'')) like '%texte confidentiel%'`)).toBe("0");
   });
 
+  it("préférence marketing (STOP annoncé par WhatsApp) : signée, acceptée, conservée sous forme réduite ; sans numéro de contact, acceptée et ignorée", async () => {
+    const stop = JSON.stringify({
+      phone_number_id: PHONE,
+      contact: { phone_number: "212600000077" },
+      marketing_preference: { status: "stopped", detail: "texte libre du contact", occurred_at: "2026-11-21T10:00:00Z", sequence: 3 },
+    });
+    expect((await kapsoHook(stop, sign(stop))).status).toBe(200);
+    const stored = psql(`select payload::text from public.webhook_events where integration_id = '${integration}' and status <> 'rejected' and payload::text like '%marketing_preference%'`);
+    expect(stored).toContain("+212600000077");
+    expect(stored).toContain('"stopped"');
+    expect(stored).not.toContain("texte libre");
+    const noPhone = JSON.stringify({ phone_number_id: PHONE, marketing_preference: { status: "stopped", sequence: 4 } });
+    expect((await kapsoHook(noPhone, sign(noPhone))).status).toBe(200);
+  });
+
   it("corps illisible ou lot mêlant deux numéros : 400, rien d'enregistré", async () => {
     const before = events(integration);
     expect((await kapsoHook("pas du json", sign("pas du json"))).status).toBe(400);

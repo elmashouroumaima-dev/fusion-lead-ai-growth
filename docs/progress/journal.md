@@ -1232,3 +1232,12 @@ Plan : test manuel e-mail et WhatsApp sur comptes d'essai (2 h), corrections (2 
 - Migration `20261215100000` appliquée par `db:reset`, retour arrière puis réapplication ; pgTAP 3 313 (dont 330, 16 tests), RLS 497, acceptation HTTP 311 (+ 1 ignoré, dont `kapso-gateway` : 8), unitaires verts. Aucun appel sortant vers Kapso.
 ### Reste à faire
 - Guide du test réel (C3) en sandbox Kapso ; confirmation des hypothèses de l'ADR 017 en test réel ; STOP et modèles avec Kapso.
+
+## Phase 3 : réponse WhatsApp, STOP Kapso, guide (21 novembre)
+### Fait
+- Réponse WhatsApp depuis l'Inbox (texte libre, fenêtre de 24 h, refus clair hors fenêtre) ; STOP Kapso (boutons et listes, événement de préférence marketing) ; guide C3 réécrit pour le sandbox Kapso.
+### Décisions par défaut
+- Kapso « stopped » = désinscription complète ; « resumed » ne réactive rien ; hors fenêtre : jamais de texte libre.
+### Reste à faire
+- Test réel C3 (Postmark : adresse d'un domaine privé ; WhatsApp : sandbox Kapso avec tunnel ou serveur), corrections, audit et revue de sécurité indépendante, décision G3 ; confirmation de la forme de l'événement de préférence marketing.
+

@@ -64,6 +64,36 @@ function isoFromSeconds(value: unknown): string | null {
 }
 
 /**
+ * Texte d'un message reçu : le texte lui-même, ou le libellé d'un bouton / d'une réponse interactive (même règle que pour Meta : un « STOP » tapé sur un bouton
+ * ne doit pas se perdre). Un message sans texte (image, audio...) n'en a pas : seul son type est conservé.
+ */
+function messageText(type: string, message: Record<string, unknown>): string | null {
+  let raw: unknown = null;
+  if (type === "text" && isRecord(message.text)) raw = message.text.body;
+  else if (type === "button" && isRecord(message.button)) raw = message.button.text;
+  else if (type === "interactive" && isRecord(message.interactive)) {
+    const reply = isRecord(message.interactive.button_reply) ? message.interactive.button_reply : isRecord(message.interactive.list_reply) ? message.interactive.list_reply : null;
+    raw = reply?.title;
+  }
+  if (typeof raw !== "string") return null;
+  const cleaned = cleanText(raw, WHATSAPP_TEXT_MAX);
+  return cleaned.length > 0 ? cleaned : null;
+}
+
+/** Numéro du contact d'un événement sans message : cherché dans les emplacements documentés (chiffres avec ou sans « + » ; jamais un identifiant autre que numérique). */
+function contactPhone(item: Record<string, unknown>): string | null {
+  const contact = isRecord(item.contact) ? item.contact : {};
+  const conversation = isRecord(item.conversation) ? item.conversation : {};
+  for (const candidate of [contact.phone_number, contact.wa_id, contact.phone, conversation.phone_number, item.phone_number, item.wa_id]) {
+    if (typeof candidate === "string") {
+      const digits = candidate.replace(/^\+/, "");
+      if (FROM.test(digits)) return `+${digits}`;
+    }
+  }
+  return null;
+}
+
+/**
  * Corps d'un webhook Kapso (JSON déjà lu) -> MÊME forme normalisée que Meta (`WhatsAppPayload`) : le worker et la base ne changent pas, et seule cette forme réduite
  * est conservée (jamais le corps brut, les profils ni les médias). Reconnaît, d'après le CONTENU (l'en-tête `X-Webhook-Event` n'est pas signé) :
  *  - un message reçu (`message.kapso.direction = "inbound"`), avec son texte ; le numéro de l'expéditeur (`from`, chiffres avec ou sans « + ») devient `+<chiffres>` ;
@@ -84,6 +114,19 @@ export function normalizeKapsoPayload(raw: unknown): WhatsAppPayload | null {
     const id = item.phone_number_id;
     if (typeof id !== "string" || !PHONE_NUMBER_ID.test(id)) return null;
     phoneNumberIds.add(id);
+    // préférence marketing d'un contact (STOP annoncé par WhatsApp) : événement SANS message, reconnu d'après son contenu
+    const preference = item.marketing_preference;
+    if (isRecord(preference) && (preference.status === "stopped" || preference.status === "resumed")) {
+      const phone = contactPhone(item);
+      if (phone === null) {
+        skipped += 1;
+        continue;
+      }
+      const sequence = typeof preference.sequence === "number" && Number.isInteger(preference.sequence) && preference.sequence >= 0 ? String(preference.sequence) : "0";
+      const at = typeof preference.occurred_at === "string" && !Number.isNaN(Date.parse(preference.occurred_at)) ? new Date(preference.occurred_at).toISOString() : null;
+      events.push({ kind: "marketing_preference", id: `mp.${phone.slice(1)}.${preference.status}.${sequence}`, from: phone, at, status: preference.status });
+      continue;
+    }
     const message = item.message;
     if (!isRecord(message) || !isRecord(message.kapso) || typeof message.id !== "string" || !MESSAGE_ID.test(message.id)) {
       skipped += 1;
@@ -97,7 +140,7 @@ export function normalizeKapsoPayload(raw: unknown): WhatsAppPayload | null {
         skipped += 1;
         continue;
       }
-      const body = type === "text" && isRecord(message.text) && typeof message.text.body === "string" ? cleanText(message.text.body, WHATSAPP_TEXT_MAX) : null;
+      const body = messageText(type, message);
       events.push({ kind: "message", id: message.id, from: `+${fromRaw}`, at: isoFromSeconds(message.timestamp), type, text: body && body.length > 0 ? body : null });
     } else if (kapso.direction === "outbound") {
       const status = (STATUSES as readonly unknown[]).find((s) => s === kapso.status) as WhatsAppStatus | undefined;

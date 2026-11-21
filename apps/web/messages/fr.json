@@ -1303,7 +1303,8 @@
         "rate_limited": "Trop de tentatives. Réessayez dans un instant.",
         "invalid_input": "La réponse est vide, trop longue ou contient des caractères non autorisés.",
         "generic": "Une erreur est survenue. Veuillez réessayer."
-      }
+      },
+      "windowClosed": "La fenêtre de 24 h est fermée : le contact n'a pas écrit depuis plus de 24 heures. Un message libre ne peut pas partir. Attendez sa réponse ou utilisez un modèle approuvé."
     }
   },
   "Lead": {

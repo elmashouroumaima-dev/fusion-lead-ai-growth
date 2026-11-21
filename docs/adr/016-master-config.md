@@ -1,6 +1,6 @@
 # ADR 016 — Palette de couleurs globale de la plateforme (`platform_config`)
 
-- **Statut :** Accepted **avec condition** (2026-11-09, décision de la responsable technique par délégation) : la palette et le logo étaient modifiables pour toute la plateforme par n'importe quel owner ou admin d'organisation ; **avant tout client réel (au plus tard J54), l'écriture est restreinte aux administrateurs de la plateforme** (`private.is_platform_admin`). **Condition mise en œuvre le 2026-11-18** (migration `20261214100000`, voir « Note de mise en œuvre ») : **changement à valider par la responsable technique**
+- **Statut :** Accepted (confirmé le 2026-11-21 par la responsable technique : condition remplie par le code, voir la décision en fin de document) ; initialement Accepted **avec condition** (2026-11-09, décision de la responsable technique par délégation) : la palette et le logo étaient modifiables pour toute la plateforme par n'importe quel owner ou admin d'organisation ; **avant tout client réel (au plus tard J54), l'écriture est restreinte aux administrateurs de la plateforme** (`private.is_platform_admin`). **Condition mise en œuvre le 2026-11-18** (migration `20261214100000`, voir « Note de mise en œuvre ») : **changement à valider par la responsable technique**
 - Date : 2026-11-07
 - Sources : spec §6, §11 ; ADR 005 (isolation, §10 Platform Admin), ADR 007 (modèle de données), ADR 014 (RBAC), ADR 015 (kit UI).
 - Historique : (1) `master_config`, palette par organisation : abandonnée avant tout commit, car la page de connexion ne connaît aucune organisation ; (2) palette globale éditée par un « administrateur de la plateforme » (table `platform_admins`) : abandonnée, car le rôle Platform Admin est prévu au J14 dans le schéma `private` (ADR 005 §10) et le propriétaire du produit veut que les owner/admin règlent les couleurs.
@@ -33,3 +33,7 @@ Le propriétaire veut choisir les couleurs de l'application et les retrouver par
 - Garde en trois endroits : base (42501), Server Actions (`forbidden`), UI (menu masqué, page en lecture seule). Lecture publique (`GET /api/brand/logo`, rendu de la palette) inchangée.
 - Conséquence opérationnelle : sans ligne dans `private.platform_admins`, personne ne peut régler la palette ni le logo ; ajout par SQL (runbook `plans-quotas.md`). En local, seul le compte seed `shared@seed.test` l'est.
 - Reste ouvert : palette par organisation après connexion (non décidé) ; page SMTP toujours en redirection pour les non-administrateurs.
+
+## Décision de la responsable technique (2026-11-21)
+- **Validé** : la palette et le logo ne sont modifiables que par les **administrateurs de la plateforme** (garde en base et sur le serveur, migration `20261214100000`). La matrice de l'ADR 014 reste inchangée (ressource hors matrice, comme le SMTP et l'administration des plans).
+- **Reste à faire avant le premier client réel** : enregistrer l'administrateur de la plateforme sur la base hébergée (runbook `hosted-database.md`, section 6) ; sans cela, personne ne peut régler la palette ni le logo.

@@ -3,6 +3,10 @@
 Format : Keep a Changelog. Une entrée par jour de travail.
 
 ## [Non publié]
+### Décisions de la responsable technique C1 à C8 (2026-11-21)
+- Décision : consentement conversationnel **7 jours** (avant : 30) : migration `20261218100000_reply_consent_7_days.sql` (+ retour arrière) ; pgTAP `360_reply_consent_7_days` (frontière 6 / 8 / 29 jours) ; `docs/api/send.md` et `conversations.md` mis à jour.
+- Décisions enregistrées : ADR 014 (amendements acceptés, 7 jours), ADR 016 (validé), ADR 010 (direction : option A, statut Proposed jusqu'à Q5), ADR 006 (règle des dates de migration), `C3.md` (écart 4 tranché), document des tâches de la responsable technique (huit points validés).
+
 ### Test réel C3 : WhatsApp (sandbox Kapso) fait, textes de l'Inbox et scripts corrigés
 - Documentation : `docs/checkpoints/C3.md` section 5 remplie pour WhatsApp (W1, W2, W4, W5, W6, W7, A1, A2 : OK ; W3 non testé à la main ; e-mail non testé) et verdict mis à jour (WhatsApp GO avec réserves ; G3 reste NO-GO tant que l'e-mail et la revue indépendante manquent).
 - Correction : Inbox : les textes de la zone de réponse suivent le canal (« par WhatsApp » et non « par e-mail » sur une conversation WhatsApp), en ar / en / fr.

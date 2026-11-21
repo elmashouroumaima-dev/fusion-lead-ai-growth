@@ -6,6 +6,11 @@ Format : Keep a Changelog. Une entrée par jour de travail.
 ### Décisions de la responsable technique C1 à C8 (2026-11-21)
 - Décision : consentement conversationnel **7 jours** (avant : 30) : migration `20261218100000_reply_consent_7_days.sql` (+ retour arrière) ; pgTAP `360_reply_consent_7_days` (frontière 6 / 8 / 29 jours) ; `docs/api/send.md` et `conversations.md` mis à jour.
 - Décisions enregistrées : ADR 014 (amendements acceptés, 7 jours), ADR 016 (validé), ADR 010 (direction : option A, statut Proposed jusqu'à Q5), ADR 006 (règle des dates de migration), `C3.md` (écart 4 tranché), document des tâches de la responsable technique (huit points validés).
+
+### Test réel C3 : WhatsApp (sandbox Kapso) fait, textes de l'Inbox et scripts corrigés
+- Documentation : `docs/checkpoints/C3.md` section 5 remplie pour WhatsApp (W1, W2, W4, W5, W6, W7, A1, A2 : OK ; W3 non testé à la main ; e-mail non testé) et verdict mis à jour (WhatsApp GO avec réserves ; G3 reste NO-GO tant que l'e-mail et la revue indépendante manquent).
+- Correction : Inbox : les textes de la zone de réponse suivent le canal (« par WhatsApp » et non « par e-mail » sur une conversation WhatsApp), en ar / en / fr.
+- Correction : `docs/testing/fixtures/c3-contact.sql` et `c3-approve.sql` : un contact WhatsApp seul (sans adresse e-mail) est possible ; `c3-approve.sql` retrouve le contact par son numéro.
 ### Phase 3 : réponse WhatsApp, STOP Kapso, guide du test réel (écart n° 3 de C3)
 - Ajout : migration `20261216100000_whatsapp_reply.sql` (+ retour arrière) : `conversation_reply` accepte WhatsApp en **texte libre dans la fenêtre de 24 h seulement** (destinataire = numéro du contact, finalité `reply`, aucun modèle) ; hors fenêtre : refus `window_closed` avant toute écriture. Page Inbox : le champ de réponse apparaît pour WhatsApp dans la fenêtre, un message clair hors fenêtre (ar / en / fr).
 - Ajout : migration `20261217100000_whatsapp_marketing_optout.sql` (+ retour arrière) : `whatsapp_marketing_preference_apply` (service_role seulement) ; l'événement Kapso `marketing_preference_changed` « stopped » applique la désinscription complète (comme un STOP), « resumed » ne réactive rien ; l'analyseur Kapso lit aussi le texte des boutons et des listes (un « STOP » tapé sur un bouton n'est plus perdu).

@@ -1246,3 +1246,11 @@ Plan : test manuel e-mail et WhatsApp sur comptes d'essai (2 h), corrections (2 
 - Les huit décisions de la responsable technique sont enregistrées (ADR 006, 010, 014, 016, `C3.md`, document des tâches) ; consentement conversationnel ramené à 7 jours (migration, test de frontière).
 ### Reste à faire
 - Avis juridique (qualification d'une réponse, Kapso sous-traitant) avant le premier client réel ; ADR de profil (nom de la personne) en phase 4 ; pack de revue de sécurité ; e-mail (Postmark) ; G3.
+
+## Test réel C3 : WhatsApp (21 novembre)
+### Fait
+- Test réel sur le sandbox Kapso avec tunnel : message entrant, réponse depuis l'Inbox, hors fenêtre, statuts jusqu'à « lu », STOP, arrêt d'urgence et reprise, balayage de la base et des journaux (aucune fuite). Résultats dans `docs/checkpoints/C3.md` section 5.
+- Corrections issues du test : textes de l'Inbox selon le canal, scripts `c3-contact.sql` et `c3-approve.sql` pour WhatsApp seul.
+### Reste à faire
+- E-mail (E1 à E7) : adresse d'expéditeur d'un domaine privé pour Postmark ; revue de sécurité indépendante ; événement de préférence marketing et modèles WhatsApp ; décisions de la responsable technique ; G3.
+

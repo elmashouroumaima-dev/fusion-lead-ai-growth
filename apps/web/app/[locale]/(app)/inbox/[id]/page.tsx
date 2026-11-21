@@ -196,7 +196,7 @@ export default async function ConversationPage({ params, searchParams }: Props) 
               <CardTitle id="thread-messages-title">
                 <h2>{t("thread.messages")}</h2>
               </CardTitle>
-              <CardDescription>{canReply ? t("reply.info") : t("reply.readOnly")}</CardDescription>
+              <CardDescription>{canReply ? (conversation?.channel_type === "whatsapp" ? t("reply.infoWhatsapp") : t("reply.info")) : t("reply.readOnly")}</CardDescription>
             </CardHeader>
             <CardContent className="grid gap-3">
               {messages.length >= MESSAGES_PAGE_SIZE ? (
@@ -245,7 +245,7 @@ export default async function ConversationPage({ params, searchParams }: Props) 
               </CardHeader>
               <CardContent>
                 {conversation.channel_type === "email" || (conversation.channel_type === "whatsapp" && whatsappWindowOpen) ? (
-                  <ReplyComposer conversationId={conversation.id} initialLock={lock} />
+                  <ReplyComposer conversationId={conversation.id} initialLock={lock} channel={conversation.channel_type === "whatsapp" ? "whatsapp" : "email"} />
                 ) : conversation.channel_type === "whatsapp" ? (
                   <p role="status" className="text-muted-foreground text-sm">
                     {t("reply.windowClosed")}

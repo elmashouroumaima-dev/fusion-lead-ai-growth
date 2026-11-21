@@ -31,16 +31,16 @@ footer { margin-top:12px; color:var(--mut); font-size:8pt; border-top:1px solid 
 </head>
 <body>
 <header>
-  <span class="pill">État au 13 novembre 2026 · J0 → J36b</span>
+  <span class="pill">État au 20 novembre 2026 · J0 → J41 (brouillon)</span>
   <h1>Tâches de la responsable technique</h1>
-  <p class="lead">Ce qui est déjà validé ou fait, et ce qui reste à valider, décider ou fournir. Sources : checkpoints C0 à C2, ADR, rapport d'avancement, journal et PR ouvertes.</p>
+  <p class="lead">Ce qui est déjà validé ou fait, et ce qui reste à valider, décider ou fournir. Sources : checkpoints C0 à C3, ADR, rapport d'avancement, journal. Aucune PR ouverte : tout est fusionné dans la branche principale (PR 8 à 67).</p>
 </header>
 
 <div class="kpis">
-  <div class="kpi"><b>21</b><span>validé ou fait</span></div>
-  <div class="kpi w"><b>28</b><span>en attente</span></div>
+  <div class="kpi"><b>25</b><span>validé ou fait</span></div>
+  <div class="kpi w"><b>30</b><span>en attente</span></div>
   <div class="kpi r"><b>2</b><span>bloquants (domaine, Postmark)</span></div>
-  <div class="kpi"><b>5</b><span>PR à relire (#41 à #45)</span></div>
+  <div class="kpi"><b>0</b><span>PR ouverte (tout est fusionné)</span></div>
 </div>
 
 <h2>A. Déjà validé ou fait</h2>
@@ -69,18 +69,20 @@ footer { margin-top:12px; color:var(--mut); font-size:8pt; border-top:1px solid 
 <tr><td class="n">21</td><td><span class="chip ok">Décidé</span> Accès minimal à Meta : « comptes WhatsApp actuels seulement », compte de test seul.</td><td>13 nov</td><td>J34</td></tr>
 </table>
 
+
+<h3 style="font-size:10.5pt;margin:8px 0 3px;">Fait depuis le 13 novembre</h3>
+<table>
+<tr><th class="n">#</th><th>Tâche</th><th style="width:13%">Date</th><th style="width:15%">Référence</th></tr>
+<tr><td class="n">22</td><td><span class="chip ok">Ordonné</span> Fusion de toutes les PR ouvertes (J33 à J41, écran d'import, écran de canaux, retours de test, ADR 016) : la branche principale contient tout, aucune PR ouverte.</td><td>14 → 20 nov</td><td>PR #41–#67</td></tr>
+<tr><td class="n">23</td><td><span class="chip ok">Validé</span> Plans de J39, J39b, J39c, J40 et de l'écran de canaux (choix par défaut).</td><td>14 → 18 nov</td><td>Journal</td></tr>
+<tr><td class="n">24</td><td><span class="chip ok">Décidé</span> Un canal est actif si et seulement si son intégration est validée par le fournisseur ; validation e-mail par l'API de Postmark.</td><td>18 nov</td><td>PR #64</td></tr>
+<tr><td class="n">25</td><td><span class="chip ok">Décidé</span> Salutation du tableau de bord par le début de l'adresse de connexion, en attendant un champ « Nom » (voir C6).</td><td>20 nov</td><td>PR #65</td></tr>
+</table>
+
 <h2>B. En attente : à valider, décider ou fournir</h2>
 
 <h3 style="font-size:10.5pt;margin:8px 0 3px;">B1. À relire et fusionner</h3>
-<table>
-<tr><th class="n">#</th><th>Tâche</th><th style="width:15%">Statut</th><th style="width:19%">Échéance</th></tr>
-<tr><td class="n">1</td><td>Relire la PR #41 (J33, désabonnement), base <code>main</code>.</td><td><span class="chip wait">À relire</span></td><td>Avant fusion</td></tr>
-<tr><td class="n">2</td><td>Relire la PR #42 (J34, connexion WhatsApp) : nouvelle variable <code>WHATSAPP_VERIFY_TOKEN</code>.</td><td><span class="chip wait">À relire</span></td><td>Avant fusion</td></tr>
-<tr><td class="n">3</td><td>Relire la PR #43 (J35, réception) : reprise de la garde des messages.</td><td><span class="chip wait">À relire</span></td><td>Avant fusion</td></tr>
-<tr><td class="n">4</td><td>Relire la PR #44 (J36, envoi) : reprise de l'approbation, de la réclamation et des statuts.</td><td><span class="chip wait">À relire</span></td><td>Avant fusion</td></tr>
-<tr><td class="n">5</td><td>Relire la PR #45 (J36b, retrait par mot d'arrêt).</td><td><span class="chip wait">À relire</span></td><td>Avant fusion</td></tr>
-<tr><td class="n">6</td><td>Ordonner la fusion de la chaîne #41 à #45 (dans l'ordre, base remise sur <code>main</code> à chaque étape).</td><td><span class="chip wait">À ordonner</span></td><td>Après relecture</td></tr>
-</table>
+<div class="note">Rien à relire ni à fusionner : les PR #41 à #67 sont fusionnées (voir « Fait depuis le 13 novembre »).</div>
 
 <h3 style="font-size:10.5pt;margin:8px 0 3px;">B2. Décisions d'architecture à valider</h3>
 <table>
@@ -116,11 +118,26 @@ footer { margin-top:12px; color:var(--mut); font-size:8pt; border-top:1px solid 
 <tr><td class="n">25</td><td>Protection de la branche principale sur GitHub (non activée) ; test de base de données « conversations » instable une fois.</td><td><span class="chip wait">À surveiller</span></td><td>Continu</td></tr>
 <tr><td class="n">26</td><td>Purge des contenus conservés (événements de webhook, file de tri) et durée de conservation du journal d'audit.</td><td><span class="chip wait">À décider</span></td><td>J39 / J57</td></tr>
 <tr><td class="n">27</td><td>Effacement d'un contact qui a des messages (droit à l'effacement) : procédure d'anonymisation.</td><td><span class="chip wait">À décider</span></td><td>Avant le pilote</td></tr>
-<tr><td class="n">28</td><td>Réserver la palette et le logo aux administrateurs de la plateforme avant de vrais clients (condition de l'ADR 016).</td><td><span class="chip wait">À faire</span></td><td>Avant J54</td></tr>
+<tr><td class="n">28</td><td>Palette et logo réservés aux administrateurs de la plateforme (condition de l'ADR 016) : code livré ; reste à valider (C1) et à enregistrer l'administrateur sur la base hébergée (runbook).</td><td><span class="chip part">Livré, à valider</span></td><td>Avant J54</td></tr>
+</table>
+
+
+<h2>C. Nouvelles décisions à trancher (depuis le 13 novembre)</h2>
+<p style="margin:2px 0 6px;font-size:9pt;color:var(--mut)">Pour chaque point : les options et la recommandation de l'équipe de développement. Rien n'est décidé sans réponse de la responsable technique.</p>
+<table>
+<tr><th class="n">#</th><th>Décision</th><th style="width:30%">Options et recommandation</th><th style="width:12%">Statut</th></tr>
+<tr><td class="n">C1</td><td><b>ADR 016 : qui modifie la palette et le logo.</b> Le code les réserve aux administrateurs de la plateforme (garde en base et sur le serveur). Avant cela, tout propriétaire ou administrateur d'entreprise pouvait les modifier. La matrice de l'ADR 014 n'est pas changée (cette ressource est hors matrice, comme le SMTP).</td><td><b>Recommandé : valider.</b> Alternative : garder les propriétaires d'entreprise et réserver seulement la palette globale.</td><td><span class="chip wait">À valider</span></td></tr>
+<tr><td class="n">C2</td><td><b>ADR 014, amendements.</b> (a) Ressource « clés de formulaire » rattachée à la ligne 16 (propriétaire, administrateur). (b) Finalité d'envoi <code>reply</code> réservée à la réponse depuis la boîte (e-mail seulement).</td><td><b>Recommandé : accepter les deux.</b> Alternative pour (b) : ouvrir <code>reply</code> à WhatsApp après revue.</td><td><span class="chip wait">À valider</span></td></tr>
+<tr><td class="n">C3</td><td><b>Version fusionnée de la réclamation d'envoi</b> (<code>message_send_claim</code>) : le commercial approuve sa propre réponse ; consentement conversationnel de <b>30 jours</b> après le dernier message reçu.</td><td><b>Recommandé : accepter</b> après avis juridique sur la durée de 30 jours et sa qualification. Alternative : durée plus courte (7 jours).</td><td><span class="chip wait">À valider</span></td></tr>
+<tr><td class="n">C4</td><td><b>Dates des migrations et « une PR par jour ».</b> Les fichiers portent des dates du plan (jusqu'au 14 décembre), postérieures à la date réelle. Les renommer est impossible : l'ordre doit rester croissant et les migrations déjà appliquées (jusqu'à J28 sur la base hébergée) ne se renomment pas.</td><td><b>Recommandé :</b> garder les dates existantes ; règle pour les nouvelles : date réelle, mais jamais antérieure à la dernière migration. « Une PR par jour » : grouper les correctifs du jour dans une seule PR.</td><td><span class="chip wait">À décider</span></td></tr>
+<tr><td class="n">C5</td><td><b>Revue de sécurité indépendante</b> de J39, J39b, J39c, J40 et du durcissement de <code>reply</code> : non faite. Qui la fait ?</td><td><b>Recommandé :</b> une personne qui n'a pas écrit le code, avant la fusion de G3.</td><td><span class="chip wait">À planifier</span></td></tr>
+<tr><td class="n">C6</td><td><b>Nom de la personne.</b> L'application ne stocke aucun nom (inscription par e-mail et mot de passe seulement) ; la salutation utilise le début de l'adresse.</td><td><b>Recommandé :</b> ADR pour une table de profil (nom affiché, saisi à l'inscription et modifiable dans le menu du compte). Alternative : garder l'adresse.</td><td><span class="chip wait">À décider</span></td></tr>
+<tr><td class="n">C7</td><td><b>Numéro WhatsApp réel.</b> Numéro de test de Meta (recommandé, sans numéro réel) ou prestataire (Kapso) : non pris en charge par le code actuel (autre adresse d'API, autre signature de webhook), cela demande un ADR.</td><td><b>Recommandé :</b> numéro de test de Meta pour C3 ; ADR séparé si le prestataire est voulu pour la production.</td><td><span class="chip wait">À décider</span></td></tr>
+<tr><td class="n">C8</td><td><b>Base hébergée.</b> Elle n'a pas les migrations depuis J28 (Contacts, boîte de réception et Intégrations y affichent des erreurs). Qui possède le projet et applique les migrations ? Qui enregistre l'administrateur de la plateforme ?</td><td><b>Recommandé :</b> la personne qui possède le projet applique par le runbook <code>docs/runbooks/hosted-database.md</code> (essai à blanc d'abord, jamais de remise à zéro).</td><td><span class="chip urg">Bloquant recette</span></td></tr>
 </table>
 
 <div class="note"><b>Prochain jalon : C3 (18 janvier 2027).</b> Il dépend des comptes réels : domaine d'envoi et Postmark pour l'e-mail, application Meta pour WhatsApp. Les lignes « Bloquant » sont celles qui font glisser ce jalon si elles ne sont pas levées.</div>
 
-<footer>Fusion Leap AI Growth · Document de suivi des tâches de la responsable technique · sources : docs/checkpoints, docs/adr, scripts/progress-report/data.json, PR #41 à #45.</footer>
+<footer>Fusion Leap AI Growth · Document de suivi des tâches de la responsable technique · sources : docs/checkpoints, docs/adr, scripts/progress-report/data.json, journal, PR #41 à #67.</footer>
 </body>
 </html>

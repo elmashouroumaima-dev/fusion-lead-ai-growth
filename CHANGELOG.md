@@ -3,6 +3,11 @@
 Format : Keep a Changelog. Une entrée par jour de travail.
 
 ## [Non publié]
+### Passation : base hébergée, administrateur de la plateforme, décisions à trancher
+- Ajout : `docs/runbooks/hosted-database.md` : appliquer les migrations manquantes sur la base hébergée (sauvegarde, essai à blanc, vérification, jamais de remise à zéro) et enregistrer l'administrateur de la plateforme (ADR 016) ; à faire par la personne qui possède le projet.
+- Modification : `docs/product/taches-responsable-technique` (HTML et PDF) mis à jour au 20 novembre : tout fusionné (PR 41 à 67), huit nouvelles décisions avec options et recommandation (droits de la palette, amendements ADR 014, réclamation d'envoi, dates des migrations, revue de sécurité, nom de la personne, numéro WhatsApp, base hébergée).
+- Modification : rapport d'avancement du 20 novembre (tests mesurés : 8 245 ; résumé, points ouverts, étapes suivantes mis à jour).
+
 ### Passerelle WhatsApp Kapso (ADR 017, acceptée le 21 novembre)
 - Ajout : migration `20261215100000_integration_gateway.sql` (+ retour arrière) : `integrations.gateway` (`meta` | `kapso`), `create_provider_integration(p_gateway)`, `webhook_resolve_integration(p_gateway)`, `message_send_claim` renvoie `channel.gateway`.
 - Ajout : `packages/adapters/src/whatsapp/kapso.ts` : envoi et vérification par Kapso (`X-API-Key`, adresse fixe), routeur de passerelle, adaptateur de webhook (`X-Webhook-Signature`), analyseur d'événements vers la forme normalisée commune ; le worker envoie par la passerelle de l'intégration ; `POST /api/webhooks/kapso`.

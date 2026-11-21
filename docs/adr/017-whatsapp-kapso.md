@@ -1,6 +1,6 @@
-# ADR 017 — Passerelle WhatsApp : Kapso (en plus de l'API Cloud de Meta en direct)
+# ADR 017 — Passerelle WhatsApp : Kapso
 
-- **Statut :** Proposed (à valider par la responsable technique ; **aucun code avant sa décision**)
+- **Statut :** Accepted le 2026-11-21 par la responsable technique (voir « Décision de la responsable technique »)
 - **Date :** 2026-11-21
 - **Section de spec :** §9.3 (WhatsApp Cloud API officielle), §11 (webhooks), §13-5, §14 (hypothèses d'exécution) ; ADR 004 (secrets), 007 (modèle de données), 008 (webhooks e-mail, modèle d'authentification) ; CLAUDE.md (interdits : WhatsApp Web non officiel, secrets dans les journaux, envoi sans approbation)
 
@@ -65,3 +65,14 @@ Signature des webhooks `meta` ; valeur et stabilité de `X-Idempotency-Key` ; ad
 
 ## Sources (consultées le 2026-11-21)
 Documentation officielle de Kapso : vue d'ensemble et sécurité des webhooks, événements de messages, envoi de message, utilisation du sandbox (docs.kapso.ai).
+
+## Décision de la responsable technique (2026-11-21)
+1. **Kapso est la seule passerelle WhatsApp utilisée** : Meta en direct n'est plus voulu. *Mise en œuvre retenue par défaut (à contredire si besoin)* : le code Meta direct, déjà écrit et testé, **n'est pas supprimé** et reste sans écran de connexion ; les nouvelles intégrations WhatsApp passent toutes par Kapso (`gateway = 'kapso'` par défaut) ; le retrait du code Meta direct fera l'objet d'une décision séparée.
+2. **Sous-traitant** : les essais se font avec des **données factices** (sandbox, numéro du testeur) ; aucun client réel avant l'accord de traitement des données avec Kapso (voir réserve ci-dessous).
+3. **Webhooks de type `kapso` (option C)** : signature `X-Webhook-Signature` (HMAC-SHA256 hexadécimal du corps brut, sans préfixe), analyseur d'événements propre à Kapso. *Lecture retenue* : la réponse « C sinon » est comprise comme « option C » (l'option B reste écartée tant que la signature du type `meta` n'est pas établie).
+4. **Kapso aussi en production**, pas seulement pour les tests et le pilote.
+
+**Réserve liée à la décision 4** : avant le premier client réel, il faut un contrat et un accord de traitement des données avec Kapso (lieu et durée de conservation), un **plan payant** (le plan gratuit n'offre qu'un numéro) et la **vérification de l'entreprise chez Meta** pour un numéro réel. Ce point est suivi dans le document des tâches de la responsable technique.
+
+## Mise en œuvre prévue (après validation du plan)
+Migration `gateway` (retour arrière) ; constante d'adresse de Kapso et authentification `X-API-Key` ; vérification de signature et analyseur d'événements Kapso ; connexion d'un numéro Kapso depuis l'écran ; tests refus d'abord ; guide du test réel (C3) en sandbox ; runbook et documentation de l'API.

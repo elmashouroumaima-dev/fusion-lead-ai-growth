@@ -121,6 +121,9 @@ describe.skipIf(!MASTER)("page de la conversation", () => {
   it("fenêtre ouverte : le champ de réponse est proposé ; fenêtre fermée : message clair, pas de champ", async () => {
     const open = await page(conv.open);
     expect(open).toMatch(/send reply|reply/i);
+    // les textes suivent le canal : jamais « par e-mail » sur une conversation WhatsApp
+    expect(open).toContain("sent by WhatsApp");
+    expect(open).not.toContain("sent by e-mail");
     expect(open).not.toContain("The 24-hour window is closed");
     const closed = await page(conv.closed);
     expect(closed).toContain("The 24-hour window is closed");

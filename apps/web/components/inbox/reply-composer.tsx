@@ -31,7 +31,7 @@ const lockFormData = (conversationId: string, uiLocale: string): FormData => {
 };
 const IDLE: LockActionState = { status: "idle" };
 
-export function ReplyComposer({ conversationId, initialLock }: { conversationId: string; initialLock: Lock }) {
+export function ReplyComposer({ conversationId, initialLock, channel = "email" }: { conversationId: string; initialLock: Lock; channel?: "email" | "whatsapp" }) {
   const t = useTranslations("Inbox.reply");
   const uiLocale = useLocale();
   const router = useRouter();
@@ -167,7 +167,7 @@ export function ReplyComposer({ conversationId, initialLock }: { conversationId:
         maxLength={REPLY_MAX}
         rows={5}
         disabled={blocked || pending}
-        placeholder={t("placeholder")}
+        placeholder={channel === "whatsapp" ? t("placeholderWhatsapp") : t("placeholder")}
         onChange={(event) => setBody(event.target.value)}
         onFocus={() => void onFocus()}
         onBlur={() => void onBlur()}

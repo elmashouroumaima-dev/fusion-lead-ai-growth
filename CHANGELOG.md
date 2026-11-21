@@ -3,6 +3,12 @@
 Format : Keep a Changelog. Une entrée par jour de travail.
 
 ## [Non publié]
+### Phase 3 : réponse WhatsApp, STOP Kapso, guide du test réel (écart n° 3 de C3)
+- Ajout : migration `20261216100000_whatsapp_reply.sql` (+ retour arrière) : `conversation_reply` accepte WhatsApp en **texte libre dans la fenêtre de 24 h seulement** (destinataire = numéro du contact, finalité `reply`, aucun modèle) ; hors fenêtre : refus `window_closed` avant toute écriture. Page Inbox : le champ de réponse apparaît pour WhatsApp dans la fenêtre, un message clair hors fenêtre (ar / en / fr).
+- Ajout : migration `20261217100000_whatsapp_marketing_optout.sql` (+ retour arrière) : `whatsapp_marketing_preference_apply` (service_role seulement) ; l'événement Kapso `marketing_preference_changed` « stopped » applique la désinscription complète (comme un STOP), « resumed » ne réactive rien ; l'analyseur Kapso lit aussi le texte des boutons et des listes (un « STOP » tapé sur un bouton n'est plus perdu).
+- Tests : pgTAP `340_whatsapp_reply` (17) et `350_whatsapp_marketing_optout` (17), `270` adapté ; analyseur Kapso, worker, fenêtre de l'Inbox ; acceptation `whatsapp-reply` (5) et `kapso-gateway` (9). Vérifiés : retours arrière, pgTAP 3 347, RLS 497, acceptation 317 (+ 1 ignoré), unitaires verts.
+- Documentation : guide du test réel (C3) réécrit pour WhatsApp en sandbox Kapso (PDF et PDF « toutes phases » régénérés) ; note sur les adresses d'expéditeur refusées par Postmark (domaines publics).
+- Réserve : la forme exacte de l'événement `marketing_preference_changed` n'a pas d'exemple dans la documentation de Kapso ; l'analyse est prudente (champ manquant : événement ignoré, jamais une erreur) ; à confirmer au test réel.
 ### Passerelle WhatsApp Kapso (ADR 017, acceptée le 21 novembre)
 - Ajout : migration `20261215100000_integration_gateway.sql` (+ retour arrière) : `integrations.gateway` (`meta` | `kapso`), `create_provider_integration(p_gateway)`, `webhook_resolve_integration(p_gateway)`, `message_send_claim` renvoie `channel.gateway`.
 - Ajout : `packages/adapters/src/whatsapp/kapso.ts` : envoi et vérification par Kapso (`X-API-Key`, adresse fixe), routeur de passerelle, adaptateur de webhook (`X-Webhook-Signature`), analyseur d'événements vers la forme normalisée commune ; le worker envoie par la passerelle de l'intégration ; `POST /api/webhooks/kapso`.

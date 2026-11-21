@@ -66,3 +66,7 @@ Migration `20261210100000_replies_lock.sql` (retour arrière : `supabase/rollbac
 - Pas d'envoi ni de réception réels (J31, J32, J35) ; `message_record` n'est appelée que par le serveur et le worker.
 - Pas de quota `messages_per_month` ni de plafond de conversations par entreprise (J39, avec l'exploitation des envois) ; pas de purge des corps de message (rétention à définir).
 - Les transitions de statut d'un message sortant (`queued` vers `accepted`, `sent`, `delivered`, `read`, `failed`) sont définies avec l'envoi (J31).
+
+
+## Réponse WhatsApp (migration `20261216100000_whatsapp_reply.sql`)
+`POST /api/conversations/:id/replies` accepte aussi les conversations WhatsApp : **texte libre dans la fenêtre de 24 h seulement** (le contact a écrit dans ce fil il y a moins de 24 heures). Destinataire = numéro du contact (E.164, figé à l'approbation), finalité `reply`, aucun modèle. Hors fenêtre (ou contact qui n'a jamais écrit) : **409** (`window_closed`), aucun message ni job créé ; hors fenêtre, seul un modèle approuvé peut partir, par la voie d'approbation. Les contrôles du worker restent inchangés (approbation habilitée, consentement, ne plus contacter, suppression, arrêt d'urgence, débit, fenêtre). Page Inbox : champ de réponse dans la fenêtre, message « La fenêtre de 24 h est fermée » sinon.

@@ -1241,3 +1241,8 @@ Plan : test manuel e-mail et WhatsApp sur comptes d'essai (2 h), corrections (2 
 ### Reste à faire
 - Test réel C3 (Postmark : adresse d'un domaine privé ; WhatsApp : sandbox Kapso avec tunnel ou serveur), corrections, audit et revue de sécurité indépendante, décision G3 ; confirmation de la forme de l'événement de préférence marketing.
 
+## Décisions C1 à C8 (2026-11-21)
+### Fait
+- Les huit décisions de la responsable technique sont enregistrées (ADR 006, 010, 014, 016, `C3.md`, document des tâches) ; consentement conversationnel ramené à 7 jours (migration, test de frontière).
+### Reste à faire
+- Avis juridique (qualification d'une réponse, Kapso sous-traitant) avant le premier client réel ; ADR de profil (nom de la personne) en phase 4 ; pack de revue de sécurité ; e-mail (Postmark) ; G3.

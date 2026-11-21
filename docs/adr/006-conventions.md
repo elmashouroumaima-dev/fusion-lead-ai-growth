@@ -38,3 +38,8 @@ Ces conventions sont appliquées par ESLint/CI (frontières de packages, interdi
 - Caviardage : clés sensibles (même liste que `private.audit_redact`, test de parité) et valeurs (JWT, `Bearer` / `Basic`, clés `sb_secret_` / `sb_publishable_`, e-mails, secrets dans les URL et chaînes de connexion, jetons d'invitation) ; une `Error` n'est journalisée que par son nom et son code, jamais son message.
 - Le client Supabase serveur envoie l'en-tête `x-request-id` (identifiant généré côté serveur) pour que l'audit porte le même `request_id`.
 - Reste : migrer les actions d'authentification (J8) et `/auth/confirm` sur la couche service ; le message de démarrage (`startup-check`) utilise encore `console`.
+
+## Règle des dates de migration (2026-11-21, responsable technique)
+- Les migrations existantes (dates du plan, jusqu'en décembre) **ne sont pas renommées** : l'ordre doit rester croissant et les bases déjà migrées gardent leur historique.
+- Une nouvelle migration porte la **date réelle de création, sans jamais précéder la dernière migration existante** (si la date réelle est antérieure, on prend la suivante).
+- Une migration appliquée n'est jamais modifiée : on en crée une nouvelle (avec son fichier de retour arrière). Les correctifs du jour se regroupent dans une seule PR (« une PR par jour »).

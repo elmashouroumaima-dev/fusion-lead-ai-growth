@@ -35,7 +35,7 @@ Charge utile stricte `{ message_id }`. Entreprise = celle de la ligne du job. Or
 `message.approved`, `message.accepted`, `message.failed` : identifiants, finalité et codes. Jamais le corps, l'adresse, l'identifiant du fournisseur ni la clé d'envoi.
 
 ## Réponses humaines (J38)
-`message_send_claim` accepte aussi, pour une réponse (`approved_purpose = 'reply'`), un commercial approbateur sur SA conversation et le consentement conversationnel (message entrant du contact dans la même conversation depuis moins de 30 jours). Détails : `docs/api/conversations.md`.
+`message_send_claim` accepte aussi, pour une réponse (`approved_purpose = 'reply'`), un commercial approbateur sur SA conversation et le consentement conversationnel (message entrant du contact dans la même conversation depuis moins de 7 jours). Détails : `docs/api/conversations.md`.
 
 ## Limites connues et décisions à confirmer
 - **Postmark est une hypothèse** (ADR 008 ; Q2 sans réponse) : aucun compte ouvert, aucun envoi réel avant le checkpoint C3.

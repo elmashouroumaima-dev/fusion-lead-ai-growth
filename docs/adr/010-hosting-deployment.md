@@ -28,3 +28,8 @@ Q5 devient bloquante pour la production (pas pour le dev/staging). Risque R-new 
 - La route publique `POST /api/leads` limite le débit **par adresse** : le reverse proxy d'hébergement doit AJOUTER l'adresse qu'il voit à `x-forwarded-for` (ou l'écraser) ; l'application lit l'élément situé à `TRUSTED_PROXY_HOPS` rangs en partant de la droite (1 par défaut, 0 = ignorer l'en-tête). **À régler et vérifier au choix de l'hébergeur** : un mauvais réglage rend la limitation par adresse contournable (la limitation par clé de formulaire reste).
 - Le proxy doit aussi retirer l'en-tête `X-Forwarded-Host` fourni par le client (voir J17).
 - Journaux Postgres : `log_error_verbosity = terse` recommandé en production (une violation de contrainte écrit la valeur fautive).
+
+## Direction retenue pour le test et le pilote (2026-11-21, responsable technique)
+- **Option A** : l'application (web) et le worker en conteneurs sur le VPS existant (nginx et certificats déjà en place), dans un dossier et un réseau dédiés, derrière un port propre ; **Supabase hébergé (cloud)**, pas de Supabase auto-hébergé sur ce serveur mutualisé.
+- **Réserves** : le serveur héberge d'autres projets (isolation des données et des secrets, ressources) ; le **statut reste Proposed** tant que Q5 (marché, région, protection des données) n'a pas de réponse ; une isolation plus forte (serveur dédié) reste l'option pour la production avec de vrais clients.
+- Prérequis avant déploiement : Dockerfiles, compose, script de production du worker, variables d'environnement de production, runbook de déploiement (à écrire), base hébergée à jour (`hosted-database.md`).

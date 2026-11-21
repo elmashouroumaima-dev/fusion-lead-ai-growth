@@ -1241,3 +1241,10 @@ Plan : test manuel e-mail et WhatsApp sur comptes d'essai (2 h), corrections (2 
 ### Reste à faire
 - Test réel C3 (Postmark : adresse d'un domaine privé ; WhatsApp : sandbox Kapso avec tunnel ou serveur), corrections, audit et revue de sécurité indépendante, décision G3 ; confirmation de la forme de l'événement de préférence marketing.
 
+## Test réel C3 : WhatsApp (21 novembre)
+### Fait
+- Test réel sur le sandbox Kapso avec tunnel : message entrant, réponse depuis l'Inbox, hors fenêtre, statuts jusqu'à « lu », STOP, arrêt d'urgence et reprise, balayage de la base et des journaux (aucune fuite). Résultats dans `docs/checkpoints/C3.md` section 5.
+- Corrections issues du test : textes de l'Inbox selon le canal, scripts `c3-contact.sql` et `c3-approve.sql` pour WhatsApp seul.
+### Reste à faire
+- E-mail (E1 à E7) : adresse d'expéditeur d'un domaine privé pour Postmark ; revue de sécurité indépendante ; événement de préférence marketing et modèles WhatsApp ; décisions de la responsable technique ; G3.
+

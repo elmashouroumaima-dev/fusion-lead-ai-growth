@@ -3,7 +3,7 @@
 -- et pour répéter un envoi e-mail sans passer par l'écran. Même chaîne que l'application : approbation humaine (owner), puis contrôle final du worker.
 --
 --   docker exec -i supabase_db_fusion-leap psql -U postgres -v ON_ERROR_STOP=1 \
---     -v channel='whatsapp' -v tester_email='<votre adresse de test>' -v body='Bonjour, test C3 WhatsApp.' \
+--     -v channel='whatsapp' -v tester_email='<votre adresse de test OU votre téléphone E.164>' -v body='Bonjour, test C3 WhatsApp.' \
 --     < docs/testing/fixtures/c3-approve.sql
 --
 -- `channel` = `email` ou `whatsapp`. Finalité « service » (consentement enregistré par c3-setup.sql). La finalité « reply » est réservée au
@@ -26,7 +26,7 @@ begin
     from public.conversations c
     join public.contacts ct on ct.organization_id = c.organization_id and ct.id = c.contact_id
     join public.channels ch on ch.organization_id = c.organization_id and ch.id = c.channel_id
-   where c.organization_id = v_org and ct.email_normalized = lower(current_setting('c3.tester_email')) and ch.type = current_setting('c3.channel')::public.channel_type
+   where c.organization_id = v_org and (ct.email_normalized = lower(current_setting('c3.tester_email')) or ct.phone_e164 = current_setting('c3.tester_email')) and ch.type = current_setting('c3.channel')::public.channel_type
    limit 1;
   if v_conv is null then raise exception 'aucune conversation « % » pour % : exécuter c3-setup.sql d''abord', current_setting('c3.channel'), current_setting('c3.tester_email'); end if;
   v_id := (private.message_record(v_org, v_conv, 'outbound', null, current_setting('c3.body'), v_key, null) ->> 'message_id')::uuid;

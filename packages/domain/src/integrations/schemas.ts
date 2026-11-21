@@ -10,6 +10,9 @@ export const SECRET_PROVIDERS = ["email", "whatsapp"] as const;
 export type SecretProvider = (typeof SECRET_PROVIDERS)[number];
 
 export const INTEGRATION_PROVIDERS = ["csv", "internal", "email", "whatsapp"] as const;
+/** Passerelle d'une intégration WhatsApp (ADR 017) : `kapso` (choix de la responsable technique, 2026-11-21) ou `meta` (API Graph en direct, intégrations existantes). */
+export const INTEGRATION_GATEWAYS = ["meta", "kapso"] as const;
+export type IntegrationGateway = (typeof INTEGRATION_GATEWAYS)[number];
 export const INTEGRATION_STATUSES = ["pending", "active", "error", "disconnected", "disabled"] as const;
 export type IntegrationStatus = (typeof INTEGRATION_STATUSES)[number];
 
@@ -39,11 +42,16 @@ export const createProviderIntegrationSchema = z
     external_account_id: accountSchema,
     scopes: z.array(scopeSchema).max(50).default([]),
     secret: integrationSecretSchema,
+    /** Les nouvelles intégrations WhatsApp passent par Kapso ; `meta` reste possible par l'API (intégrations existantes). Kapso n'existe que pour WhatsApp. */
+    gateway: z.enum(INTEGRATION_GATEWAYS).optional(),
   })
   .strict()
   .refine((value) => new Set(value.scopes).size === value.scopes.length, { path: ["scopes"] })
+  .refine((value) => value.provider === "whatsapp" || value.gateway === undefined || value.gateway === "meta", { path: ["gateway"] })
   // l'identifiant d'un numéro WhatsApp est numérique (5 à 30 chiffres) : toute autre forme ne pourrait jamais correspondre à un webhook
-  .refine((value) => value.provider !== "whatsapp" || /^[0-9]{5,30}$/.test(value.external_account_id), { path: ["external_account_id"] });
+  .refine((value) => value.provider !== "whatsapp" || /^[0-9]{5,30}$/.test(value.external_account_id), { path: ["external_account_id"] })
+  // WhatsApp passe par Kapso par défaut (ADR 017) ; un e-mail n'a pas de passerelle
+  .transform((value) => ({ ...value, gateway: value.gateway ?? (value.provider === "whatsapp" ? ("kapso" as const) : ("meta" as const)) }));
 export type CreateProviderIntegrationInput = z.infer<typeof createProviderIntegrationSchema>;
 
 /**
@@ -93,6 +101,7 @@ export const integrationRowSchema = z.object({
   provider: z.enum(INTEGRATION_PROVIDERS),
   status: z.enum(INTEGRATION_STATUSES),
   external_account_id: z.string(),
+  gateway: z.enum(INTEGRATION_GATEWAYS).default("meta"),
   scopes: z.array(z.string()),
   has_secret: z.boolean(),
   has_webhook_secret: z.boolean().default(false),

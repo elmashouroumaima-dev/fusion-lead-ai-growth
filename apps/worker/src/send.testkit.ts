@@ -12,7 +12,7 @@ export function claimedOk(patch: Partial<Extract<SendClaim, { status: "claimed" 
     status: "claimed",
     message: { body: "Bonjour Karim\nVoici notre offre.", approved: true, purpose: "marketing", approverValid: true, approvalAgeSeconds: 120, recipientUnchanged: true },
     contact: { email: "karim@example.test", phone: "+212600000001", doNotContact: false },
-    channel: { type: "email", status: "active", sendPaused: false, sender: "ventes@acme.test", integrationId: SEND_INTEGRATION, integrationStatus: "active", account: "106540352242922" },
+    channel: { type: "email", status: "active", sendPaused: false, sender: "ventes@acme.test", integrationId: SEND_INTEGRATION, integrationStatus: "active", account: "106540352242922", gateway: "meta" },
     windowOpen: true,
     template: null,
     organizationActive: true,

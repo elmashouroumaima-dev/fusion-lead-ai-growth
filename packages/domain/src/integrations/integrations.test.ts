@@ -38,6 +38,13 @@ describe("createProviderIntegrationSchema", () => {
     expect(createProviderIntegrationSchema.parse(base).scopes).toEqual([]);
     expect(createProviderIntegrationSchema.safeParse({ ...base, provider: "email" }).success).toBe(true);
   });
+  it("passerelle (ADR 017) : Kapso par défaut pour WhatsApp, « meta » pour l'e-mail ; Kapso refusée hors WhatsApp ; valeur inconnue refusée", () => {
+    expect(createProviderIntegrationSchema.parse(base).gateway).toBe("kapso");
+    expect(createProviderIntegrationSchema.parse({ ...base, gateway: "meta" }).gateway).toBe("meta");
+    expect(createProviderIntegrationSchema.parse({ ...base, provider: "email" }).gateway).toBe("meta");
+    expect(createProviderIntegrationSchema.safeParse({ ...base, provider: "email", gateway: "kapso" }).success).toBe(false);
+    expect(createProviderIntegrationSchema.safeParse({ ...base, gateway: "autre" }).success).toBe(false);
+  });
   it("refuse csv, un compte mal formé, des portées en double ou mal formées, et un organization_id", () => {
     expect(createProviderIntegrationSchema.safeParse({ ...base, provider: "csv" }).success).toBe(false);
     expect(createProviderIntegrationSchema.safeParse({ ...base, external_account_id: "a b" }).success).toBe(false);

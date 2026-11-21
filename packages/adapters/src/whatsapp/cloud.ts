@@ -19,7 +19,7 @@ const THROTTLE_CODES = new Set([1, 2, 4, 17, 32, 341, 368, 613, 80007, 130429, 1
 
 export type WhatsAppValidation = { kind: "valid" } | { kind: "invalid"; code: "provider_auth" | "provider_account" | "provider_unavailable" | "provider_unreadable" };
 
-export type WhatsAppCloudOptions = { fetch?: typeof fetch; timeoutMs?: number };
+export type WhatsAppCloudOptions = { fetch?: typeof fetch; timeoutMs?: number; base?: string; authHeaders?: (token: string) => Record<string, string> };
 
 async function readJson(response: Response): Promise<unknown> {
   try {
@@ -46,6 +46,8 @@ async function readJson(response: Response): Promise<unknown> {
 export function createWhatsAppCloudClient(options: WhatsAppCloudOptions = {}) {
   const doFetch = options.fetch ?? fetch;
   const timeoutMs = options.timeoutMs ?? TIMEOUT_MS;
+  const base = options.base ?? WHATSAPP_GRAPH_BASE;
+  const authHeaders = options.authHeaders ?? ((token: string) => ({ Authorization: `Bearer ${token}` }));
   return {
     async validate(input: { phoneNumberId: string; accessToken: string }): Promise<WhatsAppValidation> {
       const { phoneNumberId, accessToken } = input;
@@ -54,10 +56,10 @@ export function createWhatsAppCloudClient(options: WhatsAppCloudOptions = {}) {
       }
       let response: Response;
       try {
-        response = await doFetch(`${WHATSAPP_GRAPH_BASE}/${phoneNumberId}?fields=id`, {
+        response = await doFetch(`${base}/${phoneNumberId}?fields=id`, {
           method: "GET",
           redirect: "error",
-          headers: { Accept: "application/json", Authorization: `Bearer ${accessToken}` },
+          headers: { Accept: "application/json", ...authHeaders(accessToken) },
           signal: AbortSignal.timeout(timeoutMs),
         });
       } catch {

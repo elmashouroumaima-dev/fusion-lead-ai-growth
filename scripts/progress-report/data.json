@@ -1,7 +1,7 @@
 {
   "title": "Rapport d'avancement",
   "intro": "Fusion Leap AI Growth : plateforme SaaS multi-tenant de croissance (CRM, canaux, campagnes, agents IA). Les fondations, le CRM (projets, contacts, leads, deals, capture, import) et le socle des canaux e-mail (intégrations, webhooks, conversations, envoi sous contrôles, statuts et réception, désabonnement) sont en place ; le désabonnement est en revue.",
-  "summary": "Les phases 0 à 2 sont terminées et fusionnées ; la phase 3 (canaux) est avancée : un message ne part qu'avec une approbation humaine et un contrôle final dans le worker, pour l'e-mail comme pour WhatsApp, avec désabonnement et retrait de consentement. Les journées 38 à 40 sont fusionnées : réponses avec verrou humain / IA, arrêt d'urgence d'envoi, jobs en échec rejouables, alertes, écrans de configuration (clés de formulaire, règles d'assignation, notifications) et scénarios automatiques des canaux (série d'e-mails avec désabonnement, WhatsApp avec webhook en double et pannes du fournisseur). Depuis : l'audit du checkpoint C3 est rédigé (verdict proposé NO-GO tant que le test réel n'est pas fait), l'écran de canaux est livré (un canal devient actif seulement quand son intégration est validée par le fournisseur ; e-mail Postmark et WhatsApp), la palette et le logo sont réservés aux administrateurs de la plateforme (ADR 016, à valider), et les retours de test sont traités (page Membres en cartes, fil d'Ariane, accessibilité, textes). La passerelle WhatsApp est désormais Kapso (ADR 017 acceptée le 21 novembre : webhooks signés, choix par intégration, essai prévu en sandbox) ; l'ancien chemin Meta reste dans le code sans écran de connexion. Rien n'a encore été envoyé pour de vrai : il manque les comptes d'essai réels (checkpoint C3, J41).",
+  "summary": "Les phases 0 à 2 sont terminées et fusionnées ; la phase 3 (canaux) est avancée : un message ne part qu'avec une approbation humaine et un contrôle final dans le worker, pour l'e-mail comme pour WhatsApp, avec désabonnement et retrait de consentement. Les journées 38 à 40 sont fusionnées : réponses avec verrou humain / IA, arrêt d'urgence d'envoi, jobs en échec rejouables, alertes, écrans de configuration (clés de formulaire, règles d'assignation, notifications) et scénarios automatiques des canaux (série d'e-mails avec désabonnement, WhatsApp avec webhook en double et pannes du fournisseur). Depuis : l'audit du checkpoint C3 est rédigé (verdict proposé NO-GO tant que le test réel n'est pas fait), l'écran de canaux est livré (un canal devient actif seulement quand son intégration est validée par le fournisseur ; e-mail Postmark et WhatsApp), la palette et le logo sont réservés aux administrateurs de la plateforme (ADR 016, à valider), et les retours de test sont traités (page Membres en cartes, fil d'Ariane, accessibilité, textes). La passerelle WhatsApp est désormais Kapso (ADR 017 acceptée le 21 novembre : webhooks signés, choix par intégration, essai prévu en sandbox) ; l'ancien chemin Meta reste dans le code sans écran de connexion. Le 21 novembre, le test réel WhatsApp (sandbox Kapso, tunnel public) a été fait : message entrant, réponse depuis l'Inbox, statuts jusqu'à « lu », hors fenêtre, STOP, arrêt d'urgence et reprise, et aucun secret ni message dans la base ni les journaux. Les huit décisions de la responsable technique (C1 à C8) sont prises et enregistrées. Il reste l'e-mail réel (adresse d'un domaine privé pour Postmark), la revue de sécurité et la décision G3.",
   "tests": [
     {
       "label": "Web (application)",
@@ -10,7 +10,7 @@
     },
     {
       "label": "Base de données (pgTAP)",
-      "value": 3347,
+      "value": 3353,
       "note": "Tables, droits et règles de la base de données"
     },
     {
@@ -461,7 +461,7 @@
       "urgency": "Avant J34"
     },
     {
-      "text": "Choisir le fournisseur IA (ADR 012) et l'hébergeur (ADR 010).",
+      "text": "Fournisseur IA (ADR 012) : à choisir. Hébergement : direction retenue (option A : application et worker sur le VPS, Supabase hébergé), ADR 010 reste Proposed jusqu'à Q5.",
       "owner": "Responsable technique",
       "urgency": "Avant J47 / J58"
     },
@@ -476,9 +476,9 @@
       "urgency": "J57 / J58"
     },
     {
-      "text": "Palette et logo réservés aux administrateurs de la plateforme (ADR 016) : code livré ; reste à valider le changement de droits, à enregistrer l'administrateur de la plateforme en SQL et à appliquer la migration sur la base hébergée.",
+      "text": "Palette et logo réservés aux administrateurs de la plateforme (ADR 016, validé) : enregistrer l'administrateur de la plateforme sur la base hébergée (runbook hosted-database.md), puis y appliquer les migrations.",
       "owner": "Équipe",
-      "urgency": "Avant J54"
+      "urgency": "Avant la recette sur la base hébergée"
     },
     {
       "text": "Protection de la branche principale non activée sur GitHub ; un test de base de données (conversations) a échoué deux fois sans cause trouvée.",
@@ -501,14 +501,9 @@
       "urgency": "Avant le premier envoi"
     },
     {
-      "text": "Revue de sécurité indépendante des journées 39, 39b et 40 : pas encore faite.",
+      "text": "Revue de sécurité (J39 à J40, réponses, réponse WhatsApp, Kapso, STOP) : par la responsable technique avec un pack de revue et des outils avant G3 ; par un tiers avant le premier client réel.",
       "owner": "Équipe",
-      "urgency": "Avant la fusion de G3"
-    },
-    {
-      "text": "Amendement de l'ADR 014 : la ressource « clés de formulaire » rattachée à la ligne 16 (propriétaire, administrateur). À valider.",
-      "owner": "Responsable technique",
-      "urgency": "Avant G3"
+      "urgency": "Avant G3 (puis avant le pilote)"
     },
     {
       "text": "WhatsApp : une panne 5xx est « résultat inconnu » et n'est jamais rejouée (décision J36) ; la validation « 503 puis 200 sans doublon » vaut donc pour l'e-mail seulement. À confirmer.",
@@ -521,12 +516,7 @@
       "urgency": "Avant la recette"
     },
     {
-      "text": "Dates des migrations : les fichiers portent des dates postérieures à la date réelle ; la règle « date réelle de création » et « une PR par jour » est à trancher (renommer des migrations déjà appliquées est interdit).",
-      "owner": "Responsable technique",
-      "urgency": "Avant G3"
-    },
-    {
-      "text": "Nom de la personne : l'application ne stocke aucun nom (la salutation utilise le début de l'adresse). Un vrai champ « Nom » demande une table de profil et un ADR.",
+      "text": "Nom de la personne : ADR de profil (table, saisie à l'inscription) prévu en phase 4 ; en attendant, la salutation utilise le début de l'adresse.",
       "owner": "Responsable technique",
       "urgency": "Avant le pilote"
     },
@@ -534,20 +524,30 @@
       "text": "Kapso : contrat et accord de traitement des données (sous-traitant qui voit messages et numéros), plan payant (un seul numéro en gratuit), vérification de l'entreprise chez Meta pour un numéro réel ; hypothèses de l'ADR 017 à confirmer au test réel (adresse et version de l'API, route de vérification, événements réels, STOP, modèles).",
       "owner": "Responsable technique",
       "urgency": "Avant un client réel"
+    },
+    {
+      "text": "Avis juridique avant le premier client réel : qualification d'une réponse comme échange à l'initiative du contact (consentement de 7 jours) et Kapso comme sous-traitant.",
+      "owner": "Responsable technique",
+      "urgency": "Avant un client réel"
+    },
+    {
+      "text": "E-mail réel : Postmark refuse les adresses de domaines publics ; il faut une adresse d'un domaine privé (boîte ou domaine vérifié dans le DNS) et le jeton du serveur.",
+      "owner": "Responsable technique",
+      "urgency": "Avant G3"
     }
   ],
   "nextSteps": [
     {
       "when": "Maintenant",
-      "action": "Premier essai réel en sandbox Kapso (tunnel public, webhook de type kapso, numéro de test) puis test réel C3 avec le guide ; recette des phases 1 à 3 par une personne qui n'a pas écrit le code."
+      "action": "E-mail réel (E1 à E7) : adresse d'un domaine privé et jeton Postmark ; pack de revue de sécurité (liste de fichiers, checklist, scans automatiques) ; décision G3 dans C3.md."
+    },
+    {
+      "when": "Ensuite",
+      "action": "Déploiement sur le VPS (option A) : Dockerfiles, compose, script de production du worker, runbook de déploiement, base Supabase hébergée à jour ; recette des phases 1 à 3 par une personne qui n'a pas écrit le code."
     },
     {
       "when": "À valider",
-      "action": "Droits de la palette et du logo (ADR 016), amendement de la matrice (clés de formulaire), version fusionnée de la réclamation d'envoi, ADR 010, 012 et 013, dates des migrations : décisions de la responsable technique."
-    },
-    {
-      "when": "J41",
-      "action": "Checkpoint C3 et gate G3 : décision après le test manuel sur les comptes d'essai réels, jalon le 18 janvier 2027."
+      "action": "Avis juridique (réponse à un message reçu, Kapso sous-traitant) ; ADR de profil (nom de la personne) en phase 4 ; ADR 012 (fournisseur IA) et 013."
     }
   ],
   "milestones": [
@@ -573,13 +573,13 @@
       "label": "C3 · Compte d'essai e-mail",
       "when": "avant tout envoi réel",
       "status": "todo",
-      "note": "Fournisseur confirmé sur un compte d'essai"
+      "note": "WhatsApp essayé le 21 nov sur le sandbox Kapso ; e-mail à essayer (adresse d'un domaine privé pour Postmark)"
     },
     {
       "label": "G3 · Canaux",
       "when": "18 janv. 2027",
       "status": "todo",
-      "note": "Boîte unifiée, envoi et réception sûrs"
+      "note": "Boîte unifiée, envoi et réception sûrs : WhatsApp OK, e-mail et revue de sécurité à faire"
     },
     {
       "label": "Fin du pilote",
@@ -589,26 +589,6 @@
     }
   ],
   "recent": [
-    {
-      "day": "J41",
-      "title": "Checkpoint C3 (brouillon)",
-      "items": [
-        "Audit de conformité de la phase 3 : invariants du CLAUDE.md, usage de service_role, balayage de la base et des journaux, registre des écarts. Verdict proposé : NO-GO tant que le test réel n'est pas fait.",
-        "Guide complet du test réel (Postmark, WhatsApp, arrêt d'urgence, fuites) et scripts de préparation, de contact de test, d'approbation et de balayage."
-      ],
-      "proof": "Audit par lecture et par recherche, scripts essayés sur des données factices ; aucun compte réel",
-      "review": false
-    },
-    {
-      "day": "Canaux",
-      "title": "Écran de canaux",
-      "items": [
-        "Un canal est actif si et seulement si son intégration est validée par le fournisseur ; une panne du fournisseur ne dégrade rien. Connexion e-mail Postmark depuis l'écran, ajout d'un canal, pause et reprise.",
-        "Corrige l'écart n° 2 de C3 (aucun chemin applicatif pour créer ou activer un canal). La route de vérification Postmark est une hypothèse à confirmer sur un compte réel."
-      ],
-      "proof": "23 tests de base (refus d'abord), 7 tests d'acceptation HTTP réelle, adaptateur et service unitaires",
-      "review": false
-    },
     {
       "day": "Retours",
       "title": "Retours de test et ADR 016",
@@ -638,6 +618,26 @@
       ],
       "proof": "34 tests de base (refus d'abord), 14 tests d'acceptation HTTP réelle, adaptateur et worker ; retours arrière vérifiés ; la forme réelle de l'événement de préférence reste à confirmer au test réel",
       "review": false
+    },
+    {
+      "day": "C3",
+      "title": "Test réel WhatsApp (sandbox Kapso)",
+      "items": [
+        "Message entrant traité (signature valide), réponse envoyée par le worker, reçue et lue ; hors fenêtre de 24 h : pas de champ de réponse ; STOP : numéro supprimé, envoi suivant refusé ; arrêt d'urgence : rien ne part, puis la reprise fonctionne.",
+        "Balayage de la base : tous les compteurs de fuites à 0 ; journaux de l'application et du worker : aucune occurrence de clé, de secret, de numéro ni de texte de message. Hypothèses sur Kapso (adresse, en-tête, signature, événements) confirmées."
+      ],
+      "proof": "Test manuel sur compte d'essai réel, résultats dans docs/checkpoints/C3.md ; e-mail non testé",
+      "review": false
+    },
+    {
+      "day": "Décisions",
+      "title": "Décisions C1 à C8",
+      "items": [
+        "Validées : palette et logo réservés aux administrateurs de la plateforme, amendements de l'ADR 014, Kapso, hébergement (option A), règle des dates de migration, revue de sécurité par la responsable technique avant G3 puis par un tiers avant le premier client.",
+        "Consentement conversationnel ramené de 30 à 7 jours (migration, retour arrière, test de frontière)."
+      ],
+      "proof": "pgTAP 3 353 dont 360 (frontière 6 / 8 / 29 jours), aller-retour de la migration",
+      "review": false
     }
   ],
   "capabilities": {
@@ -657,7 +657,7 @@
       "Répondre à un contact WhatsApp depuis la boîte de réception dans la fenêtre de 24 h ; un STOP (texte, bouton, liste ou préférence marketing de Kapso) désinscrit le numéro (essayé sur des fixtures)."
     ],
     "notYet": [
-      "Envoyer ou recevoir un vrai e-mail ou un vrai message WhatsApp : il manque les comptes d'essai réels et le test manuel (checkpoint C3, J41).",
+      "Envoyer ou recevoir un vrai e-mail : il manque l'adresse d'un domaine privé et le jeton Postmark (WhatsApp réel essayé sur le sandbox Kapso, pas encore avec un numéro réel ni des modèles).",
       "Se réabonner : aucune action pour lever une désinscription."
     ]
   },

@@ -61,10 +61,10 @@ select ok(not has_table_privilege('authenticated', 'public.webhook_events', 'ins
 select ok(not has_table_privilege('service_role', 'public.webhook_events', 'update') and not has_table_privilege('service_role', 'public.webhook_events', 'delete'), 'aucune modification directe, même service_role');
 select ok(not has_table_privilege('anon', 'public.webhook_events', 'select'), 'anon ne lit rien');
 select ok((select bool_and(has_function_privilege('service_role', s, 'execute')) from unnest(array[
-  'public.webhook_resolve_integration(text,text)', 'public.webhook_record(uuid,uuid,text,text,jsonb)', 'public.webhook_record_rejection(uuid,uuid,text)',
+  'public.webhook_resolve_integration(text,text,text)', 'public.webhook_record(uuid,uuid,text,text,jsonb)', 'public.webhook_record_rejection(uuid,uuid,text)',
   'public.webhook_start(uuid,uuid)', 'public.webhook_finish(uuid,uuid,text,text)']) s), 'service_role exécute les 5 fonctions');
 select ok((select bool_and(not has_function_privilege('authenticated', s, 'execute') and not has_function_privilege('anon', s, 'execute')) from unnest(array[
-  'public.webhook_resolve_integration(text,text)', 'public.webhook_record(uuid,uuid,text,text,jsonb)', 'public.webhook_record_rejection(uuid,uuid,text)',
+  'public.webhook_resolve_integration(text,text,text)', 'public.webhook_record(uuid,uuid,text,text,jsonb)', 'public.webhook_record_rejection(uuid,uuid,text)',
   'public.webhook_start(uuid,uuid)', 'public.webhook_finish(uuid,uuid,text,text)']) s), 'ni authenticated ni anon n''exécutent aucune des 5');
 
 -- ---------------------------------------------------------------------------

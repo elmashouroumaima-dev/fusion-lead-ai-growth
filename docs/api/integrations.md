@@ -31,6 +31,14 @@ Owner et admin ; entreprise du contexte vérifié ; `Idempotency-Key` obligatoir
 - `POST /api/integrations/secret` `{ integration_id, secret }` : 200 `{ replaced: true }` (rotation ou reconnexion).
 - `POST /api/integrations/disconnect` `{ integration_id }` : 200 `{ disconnected: true }`.
 
+## Passerelle WhatsApp (ADR 017, migration `20261215100000_integration_gateway.sql`)
+- `integrations.gateway` (`meta` par défaut en base, `kapso`) ; le fournisseur reste `whatsapp`. Lisible par owner / admin ; jamais un secret. `POST /api/integrations` accepte `gateway` pour WhatsApp (**`kapso` par défaut**) ; `meta` reste possible ; `kapso` est refusé pour l'e-mail (400).
+- Le secret d'une intégration `kapso` est la **clé d'API de Kapso** ; son secret de webhook est la `secret_key` choisie par nous (`POST /api/integrations/webhook-secret`).
+- `POST /api/integrations/validate` essaie la clé par Kapso (`GET …/{phone_number_id}?fields=id`, en-tête `X-API-Key`) pour une intégration `kapso`, par Meta sinon. `POST /api/integrations/templates/sync` refuse une intégration `kapso` (400) : synchronisation des modèles non branchée.
+- Webhooks : `POST /api/webhooks/kapso` (signature `X-Webhook-Signature`, HMAC-SHA256 hexadécimal du corps brut, sans préfixe). Les événements sont conservés sous le fournisseur `whatsapp` ; la résolution ne retrouve qu'une intégration `kapso` (et `POST /api/webhooks/whatsapp` qu'une intégration `meta`). Charge utile réduite à la forme normalisée commune, déduplication par empreinte (`kp:…`), jamais par l'en-tête non signé `X-Idempotency-Key`.
+- Envoi : le worker lit `channel.gateway` dans la réclamation (`message_send_claim`) et envoie par Kapso (`https://api.kapso.ai/meta/whatsapp/v24.0`, hypothèse à confirmer en C3) ou par Meta.
+- Retour arrière : `supabase/rollbacks/20261215100000_integration_gateway.sql` (supprime les intégrations Kapso : jamais sur une base qui contient de vraies données).
+
 ## Canaux (écran de canaux, migration `20261213100000_channels_activation.sql`)
 Owner et admin (`connect` sur `integrations`) ; `Idempotency-Key` obligatoire ; corps stricts (un `organization_id` du client est refusé).
 - `POST /api/channels` `{ integration_id, type: "email" | "whatsapp", sender_identity, project_scope? }` : 201 `{ channel: { id } }`. Le canal naît `pending` ; il naît `active` seulement si son intégration est déjà `active`.

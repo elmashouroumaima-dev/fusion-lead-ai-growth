@@ -21,9 +21,12 @@ const WAMID = /^[A-Za-z0-9._=+/-]{1,255}$/;
 const TEMPLATE_NAME = /^[a-z0-9_]{1,200}$/;
 const LANGUAGE = /^[a-z]{2}(_[A-Z]{2})?$/;
 
+/** Passerelle de l'intégration (ADR 017) : `meta` (API Graph en direct, par défaut) ou `kapso`. Choisie par le worker d'après la ligne `integrations.gateway`. */
+export type WhatsAppGateway = "meta" | "kapso";
+
 export type WhatsAppSendInput =
-  | { kind: "text"; phoneNumberId: string; to: string; text: string }
-  | { kind: "template"; phoneNumberId: string; to: string; template: { name: string; language: string; variables: string[] } };
+  | { kind: "text"; phoneNumberId: string; to: string; text: string; gateway?: WhatsAppGateway }
+  | { kind: "template"; phoneNumberId: string; to: string; template: { name: string; language: string; variables: string[] }; gateway?: WhatsAppGateway };
 
 export type WhatsAppSendOutcome =
   | { kind: "accepted"; providerMessageId: string }
@@ -36,7 +39,8 @@ export interface WhatsAppSender {
   send(input: WhatsAppSendInput, accessToken: string): Promise<WhatsAppSendOutcome>;
 }
 
-export type WhatsAppSenderOptions = { fetch?: typeof fetch; timeoutMs?: number };
+/** `base` et `authHeaders` ne viennent JAMAIS d'une saisie utilisateur : ce sont des constantes du code par passerelle (Graph par défaut). */
+export type WhatsAppSenderOptions = { fetch?: typeof fetch; timeoutMs?: number; base?: string; name?: string; authHeaders?: (token: string) => Record<string, string> };
 
 /** Codes Graph de limite de débit SANS ambiguïté : l'envoi n'a pas été accepté, un nouvel essai est sûr. Les erreurs 500, 503 et les codes 1, 2 (erreur interne) arrivent parfois APRÈS l'acceptation : jamais réessayées à l'aveugle. */
 const RETRYABLE_CODES = new Set([4, 17, 32, 613, 80007, 130429, 131056]);
@@ -105,16 +109,18 @@ async function readJson(response: Response): Promise<unknown> {
 export function createWhatsAppSender(options: WhatsAppSenderOptions = {}): WhatsAppSender {
   const doFetch = options.fetch ?? fetch;
   const timeoutMs = options.timeoutMs ?? TIMEOUT_MS;
+  const base = options.base ?? WHATSAPP_MESSAGES_BASE;
+  const authHeaders = options.authHeaders ?? ((token: string) => ({ Authorization: `Bearer ${token}` }));
   return {
-    name: "whatsapp_cloud",
+    name: options.name ?? "whatsapp_cloud",
     async send(input, accessToken): Promise<WhatsAppSendOutcome> {
       if (!validInput(input, accessToken)) return { kind: "rejected", code: "invalid_input" };
       let response: Response;
       try {
-        response = await doFetch(`${WHATSAPP_MESSAGES_BASE}/${input.phoneNumberId}/messages`, {
+        response = await doFetch(`${base}/${input.phoneNumberId}/messages`, {
           method: "POST",
           redirect: "error",
-          headers: { Accept: "application/json", "Content-Type": "application/json", Authorization: `Bearer ${accessToken}` },
+          headers: { Accept: "application/json", "Content-Type": "application/json", ...authHeaders(accessToken) },
           body: JSON.stringify(payload(input)),
           signal: AbortSignal.timeout(timeoutMs),
         });

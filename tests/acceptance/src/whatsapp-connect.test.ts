@@ -65,7 +65,7 @@ beforeAll(async () => {
   cleanup();
   for (const name of ["shared", "alpha-admin", "alpha-marketing", "alpha-sales", "alpha-analyst", "beta-owner"]) sessions.set(name, await signIn(`${name}@seed.test`));
   if (!MASTER) return;
-  const created = await post("shared", "/api/integrations", { provider: "whatsapp", external_account_id: PHONE, scopes: [], secret: TOKEN });
+  const created = await post("shared", "/api/integrations", { provider: "whatsapp", gateway: "meta", external_account_id: PHONE, scopes: [], secret: TOKEN });
   expect(created.status).toBe(201);
   integration = psql(`select id from public.integrations where external_account_id = '${PHONE}'`);
   const email = await post("shared", "/api/integrations", { provider: "email", external_account_id: `acc34${run}`, scopes: [], secret: `jeton-envoi-${run}-0123456789` });

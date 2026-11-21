@@ -10,8 +10,8 @@ import { ServiceError } from "./errors";
 export function createWebhookStore(): WebhookStore {
   const client = () => createAdminClient();
   return {
-    async resolve(provider, account) {
-      const { data, error } = await client().rpc("webhook_resolve_integration", { p_provider: provider, p_account: account });
+    async resolve(provider, account, gateway) {
+      const { data, error } = await client().rpc("webhook_resolve_integration", { p_provider: provider, p_account: account, ...(gateway ? { p_gateway: gateway } : {}) });
       if (error) throw new ServiceError("service_unavailable");
       if (data === null || data === undefined) return null;
       const row = data as { organization_id?: unknown; integration_id?: unknown };

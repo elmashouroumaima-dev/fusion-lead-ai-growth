@@ -990,6 +990,36 @@
         "unreadable": "Unreadable response from Postmark.",
         "unavailable": "Postmark is unavailable. Try again in a moment."
       }
+    },
+    "kapso": {
+      "connect": {
+        "title": "Connect a WhatsApp number (Kapso)",
+        "description": "Kapso relays the official WhatsApp API. The API key and the secret are encrypted, written once and never displayed.",
+        "phoneId": "Number identifier (Phone number ID)",
+        "apiKey": "Kapso API key",
+        "webhookSecret": "Webhook secret (you choose it)",
+        "generate": "Generate",
+        "webhookSecretHint": "At least 32 characters, no spaces. Copy it into Kapso, in the number's webhook (\"secret key\" field).",
+        "webhookUrl": "Webhook address to register at Kapso",
+        "webhookUrlHint": "Must be a public https address (the SITE_URL variable). Webhook type: \"kapso\".",
+        "submit": "Connect and verify",
+        "duplicate": "This number is already connected.",
+        "invalid": "Invalid identifier or key.",
+        "secretInvalid": "Invalid webhook secret (32 to 200 characters, no spaces). The number is created: replace the secret, then verify.",
+        "failed": "The connection failed. Try again in a moment."
+      },
+      "verify": {
+        "button": "Verify connection",
+        "ok": "Connection verified: the integration is active.",
+        "auth": "API key refused by Kapso.",
+        "account": "Number not found or not allowed for this key.",
+        "unreadable": "Unreadable response from Kapso.",
+        "unavailable": "Kapso is unavailable. Try again in a moment.",
+        "failed": "The verification failed."
+      }
+    },
+    "gateway": {
+      "meta": "Meta (direct)"
     }
   },
   "Unsubscribe": {

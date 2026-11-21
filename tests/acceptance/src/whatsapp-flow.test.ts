@@ -114,7 +114,7 @@ beforeAll(async () => {
   cleanup();
   sessions.set("shared", await signIn("shared@seed.test"));
   if (!MASTER) return;
-  expect((await post("shared", "/api/integrations", { provider: "whatsapp", external_account_id: PHONE, scopes: [], secret: TOKEN })).status).toBe(201);
+  expect((await post("shared", "/api/integrations", { provider: "whatsapp", gateway: "meta", external_account_id: PHONE, scopes: [], secret: TOKEN })).status).toBe(201);
   integration = psql(`select id from public.integrations where external_account_id = '${PHONE}'`);
   expect((await post("shared", "/api/integrations/webhook-secret", { integration_id: integration, secret: APP_SECRET })).status).toBe(200);
   psql(`

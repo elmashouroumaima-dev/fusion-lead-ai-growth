@@ -1,16 +1,16 @@
 {
   "title": "Rapport d'avancement",
   "intro": "Fusion Leap AI Growth : plateforme SaaS multi-tenant de croissance (CRM, canaux, campagnes, agents IA). Les fondations, le CRM (projets, contacts, leads, deals, capture, import) et le socle des canaux e-mail (intégrations, webhooks, conversations, envoi sous contrôles, statuts et réception, désabonnement) sont en place ; le désabonnement est en revue.",
-  "summary": "Les phases 0 à 2 sont terminées et fusionnées ; la phase 3 (canaux) est avancée : un message ne part qu'avec une approbation humaine et un contrôle final dans le worker, pour l'e-mail comme pour WhatsApp, avec désabonnement et retrait de consentement. Les journées 38 à 40 sont fusionnées : réponses avec verrou humain / IA, arrêt d'urgence d'envoi, jobs en échec rejouables, alertes, écrans de configuration (clés de formulaire, règles d'assignation, notifications) et scénarios automatiques des canaux (série d'e-mails avec désabonnement, WhatsApp avec webhook en double et pannes du fournisseur). Depuis : l'audit du checkpoint C3 est rédigé (verdict proposé NO-GO tant que le test réel n'est pas fait), l'écran de canaux est livré (un canal devient actif seulement quand son intégration est validée par le fournisseur ; e-mail Postmark et WhatsApp), la palette et le logo sont réservés aux administrateurs de la plateforme (ADR 016, à valider), et les retours de test sont traités (page Membres en cartes, fil d'Ariane, accessibilité, textes). Rien n'a encore été envoyé pour de vrai : il manque les comptes d'essai réels (checkpoint C3, J41).",
+  "summary": "Les phases 0 à 2 sont terminées et fusionnées ; la phase 3 (canaux) est avancée : un message ne part qu'avec une approbation humaine et un contrôle final dans le worker, pour l'e-mail comme pour WhatsApp, avec désabonnement et retrait de consentement. Les journées 38 à 40 sont fusionnées : réponses avec verrou humain / IA, arrêt d'urgence d'envoi, jobs en échec rejouables, alertes, écrans de configuration (clés de formulaire, règles d'assignation, notifications) et scénarios automatiques des canaux (série d'e-mails avec désabonnement, WhatsApp avec webhook en double et pannes du fournisseur). Depuis : l'audit du checkpoint C3 est rédigé (verdict proposé NO-GO tant que le test réel n'est pas fait), l'écran de canaux est livré (un canal devient actif seulement quand son intégration est validée par le fournisseur ; e-mail Postmark et WhatsApp), la palette et le logo sont réservés aux administrateurs de la plateforme (ADR 016, à valider), et les retours de test sont traités (page Membres en cartes, fil d'Ariane, accessibilité, textes). La passerelle WhatsApp est désormais Kapso (ADR 017 acceptée le 21 novembre : webhooks signés, choix par intégration, essai prévu en sandbox) ; l'ancien chemin Meta reste dans le code sans écran de connexion. Rien n'a encore été envoyé pour de vrai : il manque les comptes d'essai réels (checkpoint C3, J41).",
   "tests": [
     {
       "label": "Web (application)",
-      "value": 2781,
+      "value": 2784,
       "note": "Écrans, routes HTTP et services de l'application"
     },
     {
       "label": "Base de données (pgTAP)",
-      "value": 3297,
+      "value": 3313,
       "note": "Tables, droits et règles de la base de données"
     },
     {
@@ -20,7 +20,7 @@
     },
     {
       "label": "Domaine (règles métier)",
-      "value": 660,
+      "value": 661,
       "note": "Règles métier pures (contrôles d'envoi, consentement...)"
     },
     {
@@ -30,12 +30,12 @@
     },
     {
       "label": "Worker et adaptateurs",
-      "value": 308,
+      "value": 331,
       "note": "Tâches de fond et adaptateurs de fournisseurs"
     },
     {
       "label": "Acceptation (T1 à T5, canaux)",
-      "value": 303,
+      "value": 311,
       "note": "Parcours complets en HTTP réel, dont les scénarios des canaux (série e-mail, WhatsApp)"
     }
   ],
@@ -461,11 +461,6 @@
       "urgency": "Avant J34"
     },
     {
-      "text": "Compte développeur Meta bloqué (« compte trop récent ») : WhatsApp est critique pour J34.",
-      "owner": "Propriétaire du produit",
-      "urgency": "Avant J34"
-    },
-    {
       "text": "Choisir le fournisseur IA (ADR 012) et l'hébergeur (ADR 010).",
       "owner": "Responsable technique",
       "urgency": "Avant J47 / J58"
@@ -534,12 +529,17 @@
       "text": "Nom de la personne : l'application ne stocke aucun nom (la salutation utilise le début de l'adresse). Un vrai champ « Nom » demande une table de profil et un ADR.",
       "owner": "Responsable technique",
       "urgency": "Avant le pilote"
+    },
+    {
+      "text": "Kapso : contrat et accord de traitement des données (sous-traitant qui voit messages et numéros), plan payant (un seul numéro en gratuit), vérification de l'entreprise chez Meta pour un numéro réel ; hypothèses de l'ADR 017 à confirmer au test réel (adresse et version de l'API, route de vérification, événements réels, STOP, modèles).",
+      "owner": "Responsable technique",
+      "urgency": "Avant un client réel"
     }
   ],
   "nextSteps": [
     {
       "when": "Maintenant",
-      "action": "Test réel C3 avec le guide complet : Postmark (adresse confirmée, jeton), tunnel public, numéro de test Meta ; puis recette des phases 1 à 3 par une personne qui n'a pas écrit le code."
+      "action": "Premier essai réel en sandbox Kapso (tunnel public, webhook de type kapso, numéro de test) puis test réel C3 avec le guide ; recette des phases 1 à 3 par une personne qui n'a pas écrit le code."
     },
     {
       "when": "À valider",
@@ -590,16 +590,6 @@
   ],
   "recent": [
     {
-      "day": "J40",
-      "title": "Scénarios canaux",
-      "items": [
-        "Série de 5 e-mails : le 3e contact se désabonne en cours de série, ne reçoit rien ; une panne 503 deux fois puis un succès ne crée aucun doublon.",
-        "WhatsApp : conversation démarrée par le client et par un modèle approuvé, webhook reçu deux fois (un seul message), limite de débit puis succès sans doublon, panne 5xx jamais rejouée."
-      ],
-      "proof": "15 tests d'acceptation HTTP réelle (vrai worker, fournisseurs simulés)",
-      "review": false
-    },
-    {
       "day": "J39c",
       "title": "Écran d'import CSV",
       "items": [
@@ -634,9 +624,19 @@
       "title": "Retours de test et ADR 016",
       "items": [
         "Palette et logo réservés aux administrateurs de la plateforme (garde en base et sur le serveur) : le changement de qui peut écrire est à valider par la responsable technique.",
-        "Page Membres en cartes (plus de débordement sur mobile et tablette), fil d'Ariane sur cinq pages, attribut d'accessibilité corrigé, textes (doublon Deals, nombres formatés, libellé de langue, salutation par la personne)."
+        "Page Membres en cartes, fil d'Ariane sur cinq pages, attribut d'accessibilité corrigé, textes du tableau de bord et de Deals corrigés."
       ],
-      "proof": "Tests de base, RLS, acceptation HTTP et unitaires ; vérifié au navigateur à 375 et 768 px (anglais et arabe)",
+      "proof": "Tests de base, RLS, acceptation HTTP et unitaires ; vérifié au navigateur à 375 et 768 px",
+      "review": false
+    },
+    {
+      "day": "ADR 017",
+      "title": "Passerelle WhatsApp Kapso",
+      "items": [
+        "Kapso relaie l'API officielle de WhatsApp : envoi par clé d'API, webhooks signés (HMAC-SHA256 du corps brut), événements ramenés à la forme commune ; l'intégration porte sa passerelle (`meta` ou `kapso`), Kapso par défaut pour les nouvelles.",
+        "Écran « Connecter un numéro WhatsApp (Kapso) » : clé d'API et secret de webhook en écriture seule, adresse du webhook à recopier chez Kapso. Décisions prises : Kapso seule passerelle, essais avec données factices, option C, Kapso aussi en production (contrat et accord de traitement des données à obtenir avant un client réel)."
+      ],
+      "proof": "22 tests d'adaptateur, 16 tests de base (refus d'abord), 8 tests d'acceptation HTTP réelle, retour arrière vérifié ; aucun appel réel vers Kapso",
       "review": false
     }
   ],

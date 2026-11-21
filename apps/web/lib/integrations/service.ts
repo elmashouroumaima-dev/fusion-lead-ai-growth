@@ -26,7 +26,7 @@ export type IntegrationsResult<T> = { ok: true; value: T } | { ok: false; code: 
 const fail = (code: ServiceErrorCode): { ok: false; code: ServiceErrorCode } => ({ ok: false, code });
 
 const INTEGRATION_COLUMNS =
-  "id, organization_id, provider, status, external_account_id, scopes, has_secret, has_webhook_secret, last_sync_at, last_sync_finished_at, last_error, created_at, updated_at";
+  "id, organization_id, provider, status, external_account_id, gateway, scopes, has_secret, has_webhook_secret, last_sync_at, last_sync_finished_at, last_error, created_at, updated_at";
 const CHANNEL_COLUMNS = "id, organization_id, type, integration_id, sender_identity, status, project_scope, send_paused, created_at, updated_at";
 
 export type IntegrationView = { integration: IntegrationRow; channels: ChannelRow[] };
@@ -65,7 +65,7 @@ export async function listIntegrationViews(supabase: ServerSupabase, organizatio
 export async function createProviderIntegration(
   supabase: ServerSupabase,
   organizationId: string,
-  input: CreateProviderIntegrationInput,
+  input: Omit<CreateProviderIntegrationInput, "gateway"> & { gateway?: CreateProviderIntegrationInput["gateway"] },
 ): Promise<IntegrationsResult<{ id: string }>> {
   const keyRing = getKeyRing();
   if (!keyRing) return fail("service_unavailable");
@@ -84,6 +84,8 @@ export async function createProviderIntegration(
     p_ciphertext: sealed.ciphertext,
     p_nonce: sealed.nonce,
     p_key_version: sealed.keyVersion,
+    // un e-mail est toujours « meta » (colonne sans objet) ; une intégration WhatsApp porte la passerelle choisie (Kapso par défaut)
+    p_gateway: input.provider === "whatsapp" ? (input.gateway ?? "meta") : "meta",
   });
   if (error) return fail(mapLeadsDbError(error));
   return typeof data === "string" ? { ok: true, value: { id: data } } : fail("internal_error");

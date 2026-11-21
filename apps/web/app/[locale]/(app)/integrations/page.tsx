@@ -8,10 +8,11 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { AddChannel, ChannelPause, ConnectEmail } from "../../../../components/integrations/channel-actions";
 import { IntegrationActions } from "../../../../components/integrations/integration-actions";
-import { ConnectWhatsApp, VerifyConnection } from "../../../../components/integrations/whatsapp-connect";
+import { ConnectKapso, VerifyConnection } from "../../../../components/integrations/whatsapp-connect";
 import { requireLocale } from "../../../../i18n/require-locale";
 import { requireClaims } from "../../../../lib/auth/require-claims";
 import { isEncryptionConfigured, listIntegrationViews } from "../../../../lib/integrations/service";
+import { getServerEnv } from "../../../../lib/env/server";
 import { createClient } from "../../../../lib/supabase/server";
 import { requireTenantContext } from "../../../../lib/tenant/context";
 
@@ -55,7 +56,7 @@ export default async function IntegrationsPage({ params }: { params: Promise<{ l
       ) : null}
 
       <ConnectEmail encryptionConfigured={encryptionConfigured} />
-      <ConnectWhatsApp encryptionConfigured={encryptionConfigured} />
+      <ConnectKapso encryptionConfigured={encryptionConfigured} webhookUrl={`${getServerEnv().SITE_URL}/api/webhooks/kapso`} />
 
       {views === null ? (
         <Alert variant="destructive" role="alert">
@@ -75,7 +76,9 @@ export default async function IntegrationsPage({ params }: { params: Promise<{ l
               <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                 <div className="grid gap-1">
                   <h2 className="text-lg leading-none font-semibold">
-                    {name} <bdi dir="ltr" className="text-muted-foreground text-sm font-normal">({integration.external_account_id})</bdi>
+                    {name}{" "}
+                    {integration.provider === "whatsapp" ? <span className="text-muted-foreground text-sm font-normal">· {integration.gateway === "kapso" ? "Kapso" : t("gateway.meta")}</span> : null}{" "}
+                    <bdi dir="ltr" className="text-muted-foreground text-sm font-normal">({integration.external_account_id})</bdi>
                   </h2>
                   <p className="text-muted-foreground text-sm">
                     {t("lastSync")} : {integration.last_sync_at ? format.dateTime(new Date(integration.last_sync_at), { dateStyle: "medium", timeStyle: "short" }) : t("lastSyncNever")}
@@ -130,7 +133,7 @@ export default async function IntegrationsPage({ params }: { params: Promise<{ l
                         </ul>
                       )}
                     </div>
-                    {integration.status !== "disconnected" && integration.has_secret ? <VerifyConnection integrationId={integration.id} /> : null}
+                    {integration.status !== "disconnected" && integration.has_secret ? <VerifyConnection integrationId={integration.id} gateway={integration.gateway} /> : null}
                     {integration.status !== "disconnected" && (integration.provider === "email" || integration.provider === "whatsapp") ? <AddChannel integrationId={integration.id} type={integration.provider} /> : null}
                     <IntegrationActions integrationId={integration.id} encryptionConfigured={encryptionConfigured} disconnected={integration.status === "disconnected"} />
                   </>

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { normalizeWhatsAppPayload } from "@fusion-leap/adapters";
-import { createWhatsAppWebhookProcessor, type InboundResult, type MessageEvent, type StatusEvent, type StatusResult, type WhatsAppEventGateway } from "./whatsapp-webhook";
+import { createWhatsAppWebhookProcessor, type InboundResult, type MarketingPreferenceEvent, type MessageEvent, type StatusEvent, type StatusResult, type WhatsAppEventGateway } from "./whatsapp-webhook";
 
 const ORG = "11111111-1111-4111-8111-111111111111";
 const INT = "33333333-3333-4333-8333-333333333333";
@@ -17,6 +17,7 @@ const stored = (value: Record<string, unknown>) => JSON.parse(JSON.stringify(nor
 class Memory implements WhatsAppEventGateway {
   readonly messages: Array<{ org: string; integration: string; event: MessageEvent }> = [];
   readonly statuses: Array<{ org: string; integration: string; event: StatusEvent }> = [];
+  readonly preferences: Array<{ org: string; integration: string; event: MarketingPreferenceEvent }> = [];
   inbound: InboundResult = { outcome: "recorded" };
   statusResult: StatusResult = { outcome: "applied" };
   fail = false;
@@ -27,6 +28,10 @@ class Memory implements WhatsAppEventGateway {
   }
   async applyStatus(org: string, integration: string, event: StatusEvent) {
     this.statuses.push({ org, integration, event });
+    return this.statusResult;
+  }
+  async applyMarketingPreference(org: string, integration: string, event: MarketingPreferenceEvent) {
+    this.preferences.push({ org, integration, event });
     return this.statusResult;
   }
 }
@@ -87,5 +92,32 @@ describe("processeur des événements WhatsApp (J35)", () => {
     g.fail = true;
     const error = await run(g, stored({ messages: [message("wamid.A", { text: { body: "SECRET-CONTENU" } })] })).catch((e: Error) => e);
     expect(String(error)).not.toContain("SECRET-CONTENU");
+  });
+});
+
+describe("préférence marketing annoncée par la passerelle (STOP Kapso, ADR 017)", () => {
+  const preference = (status: string) => ({ object: "whatsapp_business_account", phoneNumberIds: [PHONE], skipped: 0, events: [{ kind: "marketing_preference", id: "mp.212600000000.1", from: "+212600000000", at: null, status }] });
+
+  it("« stopped » : appliquée avec l'entreprise et l'intégration de la LIGNE ; l'événement est traité (jamais pris pour un statut)", async () => {
+    const g = new Memory();
+    expect(await run(g, preference("stopped"))).toBe("processed");
+    expect(g.preferences.map((p) => [p.org, p.integration, p.event.from, p.event.status])).toEqual([[ORG, INT, "+212600000000", "stopped"]]);
+    expect(g.statuses).toHaveLength(0);
+    expect(g.messages).toHaveLength(0);
+  });
+
+  it("« resumed » ignoré par la base : « ignored », rien n'est réactivé par le worker", async () => {
+    const g = new Memory();
+    g.statusResult = { outcome: "ignored", reason: "resumed_not_applied" };
+    expect(await run(g, preference("resumed"))).toBe("ignored");
+  });
+
+  it("forme altérée (statut inconnu, numéro sans « + ») : jamais rejouable", async () => {
+    const g = new Memory();
+    await expect(run(g, preference("autre"))).rejects.toMatchObject({ message: "invalid_event" });
+    const bad = preference("stopped");
+    (bad.events[0] as { from: string }).from = "212600000000";
+    await expect(run(g, bad)).rejects.toMatchObject({ message: "invalid_event" });
+    expect(g.preferences).toHaveLength(0);
   });
 });

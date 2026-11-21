@@ -231,3 +231,47 @@ describe("vérification de la clé et du numéro Kapso", () => {
     expect(await run(() => json(200, { id: "999999999999" }))).toEqual({ kind: "invalid", code: "provider_unreadable" });
   });
 });
+
+describe("STOP chez Kapso : boutons, listes et préférence marketing (ADR 017)", () => {
+  it("un « STOP » tapé sur un bouton ou une liste garde son texte (même règle que Meta) ; un média n'en a pas", () => {
+    const button = normalizeKapsoPayload(received({ type: "button", text: undefined, button: { text: "STOP" } }));
+    expect(button?.events[0]).toMatchObject({ kind: "message", type: "button", text: "STOP" });
+    const list = normalizeKapsoPayload(received({ type: "interactive", text: undefined, interactive: { list_reply: { id: "x", title: "Arrêt" } } }));
+    expect(list?.events[0]).toMatchObject({ type: "interactive", text: "Arrêt" });
+    const reply = normalizeKapsoPayload(received({ type: "interactive", text: undefined, interactive: { button_reply: { title: "Oui" } } }));
+    expect(reply?.events[0]).toMatchObject({ text: "Oui" });
+    expect(normalizeKapsoPayload(received({ type: "image", text: undefined }))?.events[0]).toMatchObject({ type: "image", text: null });
+  });
+
+  const preference = (status: string, over: Record<string, unknown> = {}) => ({
+    phone_number_id: PHONE,
+    contact: { phone_number: "212600000001" },
+    marketing_preference: { status, previous_status: "resumed", detail: "texte libre du contact", occurred_at: "2026-11-21T10:00:00Z", sequence: 7 },
+    ...over,
+  });
+
+  it("« stopped » et « resumed » : événement de préférence, numéro avec « + », identifiant stable, aucun texte libre conservé", () => {
+    const stopped = normalizeKapsoPayload(preference("stopped"));
+    expect(stopped).toEqual({
+      object: "whatsapp_business_account", phoneNumberIds: [PHONE], skipped: 0,
+      events: [{ kind: "marketing_preference", id: "mp.212600000001.stopped.7", from: "+212600000001", at: "2026-11-21T10:00:00.000Z", status: "stopped" }],
+    });
+    expect(JSON.stringify(stopped)).not.toContain("texte libre");
+    expect(normalizeKapsoPayload(preference("resumed"))?.events[0]).toMatchObject({ status: "resumed" });
+    expect(readWhatsAppPayload(stopped)).not.toBeNull();
+  });
+
+  it("le numéro est cherché dans les emplacements documentés ; absent ou invalide : l'événement est ignoré et compté (jamais une erreur qui casse le lot)", () => {
+    expect(normalizeKapsoPayload(preference("stopped", { contact: undefined, conversation: { phone_number: "+212600000002" } }))?.events[0]).toMatchObject({ from: "+212600000002" });
+    expect(normalizeKapsoPayload(preference("stopped", { contact: { wa_id: "212600000003" } }))?.events[0]).toMatchObject({ from: "+212600000003" });
+    expect(normalizeKapsoPayload(preference("stopped", { contact: {} }))).toMatchObject({ events: [], skipped: 1 });
+    expect(normalizeKapsoPayload(preference("stopped", { contact: { phone_number: "pas-un-numero" } }))).toMatchObject({ events: [], skipped: 1 });
+  });
+
+  it("statut inconnu : pas un événement de préférence (ignoré) ; identifiant de séquence absent : « 0 »", () => {
+    expect(normalizeKapsoPayload(preference("autre"))).toMatchObject({ events: [], skipped: 1 });
+    const noSequence = preference("stopped");
+    delete (noSequence.marketing_preference as Record<string, unknown>).sequence;
+    expect(normalizeKapsoPayload(noSequence)?.events[0]).toMatchObject({ id: "mp.212600000001.stopped.0" });
+  });
+});

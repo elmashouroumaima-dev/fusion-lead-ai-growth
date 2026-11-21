@@ -21,7 +21,9 @@ const NOT_MESSAGES = new Set(["reaction", "system", "request_welcome"]);
 export type WhatsAppStatus = (typeof STATUSES)[number];
 export type WhatsAppEvent =
   | { kind: "message"; id: string; from: string; at: string | null; type: string; text: string | null }
-  | { kind: "status"; id: string; status: WhatsAppStatus; at: string | null; errorCode: number | null };
+  | { kind: "status"; id: string; status: WhatsAppStatus; at: string | null; errorCode: number | null }
+  /** Préférence marketing d'un contact annoncée par la passerelle (Kapso : `marketing_preference_changed`) ; `from` au format `+<chiffres>`. */
+  | { kind: "marketing_preference"; id: string; from: string; at: string | null; status: "stopped" | "resumed" };
 export type WhatsAppPayload = { object: "whatsapp_business_account"; phoneNumberIds: string[]; events: WhatsAppEvent[]; skipped: number };
 
 const isRecord = (value: unknown): value is Record<string, unknown> => typeof value === "object" && value !== null && !Array.isArray(value);
@@ -120,6 +122,9 @@ export function readWhatsAppPayload(value: unknown): WhatsAppPayload | null {
       if (event.at !== null && typeof event.at !== "string") return null;
     } else if (event.kind === "status") {
       if (!(STATUSES as readonly unknown[]).includes(event.status) || (event.errorCode !== null && typeof event.errorCode !== "number")) return null;
+      if (event.at !== null && typeof event.at !== "string") return null;
+    } else if (event.kind === "marketing_preference") {
+      if (typeof event.from !== "string" || !/^\+[0-9]{5,20}$/.test(event.from) || (event.status !== "stopped" && event.status !== "resumed")) return null;
       if (event.at !== null && typeof event.at !== "string") return null;
     } else {
       return null;

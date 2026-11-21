@@ -1210,6 +1210,12 @@ Plan : test manuel e-mail et WhatsApp sur comptes d'essai (2 h), corrections (2 
 ### Reste à faire
 - Avant l'ouverture à un vrai client : insérer l'administrateur de la plateforme en SQL (runbook `plans-quotas.md`) ; appliquer la migration sur la base hébergée avec les autres.
 
+## Passation (20 novembre)
+### Fait
+- Runbook de la base hébergée et de l'enregistrement de l'administrateur de la plateforme ; document des tâches de la responsable technique mis à jour avec huit décisions (options et recommandation) ; rapport d'avancement actualisé (le contenu manuel n'avait pas bougé depuis le 16 novembre).
+### Reste à faire
+- Appliquer les migrations sur la base hébergée (personne qui possède le projet), trancher les décisions C1 à C8, test réel C3.
+
 ## ADR 017 : Kapso (21 novembre)
 ### Fait
 - ADR 017 rédigée (Proposed) après lecture de la documentation de Kapso : envoi compatible Meta avec une autre adresse et `X-API-Key`, webhooks signés en HMAC-SHA256 hexadécimal (`X-Webhook-Signature`) pour le type `kapso`, signature du type `meta` non établie.

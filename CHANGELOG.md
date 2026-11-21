@@ -9,6 +9,12 @@ Format : Keep a Changelog. Une entrée par jour de travail.
 - Tests : pgTAP `340_whatsapp_reply` (17) et `350_whatsapp_marketing_optout` (17), `270` adapté ; analyseur Kapso, worker, fenêtre de l'Inbox ; acceptation `whatsapp-reply` (5) et `kapso-gateway` (9). Vérifiés : retours arrière, pgTAP 3 347, RLS 497, acceptation 317 (+ 1 ignoré), unitaires verts.
 - Documentation : guide du test réel (C3) réécrit pour WhatsApp en sandbox Kapso (PDF et PDF « toutes phases » régénérés) ; note sur les adresses d'expéditeur refusées par Postmark (domaines publics).
 - Réserve : la forme exacte de l'événement `marketing_preference_changed` n'a pas d'exemple dans la documentation de Kapso ; l'analyse est prudente (champ manquant : événement ignoré, jamais une erreur) ; à confirmer au test réel.
+
+### Passation : base hébergée, administrateur de la plateforme, décisions à trancher
+- Ajout : `docs/runbooks/hosted-database.md` : appliquer les migrations manquantes sur la base hébergée (sauvegarde, essai à blanc, vérification, jamais de remise à zéro) et enregistrer l'administrateur de la plateforme (ADR 016) ; à faire par la personne qui possède le projet.
+- Modification : `docs/product/taches-responsable-technique` (HTML et PDF) mis à jour au 20 novembre : tout fusionné (PR 41 à 67), huit nouvelles décisions avec options et recommandation (droits de la palette, amendements ADR 014, réclamation d'envoi, dates des migrations, revue de sécurité, nom de la personne, numéro WhatsApp, base hébergée).
+- Modification : rapport d'avancement du 20 novembre (tests mesurés : 8 245 ; résumé, points ouverts, étapes suivantes mis à jour).
+
 ### Passerelle WhatsApp Kapso (ADR 017, acceptée le 21 novembre)
 - Ajout : migration `20261215100000_integration_gateway.sql` (+ retour arrière) : `integrations.gateway` (`meta` | `kapso`), `create_provider_integration(p_gateway)`, `webhook_resolve_integration(p_gateway)`, `message_send_claim` renvoie `channel.gateway`.
 - Ajout : `packages/adapters/src/whatsapp/kapso.ts` : envoi et vérification par Kapso (`X-API-Key`, adresse fixe), routeur de passerelle, adaptateur de webhook (`X-Webhook-Signature`), analyseur d'événements vers la forme normalisée commune ; le worker envoie par la passerelle de l'intégration ; `POST /api/webhooks/kapso`.

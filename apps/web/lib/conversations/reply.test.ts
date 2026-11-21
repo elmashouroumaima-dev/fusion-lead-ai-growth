@@ -37,7 +37,7 @@ describe("replyToConversation", () => {
       replyToConversation({ rpc: vi.fn().mockResolvedValue({ data: null, error }) } as never, ORG, CONV, { body: "x" }, KEY);
     expect(await run({ code: "42501", message: "forbidden" })).toEqual({ ok: false, code: "forbidden" });
     expect(await run({ code: "PT404", message: "not found" })).toEqual({ ok: false, code: "not_found" });
-    for (const reason of ["conversation_locked", "channel_unsupported", "channel_inactive", "message_not_approvable", "idempotency_conflict"]) {
+    for (const reason of ["conversation_locked", "channel_unsupported", "channel_inactive", "message_not_approvable", "window_closed", "idempotency_conflict"]) {
       expect(await run({ code: "P0001", message: reason })).toEqual({ ok: false, code: "conflict" });
       expect(mapLeadsDbError({ code: "P0001", message: reason })).toBe("conflict");
     }

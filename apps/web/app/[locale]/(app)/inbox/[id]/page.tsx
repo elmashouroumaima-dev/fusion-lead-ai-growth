@@ -14,6 +14,7 @@ import { requireLocale } from "../../../../../i18n/require-locale";
 import { requireClaims } from "../../../../../lib/auth/require-claims";
 import { getConversationLock, listMessages, MESSAGES_PAGE_SIZE } from "../../../../../lib/conversations/service";
 import { getInboxConversation } from "../../../../../lib/inbox/queries";
+import { isWhatsAppWindowOpen } from "../../../../../lib/inbox/whatsapp-window";
 import { listOrganizationMembers } from "../../../../../lib/members/queries";
 import { createClient } from "../../../../../lib/supabase/server";
 import { requireTenantContext } from "../../../../../lib/tenant/context";
@@ -68,6 +69,15 @@ export default async function ConversationPage({ params, searchParams }: Props) 
   const canSetState = conversation !== null && can(ctx.role, "reply", "conversations", { isOwnRecord: conversation.assignee_id === ctx.userId });
   const canOpenContact = can(ctx.role, "read", "contacts");
   const canReply = canSetState;
+  // WhatsApp : texte libre seulement dans la fenêtre de 24 h (le message le plus récent du contact, première page) ; le serveur refuse de toute façon hors fenêtre
+  let whatsappWindowOpen = false;
+  if (conversation?.channel_type === "whatsapp" && canReply) {
+    try {
+      whatsappWindowOpen = isWhatsAppWindowOpen(page === 1 ? messages : await listMessages(supabase, ctx.organizationId, conversation.id, 1));
+    } catch {
+      whatsappWindowOpen = false;
+    }
+  }
   // Verrou courant : l'état réel (jamais l'identité de l'autre rédacteur), relu à chaque rafraîchissement.
   let lock: "none" | "mine" | "other" | "ai" = "none";
   if (canReply && conversation) {
@@ -234,8 +244,12 @@ export default async function ConversationPage({ params, searchParams }: Props) 
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                {conversation.channel_type === "email" ? (
+                {conversation.channel_type === "email" || (conversation.channel_type === "whatsapp" && whatsappWindowOpen) ? (
                   <ReplyComposer conversationId={conversation.id} initialLock={lock} />
+                ) : conversation.channel_type === "whatsapp" ? (
+                  <p role="status" className="text-muted-foreground text-sm">
+                    {t("reply.windowClosed")}
+                  </p>
                 ) : (
                   <p className="text-muted-foreground text-sm">{t("reply.unsupported")}</p>
                 )}

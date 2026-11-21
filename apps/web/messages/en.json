@@ -1304,7 +1304,9 @@
         "invalid_input": "The reply is empty, too long or contains disallowed characters.",
         "generic": "An error occurred. Please try again."
       },
-      "windowClosed": "The 24-hour window is closed: the contact has not written for more than 24 hours. A free-text message cannot be sent. Wait for their reply or use an approved template."
+      "windowClosed": "The 24-hour window is closed: the contact has not written for more than 24 hours. A free-text message cannot be sent. Wait for their reply or use an approved template.",
+      "placeholderWhatsapp": "Write your WhatsApp reply…",
+      "infoWhatsapp": "The reply is sent by WhatsApp after a final check (consent, do not contact, 24-hour window). It first appears as “queued”."
     }
   },
   "Lead": {

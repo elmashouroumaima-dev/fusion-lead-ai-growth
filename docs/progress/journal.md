@@ -1254,3 +1254,9 @@ Plan : test manuel e-mail et WhatsApp sur comptes d'essai (2 h), corrections (2 
 ### Reste à faire
 - E-mail (E1 à E7) : adresse d'expéditeur d'un domaine privé pour Postmark ; revue de sécurité indépendante ; événement de préférence marketing et modèles WhatsApp ; décisions de la responsable technique ; G3.
 
+## Rapport d'avancement : nouveau design (22 novembre)
+### Fait
+- Rapport refait : A4, couleurs et police de l'application, synthèse lisible en une page, détails en annexes ; données mises à jour (statuts, points ouverts, texte sur la sécurité).
+### Reste à faire
+- Relire le texte « en bref » (`brief`) et les points ouverts à chaque rapport ; e-mail réel, pack de revue de sécurité, G3.
+

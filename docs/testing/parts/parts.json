@@ -1,0 +1,40 @@
+{
+  "_aide": "Ordre et titres des parties du guide de test complet. Une partie = un .pdf (repris tel quel), un .html (rendu par Chrome) ou un .md (rendu par scripts/test-guide/build-pdf.mjs, avec sa fiche de résultats). Pour ajouter quelque chose : déposer le fichier dans docs/testing/parts/, ajouter une ligne ici, lancer pnpm test:guide.",
+  "parts": [
+    {
+      "file": "01-phase1-comptes-roles.pdf",
+      "tag": "Phase 1",
+      "title": "Comptes, entreprises et rôles (J4 à J15)"
+    },
+    {
+      "file": "02-phase2-crm.pdf",
+      "tag": "Phase 2",
+      "title": "Projets, leads, contacts et deals (J16 à J28)"
+    },
+    {
+      "file": "../phase2-3-functional-tests.md",
+      "tag": "Phases 2 et 3",
+      "title": "Recette détaillée, partie interface et partie technique (J16 à J32)"
+    },
+    {
+      "file": "04-phase3-conversations-envoi.pdf",
+      "tag": "Phase 3",
+      "title": "Conversations et envoi d'e-mails (J29 à J31)"
+    },
+    {
+      "file": "05-phase3-boite-reponses.pdf",
+      "tag": "Phase 3",
+      "title": "Boîte de réception et réponses (J38)"
+    },
+    {
+      "file": "06-phase3-exploitation-configuration.pdf",
+      "tag": "Phase 3",
+      "title": "Exploitation, configuration et import (J39 à J40)"
+    },
+    {
+      "file": "07-c3-test-reel.html",
+      "tag": "Checkpoint C3",
+      "title": "Test réel : Postmark, WhatsApp (Kapso), arrêt d'urgence, fuites (J41), étape par étape"
+    }
+  ]
+}

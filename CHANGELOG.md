@@ -3,6 +3,15 @@
 Format : Keep a Changelog. Une entrée par jour de travail.
 
 ## [Non publié]
+### Un seul PDF de test (22 novembre)
+- Modification : `docs/testing/` ne contient plus qu'**un PDF : `Guide-test-complet.pdf`** (couverture, sommaire, signets ; 71 pages). Les parties sont dans `docs/testing/parts/` (listées dans `parts.json`) ; chaque partie est un `.pdf`, un `.html` ou un `.md`. Pour ajouter quelque chose : déposer le fichier, ajouter une ligne dans `parts.json`, lancer `pnpm test:guide`.
+- Modification : `pnpm test:guide` reconstruit le PDF complet (`scripts/test-guide/merge-all.py`) ; `build-pdf.mjs` accepte un guide Markdown et une sortie en argument.
+- Suppression : anciens PDF séparés (Guide-test-simple-*, Guide-tests-phases-2-3, Guide-test-manuel-C3, Guide-test-reel-complet-C3, Guide-test-complet-toutes-phases) : leur contenu est dans le PDF complet ; ils restent dans l'historique git.
+### Rapport d'avancement : nouveau design (22 novembre)
+- Modification : `scripts/progress-report/build.mjs` et `styles.css` réécrits : A4, aux couleurs de l'application (menthe, teal, noir, dégradé de l'en-tête), police Inter ; 5 pages de lecture (synthèse, dernières livraisons, ce qui reste, points ouverts, qualité) et 4 pages d'annexes (détail des phases, fonctions, réalisé en plus du plan) ; texte « en bref » court (`brief` dans `data.json`) à la place du long paragraphe ; plus de chevauchement du pied de page.
+- Correction : `data.json` : statuts « en revue » passés à « fait » (tout est fusionné), notes de la phase 3 mises à jour (Kapso, test réel WhatsApp), points ouverts dédoublonnés (15), paragraphe sur la sécurité rendu exact (les revues de J39 à J40, de la réponse WhatsApp, de Kapso et du STOP restent à faire).
+- Modification : un seul rapport gardé dans `docs/progress/report/` : le PDF du jour ; les anciens PDF (13) et toutes les sources HTML sont supprimés (ils restent dans l'historique git), et la commande `pnpm report:progress` le refait à chaque génération.
+- Documentation : `docs/runbooks/progress-report.md`.
 ### Décisions de la responsable technique C1 à C8 (2026-11-21)
 - Décision : consentement conversationnel **7 jours** (avant : 30) : migration `20261218100000_reply_consent_7_days.sql` (+ retour arrière) ; pgTAP `360_reply_consent_7_days` (frontière 6 / 8 / 29 jours) ; `docs/api/send.md` et `conversations.md` mis à jour.
 - Décisions enregistrées : ADR 014 (amendements acceptés, 7 jours), ADR 016 (validé), ADR 010 (direction : option A, statut Proposed jusqu'à Q5), ADR 006 (règle des dates de migration), `C3.md` (écart 4 tranché), document des tâches de la responsable technique (huit points validés).

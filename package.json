@@ -20,7 +20,7 @@
     "worker:dev": "pnpm --filter @fusion-leap/worker dev",
     "report:progress": "node scripts/progress-report/build.mjs",
     "test:call": "tsx scripts/test-guide/api-call.mts",
-    "test:guide": "node scripts/test-guide/build-pdf.mjs",
+    "test:guide": "python scripts/test-guide/merge-all.py",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "db:start": "supabase start",

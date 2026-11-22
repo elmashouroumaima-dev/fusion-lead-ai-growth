@@ -1,5 +1,5 @@
 /**
- * Génère le PDF d'un guide de tests (Markdown) : `pnpm test:guide` produit docs/testing/Guide-tests-phases-2-3.pdf à partir de
+ * Génère le PDF d'un guide de tests (Markdown) ; appelé par scripts/test-guide/merge-all.py (`pnpm test:guide`) pour chaque partie .md du guide complet. Sans argument : le guide des phases 2 et 3, à partir de
  * docs/testing/phase2-3-functional-tests.md, avec couverture, sommaire, tableaux de cas et FICHE DE RÉSULTATS (OK / KO / commentaire) générée
  * à partir des identifiants de cas (première colonne des tableaux : A1, B12, T6.3...). Chrome headless (CHROME_PATH pour un autre exécutable).
  * Sous-ensemble de Markdown pris en charge : titres #, ##, ###, paragraphes, listes (avec blocs de code imbriqués), tableaux, blocs de code, citations, règles.
@@ -8,15 +8,18 @@
  *   pnpm test:guide --html          -> HTML seulement (sans Chrome)
  */
 import { execFileSync } from "node:child_process";
-import { existsSync, readFileSync, writeFileSync, mkdirSync } from "node:fs";
+import { existsSync, readFileSync, writeFileSync, mkdirSync, rmSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(here, "../..");
-const source = path.join(root, "docs/testing/phase2-3-functional-tests.md");
-const outPdf = path.join(root, "docs/testing/Guide-tests-phases-2-3.pdf");
+// usage : build-pdf.mjs [guide.md] [sortie.pdf] [--html] ; sans argument : le guide des phases 2 et 3 (appelé aussi par merge-all.py pour chaque partie .md)
+const positional = process.argv.slice(2).filter((a) => !a.startsWith("--"));
+const source = path.resolve(positional[0] ?? path.join(root, "docs/testing/phase2-3-functional-tests.md"));
+const outPdf = path.resolve(positional[1] ?? path.join(root, "docs/testing/Guide-tests-phases-2-3.pdf"));
 const tmpDir = path.join(root, "docs/progress/report"); // les polices sont à côté (fonts/)
+const tmpName = `_test-guide-${path.basename(source, ".md")}.html`;
 const htmlOnly = process.argv.includes("--html");
 
 const md = readFileSync(source, "utf8").replace(/\r\n/g, "\n");
@@ -287,7 +290,7 @@ blockquote{border-left:3px solid var(--green-fill);background:var(--lime-soft);p
 const html = `<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8"><title>Guide de tests — Phases 2 et 3 (J16 à J32)</title><style>${css}</style></head><body>${cover}<main>${body}</main>${sheet}</body></html>`;
 
 mkdirSync(tmpDir, { recursive: true });
-const htmlPath = path.join(tmpDir, "_test-guide.html");
+const htmlPath = path.join(tmpDir, tmpName);
 writeFileSync(htmlPath, html, "utf8");
 console.log(`HTML : ${path.relative(root, htmlPath)} (${caseIds.length} cas de test)`);
 
@@ -307,4 +310,5 @@ if (!htmlOnly) {
   }
   execFileSync(chrome, ["--headless=new", "--disable-gpu", "--no-pdf-header-footer", `--print-to-pdf=${outPdf}`, pathToFileURL(htmlPath).href], { stdio: "ignore" });
   console.log(`PDF  : ${path.relative(root, outPdf)}`);
+  rmSync(htmlPath, { force: true }); // source temporaire, régénérable
 }

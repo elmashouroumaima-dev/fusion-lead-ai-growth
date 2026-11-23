@@ -451,8 +451,8 @@ export function createSendMessageHandler(deps: SendDeps): JobHandler {
         // juste avant l'appel : aucun autre accès base entre le contrôle final et le fournisseur
         outcome = await deps.whatsapp.send(
           claim.template
-            ? { kind: "template", phoneNumberId, to, template: { name: claim.template.name, language: claim.template.language, variables: claim.template.variables }, gateway: claim.channel.gateway }
-            : { kind: "text", phoneNumberId, to, text: claim.message.body, gateway: claim.channel.gateway },
+            ? { kind: "template", phoneNumberId, to, template: { name: claim.template.name, language: claim.template.language, variables: claim.template.variables }, gateway: claim.channel.gateway === "kapso" ? "kapso" : "meta" }
+            : { kind: "text", phoneNumberId, to, text: claim.message.body, gateway: claim.channel.gateway === "kapso" ? "kapso" : "meta" },
           secret,
         );
       } else {
@@ -463,7 +463,7 @@ export function createSendMessageHandler(deps: SendDeps): JobHandler {
           {
             from: claim.channel.sender, to: claim.contact.email as string, subject: deriveEmailSubject(claim.message.body),
             textBody: appendUnsubscribeFooter(claim.message.body, unsubUrl), headers: listUnsubscribeHeaders(unsubUrl),
-            metadata: { fusion_message_id: messageId },
+            metadata: { fusion_message_id: messageId }, gateway: claim.channel.gateway === "resend" ? "resend" : "postmark",
           },
           secret,
         );

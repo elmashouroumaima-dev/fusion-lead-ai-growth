@@ -32,6 +32,7 @@ function deps(overrides: Partial<ValidationDeps> = {}) {
     readSecret: async () => TOKEN,
     validate: async () => ({ kind: "valid" }),
     validateEmail: async () => ({ kind: "valid" }),
+    validateResend: async () => ({ kind: "valid" }),
     validateKapso: async () => ({ kind: "valid" }),
     setValidation: async (input) => {
       written.push({ ok: input.ok, code: input.code });

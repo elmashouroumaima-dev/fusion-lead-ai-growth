@@ -16,7 +16,7 @@ export type SendClaim =
       status: "claimed";
       message: { body: string; approved: boolean; purpose: string | null; approverValid: boolean; approvalAgeSeconds: number | null; recipientUnchanged: boolean };
       contact: { email: string | null; phone: string | null; doNotContact: boolean };
-      channel: { type: string; status: string; sendPaused: boolean; sender: string; integrationId: string; integrationStatus: string; account: string | null; gateway: "meta" | "kapso" };
+      channel: { type: string; status: string; sendPaused: boolean; sender: string; integrationId: string; integrationStatus: string; account: string | null; gateway: "meta" | "kapso" | "resend" };
       /** Fenêtre de conversation WhatsApp : le contact a écrit il y a moins de 24 h dans ce fil. */
       windowOpen: boolean;
       template: { status: string; name: string; language: string; category: string; version: number; variables: string[] } | null;
@@ -60,7 +60,7 @@ const claimSchema = z.discriminatedUnion("status", [
     window_open: z.boolean().default(false),
     template: z.object({ status: z.string(), name: z.string(), language: z.string(), category: z.string(), version: z.number().int(), variables: z.array(z.string()) }).nullable().default(null),
     channel: z.object({
-      type: z.string(), status: z.string(), send_paused: z.boolean(), sender: z.string(), integration_id: z.uuid(), integration_status: z.string().nullable(), account: z.string().nullable().default(null), gateway: z.enum(["meta", "kapso"]).default("meta"),
+      type: z.string(), status: z.string(), send_paused: z.boolean(), sender: z.string(), integration_id: z.uuid(), integration_status: z.string().nullable(), account: z.string().nullable().default(null), gateway: z.enum(["meta", "kapso", "resend"]).default("meta"),
     }),
     organization_active: z.boolean(),
     organization_send_paused: z.boolean(),

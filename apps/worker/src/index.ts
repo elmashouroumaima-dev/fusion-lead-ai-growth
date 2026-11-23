@@ -1,4 +1,4 @@
-import { createKapsoSender, createKeyRing, createPostmarkProvider, createWhatsAppGatewaySender, createWhatsAppSender } from "@fusion-leap/adapters";
+import { createKapsoSender, createEmailGatewayProvider, createKeyRing, createPostmarkProvider, createResendProvider, createWhatsAppGatewaySender, createWhatsAppSender } from "@fusion-leap/adapters";
 import { EnvValidationError } from "@fusion-leap/domain";
 import { hostname } from "node:os";
 import { randomBytes } from "node:crypto";
@@ -41,7 +41,7 @@ try {
   const webhookProcessors: WebhookProcessors = new Map([["email", createEmailWebhookProcessor(createSupabaseEmailEventGateway(env))], ["whatsapp", createWhatsAppWebhookProcessor(createSupabaseWhatsAppEventGateway(env))]]);
   const runner = new Runner({
     store: createSupabaseJobStore(env),
-    registry: createDefaultRegistry({ assigner: createSupabaseLeadAssigner(env), imports: createSupabaseImportGateway(env), crm: createSupabaseCrmSyncGateway(env), send: { gateway: createSupabaseSendGateway(env), readSecret: createSupabaseSecretReader(env), provider: createPostmarkProvider(), whatsapp: createWhatsAppGatewaySender({ meta: createWhatsAppSender(), kapso: createKapsoSender() }), unsubscribe: { keyRing: unsubscribeKeyRing(env), siteUrl: env.SITE_URL } }, webhooks: { gateway: createSupabaseWebhookGateway(env), processors: webhookProcessors } }),
+    registry: createDefaultRegistry({ assigner: createSupabaseLeadAssigner(env), imports: createSupabaseImportGateway(env), crm: createSupabaseCrmSyncGateway(env), send: { gateway: createSupabaseSendGateway(env), readSecret: createSupabaseSecretReader(env), provider: createEmailGatewayProvider({ postmark: createPostmarkProvider(), resend: createResendProvider() }), whatsapp: createWhatsAppGatewaySender({ meta: createWhatsAppSender(), kapso: createKapsoSender() }), unsubscribe: { keyRing: unsubscribeKeyRing(env), siteUrl: env.SITE_URL } }, webhooks: { gateway: createSupabaseWebhookGateway(env), processors: webhookProcessors } }),
     workerId,
     logger,
   });

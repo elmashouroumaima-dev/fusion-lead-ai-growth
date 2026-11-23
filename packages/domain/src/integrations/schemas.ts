@@ -11,7 +11,7 @@ export type SecretProvider = (typeof SECRET_PROVIDERS)[number];
 
 export const INTEGRATION_PROVIDERS = ["csv", "internal", "email", "whatsapp"] as const;
 /** Passerelle d'une intégration WhatsApp (ADR 017) : `kapso` (choix de la responsable technique, 2026-11-21) ou `meta` (API Graph en direct, intégrations existantes). */
-export const INTEGRATION_GATEWAYS = ["meta", "kapso"] as const;
+export const INTEGRATION_GATEWAYS = ["meta", "kapso", "resend"] as const;
 export type IntegrationGateway = (typeof INTEGRATION_GATEWAYS)[number];
 export const INTEGRATION_STATUSES = ["pending", "active", "error", "disconnected", "disabled"] as const;
 export type IntegrationStatus = (typeof INTEGRATION_STATUSES)[number];
@@ -47,10 +47,11 @@ export const createProviderIntegrationSchema = z
   })
   .strict()
   .refine((value) => new Set(value.scopes).size === value.scopes.length, { path: ["scopes"] })
-  .refine((value) => value.provider === "whatsapp" || value.gateway === undefined || value.gateway === "meta", { path: ["gateway"] })
+  // `kapso` seulement pour WhatsApp, `resend` seulement pour l'e-mail (`meta` = défaut : Meta pour WhatsApp, Postmark pour l'e-mail)
+  .refine((value) => value.gateway === undefined || value.gateway === "meta" || (value.gateway === "kapso" && value.provider === "whatsapp") || (value.gateway === "resend" && value.provider === "email"), { path: ["gateway"] })
   // l'identifiant d'un numéro WhatsApp est numérique (5 à 30 chiffres) : toute autre forme ne pourrait jamais correspondre à un webhook
   .refine((value) => value.provider !== "whatsapp" || /^[0-9]{5,30}$/.test(value.external_account_id), { path: ["external_account_id"] })
-  // WhatsApp passe par Kapso par défaut (ADR 017) ; un e-mail n'a pas de passerelle
+  // WhatsApp passe par Kapso par défaut (ADR 017) ; un e-mail reste sur Postmark (`meta`) sauf demande de `resend` (ADR 008)
   .transform((value) => ({ ...value, gateway: value.gateway ?? (value.provider === "whatsapp" ? ("kapso" as const) : ("meta" as const)) }));
 export type CreateProviderIntegrationInput = z.infer<typeof createProviderIntegrationSchema>;
 

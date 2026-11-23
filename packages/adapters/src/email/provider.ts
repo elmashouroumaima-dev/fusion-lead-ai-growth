@@ -20,6 +20,8 @@ export type EmailSendInput = {
   metadata?: Record<string, string>;
   /** En-têtes ajoutés par NOTRE code (désabonnement, J33) : jamais une valeur saisie par un utilisateur. */
   headers?: { name: string; value: string }[];
+  /** Fournisseur de CETTE intégration (colonne `integrations.gateway`, jamais une valeur du client) : absent ou `postmark` = Postmark. Lu par `createEmailGatewayProvider`. */
+  gateway?: "postmark" | "resend";
 };
 
 export type EmailSendOutcome =

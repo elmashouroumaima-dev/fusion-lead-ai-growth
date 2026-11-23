@@ -4,6 +4,8 @@ Format : Keep a Changelog. Une entrée par jour de travail.
 
 ## [Non publié]
 ### E-mail : Resend à côté de Postmark (23 novembre)
+- Correction : `createProviderIntegration` forçait `p_gateway = meta` pour l'e-mail : une intégration Resend était enregistrée comme Postmark. Test ajouté.
+- Modification : page Intégrations en deux onglets (E-mail, WhatsApp ; « Autres » s'il y a du CSV ou du CRM interne), fournisseur affiché sur chaque e-mail ; guide de test Resend corrigé (envoi par l'Inbox après `c3-contact.sql`).
 - Ajout : adaptateur `resend.ts` (envoi), `resend-validate.ts`, `gateway.ts` (aiguillage par intégration) dans `packages/adapters/src/email/`, avec tests.
 - Ajout : migration `20261219100000_email_gateway_resend.sql` (+ retour arrière) : `integrations.gateway` accepte `resend` pour l'e-mail ; `create_provider_integration` mise à jour.
 - Modification : schéma domaine (`gateway: resend`), worker (aiguillage), validation web.

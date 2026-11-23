@@ -47,11 +47,11 @@ Guide pour la personne qui teste. Il couvre le nouveau fournisseur e-mail **Rese
 
 | ID | Étapes | Résultat attendu |
 |---|---|---|
-| S1 | Créer un contact avec **votre adresse Resend**, lui enregistrer un consentement e-mail (finalité marketing ou transactionnelle), ouvrir sa conversation, rédiger un message et l'**approuver** (voir le guide « Conversations et envoi d'e-mails »). | Le message passe de **en file** à **accepté** en quelques secondes (worker lancé). |
+| S1 | Créer le contact et sa conversation (une seule fois), en remplaçant l'adresse par **celle de votre compte Resend** : `docker exec -i supabase_db_fusion-leap psql -U postgres -v ON_ERROR_STOP=1 -v mail_sender='onboarding@resend.dev' -v wa_sender='' -v tester_name='Testeur Resend' -v tester_email='<votre-adresse-resend>' -v tester_phone='' < docs/testing/fixtures/c3-contact.sql`. Puis ouvrir **Boîte de réception** (Inbox), la conversation du contact, écrire une réponse et l'envoyer (c'est la réponse humaine : l'approbation est faite par le clic sur Envoyer). | Le message passe de **en file** à **accepté** en quelques secondes (worker lancé). |
 | S2 | Ouvrir votre boîte e-mail. | Le message est arrivé, expéditeur `onboarding@resend.dev`, avec le **pied de page de désabonnement** et les en-têtes `List-Unsubscribe` (afficher l'original). |
 | S3 | Attendre une minute, rafraîchir la conversation. | Le message passe à **délivré** (événement `email.delivered` reçu par webhook). Dans la liste des événements de Resend : livraison **200**. |
 | S4 | Dans Resend, rejouer l'événement de livraison (**Resend** / renvoyer). | Réponse 200 chez Resend ; **aucun second changement** de statut dans l'application (déduplication). |
-| S5 | Envoyer un message à un **autre** contact (adresse qui n'est pas celle de votre compte Resend). | Le message échoue avec le code **sender_not_allowed** ; il n'est **pas** renvoyé en boucle (échec définitif). |
+| S5 | Dans l'Inbox, répondre à un **autre** contact dont l'adresse n'est pas celle de votre compte Resend (en créer un par le fixture avec une autre adresse). | Le message échoue avec le code **sender_not_allowed** ; il n'est **pas** renvoyé en boucle (échec définitif). |
 | S6 | Si Resend le permet : envoyer à l'adresse de test de rebond de Resend (`bounced@resend.dev`). | **À CONFIRMER** : l'événement de rebond arrive ; un rebond « Permanent » marque l'adresse comme supprimée, un autre type ne la supprime pas. |
 
 ---

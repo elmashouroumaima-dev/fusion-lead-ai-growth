@@ -5,7 +5,7 @@
   "tests": [
     {
       "label": "Web (application)",
-      "value": 2788,
+      "value": 2789,
       "note": "Écrans, routes HTTP et services de l'application"
     },
     {
@@ -634,7 +634,8 @@
       "title": "Resend à côté de Postmark",
       "items": [
         "Le fournisseur e-mail se choisit par intégration (Postmark ou Resend) : envoi, vérification de la clé, écran de connexion avec le secret de signature et l'adresse du webhook, migration avec retour arrière (aucune donnée à migrer : Postmark reste le défaut).",
-        "Webhooks Resend signés (standard Svix) : livraison, rebond, plainte appliqués par les mêmes fonctions que Postmark ; autres événements acquittés et ignorés. La réception des réponses par Resend n'est pas faite."
+        "Webhooks Resend signés (standard Svix) : livraison, rebond, plainte appliqués par les mêmes fonctions que Postmark ; autres événements acquittés et ignorés. La réception des réponses par Resend n'est pas faite.",
+        "Correction trouvée au premier essai : le service forçait la passerelle « meta » pour tout e-mail (Resend aurait été enregistré comme Postmark) ; la page Intégrations passe en deux onglets (E-mail, WhatsApp) et affiche le fournisseur de chaque e-mail. Envoi réel Resend vers l'adresse du compte : réussi."
       ],
       "proof": "57 tests d'adaptateur (envoi, validation, aiguillage, signature, pipeline complet), 1 test de domaine ; typecheck, lint et tests verts ; tests de base non relancés (Docker indisponible) ; aucun appel réel vers Resend à ce jour",
       "review": false

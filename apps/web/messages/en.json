@@ -1029,6 +1029,10 @@
     },
     "gateway": {
       "meta": "Meta (direct)"
+    },
+    "tabs": {
+      "label": "Integration types",
+      "other": "Other"
     }
   },
   "Unsubscribe": {

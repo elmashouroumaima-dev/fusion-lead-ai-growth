@@ -1029,6 +1029,10 @@
     },
     "gateway": {
       "meta": "Meta (مباشر)"
+    },
+    "tabs": {
+      "label": "أنواع التكاملات",
+      "other": "أخرى"
     }
   },
   "Unsubscribe": {

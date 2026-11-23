@@ -139,7 +139,7 @@ describe.runIf(Boolean(keyRing))("parcours complet avec chiffrement configuré",
     expect(mine?.integration).toMatchObject({ has_secret: true, status: "pending", scopes: ["messages", "templates"] });
 
     for (const who of ["shared", "alpha-admin"]) {
-      const page = await getPage(as(who), "/fr/integrations", ORG.alpha);
+      const page = await getPage(as(who), "/fr/integrations?tab=whatsapp", ORG.alpha);
       expect(page.status, who).toBe(200);
       const visible = visibleText(page);
       expect(visible, who).toContain(ACCOUNT);
@@ -189,7 +189,7 @@ describe.runIf(Boolean(keyRing))("parcours complet avec chiffrement configuré",
     expect(await stored()).toBeNull();
     expect(psql(`select count(*) from private.secrets where organization_id = '${ORG.alpha}' and id in (select secret_ref from public.integrations where id = '${integration}')`)).toBe("0");
     expect((await post("shared", "/api/integrations/disconnect", { integration_id: integration })).status).toBe(200);
-    expect(visibleText(await getPage(as("shared"), "/fr/integrations", ORG.alpha))).toContain("Déconnectée");
+    expect(visibleText(await getPage(as("shared"), "/fr/integrations?tab=whatsapp", ORG.alpha))).toContain("Déconnectée");
   });
 
   it("reconnexion : un nouveau jeton remet l'intégration en attente de validation (le compte reste à Alpha) ; l'écran propose « Reconnecter »", async () => {
@@ -197,8 +197,8 @@ describe.runIf(Boolean(keyRing))("parcours complet avec chiffrement configuré",
     expect(res.status).toBe(200);
     expect(openOrganizationSecret({ organizationId: ORG.alpha, stored: (await stored())!, keyRing: ring() })).toBe(TOKEN_1);
     expect(psql(`select status from public.integrations where id = '${integration}'`)).toBe("pending");
-    expect(visibleText(await getPage(as("shared"), "/fr/integrations", ORG.alpha))).toContain("En attente de validation");
+    expect(visibleText(await getPage(as("shared"), "/fr/integrations?tab=whatsapp", ORG.alpha))).toContain("En attente de validation");
     expect((await post("shared", "/api/integrations/disconnect", { integration_id: integration })).status).toBe(200);
-    expect(visibleText(await getPage(as("shared"), "/fr/integrations", ORG.alpha))).toContain("Reconnecter");
+    expect(visibleText(await getPage(as("shared"), "/fr/integrations?tab=whatsapp", ORG.alpha))).toContain("Reconnecter");
   });
 });

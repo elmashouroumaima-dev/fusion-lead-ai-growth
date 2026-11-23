@@ -50,3 +50,7 @@ Q2 n'a toujours pas de réponse : en application de la règle du 2026-11-09, l'*
 - Hypothèse à confirmer au checkpoint C3 : que Postmark transmette tels quels les en-têtes `List-Unsubscribe` fournis dans `Headers` de l'appel d'envoi.
 - Point ouvert : la levée d'une désinscription (réabonnement) n'existe pas encore (action auditée à prévoir avec l'écran contacts, J30b).
 
+## Note du 2026-11-23 — Resend ajouté à côté de Postmark
+- Décision de la responsable technique : **Resend entre à côté de Postmark** (pas à sa place). Choix **par intégration** via `integrations.gateway` (même mécanisme que WhatsApp/Kapso, ADR 017) : `meta` = défaut = Postmark pour un e-mail (aucune donnée à migrer), `resend` = Resend (e-mail seulement). Migration `20261219100000_email_gateway_resend.sql` (retour arrière : `supabase/rollbacks/`).
+- Adaptateurs : `packages/adapters/src/email/resend.ts` (envoi), `resend-validate.ts` (clé), `gateway.ts` (aiguillage). Le worker lit `channel.gateway` de la réclamation d'envoi.
+- **Webhooks Resend branchés** (`resend-webhook.ts`, route `/api/webhooks/resend`, passerelle `resend`) : signature Svix, `delivered/bounced/complained` appliqués par les fonctions existantes. **Hors périmètre, à faire** : la réception (`email.received`, à relire par l'API) ; aucune réponse entrante par Resend pour l'instant. Le forfait de l'inbound Resend est **à confirmer**. Sans domaine vérifié, Resend n'envoie qu'à l'adresse du compte (code `sender_not_allowed`). Écran de connexion : choix du fournisseur et saisie du secret de signature faits.

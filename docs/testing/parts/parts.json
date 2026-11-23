@@ -35,6 +35,11 @@
       "file": "07-c3-test-reel.html",
       "tag": "Checkpoint C3",
       "title": "Test réel : Postmark, WhatsApp (Kapso), arrêt d'urgence, fuites (J41), étape par étape"
+    },
+    {
+      "file": "08-email-resend.md",
+      "tag": "E-mail",
+      "title": "Test réel e-mail avec Resend : connexion, envoi, webhooks signés"
     }
   ]
 }

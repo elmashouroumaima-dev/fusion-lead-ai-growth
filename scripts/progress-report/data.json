@@ -20,7 +20,7 @@
     },
     {
       "label": "Domaine (règles métier)",
-      "value": 661,
+      "value": 662,
       "note": "Règles métier pures (contrôles d'envoi, consentement...)"
     },
     {
@@ -30,7 +30,7 @@
     },
     {
       "label": "Worker et adaptateurs",
-      "value": 338,
+      "value": 395,
       "note": "Tâches de fond et adaptateurs de fournisseurs"
     },
     {
@@ -451,7 +451,7 @@
   "security": "Les journées jusqu'à J36 ont chacune eu une revue adverse (attaques réelles contre la base locale, lecture critique du code) puis une re-vérification. Les journées J39 à J40, la réponse WhatsApp, Kapso et le STOP attendent leur revue de sécurité : par la responsable technique avant G3, par un tiers avant le premier client réel. Vérifié pendant le test réel WhatsApp : aucun secret ni message dans la base ni dans les journaux ; isolation entre organisations, journal d'audit non modifiable et secrets chiffrés contrôlés par les tests.",
   "openPoints": [
     {
-      "text": "E-mail réel et Q2 (domaine d'envoi) : Postmark refuse les adresses de domaines publics ; il faut une adresse d'un domaine privé (boîte ou domaine vérifié dans le DNS) et le jeton du serveur. Les hypothèses sur Postmark (e-mails entrants, événements, rebonds) restent à confirmer.",
+      "text": "E-mail réel et Q2 (domaine d'envoi) : Postmark et Resend exigent un domaine privé vérifié (DNS) pour écrire à des clients ; sans domaine, Resend ne livre qu'à l'adresse du compte (test possible dès maintenant, guide « Test réel e-mail avec Resend »). Les hypothèses sur Postmark et Resend (signature Svix, rebonds, réception) restent à confirmer.",
       "owner": "Responsable technique",
       "urgency": "Avant G3"
     },
@@ -529,7 +529,7 @@
   "nextSteps": [
     {
       "when": "Maintenant",
-      "action": "E-mail réel (E1 à E7) : adresse d'un domaine privé et jeton Postmark ; pack de revue de sécurité (liste de fichiers, checklist, scans automatiques) ; décision G3 dans C3.md."
+      "action": "E-mail réel : essai de Resend avec l'adresse du compte (guide du test), puis domaine privé et jeton Postmark ; réception des réponses Resend ; tests de base de la migration (Docker) ; pack de revue de sécurité ; décision G3 dans C3.md."
     },
     {
       "when": "Ensuite",
@@ -628,6 +628,16 @@
       ],
       "proof": "pgTAP 3 353 dont 360 (frontière 6 / 8 / 29 jours), aller-retour de la migration",
       "review": false
+    },
+    {
+      "day": "E-mail",
+      "title": "Resend à côté de Postmark",
+      "items": [
+        "Le fournisseur e-mail se choisit par intégration (Postmark ou Resend) : envoi, vérification de la clé, écran de connexion avec le secret de signature et l'adresse du webhook, migration avec retour arrière (aucune donnée à migrer : Postmark reste le défaut).",
+        "Webhooks Resend signés (standard Svix) : livraison, rebond, plainte appliqués par les mêmes fonctions que Postmark ; autres événements acquittés et ignorés. La réception des réponses par Resend n'est pas faite."
+      ],
+      "proof": "57 tests d'adaptateur (envoi, validation, aiguillage, signature, pipeline complet), 1 test de domaine ; typecheck, lint et tests verts ; tests de base non relancés (Docker indisponible) ; aucun appel réel vers Resend à ce jour",
+      "review": false
     }
   ],
   "capabilities": {
@@ -644,10 +654,11 @@
       "Importer un fichier de contacts depuis l'écran, avec aperçu avant d'écrire, suivi et rapport sans donnée de contact.",
       "Connecter un e-mail Postmark depuis l'écran et activer le canal après vérification du jeton ; ajouter un canal, le mettre en pause (essayé sur des fixtures, pas sur un compte réel).",
       "Page Membres lisible sur mobile et tablette ; fil d'Ariane sur toutes les pages de la navigation.",
-      "Répondre à un contact WhatsApp depuis la boîte de réception dans la fenêtre de 24 h ; un STOP (texte, bouton, liste ou préférence marketing de Kapso) désinscrit le numéro (essayé sur des fixtures)."
+      "Répondre à un contact WhatsApp depuis la boîte de réception dans la fenêtre de 24 h ; un STOP (texte, bouton, liste ou préférence marketing de Kapso) désinscrit le numéro (essayé sur des fixtures).",
+      "Choisir Postmark ou Resend pour une intégration e-mail, envoyer avec Resend et suivre la livraison par webhook signé (essayé sur des fixtures, pas encore sur un compte réel)."
     ],
     "notYet": [
-      "Envoyer ou recevoir un vrai e-mail : il manque l'adresse d'un domaine privé et le jeton Postmark (WhatsApp réel essayé sur le sandbox Kapso, pas encore avec un numéro réel ni des modèles).",
+      "Envoyer à de vrais clients : il manque un domaine privé vérifié (Postmark comme Resend) ; recevoir les réponses par Resend n'est pas fait.",
       "Se réabonner : aucune action pour lever une désinscription."
     ]
   },
@@ -700,7 +711,7 @@
     "bullets": [
       "Phases 0 à 2 terminées. Phase 3 (canaux) : le code est fait et tout est dans la branche principale.",
       "Test réel WhatsApp (sandbox Kapso) réussi le 21 novembre : réception, réponse, statuts, STOP, arrêt d'urgence, aucune fuite.",
-      "Reste pour valider la phase 3 : tester l'e-mail réel (adresse d'un domaine privé), la revue de sécurité, la décision G3."
+      "Reste pour valider la phase 3 : tester l'e-mail réel (Resend avec l'adresse du compte, puis un domaine privé), la revue de sécurité, la décision G3."
     ]
   }
 }

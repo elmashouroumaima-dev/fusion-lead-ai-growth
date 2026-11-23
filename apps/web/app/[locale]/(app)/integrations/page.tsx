@@ -55,7 +55,7 @@ export default async function IntegrationsPage({ params }: { params: Promise<{ l
         </Alert>
       ) : null}
 
-      <ConnectEmail encryptionConfigured={encryptionConfigured} />
+      <ConnectEmail encryptionConfigured={encryptionConfigured} resendWebhookUrl={`${getServerEnv().SITE_URL}/api/webhooks/resend`} />
       <ConnectKapso encryptionConfigured={encryptionConfigured} webhookUrl={`${getServerEnv().SITE_URL}/api/webhooks/kapso`} />
 
       {views === null ? (
@@ -133,7 +133,7 @@ export default async function IntegrationsPage({ params }: { params: Promise<{ l
                         </ul>
                       )}
                     </div>
-                    {integration.status !== "disconnected" && integration.has_secret ? <VerifyConnection integrationId={integration.id} gateway={integration.gateway} /> : null}
+                    {integration.status !== "disconnected" && integration.has_secret ? <VerifyConnection integrationId={integration.id} gateway={integration.gateway === "kapso" ? "kapso" : "meta"} /> : null}
                     {integration.status !== "disconnected" && (integration.provider === "email" || integration.provider === "whatsapp") ? <AddChannel integrationId={integration.id} type={integration.provider} /> : null}
                     <IntegrationActions integrationId={integration.id} encryptionConfigured={encryptionConfigured} disconnected={integration.status === "disconnected"} />
                   </>

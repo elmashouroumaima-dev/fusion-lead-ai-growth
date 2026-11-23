@@ -121,7 +121,7 @@ describe("messages fr/ar/en", () => {
   });
 
   it("l'arabe n'est pas une copie de l'anglais", () => {
-    const allowed = new Set(["Meta.title", "Common.appName", "Home.title"]);
+    const allowed = new Set(["Meta.title", "Common.appName", "Home.title", "Integrations.channelsUi.email.providerPostmark", "Integrations.channelsUi.email.providerResend"]);
     const same = [...arFlat].filter(([k, v]) => !allowed.has(k) && enFlat.get(k) === v && /[A-Za-z]{4,}/.test(v));
     expect(same.map(([k]) => k)).toEqual([]);
   });
@@ -131,7 +131,7 @@ describe("messages fr/ar/en", () => {
     const allowed = new Set([
       "Meta.title", "Common.appName", "Home.title",
       "Shell.nav.leads", "Shell.nav.deals", "Crm.leads.title", "Crm.deals.title", "Crm.filters.source", "Crm.table.contact", "Crm.table.source",
-      "Crm.pagination.label", "Integrations.providers.whatsapp",
+      "Crm.pagination.label", "Integrations.providers.whatsapp", "Integrations.channelsUi.email.providerPostmark", "Integrations.channelsUi.email.providerResend",
       "Shell.nav.contacts", "Contacts.title", "Contacts.table.contact", "Contacts.table.email", "Contacts.pagination.label", "Contacts.detail.email",
       "Contacts.history.source", "Contacts.history.proofVersion", "Contacts.channels.email", "Contacts.channels.whatsapp", "Contacts.purposes.marketing",
       "Inbox.channels.email", "Inbox.channels.whatsapp", "Inbox.pagination.label", "Inbox.thread.email", "Inbox.thread.summary", "Inbox.thread.messages",

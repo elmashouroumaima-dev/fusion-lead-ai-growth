@@ -320,7 +320,7 @@ describe("catalogues fr / ar / en : parité", () => {
   });
 
   it("l'arabe est de l'arabe : chaque valeur contenant des lettres latines en anglais contient aussi de l'arabe (hors noms propres)", () => {
-    const PROPER = new Set(["Fusion Leap", "Fusion Leap AI Growth"]);
+    const PROPER = new Set(["Fusion Leap", "Fusion Leap AI Growth", "Postmark", "Resend"]);
     const bad: string[] = [];
     for (const [key, arValue] of flat.ar) {
       const enValue = flat.en.get(key) ?? "";
@@ -332,7 +332,7 @@ describe("catalogues fr / ar / en : parité", () => {
 
   it("le français et l'anglais ne sont pas des copies l'un de l'autre (valeurs traduites)", () => {
     // Termes identiques en français et en anglais (anglicismes usuels du métier : « Leads », « Deals », « Source », « Contact »).
-    const SAME_OK = new Set(["Fusion Leap", "Fusion Leap AI Growth", "Leads", "Deals", "Source", "Contact", "Contacts", "E-mail", "Marketing", "Version", "Conversation", "Messages", "Note", "{minutes} min", "Pagination", "WhatsApp"]);
+    const SAME_OK = new Set(["Fusion Leap", "Fusion Leap AI Growth", "Leads", "Deals", "Source", "Contact", "Contacts", "E-mail", "Marketing", "Version", "Conversation", "Messages", "Note", "{minutes} min", "Pagination", "WhatsApp", "Postmark", "Resend"]);
     const same = [...flat.fr].filter(([k, v]) => v === flat.en.get(k) && /[A-Za-z]{4,}/.test(v) && !SAME_OK.has(v)).map(([k]) => k);
     expect(same).toEqual([]);
   });

@@ -6,6 +6,7 @@ export * from "./postmark-validate";
 export * from "./resend";
 export * from "./resend-validate";
 export * from "./resend-webhook";
+export * from "./resend-receive";
 export * from "./gateway";
 export * from "./events";
 export * from "./unsubscribe";

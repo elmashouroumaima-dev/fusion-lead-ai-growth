@@ -13,7 +13,7 @@ import type { EmailEvent } from "./events";
  * Entreprise : le compte de l'intégration est `resend-<domaine de l'expéditeur>` (même règle que l'écran de connexion), lu dans `data.from` du corps
  * NON authentifié : il ne sert qu'à retrouver l'intégration et son secret ; un faux compte échoue à la signature.
  * Traités : `email.delivered`, `email.bounced`, `email.complained`. Tout autre événement d'e-mail (sent, opened, clicked, failed...) est ACQUITTÉ puis ignoré.
- * PAS ENCORE traité : `email.received` (la charge utile ne porte pas le corps ; il faut le relire par l'API avec la clé) : ne pas s'y abonner.
+ * Traité aussi : `email.received` (la charge utile n'a pas le corps : le worker le relit par l'API de réception avec la clé de l'intégration, voir `resend-receive.ts`). Le compte est alors le domaine de l'adresse qui a REÇU le message.
  * Identifiant d'événement : dérivé du contenu (les retries ont le même corps), jamais d'un en-tête.
  */
 const MAX_BYTES = 1024 * 1024;
@@ -31,7 +31,7 @@ export function resendAccountId(sender: string): string {
 }
 
 /** « Nom <a@b.test> » ou « a@b.test » -> « a@b.test » (normalisée) ou `null`. */
-function addressOf(value: unknown): string | null {
+export function resendAddressOf(value: unknown): string | null {
   if (typeof value !== "string" || value.length > 400) return null;
   const angled = /<([^<>]+)>\s*$/.exec(value);
   const normalized = normalizeContactEmail((angled?.[1] ?? value).trim());
@@ -59,10 +59,18 @@ export function normalizeResendPayload(raw: unknown): ResendNormalized | null {
   const type = raw.type;
   const data = raw.data;
   if (!/^[a-z_.]{3,60}$/.test(type) || !type.startsWith("email.")) return null;
-  const from = addressOf(data.from);
+  // `email.received` : le « From » est le CLIENT ; le compte de l'intégration est le domaine de l'adresse qui a REÇU le message
+  if (type === "email.received") {
+    const received = Array.isArray(data.received_for) && data.received_for.length > 0 ? data.received_for : Array.isArray(data.to) ? data.to : [];
+    const target = resendAddressOf(received[0]);
+    const receivedId = typeof data.email_id === "string" && /^[A-Za-z0-9._-]{1,100}$/.test(data.email_id) ? data.email_id : null;
+    if (target === null || receivedId === null) return null;
+    return { kind: "inbound_fetch", eventId: `rs-rcv:${receivedId}`, emailId: receivedId, at: isoOrNull(raw.created_at), account: resendAccountId(target) };
+  }
+  const from = resendAddressOf(data.from);
   const account = from === null ? null : resendAccountId(from);
   const emailId = typeof data.email_id === "string" && PROVIDER_ID.test(data.email_id) ? data.email_id : null;
-  const recipient = Array.isArray(data.to) ? addressOf(data.to[0]) : null;
+  const recipient = Array.isArray(data.to) ? resendAddressOf(data.to[0]) : null;
   const at = isoOrNull(raw.created_at);
 
   if (type === "email.delivered" || type === "email.bounced" || type === "email.complained") {

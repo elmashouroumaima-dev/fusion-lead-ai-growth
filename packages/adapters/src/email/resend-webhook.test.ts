@@ -98,6 +98,26 @@ describe("resendWebhookAdapter : lecture", () => {
   });
 });
 
+describe("email.received (réception)", () => {
+  const received = (data: Record<string, unknown> = {}) =>
+    new TextEncoder().encode(JSON.stringify({ type: "email.received", created_at: "2026-11-24T10:00:00.000Z", data: { email_id: MSG, from: "Client <c@client.test>", to: ["ventes@exemple.test"], received_for: ["Ventes@Exemple.test"], subject: "Re", message_id: "<m@x>", ...data } }));
+  it("événement à relire par l'API : seulement l'identifiant ; compte = domaine de l'adresse qui a REÇU (pas du client)", () => {
+    const parsed = resendWebhookAdapter.parse(received());
+    expect(resendWebhookAdapter.extractAccount(parsed, {})).toBe("resend-exemple.test");
+    expect(readEmailEvent(parsed)).toEqual({ kind: "inbound_fetch", eventId: `rs-rcv:${MSG}`, emailId: MSG, at: "2026-11-24T10:00:00.000Z" });
+    expect(resendWebhookAdapter.extractEventId(parsed, {})).toBe(`rs-rcv:${MSG}`);
+  });
+  it("sans received_for : repli sur to ; sans destinataire lisible ou sans identifiant : illisible", () => {
+    expect(resendWebhookAdapter.extractAccount(resendWebhookAdapter.parse(received({ received_for: undefined })), {})).toBe("resend-exemple.test");
+    expect(resendWebhookAdapter.parse(received({ received_for: [], to: [] }))).toBeNull();
+    expect(resendWebhookAdapter.parse(received({ email_id: undefined }))).toBeNull();
+  });
+  it("le corps éventuel du webhook n'est jamais conservé", () => {
+    const parsed = resendWebhookAdapter.parse(received({ text: "SECRET", html: "<b>SECRET</b>" }));
+    expect(JSON.stringify(parsed)).not.toContain("SECRET");
+  });
+});
+
 describe("resendAccountId", () => {
   it("domaine de l'expéditeur, en minuscules, caractères permis seulement", () => {
     expect(resendAccountId("Ventes@Exemple.TEST")).toBe("resend-exemple.test");

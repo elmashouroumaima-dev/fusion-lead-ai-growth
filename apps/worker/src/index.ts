@@ -1,4 +1,4 @@
-import { createKapsoSender, createEmailGatewayProvider, createKeyRing, createPostmarkProvider, createResendProvider, createWhatsAppGatewaySender, createWhatsAppSender } from "@fusion-leap/adapters";
+import { createKapsoSender, createEmailGatewayProvider, createKeyRing, createPostmarkProvider, createResendProvider, createResendReceiver, createWhatsAppGatewaySender, createWhatsAppSender } from "@fusion-leap/adapters";
 import { EnvValidationError } from "@fusion-leap/domain";
 import { hostname } from "node:os";
 import { randomBytes } from "node:crypto";
@@ -38,7 +38,7 @@ try {
   const env = loadWorkerEnv();
   const workerId = `${hostname().replace(/[^A-Za-z0-9._-]/g, "-").slice(0, 60)}:${process.pid}:${randomBytes(4).toString("hex")}`;
   // processeurs de webhooks par fournisseur : e-mail (J32) et WhatsApp (J35). Sans processeur, un événement est marqué `failed` (`no_processor`), re-jouable.
-  const webhookProcessors: WebhookProcessors = new Map([["email", createEmailWebhookProcessor(createSupabaseEmailEventGateway(env))], ["whatsapp", createWhatsAppWebhookProcessor(createSupabaseWhatsAppEventGateway(env))]]);
+  const webhookProcessors: WebhookProcessors = new Map([["email", createEmailWebhookProcessor(createSupabaseEmailEventGateway(env), { receiver: createResendReceiver(), readSecret: createSupabaseSecretReader(env) })], ["whatsapp", createWhatsAppWebhookProcessor(createSupabaseWhatsAppEventGateway(env))]]);
   const runner = new Runner({
     store: createSupabaseJobStore(env),
     registry: createDefaultRegistry({ assigner: createSupabaseLeadAssigner(env), imports: createSupabaseImportGateway(env), crm: createSupabaseCrmSyncGateway(env), send: { gateway: createSupabaseSendGateway(env), readSecret: createSupabaseSecretReader(env), provider: createEmailGatewayProvider({ postmark: createPostmarkProvider(), resend: createResendProvider() }), whatsapp: createWhatsAppGatewaySender({ meta: createWhatsAppSender(), kapso: createKapsoSender() }), unsubscribe: { keyRing: unsubscribeKeyRing(env), siteUrl: env.SITE_URL } }, webhooks: { gateway: createSupabaseWebhookGateway(env), processors: webhookProcessors } }),

@@ -84,8 +84,8 @@ export async function createProviderIntegration(
     p_ciphertext: sealed.ciphertext,
     p_nonce: sealed.nonce,
     p_key_version: sealed.keyVersion,
-    // un e-mail est toujours « meta » (colonne sans objet) ; une intégration WhatsApp porte la passerelle choisie (Kapso par défaut)
-    p_gateway: input.provider === "whatsapp" ? (input.gateway ?? "meta") : "meta",
+    // la passerelle choisie : WhatsApp `meta` ou `kapso`, e-mail `meta` (= Postmark, défaut) ou `resend` ; le schéma et la base refusent les autres combinaisons
+    p_gateway: input.gateway ?? "meta",
   });
   if (error) return fail(mapLeadsDbError(error));
   return typeof data === "string" ? { ok: true, value: { id: data } } : fail("internal_error");

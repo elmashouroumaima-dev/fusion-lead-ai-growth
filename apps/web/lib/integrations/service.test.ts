@@ -105,6 +105,18 @@ describe("createProviderIntegration", () => {
     expect(() => openOrganizationSecret({ organizationId: "aa000000-0000-4000-8000-00000000000b", stored, keyRing })).toThrow();
   });
 
+  it("passerelle transmise à la base : e-mail Resend = resend ; e-mail sans choix = meta (Postmark) ; WhatsApp Kapso = kapso", async () => {
+    c.result.rpc = () => ({ data: INT, error: null });
+    const gatewayOf = async (extra: Record<string, unknown>): Promise<unknown> => {
+      c.calls.length = 0;
+      await createProviderIntegration(c.client, ORG, { ...input, ...extra } as never);
+      return (c.calls[0]?.args[0] as Record<string, unknown>).p_gateway;
+    };
+    expect(await gatewayOf({ provider: "email", external_account_id: "resend-exemple.test", gateway: "resend" })).toBe("resend");
+    expect(await gatewayOf({ provider: "email", external_account_id: "postmark-exemple.test" })).toBe("meta");
+    expect(await gatewayOf({ gateway: "kapso" })).toBe("kapso");
+  });
+
   it("sans clé maître : 503, AUCUN appel à la base (jamais de repli en clair)", async () => {
     state.keyRing = null;
     expect(isEncryptionConfigured()).toBe(false);

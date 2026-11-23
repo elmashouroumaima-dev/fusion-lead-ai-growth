@@ -34,6 +34,8 @@ export type EmailEvent =
       /** `X-Spam-Status` à « Yes ». */
       spam: boolean;
     }
+  /** Resend (`email.received`) : la charge utile du webhook n'a NI corps NI en-têtes ; le worker relit le message par l'API (clé de l'intégration) puis l'applique comme un `inbound`. */
+  | { kind: "inbound_fetch"; eventId: string; emailId: string; at: string | null }
   | { kind: "ignored"; eventId: string; recordType: string };
 
 const isRecord = (value: unknown): value is Record<string, unknown> => typeof value === "object" && value !== null && !Array.isArray(value);
@@ -45,7 +47,7 @@ const short = (text: string): string => createHash("sha256").update(text).digest
  * (jamais au milieu d'une paire). Un corps qui ne passerait pas le stockage ferait échouer l'enregistrement du webhook et le fournisseur
  * réessaierait jusqu'à perdre le message.
  */
-function cleanText(value: string, max: number): string {
+export function cleanText(value: string, max: number): string {
   // surrogate haut sans bas, ou bas sans haut : remplacé par U+FFFD (équivalent de `toWellFormed`)
   const wellFormed = value.replaceAll("\u0000", "").replace(/[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?<![\uD800-\uDBFF])[\uDC00-\uDFFF]/g, "�");
   if (wellFormed.length <= max) return wellFormed;
@@ -200,6 +202,11 @@ export function readEmailEvent(value: unknown): EmailEvent | null {
   if (kind === "ignored") {
     const recordType = str(value.recordType);
     return recordType !== null && /^[A-Za-z]{1,40}$/.test(recordType) ? { kind, eventId, recordType } : null;
+  }
+  if (kind === "inbound_fetch") {
+    const emailId = str(value.emailId);
+    const at = optionalIso(value.at);
+    return emailId !== null && /^[A-Za-z0-9._-]{1,100}$/.test(emailId) && at !== undefined ? { kind, eventId, emailId, at } : null;
   }
   if (kind === "delivered" || kind === "bounced" || kind === "complaint") {
     const providerMessageId = str(value.providerMessageId);

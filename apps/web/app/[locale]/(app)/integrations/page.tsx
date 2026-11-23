@@ -26,8 +26,9 @@ const isProvider = (value: string): value is (typeof INTEGRATION_PROVIDERS)[numb
  * Owner et admin seulement (la RLS et les fonctions SQL revérifient) ; les autres rôles sont renvoyés au tableau de bord. AUCUN
  * secret n'est lu ni affiché : la page ne reçoit que `has_secret`. Le jeton est en écriture seule.
  */
-export default async function IntegrationsPage({ params }: { params: Promise<{ locale: string }> }) {
+export default async function IntegrationsPage({ params, searchParams }: { params: Promise<{ locale: string }>; searchParams: Promise<{ tab?: string }> }) {
   const locale = localeSchema.parse(await requireLocale(params));
+  const { tab: tabParam } = await searchParams;
   const t = await getTranslations({ locale, namespace: "Integrations" });
   await requireClaims(locale);
   const ctx = await requireTenantContext(locale);
@@ -42,6 +43,97 @@ export default async function IntegrationsPage({ params }: { params: Promise<{ l
     views = null;
   }
 
+  type View = NonNullable<typeof views>[number];
+  const renderCard = ({ integration, channels }: View) => {
+      const withSecret = integration.provider === "email" || integration.provider === "whatsapp";
+      const name = isProvider(integration.provider) ? t(`providers.${integration.provider}`) : integration.provider;
+      return (
+        <Card key={integration.id} className="min-w-0">
+          <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+            <div className="grid gap-1">
+              <h2 className="text-lg leading-none font-semibold">
+                {name}{" "}
+                    {integration.provider === "email" ? <span className="text-muted-foreground text-sm font-normal">· {integration.gateway === "resend" ? t("channelsUi.email.providerResend") : t("channelsUi.email.providerPostmark")}</span> : null}{" "}
+                {integration.provider === "whatsapp" ? <span className="text-muted-foreground text-sm font-normal">· {integration.gateway === "kapso" ? "Kapso" : t("gateway.meta")}</span> : null}{" "}
+                <bdi dir="ltr" className="text-muted-foreground text-sm font-normal">({integration.external_account_id})</bdi>
+              </h2>
+              <p className="text-muted-foreground text-sm">
+                {t("lastSync")} : {integration.last_sync_at ? format.dateTime(new Date(integration.last_sync_at), { dateStyle: "medium", timeStyle: "short" }) : t("lastSyncNever")}
+              </p>
+            </div>
+            <Badge variant={STATUS_VARIANT[integration.status]}>
+              {t("status.label")} : {t(`status.${integration.status}`)}
+            </Badge>
+          </CardHeader>
+          <CardContent className="grid min-w-0 gap-4">
+            {integration.last_error ? (
+              <Alert variant="destructive" role="alert">
+                <AlertDescription>{t("lastError")}</AlertDescription>
+              </Alert>
+            ) : null}
+
+            <div className="grid gap-1 text-sm">
+              <span className="font-semibold">{t("scopes")}</span>
+              {integration.scopes.length === 0 ? (
+                <span className="text-muted-foreground">{t("scopesNone")}</span>
+              ) : (
+                <ul className="flex flex-wrap gap-1" dir="ltr">
+                  {integration.scopes.map((scope) => (
+                    <li key={scope}>
+                      <Badge variant="outline">{scope}</Badge>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+
+            {withSecret ? (
+              <>
+                <p className="flex items-center gap-2 text-sm">
+                  <KeyRoundIcon className="size-4" aria-hidden="true" />
+                  <span>{integration.has_secret ? t("secretStored") : t("secretMissing")}</span>
+                </p>
+                <p className="text-muted-foreground text-xs">{t("secretNote")}</p>
+                <div className="grid gap-1 text-sm">
+                  <span className="font-semibold">{t("channels")}</span>
+                  {channels.length === 0 ? (
+                    <span className="text-muted-foreground">{t("channelsNone")}</span>
+                  ) : (
+                    <ul className="grid gap-1">
+                      {channels.map((channel) => (
+                        <li key={channel.id} className="flex flex-wrap items-center gap-2">
+                          <bdi dir="ltr">{channel.sender_identity}</bdi>
+                          <Badge variant="outline">{t(`channelStatus.${channel.send_paused && channel.status !== "disconnected" ? "paused" : channel.status}`)}</Badge>
+                          {channel.status !== "disconnected" ? <ChannelPause channelId={channel.id} paused={channel.send_paused} /> : null}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+                {integration.status !== "disconnected" && integration.has_secret ? <VerifyConnection integrationId={integration.id} gateway={integration.gateway === "kapso" ? "kapso" : "meta"} /> : null}
+                {integration.status !== "disconnected" && (integration.provider === "email" || integration.provider === "whatsapp") ? <AddChannel integrationId={integration.id} type={integration.provider} /> : null}
+                <IntegrationActions integrationId={integration.id} encryptionConfigured={encryptionConfigured} disconnected={integration.status === "disconnected"} />
+              </>
+            ) : (
+              <a href={`/${locale}/crm`} className="text-primary-text text-sm underline-offset-4 hover:underline">
+                {t("crmLink")}
+              </a>
+            )}
+          </CardContent>
+        </Card>
+      );
+  };
+
+  // onglets pilotés par l'adresse (?tab=) : rendu serveur, aucun état client ; « Autres » (CSV, CRM interne) n'apparaît que s'il y a quelque chose à montrer
+  const others = views?.filter((v) => v.integration.provider !== "email" && v.integration.provider !== "whatsapp") ?? [];
+  const tabs = [
+    { key: "email", label: t("providers.email") },
+    { key: "whatsapp", label: t("providers.whatsapp") },
+    ...(others.length > 0 ? [{ key: "other", label: t("tabs.other") }] : []),
+  ] as const;
+  const active = tabs.some((x) => x.key === tabParam) ? (tabParam as (typeof tabs)[number]["key"]) : "email";
+  const shown = views === null ? [] : active === "other" ? others : views.filter((v) => v.integration.provider === active);
+
   return (
     <div className="mx-auto grid w-full min-w-0 max-w-5xl gap-6">
       <header className="grid gap-1">
@@ -55,97 +147,33 @@ export default async function IntegrationsPage({ params }: { params: Promise<{ l
         </Alert>
       ) : null}
 
-      <ConnectEmail encryptionConfigured={encryptionConfigured} />
-      <ConnectKapso encryptionConfigured={encryptionConfigured} webhookUrl={`${getServerEnv().SITE_URL}/api/webhooks/kapso`} />
+      <nav aria-label={t("tabs.label")} className="flex gap-1 border-b">
+        {tabs.map((x) => (
+          <a
+            key={x.key}
+            href={`/${locale}/integrations?tab=${x.key}`}
+            aria-current={x.key === active ? "page" : undefined}
+            className={`-mb-px border-b-2 px-4 py-2 text-sm font-medium ${x.key === active ? "border-primary text-foreground" : "text-muted-foreground hover:text-foreground border-transparent"}`}
+          >
+            {x.label}
+          </a>
+        ))}
+      </nav>
+
+      {active === "email" ? <ConnectEmail encryptionConfigured={encryptionConfigured} resendWebhookUrl={`${getServerEnv().SITE_URL}/api/webhooks/resend`} /> : null}
+      {active === "whatsapp" ? <ConnectKapso encryptionConfigured={encryptionConfigured} webhookUrl={`${getServerEnv().SITE_URL}/api/webhooks/kapso`} /> : null}
 
       {views === null ? (
         <Alert variant="destructive" role="alert">
           <AlertDescription>{t("loadFailed")}</AlertDescription>
         </Alert>
-      ) : views.length === 0 ? (
+      ) : shown.length === 0 ? (
         <div className="text-muted-foreground flex flex-col items-center gap-2 rounded-lg border border-dashed p-8 text-center text-sm">
           <PlugIcon className="size-6" aria-hidden="true" />
           <p>{t("empty")}</p>
         </div>
       ) : (
-        views.map(({ integration, channels }) => {
-          const withSecret = integration.provider === "email" || integration.provider === "whatsapp";
-          const name = isProvider(integration.provider) ? t(`providers.${integration.provider}`) : integration.provider;
-          return (
-            <Card key={integration.id} className="min-w-0">
-              <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                <div className="grid gap-1">
-                  <h2 className="text-lg leading-none font-semibold">
-                    {name}{" "}
-                    {integration.provider === "whatsapp" ? <span className="text-muted-foreground text-sm font-normal">· {integration.gateway === "kapso" ? "Kapso" : t("gateway.meta")}</span> : null}{" "}
-                    <bdi dir="ltr" className="text-muted-foreground text-sm font-normal">({integration.external_account_id})</bdi>
-                  </h2>
-                  <p className="text-muted-foreground text-sm">
-                    {t("lastSync")} : {integration.last_sync_at ? format.dateTime(new Date(integration.last_sync_at), { dateStyle: "medium", timeStyle: "short" }) : t("lastSyncNever")}
-                  </p>
-                </div>
-                <Badge variant={STATUS_VARIANT[integration.status]}>
-                  {t("status.label")} : {t(`status.${integration.status}`)}
-                </Badge>
-              </CardHeader>
-              <CardContent className="grid min-w-0 gap-4">
-                {integration.last_error ? (
-                  <Alert variant="destructive" role="alert">
-                    <AlertDescription>{t("lastError")}</AlertDescription>
-                  </Alert>
-                ) : null}
-
-                <div className="grid gap-1 text-sm">
-                  <span className="font-semibold">{t("scopes")}</span>
-                  {integration.scopes.length === 0 ? (
-                    <span className="text-muted-foreground">{t("scopesNone")}</span>
-                  ) : (
-                    <ul className="flex flex-wrap gap-1" dir="ltr">
-                      {integration.scopes.map((scope) => (
-                        <li key={scope}>
-                          <Badge variant="outline">{scope}</Badge>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                </div>
-
-                {withSecret ? (
-                  <>
-                    <p className="flex items-center gap-2 text-sm">
-                      <KeyRoundIcon className="size-4" aria-hidden="true" />
-                      <span>{integration.has_secret ? t("secretStored") : t("secretMissing")}</span>
-                    </p>
-                    <p className="text-muted-foreground text-xs">{t("secretNote")}</p>
-                    <div className="grid gap-1 text-sm">
-                      <span className="font-semibold">{t("channels")}</span>
-                      {channels.length === 0 ? (
-                        <span className="text-muted-foreground">{t("channelsNone")}</span>
-                      ) : (
-                        <ul className="grid gap-1">
-                          {channels.map((channel) => (
-                            <li key={channel.id} className="flex flex-wrap items-center gap-2">
-                              <bdi dir="ltr">{channel.sender_identity}</bdi>
-                              <Badge variant="outline">{t(`channelStatus.${channel.send_paused && channel.status !== "disconnected" ? "paused" : channel.status}`)}</Badge>
-                              {channel.status !== "disconnected" ? <ChannelPause channelId={channel.id} paused={channel.send_paused} /> : null}
-                            </li>
-                          ))}
-                        </ul>
-                      )}
-                    </div>
-                    {integration.status !== "disconnected" && integration.has_secret ? <VerifyConnection integrationId={integration.id} gateway={integration.gateway} /> : null}
-                    {integration.status !== "disconnected" && (integration.provider === "email" || integration.provider === "whatsapp") ? <AddChannel integrationId={integration.id} type={integration.provider} /> : null}
-                    <IntegrationActions integrationId={integration.id} encryptionConfigured={encryptionConfigured} disconnected={integration.status === "disconnected"} />
-                  </>
-                ) : (
-                  <a href={`/${locale}/crm`} className="text-primary-text text-sm underline-offset-4 hover:underline">
-                    {t("crmLink")}
-                  </a>
-                )}
-              </CardContent>
-            </Card>
-          );
-        })
+        shown.map(renderCard)
       )}
     </div>
   );

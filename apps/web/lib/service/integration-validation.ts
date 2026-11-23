@@ -1,5 +1,5 @@
 import "server-only";
-import { createKapsoClient, createPostmarkValidator, createWhatsAppCloudClient, type PostmarkValidation, type WhatsAppValidation } from "@fusion-leap/adapters";
+import { createKapsoClient, createPostmarkValidator, createResendValidator, createWhatsAppCloudClient, type PostmarkValidation, type WhatsAppValidation } from "@fusion-leap/adapters";
 import { createAdminClient } from "../supabase/admin";
 import type { ServerSupabase } from "../tenant/identity";
 import { ServiceError } from "./errors";
@@ -16,6 +16,8 @@ export type ValidationDeps = {
   readSecret: (organizationId: string, integrationId: string) => Promise<string | null>;
   validate: (input: { phoneNumberId: string; accessToken: string }) => Promise<WhatsAppValidation>;
   validateEmail: (input: { serverToken: string }) => Promise<PostmarkValidation>;
+  /** Clé d'API d'une intégration e-mail Resend (ADR 008). */
+  validateResend: (input: { apiKey: string }) => Promise<PostmarkValidation>;
   /** Clé d'API d'une intégration WhatsApp de passerelle Kapso (ADR 017). */
   validateKapso: (input: { phoneNumberId: string; accessToken: string }) => Promise<WhatsAppValidation>;
   setValidation: (input: { organizationId: string; integrationId: string; ok: boolean; code: string | null; actorId: string }) => Promise<void>;
@@ -25,6 +27,7 @@ export const defaultValidationDeps: ValidationDeps = {
   readSecret: readIntegrationSecret,
   validate: (input) => createWhatsAppCloudClient().validate(input),
   validateEmail: (input) => createPostmarkValidator().validate(input),
+  validateResend: (input) => createResendValidator().validate(input),
   validateKapso: (input) => createKapsoClient().validate(input),
   async setValidation({ organizationId, integrationId, ok, code, actorId }) {
     const { error } = await createAdminClient().rpc("integration_set_validation", { p_org: organizationId, p_integration: integrationId, p_ok: ok, p_code: code, p_actor: actorId });
@@ -65,7 +68,9 @@ export async function validateIntegrationConnection(
 
   const outcome =
     row.provider === "email"
-      ? await deps.validateEmail({ serverToken: token })
+      ? row.gateway === "resend"
+        ? await deps.validateResend({ apiKey: token })
+        : await deps.validateEmail({ serverToken: token })
       : row.gateway === "kapso"
         ? await deps.validateKapso({ phoneNumberId: row.external_account_id, accessToken: token })
         : await deps.validate({ phoneNumberId: row.external_account_id, accessToken: token });

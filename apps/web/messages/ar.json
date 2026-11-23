@@ -975,14 +975,23 @@
       "addEmail": "إضافة عنوان مُرسِل",
       "addPhone": "إضافة رقم (بالصيغة +212…)",
       "email": {
-        "title": "ربط البريد الإلكتروني (Postmark)",
-        "description": "تُرسَل الرسائل عبر Postmark. يُشفَّر رمز الخادم ويُكتب مرة واحدة ولا يُعرض أبدًا. تصبح القناة نشطة عندما يقبل Postmark الرمز.",
+        "title": "ربط بريد إلكتروني",
+        "description": "تُرسل الرسائل عبر المزوّد الذي تختاره (Postmark أو Resend). يُشفَّر المفتاح ويُكتب مرة واحدة ولا يُعرض أبدا. تصبح القناة نشطة عندما يقبله المزوّد.",
         "sender": "عنوان المُرسِل",
         "senderHint": "يجب تأكيده لدى Postmark (Sender Signature) وإلا سيُرفض الإرسال.",
         "token": "رمز خادم Postmark",
         "submit": "ربط وتحقق",
         "duplicate": "هذا العنوان أو الحساب مربوط بالفعل.",
-        "invalid": "عنوان أو رمز غير صالح."
+        "invalid": "عنوان أو رمز غير صالح.",
+        "provider": "المزوّد",
+        "providerPostmark": "Postmark",
+        "providerResend": "Resend",
+        "tokenResend": "مفتاح API الخاص بـ Resend",
+        "senderHintResend": "بدون نطاق موثّق، لا يسلّم Resend إلا إلى عنوان حسابك الخاص (للتجربة).",
+        "webhookSecret": "سر التوقيع من Resend (whsec_…)",
+        "webhookSecretHint": "أنشئ الـ webhook في Resend (الأحداث: delivered وbounced وcomplained) ثم الصق هنا سر التوقيع الخاص به. يُكتب مرة واحدة ولا يُعرض أبدا.",
+        "webhookUrl": "عنوان الـ webhook الذي تعطيه لـ Resend",
+        "webhookSecretInvalid": "سر التوقيع غير صالح."
       },
       "verify": {
         "ok": "تم التحقق من الاتصال: القناة نشطة.",
@@ -1020,6 +1029,10 @@
     },
     "gateway": {
       "meta": "Meta (مباشر)"
+    },
+    "tabs": {
+      "label": "أنواع التكاملات",
+      "other": "أخرى"
     }
   },
   "Unsubscribe": {

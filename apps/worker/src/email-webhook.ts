@@ -1,7 +1,8 @@
 import { createClient } from "@supabase/supabase-js";
-import { readEmailEvent, type EmailEvent } from "@fusion-leap/adapters";
+import { readEmailEvent, type EmailEvent, type ResendReceiver } from "@fusion-leap/adapters";
 import { z } from "zod";
 import { NonRetryableError } from "./errors";
+import type { SecretReader } from "./send";
 import type { WebhookProcessor, WebhookProcessorInput } from "./webhooks";
 
 /**
@@ -29,7 +30,23 @@ export class EmailGatewayError extends Error {
   }
 }
 
-export function createEmailWebhookProcessor(gateway: EmailEventGateway): WebhookProcessor {
+/**
+ * Réception Resend : l'événement conservé ne porte que l'identifiant du message ; le worker le relit par l'API de réception avec la clé de L'INTÉGRATION
+ * de la ligne (jamais du contenu), puis l'applique comme un message entrant. Sans ces dépendances, un tel événement échoue visiblement (définitif).
+ */
+export type ResendInboundDeps = { receiver: Pick<ResendReceiver, "fetchInbound">; readSecret: SecretReader };
+
+export function createEmailWebhookProcessor(gateway: EmailEventGateway, resend?: ResendInboundDeps): WebhookProcessor {
+  async function applyInbound(input: WebhookProcessorInput, event: InboundEvent): Promise<"processed" | "ignored"> {
+    const result = await gateway.applyInbound(input.organizationId, input.integrationId, event);
+    if (result.outcome === "dropped") {
+      // file des cas ambigus pleine : échec VISIBLE et définitif (le message reste dans l'événement conservé, rejouable après le tri) ;
+      // trop de messages en attente du même expéditeur : ignoré
+      if (result.reason === "queue_full") throw new NonRetryableError("unmatched_queue_full");
+      return "ignored";
+    }
+    return "processed";
+  }
   return {
     provider: "email",
     async process(input: WebhookProcessorInput): Promise<"processed" | "ignored"> {
@@ -39,15 +56,17 @@ export function createEmailWebhookProcessor(gateway: EmailEventGateway): Webhook
       switch (event.kind) {
         case "ignored":
           return "ignored";
-        case "inbound": {
-          const result = await gateway.applyInbound(input.organizationId, input.integrationId, event);
-          if (result.outcome === "dropped") {
-            // file des cas ambigus pleine : échec VISIBLE et définitif (le message reste dans l'événement conservé, rejouable après le tri) ;
-            // trop de messages en attente du même expéditeur : ignoré
-            if (result.reason === "queue_full") throw new NonRetryableError("unmatched_queue_full");
-            return "ignored";
-          }
-          return "processed";
+        case "inbound":
+          return applyInbound(input, event);
+        case "inbound_fetch": {
+          if (!resend) throw new NonRetryableError("receiving_unavailable");
+          const apiKey = await resend.readSecret(input.organizationId, input.integrationId);
+          if (apiKey === null) throw new NonRetryableError("no_secret");
+          const fetched = await resend.receiver.fetchInbound(event.emailId, apiKey);
+          // codes courts seulement : ni adresse, ni corps, ni clé dans l'erreur
+          if (fetched.kind === "rejected") throw new NonRetryableError(`receive_${fetched.code}`);
+          if (fetched.kind === "retryable") throw new Error(`receive_${fetched.code}`);
+          return applyInbound(input, fetched.event);
         }
         case "delivered":
         case "bounced":

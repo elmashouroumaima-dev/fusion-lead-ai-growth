@@ -157,3 +157,44 @@ describe("passerelle Supabase des événements e-mail", () => {
     expect(await gateway().applyInbound(ORG, INT, inbound as never)).toEqual({ outcome: "dropped", reason: "queue_full" });
   });
 });
+
+describe("réception Resend (inbound_fetch)", () => {
+  const fetchEvent = { kind: "inbound_fetch", eventId: "rs-rcv:r1", emailId: "r1", at: null } as const;
+  const received = { kind: "inbound", eventId: "inbound:r1", providerMessageId: "r1", from: "k@example.test", recipients: ["ventes@acme.test"], subject: "Re", body: "Bonjour", at: null, spfPass: true, spam: false } as const;
+  const deps = (outcome: unknown, secret: string | null = "re_cle") => {
+    const fetchInbound = vi.fn(async () => outcome as never);
+    const readSecret = vi.fn(async () => secret);
+    return { fetchInbound, readSecret, deps: { receiver: { fetchInbound }, readSecret } };
+  };
+
+  it("relit le message avec la clé de l'intégration de la LIGNE du job, puis l'applique comme un entrant", async () => {
+    const gateway = new MemoryEmail();
+    const d = deps({ kind: "received", event: received });
+    expect(await createEmailWebhookProcessor(gateway, d.deps).process(input(fetchEvent))).toBe("processed");
+    expect(d.readSecret).toHaveBeenCalledWith(ORG, INT);
+    expect(d.fetchInbound).toHaveBeenCalledWith("r1", "re_cle");
+    expect(gateway.inboundCalls).toEqual([{ org: ORG, integration: INT, from: "k@example.test" }]);
+  });
+  it("refus définitif du fournisseur (clé refusée...) : échec visible avec un code court, rien n'est appliqué", async () => {
+    const gateway = new MemoryEmail();
+    await expect(createEmailWebhookProcessor(gateway, deps({ kind: "rejected", code: "provider_auth" }).deps).process(input(fetchEvent))).rejects.toMatchObject({ code: "receive_provider_auth" });
+    expect(gateway.inboundCalls).toHaveLength(0);
+  });
+  it("panne ou message pas encore lisible : erreur réessayable (jamais définitive)", async () => {
+    const err = await createEmailWebhookProcessor(new MemoryEmail(), deps({ kind: "retryable", code: "not_found_yet" }).deps).process(input(fetchEvent)).catch((e: Error) => e);
+    expect(err).toBeInstanceOf(Error);
+    expect(err).not.toBeInstanceOf(NonRetryableError);
+    expect((err as Error).message).toBe("receive_not_found_yet");
+  });
+  it("intégration sans clé, ou traitement non configuré : échec définitif, aucun appel au fournisseur", async () => {
+    const d = deps({ kind: "received", event: received }, null);
+    await expect(createEmailWebhookProcessor(new MemoryEmail(), d.deps).process(input(fetchEvent))).rejects.toMatchObject({ code: "no_secret" });
+    expect(d.fetchInbound).not.toHaveBeenCalled();
+    await expect(createEmailWebhookProcessor(new MemoryEmail()).process(input(fetchEvent))).rejects.toMatchObject({ code: "receiving_unavailable" });
+  });
+  it("file des cas ambigus pleine : même règle que pour Postmark", async () => {
+    const gateway = new MemoryEmail();
+    gateway.inboundResult = { outcome: "dropped", reason: "queue_full" };
+    await expect(createEmailWebhookProcessor(gateway, deps({ kind: "received", event: received }).deps).process(input(fetchEvent))).rejects.toMatchObject({ code: "unmatched_queue_full" });
+  });
+});

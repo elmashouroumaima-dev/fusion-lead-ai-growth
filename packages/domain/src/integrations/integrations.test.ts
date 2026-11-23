@@ -45,6 +45,10 @@ describe("createProviderIntegrationSchema", () => {
     expect(createProviderIntegrationSchema.safeParse({ ...base, provider: "email", gateway: "kapso" }).success).toBe(false);
     expect(createProviderIntegrationSchema.safeParse({ ...base, gateway: "autre" }).success).toBe(false);
   });
+  it("passerelle e-mail (ADR 008) : Resend acceptée pour l'e-mail seulement", () => {
+    expect(createProviderIntegrationSchema.parse({ ...base, provider: "email", gateway: "resend" }).gateway).toBe("resend");
+    expect(createProviderIntegrationSchema.safeParse({ ...base, provider: "whatsapp", gateway: "resend" }).success).toBe(false);
+  });
   it("refuse csv, un compte mal formé, des portées en double ou mal formées, et un organization_id", () => {
     expect(createProviderIntegrationSchema.safeParse({ ...base, provider: "csv" }).success).toBe(false);
     expect(createProviderIntegrationSchema.safeParse({ ...base, external_account_id: "a b" }).success).toBe(false);

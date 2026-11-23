@@ -3,6 +3,14 @@
 Format : Keep a Changelog. Une entrée par jour de travail.
 
 ## [Non publié]
+### E-mail : Resend à côté de Postmark (23 novembre)
+- Ajout : réception Resend (`email.received`) : `resend-receive.ts` relit le message par l'API (clé de l'intégration), événement conservé `inbound_fetch` (identifiant seulement), traitement dans le worker comme un entrant Postmark ; tests d'adaptateur et de worker. Demande un domaine privé avec MX ; forme de la réponse à confirmer.
+- Correction : `createProviderIntegration` forçait `p_gateway = meta` pour l'e-mail : une intégration Resend était enregistrée comme Postmark. Test ajouté.
+- Modification : page Intégrations en deux onglets (E-mail, WhatsApp ; « Autres » s'il y a du CSV ou du CRM interne), fournisseur affiché sur chaque e-mail ; guide de test Resend corrigé (envoi par l'Inbox après `c3-contact.sql`).
+- Ajout : adaptateur `resend.ts` (envoi), `resend-validate.ts`, `gateway.ts` (aiguillage par intégration) dans `packages/adapters/src/email/`, avec tests.
+- Ajout : migration `20261219100000_email_gateway_resend.sql` (+ retour arrière) : `integrations.gateway` accepte `resend` pour l'e-mail ; `create_provider_integration` mise à jour.
+- Modification : schéma domaine (`gateway: resend`), worker (aiguillage), validation web.
+- Ajout : écran « Connecter un e-mail » : choix du fournisseur (Postmark ou Resend), libellés fr/ar/en. - Ajout : webhooks Resend (`resend-webhook.ts`, `POST /api/webhooks/resend`) : signature Svix, delivered / bounced / complained ; secret de signature saisi à la connexion. **Reste à faire** : réception (`email.received`), tests pgTAP de la migration (Docker indisponible), confirmation sur un compte réel.
 ### Un seul PDF de test (22 novembre)
 - Modification : `docs/testing/` ne contient plus qu'**un PDF : `Guide-test-complet.pdf`** (couverture, sommaire, signets ; 71 pages). Les parties sont dans `docs/testing/parts/` (listées dans `parts.json`) ; chaque partie est un `.pdf`, un `.html` ou un `.md`. Pour ajouter quelque chose : déposer le fichier, ajouter une ligne dans `parts.json`, lancer `pnpm test:guide`.
 - Modification : `pnpm test:guide` reconstruit le PDF complet (`scripts/test-guide/merge-all.py`) ; `build-pdf.mjs` accepte un guide Markdown et une sortie en argument.

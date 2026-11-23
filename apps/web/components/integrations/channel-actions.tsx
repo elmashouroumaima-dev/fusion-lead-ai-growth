@@ -14,8 +14,9 @@ const post = (path: string, payload: Record<string, unknown>): Promise<Response>
   fetch(path, { method: "POST", headers: { "content-type": "application/json", "idempotency-key": crypto.randomUUID() }, body: JSON.stringify(payload) });
 
 /** Identifiant de compte d'une intégration e-mail : dérivé du domaine de l'expéditeur (caractères permis par le schéma serveur). */
-export const emailAccountId = (sender: string): string =>
-  `postmark-${sender
+export type EmailProviderChoice = "postmark" | "resend";
+export const emailAccountId = (sender: string, provider: EmailProviderChoice = "postmark"): string =>
+  `${provider}-${sender
     .slice(sender.lastIndexOf("@") + 1)
     .toLowerCase()
     .replace(/[^a-z0-9._-]/g, "-")}`.slice(0, 100);
@@ -27,14 +28,16 @@ function verifyText(t: ReturnType<typeof useTranslations>, body: { status?: stri
 }
 
 /**
- * Connecter un e-mail Postmark (écran de canaux) : adresse d'expéditeur + jeton du serveur Postmark (écriture seule, vidé dès l'envoi). Trois appels
+ * Connecter un e-mail Postmark ou Resend (écran de canaux) : adresse d'expéditeur + jeton du serveur Postmark ou clé d'API Resend (écriture seule, vidé dès l'envoi). Trois appels
  * dans l'ordre : intégration (jeton chiffré côté serveur), canal e-mail, vérification auprès de Postmark (le canal devient actif si elle réussit).
  */
-export function ConnectEmail({ encryptionConfigured }: { encryptionConfigured: boolean }) {
+export function ConnectEmail({ encryptionConfigured, resendWebhookUrl }: { encryptionConfigured: boolean; resendWebhookUrl: string }) {
   const t = useTranslations("Integrations");
   const router = useRouter();
   const sender = useRef<HTMLInputElement>(null);
   const token = useRef<HTMLInputElement>(null);
+  const hookSecret = useRef<HTMLInputElement>(null);
+  const [provider, setProvider] = useState<EmailProviderChoice>("postmark");
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState<Notice>(null);
 
@@ -43,11 +46,19 @@ export function ConnectEmail({ encryptionConfigured }: { encryptionConfigured: b
     const senderField = sender.current;
     const tokenField = token.current;
     if (busy || !senderField || !tokenField || !senderField.value || !tokenField.value) return;
-    const values = { sender: senderField.value.trim(), token: tokenField.value };
+    const hookField = hookSecret.current;
+    // Resend : le secret de signature du webhook est obligatoire (sans lui, aucun statut de livraison ne serait authentifié)
+    if (provider === "resend" && (!hookField || !hookField.value)) return;
+    const values = { sender: senderField.value.trim(), token: tokenField.value, hook: hookField?.value ?? "" };
     tokenField.value = "";
+    if (hookField) hookField.value = "";
     setBusy(true);
     try {
-      const created = await post("/api/integrations", { provider: "email", external_account_id: emailAccountId(values.sender), scopes: [], secret: values.token });
+      const created = await post("/api/integrations", {
+        provider: "email", external_account_id: emailAccountId(values.sender, provider), scopes: [], secret: values.token,
+        // Postmark = comportement par défaut (`meta`) ; Resend = passerelle `resend` (ADR 008, note du 2026-11-23)
+        ...(provider === "resend" ? { gateway: "resend" } : {}),
+      });
       if (created.status === 409) {
         setNotice({ text: t("channelsUi.email.duplicate"), error: true });
         return;
@@ -62,6 +73,14 @@ export function ConnectEmail({ encryptionConfigured }: { encryptionConfigured: b
         setNotice({ text: channel.status === 400 ? t("channelsUi.email.invalid") : channel.status === 409 ? t("channelsUi.email.duplicate") : t("channelsUi.failed"), error: true });
         router.refresh();
         return;
+      }
+      if (provider === "resend") {
+        const hook = await post("/api/integrations/webhook-secret", { integration_id: integration.id, secret: values.hook });
+        if (!hook.ok) {
+          setNotice({ text: hook.status === 400 ? t("channelsUi.email.webhookSecretInvalid") : t("channelsUi.failed"), error: true });
+          router.refresh();
+          return;
+        }
       }
       const verified = await post("/api/integrations/validate", { integration_id: integration.id });
       const body = verified.ok ? ((await verified.json()) as { status?: string; code?: string }) : null;
@@ -84,14 +103,39 @@ export function ConnectEmail({ encryptionConfigured }: { encryptionConfigured: b
       <h2 className="text-lg leading-none font-semibold">{t("channelsUi.email.title")}</h2>
       <p className="text-muted-foreground text-sm">{t("channelsUi.email.description")}</p>
       <div className="grid gap-1">
-        <Label htmlFor="em-sender">{t("channelsUi.email.sender")}</Label>
-        <Input id="em-sender" ref={sender} type="email" dir="ltr" disabled={off} autoComplete="off" spellCheck={false} />
-        <p className="text-muted-foreground text-xs">{t("channelsUi.email.senderHint")}</p>
+        <Label htmlFor="em-provider">{t("channelsUi.email.provider")}</Label>
+        <select
+          id="em-provider" value={provider} disabled={off} onChange={(e) => setProvider(e.target.value === "resend" ? "resend" : "postmark")}
+          className="border-input bg-background h-9 rounded-md border px-3 text-sm"
+        >
+          <option value="postmark">{t("channelsUi.email.providerPostmark")}</option>
+          <option value="resend">{t("channelsUi.email.providerResend")}</option>
+        </select>
       </div>
       <div className="grid gap-1">
-        <Label htmlFor="em-token">{t("channelsUi.email.token")}</Label>
+        <Label htmlFor="em-sender">{t("channelsUi.email.sender")}</Label>
+        <Input id="em-sender" ref={sender} type="email" dir="ltr" disabled={off} autoComplete="off" spellCheck={false} />
+        <p className="text-muted-foreground text-xs">{provider === "resend" ? t("channelsUi.email.senderHintResend") : t("channelsUi.email.senderHint")}</p>
+      </div>
+      <div className="grid gap-1">
+        <Label htmlFor="em-token">{provider === "resend" ? t("channelsUi.email.tokenResend") : t("channelsUi.email.token")}</Label>
         <Input id="em-token" ref={token} type="password" dir="ltr" disabled={off} autoComplete="new-password" spellCheck={false} />
       </div>
+      {provider === "resend" ? (
+        <>
+          <div className="grid gap-1">
+            <Label htmlFor="em-hook">{t("channelsUi.email.webhookSecret")}</Label>
+            <Input id="em-hook" ref={hookSecret} type="password" dir="ltr" disabled={off} autoComplete="new-password" spellCheck={false} />
+            <p className="text-muted-foreground text-xs">{t("channelsUi.email.webhookSecretHint")}</p>
+          </div>
+          <p className="text-sm">
+            <span className="font-semibold">{t("channelsUi.email.webhookUrl")}</span>
+            <bdi dir="ltr" className="text-muted-foreground block break-all font-mono text-xs">
+              {resendWebhookUrl}
+            </bdi>
+          </p>
+        </>
+      ) : null}
       <Button type="submit" className="justify-self-start" disabled={off}>
         {t("channelsUi.email.submit")}
       </Button>

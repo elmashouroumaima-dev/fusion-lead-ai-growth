@@ -975,14 +975,23 @@
       "addEmail": "Add a sender address",
       "addPhone": "Add a number (format +212…)",
       "email": {
-        "title": "Connect e-mail (Postmark)",
-        "description": "E-mails are sent through Postmark. The server token is encrypted, written once and never displayed. The channel becomes active once Postmark accepts the token.",
+        "title": "Connect e-mail",
+        "description": "E-mails are sent through the provider you choose (Postmark or Resend). The key is encrypted, written once and never displayed. The channel becomes active once the provider accepts it.",
         "sender": "Sender address",
         "senderHint": "Must be confirmed at Postmark (Sender Signature), otherwise sends will be refused.",
         "token": "Postmark server token",
         "submit": "Connect and verify",
         "duplicate": "This address or account is already connected.",
-        "invalid": "Invalid address or token."
+        "invalid": "Invalid address or token.",
+        "provider": "Provider",
+        "providerPostmark": "Postmark",
+        "providerResend": "Resend",
+        "tokenResend": "Resend API key",
+        "senderHintResend": "Without a verified domain, Resend only delivers to your own account address (testing).",
+        "webhookSecret": "Resend signing secret (whsec_…)",
+        "webhookSecretHint": "Create the webhook in Resend (events: delivered, bounced, complained), then paste its signing secret here. Written once, never displayed.",
+        "webhookUrl": "Webhook address to give to Resend",
+        "webhookSecretInvalid": "Invalid signing secret."
       },
       "verify": {
         "ok": "Connection verified: the channel is active.",
@@ -1020,6 +1029,10 @@
     },
     "gateway": {
       "meta": "Meta (direct)"
+    },
+    "tabs": {
+      "label": "Integration types",
+      "other": "Other"
     }
   },
   "Unsubscribe": {

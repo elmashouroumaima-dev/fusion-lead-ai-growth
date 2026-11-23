@@ -14,6 +14,7 @@ Ce guide explique, étape par étape, comment récupérer le code, installer ce 
 7. [Comptes de test](#7-comptes-de-test)
 8. [Lancer le worker (jobs)](#8-lancer-le-worker-jobs)
 9. [E-mails de test (facultatif)](#9-e-mails-de-test-facultatif)
+   - 9 bis. [Tunnel public cloudflared (webhooks, tests réels)](#9-bis-tunnel-public-cloudflared-webhooks-tests-réels)
 10. [Lancer les tests](#10-lancer-les-tests)
 11. [Commandes utiles](#11-commandes-utiles)
 12. [Dépannage](#12-dépannage)
@@ -221,6 +222,29 @@ Sans cette étape tout fonctionne **sauf l'inscription par e-mail** (les comptes
 3. Redémarrer : `pnpm db:stop` puis `pnpm db:start`.
 
 Tous les e-mails sont capturés dans la boîte Mailtrap, rien n'est envoyé à de vraies adresses. Détails : `docs/runbooks/local-email.md`.
+
+---
+
+## 9 bis. Tunnel public cloudflared (webhooks, tests réels)
+
+Facultatif. Les fournisseurs (Resend, Postmark, Kapso, Meta) envoient leurs webhooks par Internet : ils ne peuvent pas joindre `localhost`. Pour les tests réels (guides `docs/testing/parts/07-c3-test-reel.html` et `08-email-resend.md`), on ouvre un tunnel public vers l'application.
+
+1. Installer `cloudflared` une fois (Windows) :
+   ```powershell
+   winget install --id Cloudflare.cloudflared
+   ```
+   Fermer puis rouvrir le terminal, puis vérifier : `cloudflared --version`.
+2. Application et worker déjà lancés (§6 et §8). Dans un **terminal séparé** :
+   ```powershell
+   cloudflared tunnel --url http://localhost:3000
+   ```
+   Si le tunnel ne s'établit pas (réseau d'entreprise), ajouter `--protocol http2`.
+3. Noter l'adresse `https://xxxx.trycloudflare.com` affichée : c'est l'adresse publique. L'adresse des webhooks à donner au fournisseur est :
+   - Resend : `https://xxxx.trycloudflare.com/api/webhooks/resend`
+   - Postmark : `https://xxxx.trycloudflare.com/api/webhooks/email`
+   - Kapso : `https://xxxx.trycloudflare.com/api/webhooks/kapso`
+4. **L'adresse change à chaque lancement** : si le tunnel est relancé, mettre à jour le webhook chez le fournisseur. Laisser le terminal ouvert pendant tout le test ; `Ctrl+C` pour arrêter.
+5. Rien d'autre n'est exposé que ce que l'application sert déjà ; ne jamais laisser le tunnel ouvert hors des tests, et ne jamais y faire passer de vraies données de clients.
 
 ---
 

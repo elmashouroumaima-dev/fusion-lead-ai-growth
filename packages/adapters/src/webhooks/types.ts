@@ -4,7 +4,7 @@
  * utilisateur : une requête de webhook est authentifiée par sa signature et rattachée à une entreprise par l'identité du COMPTE
  * fournisseur, jamais par un champ libre du payload.
  */
-export type WebhookProvider = "email" | "whatsapp" | "kapso";
+export type WebhookProvider = "email" | "whatsapp" | "kapso" | "resend";
 /** Fournisseur sous lequel les événements sont CONSERVÉS (`webhook_events.provider`) : `kapso` est une passerelle de `whatsapp`, pas un fournisseur à part. */
 export type WebhookStoreProvider = "email" | "whatsapp";
 
@@ -16,7 +16,7 @@ export interface WebhookAdapter {
   /** Fournisseur de stockage et de résolution (défaut : `provider`). */
   readonly storeProvider?: WebhookStoreProvider;
   /** Passerelle exigée de l'intégration retrouvée (`integrations.gateway`) : un webhook Kapso ne retrouve pas une intégration Meta, et inversement. */
-  readonly gateway?: "meta" | "kapso";
+  readonly gateway?: "meta" | "kapso" | "resend";
   /** Taille maximale du corps brut, en octets (WhatsApp : 3 Mo). */
   readonly maxBytes: number;
   /** Corps brut -> valeur JSON, ou `null` si illisible (jamais d'exception). */
@@ -40,7 +40,7 @@ export interface WebhookAdapter {
 
 /** Accès à la base, réservé au serveur (fonctions service_role). */
 export interface WebhookStore {
-  resolve(provider: WebhookStoreProvider, account: string, gateway?: "meta" | "kapso"): Promise<{ organizationId: string; integrationId: string } | null>;
+  resolve(provider: WebhookStoreProvider, account: string, gateway?: "meta" | "kapso" | "resend"): Promise<{ organizationId: string; integrationId: string } | null>;
   record(input: { organizationId: string; integrationId: string; provider: WebhookStoreProvider; externalEventId: string; payload: unknown }): Promise<{ eventId: string; duplicate: boolean }>;
   recordRejection(input: { organizationId: string; integrationId: string; provider: WebhookStoreProvider }): Promise<void>;
 }

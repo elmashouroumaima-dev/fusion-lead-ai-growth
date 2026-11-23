@@ -71,9 +71,22 @@ Remplacer `<TUNNEL>` par votre adresse. Aucune de ces commandes ne contient de v
 
 ---
 
+## U. Réception des réponses (domaine privé requis, facultatif)
+
+À faire seulement quand un **domaine privé** est vérifié chez Resend avec la **réception activée** (enregistrement MX indiqué dans le tableau de bord, priorité la plus basse). L'adresse `onboarding@resend.dev` ne reçoit rien. Chez Resend, ajouter l'événement **email.received** au webhook (R3), connecter l'intégration avec un expéditeur de ce domaine (ex. `ventes@votre-domaine`) et refaire S1 avec cette adresse.
+
+| ID | Étapes | Résultat attendu |
+|---|---|---|
+| U1 | Depuis la boîte du contact de test, **répondre** à l'e-mail reçu en S2. | Dans les 15 secondes, la réponse apparaît dans l'**Inbox**, dans la conversation du contact (nouveau message entrant). **À CONFIRMER** : forme réelle de la réponse de l'API de réception. |
+| U2 | Dans les événements du webhook chez Resend, ouvrir `email.received`. | Livraison **200**. |
+| U3 | Répondre une deuxième fois, puis rejouer l'événement `email.received` chez Resend. | **Un seul** message dans l'Inbox (déduplication). |
+| U4 | Écrire à l'adresse du canal depuis une adresse **inconnue** (pas un contact). | Aucun contact créé : le message va dans la file des cas ambigus. |
+| U5 | Chercher `re_` et `whsec_` dans les journaux. | **Aucune** occurrence. |
+
+---
+
 ## Ce que ce guide ne couvre pas (à connaître)
 
-- **Réponses entrantes** par Resend (`email.received`) : non traité, aucun cas ici.
 - **Domaine vérifié et envoi à des clients** : demande un domaine privé (SPF, DKIM, DMARC) ; hors de ce guide.
 - Postmark : voir le guide du test réel C3.
 

@@ -30,7 +30,7 @@
     },
     {
       "label": "Worker et adaptateurs",
-      "value": 395,
+      "value": 418,
       "note": "Tâches de fond et adaptateurs de fournisseurs"
     },
     {
@@ -635,7 +635,8 @@
       "items": [
         "Le fournisseur e-mail se choisit par intégration (Postmark ou Resend) : envoi, vérification de la clé, écran de connexion avec le secret de signature et l'adresse du webhook, migration avec retour arrière (aucune donnée à migrer : Postmark reste le défaut).",
         "Webhooks Resend signés (standard Svix) : livraison, rebond, plainte appliqués par les mêmes fonctions que Postmark ; autres événements acquittés et ignorés. La réception des réponses par Resend n'est pas faite.",
-        "Correction trouvée au premier essai : le service forçait la passerelle « meta » pour tout e-mail (Resend aurait été enregistré comme Postmark) ; la page Intégrations passe en deux onglets (E-mail, WhatsApp) et affiche le fournisseur de chaque e-mail. Envoi réel Resend vers l'adresse du compte : réussi."
+        "Correction trouvée au premier essai : le service forçait la passerelle « meta » pour tout e-mail (Resend aurait été enregistré comme Postmark) ; la page Intégrations passe en deux onglets (E-mail, WhatsApp) et affiche le fournisseur de chaque e-mail. Envoi réel Resend vers l'adresse du compte : réussi.",
+        "Réception Resend (`email.received`) : le webhook ne porte que l'identifiant ; le worker relit le message par l'API de réception avec la clé de l'intégration puis l'applique comme un message entrant (mêmes règles que Postmark : expéditeur connu, destinataire = adresse atteinte, expéditeur authentifié par DMARC, file des cas ambigus). Demande un domaine privé avec réception activée."
       ],
       "proof": "57 tests d'adaptateur (envoi, validation, aiguillage, signature, pipeline complet), 1 test de domaine ; typecheck, lint et tests verts ; tests de base non relancés (Docker indisponible) ; aucun appel réel vers Resend à ce jour",
       "review": false
@@ -659,7 +660,7 @@
       "Choisir Postmark ou Resend pour une intégration e-mail, envoyer avec Resend et suivre la livraison par webhook signé (essayé sur des fixtures, pas encore sur un compte réel)."
     ],
     "notYet": [
-      "Envoyer à de vrais clients : il manque un domaine privé vérifié (Postmark comme Resend) ; recevoir les réponses par Resend n'est pas fait.",
+      "Envoyer à de vrais clients et recevoir leurs réponses : il manque un domaine privé vérifié (Postmark comme Resend, avec la réception activée chez Resend).",
       "Se réabonner : aucune action pour lever une désinscription."
     ]
   },

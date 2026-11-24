@@ -3,6 +3,9 @@
 Format : Keep a Changelog. Une entrée par jour de travail.
 
 ## [Non publié]
+### S-06 : les événements sans rien d'exploitable sont acquittés, pas refusés (24 novembre)
+- Correction S-06 : un corps lisible (JSON valide) mais sans rien à traiter (événement d'un autre type, notification sans compte) est désormais **acquitté 200 « ignored »** sans authentification ni écriture, au lieu d'un 400 qui faisait réessayer puis désactiver le webhook chez le fournisseur. Nouveau point d'extension `WebhookAdapter.isIrrelevant`, issue `ignored` du pipeline, journal `webhook.ignored`. Resend : événements de domaine, de contact, de suppression ou d'e-mail sans expéditeur lisible ; Meta et Kapso : notification ou élément sans numéro (état du compte, qualité, conversation) ; Postmark : objet JSON valide d'un type inconnu.
+- Inchangé (voulu) : corps qui n'est pas du JSON, forme invalide, numéro mal formé, événement trop gros : 400 ; **lot de plusieurs numéros dans un même corps : 400** (pas de perte silencieuse ; chaque numéro devrait avoir son propre webhook). Tests : adaptateurs (S-06 pour Resend, Postmark, Meta et Kapso), `handle`.
 ### S-03 : le consentement du formulaire public n'est effectif qu'une fois prouvé (24 novembre)
 - Correction S-03 : un consentement de source `web_form` (adresse non vérifiée) n'est effectif pour un envoi marketing que s'il est prouvé par un message entrant du contact sur ce canal postérieur à la saisie, ou par un consentement enregistré par un humain habilité. Règle `private.consent_is_effective`, appliquée par `message_send_claim`. Pas d'e-mail de confirmation automatique (spec §9.1, §9.2, §85). La capture et l'écran des consentements sont inchangés.
 - Ajout : migration `20261222100000_s03_form_consent_needs_proof.sql` (+ retour arrière), pgTAP `380` (8 tests). ADR 007 amendé (à valider). Reste à faire : appliquer la règle aux segments de campagne (J43) et afficher « non prouvé » sur l'écran du contact.

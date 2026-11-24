@@ -13,6 +13,7 @@ Un webhook n'a **pas de session**. Le fournisseur est dans l'adresse, l'entrepri
 5. Entreprise résolue par le **compte**. Compte inconnu, désactivé ou déconnecté : **le même 401 qu'une signature invalide**, après une vérification factice (même travail, même réponse : aucun oracle d'existence d'un compte, revue J29), sans aucune écriture.
 6. Secret de l'intégration (absent : refus) puis **signature** HMAC sur le corps brut, comparaison à temps constant. Échec : **401** et une ligne `rejected` **sans payload ni identifiant** (plafonnée à 200 par intégration et par heure).
 7. Horodatage signé (si l'adaptateur en déclare un) : un nombre fini dans les 5 minutes, sinon le même 401.
+7 bis. **Corps lisible mais sans rien d'exploitable** (`adapter.isIrrelevant` : événement d'un autre type, notification sans compte) : **200 `ignored`**, sans authentification ni écriture, avant la résolution du compte (S-06 : un 400 ferait réessayer puis désactiver le webhook chez le fournisseur). Un corps invalide, un numéro mal formé ou un lot de plusieurs numéros restent refusés (400).
 8. Identifiant d'événement présent ; **enregistrement idempotent** (`unique (organization_id, provider, external_event_id)`) : un rejeu répond **200 `duplicate`**, sans second traitement ; sinon **200 `accepted`**.
 Un adaptateur qui lève une exception donne une requête invalide ou un refus, jamais une erreur serveur.
 

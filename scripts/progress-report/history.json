@@ -110,5 +110,12 @@
     "days": 46,
     "totalDays": 68,
     "tests": 8445
+  },
+  {
+    "date": "2026-11-25",
+    "percent": 67.6,
+    "days": 46,
+    "totalDays": 68,
+    "tests": 8457
   }
 ]

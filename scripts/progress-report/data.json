@@ -638,7 +638,7 @@
         "Correction trouvée au premier essai : le service forçait la passerelle « meta » pour tout e-mail (Resend aurait été enregistré comme Postmark) ; la page Intégrations passe en deux onglets (E-mail, WhatsApp) et affiche le fournisseur de chaque e-mail. Envoi réel Resend vers l'adresse du compte : réussi.",
         "Réception Resend (`email.received`) : le webhook ne porte que l'identifiant ; le worker relit le message par l'API de réception avec la clé de l'intégration puis l'applique comme un message entrant (mêmes règles que Postmark : expéditeur connu, destinataire = adresse atteinte, expéditeur authentifié par DMARC, file des cas ambigus). Demande un domaine privé avec réception activée."
       ],
-      "proof": "57 tests d'adaptateur (envoi, validation, aiguillage, signature, pipeline complet), 1 test de domaine ; typecheck, lint et tests verts ; tests de base non relancés (Docker indisponible) ; aucun appel réel vers Resend à ce jour",
+      "proof": "57 tests d'adaptateur (envoi, validation, aiguillage, signature, pipeline complet) + 18 pour la réception, tests de worker ; essai réel sur un compte Resend gratuit les 23 et 24 novembre : envoi, livraison par webhook signé, rejeu dédupliqué, refus d'une adresse non autorisée, refus des requêtes non signées, aucune clé dans les journaux (voir la fiche de résultats du guide de test) ; réception et rebond non essayés",
       "review": false
     }
   ],
@@ -657,7 +657,7 @@
       "Connecter un e-mail Postmark depuis l'écran et activer le canal après vérification du jeton ; ajouter un canal, le mettre en pause (essayé sur des fixtures, pas sur un compte réel).",
       "Page Membres lisible sur mobile et tablette ; fil d'Ariane sur toutes les pages de la navigation.",
       "Répondre à un contact WhatsApp depuis la boîte de réception dans la fenêtre de 24 h ; un STOP (texte, bouton, liste ou préférence marketing de Kapso) désinscrit le numéro (essayé sur des fixtures).",
-      "Choisir Postmark ou Resend pour une intégration e-mail, envoyer avec Resend et suivre la livraison par webhook signé (essayé sur des fixtures, pas encore sur un compte réel)."
+      "Choisir Postmark ou Resend pour une intégration e-mail, envoyer avec Resend et suivre la livraison par webhook signé (essayé pour de vrai avec l'adresse du compte Resend ; la réception des réponses reste à essayer avec un domaine privé)."
     ],
     "notYet": [
       "Envoyer à de vrais clients et recevoir leurs réponses : il manque un domaine privé vérifié (Postmark comme Resend, avec la réception activée chez Resend).",
@@ -713,7 +713,7 @@
     "bullets": [
       "Phases 0 à 2 terminées. Phase 3 (canaux) : le code est fait et tout est dans la branche principale.",
       "Test réel WhatsApp (sandbox Kapso) réussi le 21 novembre : réception, réponse, statuts, STOP, arrêt d'urgence, aucune fuite.",
-      "Reste pour valider la phase 3 : tester l'e-mail réel (Resend avec l'adresse du compte, puis un domaine privé), la revue de sécurité, la décision G3."
+      "Reste pour valider la phase 3 : domaine privé (envoi à de vrais clients et réception chez Resend), revue de sécurité, décision G3. L'envoi Resend et ses webhooks sont essayés pour de vrai (adresse du compte)."
     ]
   }
 }

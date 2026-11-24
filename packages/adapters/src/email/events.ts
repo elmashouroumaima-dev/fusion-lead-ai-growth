@@ -206,7 +206,7 @@ export function readEmailEvent(value: unknown): EmailEvent | null {
   if (kind === "inbound_fetch") {
     const emailId = str(value.emailId);
     const at = optionalIso(value.at);
-    return emailId !== null && /^[A-Za-z0-9._-]{1,100}$/.test(emailId) && at !== undefined ? { kind, eventId, emailId, at } : null;
+    return emailId !== null && /^[A-Za-z0-9][A-Za-z0-9._-]{0,99}$/.test(emailId) && at !== undefined ? { kind, eventId, emailId, at } : null;
   }
   if (kind === "delivered" || kind === "bounced" || kind === "complaint") {
     const providerMessageId = str(value.providerMessageId);

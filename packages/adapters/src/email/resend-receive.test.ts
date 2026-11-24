@@ -82,3 +82,34 @@ describe("htmlToText", () => {
     expect(htmlToText("<p>a</p><p>b &lt;c&gt;</p>")).toBe("a\nb <c>");
   });
 });
+
+describe("htmlToText : entrées hostiles (revue de sécurité, constat ReDoS)", () => {
+  const time = (fn: () => string): { ms: number; out: string } => {
+    const t = Date.now();
+    const out = fn();
+    return { ms: Date.now() - t, out };
+  };
+  it("des millions de « < » sans « > » : traité en temps linéaire (plafond de 200 Ko)", () => {
+    const { ms } = time(() => htmlToText("<".repeat(2_000_000)));
+    expect(ms).toBeLessThan(500);
+  });
+  it("des « <script> » jamais refermés ou « <style » ouverts sans fin : rapide, contenu ignoré", () => {
+    expect(time(() => htmlToText("<script>".repeat(250_000))).ms).toBeLessThan(500);
+    expect(time(() => htmlToText("<style ".repeat(250_000))).ms).toBeLessThan(500);
+    expect(htmlToText("avant<script>alert(1)")).toBe("avant");
+  });
+  it("beaucoup de petites balises et de blocs : rapide", () => {
+    expect(time(() => htmlToText("<p>a</p>".repeat(30_000))).ms).toBeLessThan(500);
+  });
+  it("comportement conservé : balises, script, style, br, entités", () => {
+    expect(htmlToText("<p>a</p><p>b &lt;c&gt;</p>")).toBe("a\nb <c>");
+    expect(htmlToText("<div>Bonjour<style>x{}</style><SCRIPT>alert(1)</SCRIPT><br/>à&nbsp;bientôt</div>")).toBe("Bonjour\nà bientôt");
+    expect(htmlToText("a < b et c > d")).toBe("a d");
+  });
+  it("identifiant de message : « . » et « .. » refusés, encodage dans l'adresse", async () => {
+    const f = reply(200, full());
+    const r = createResendReceiver({ fetch: f as unknown as typeof fetch });
+    for (const bad of [".", "..", ".hidden", "a/b", "../x"]) expect(await r.fetchInbound(bad, "re_k")).toEqual({ kind: "rejected", code: "invalid_id" });
+    expect(f).not.toHaveBeenCalled();
+  });
+});

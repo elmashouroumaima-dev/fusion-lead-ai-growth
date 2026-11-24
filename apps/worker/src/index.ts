@@ -8,6 +8,7 @@ import { createSupabaseCrmSyncGateway } from "./crm-sync";
 import { createSupabaseImportGateway } from "./imports";
 import { createSupabaseSecretReader, createSupabaseSendGateway } from "./send";
 import { createEmailWebhookProcessor, createSupabaseEmailEventGateway } from "./email-webhook";
+import { createSupabaseImportPurgeGateway, startImportPurge } from "./imports-purge";
 import { createSupabaseWhatsAppEventGateway, createWhatsAppWebhookProcessor } from "./whatsapp-webhook";
 import { createSupabaseWebhookGateway, type WebhookProcessors } from "./webhooks";
 import { createDefaultRegistry } from "./handlers";
@@ -47,6 +48,8 @@ try {
   });
   installShutdown({ runner, logger });
   runner.start();
+  // purge des fichiers d'import (S-09) : au démarrage puis toutes les 15 minutes
+  startImportPurge(createSupabaseImportPurgeGateway(env), logger);
 } catch (error) {
   if (error instanceof EnvValidationError) {
     console.error(`[${WORKER_NAME}] démarrage refusé.\n${error.message}`);

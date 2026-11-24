@@ -30,7 +30,7 @@
     },
     {
       "label": "Worker et adaptateurs",
-      "value": 434,
+      "value": 455,
       "note": "Tâches de fond et adaptateurs de fournisseurs"
     },
     {
@@ -699,6 +699,15 @@
         "Les corps invalides et les lots de plusieurs numéros restent refusés : aucune perte silencieuse."
       ],
       "proof": "tests d'adaptateur pour Resend, Postmark, Meta et Kapso, test de la route ; lint, typecheck et tests verts ; aucun changement de base",
+      "review": false
+    },
+    {
+      "day": "Sécurité",
+      "title": "S-07 : un expéditeur Resend à plusieurs adresses est refusé",
+      "items": [
+        "Un message reçu dont l'expéditeur contient plusieurs adresses (ou une adresse cachée dans le nom) est refusé : il ne peut plus être rattaché au contact d'une autre personne grâce à la vérification d'identité (DMARC) d'une adresse qui n'est pas la sienne."
+      ],
+      "proof": "tests d'adaptateur (formes acceptées et refusées, réception) ; lint, typecheck et tests verts ; reste à confirmer sur un compte réel la forme du résultat d'authentification",
       "review": false
     }
   ],

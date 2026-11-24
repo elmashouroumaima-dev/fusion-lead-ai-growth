@@ -30,11 +30,20 @@ export function resendAccountId(sender: string): string {
   return `resend-${sender.slice(sender.lastIndexOf("@") + 1).toLowerCase().replace(/[^a-z0-9._-]/g, "-")}`.slice(0, 100);
 }
 
-/** « Nom <a@b.test> » ou « a@b.test » -> « a@b.test » (normalisée) ou `null`. */
+/**
+ * UNE seule adresse, ou `null` (S-07). Formes acceptées : « a@b.test », « Nom <a@b.test> », « "Nom, avec virgule" <a@b.test> ». Refusées : plusieurs adresses
+ * (virgule ou point-virgule hors d'un nom entre guillemets), commentaire entre parenthèses, nom non guillemeté contenant « @ », « < » ou « > », texte après « > ».
+ * Pourquoi : le fournisseur évalue DMARC sur UNE adresse ; une liste « A <a@pirate.test>, V <v@client.test> » pouvait faire retenir l'adresse de la victime avec le résultat
+ * « pass » de l'autre (usurpation d'un contact). Le résultat est l'adresse normalisée.
+ */
 export function resendAddressOf(value: unknown): string | null {
   if (typeof value !== "string" || value.length > 400) return null;
-  const angled = /<([^<>]+)>\s*$/.exec(value);
-  const normalized = normalizeContactEmail((angled?.[1] ?? value).trim());
+  const text = value.trim();
+  // nom guillemeté (guillemets échappés permis) ou nom simple SANS « @ », « , », « ; », « < », « > », « " », « ( » ni « ) »
+  const angled = /^(?:"(?:[^"\\]|\\.)*"|[^<>",;@()]*)\s*<([^<>\s,;"()]+)>$/.exec(text);
+  const candidate = angled ? (angled[1] ?? "") : /^[^\s<>",;()\\]+$/.test(text) ? text : null;
+  if (candidate === null) return null;
+  const normalized = normalizeContactEmail(candidate);
   return normalized.ok ? normalized.value : null;
 }
 

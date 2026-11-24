@@ -30,7 +30,7 @@
     },
     {
       "label": "Worker et adaptateurs",
-      "value": 418,
+      "value": 428,
       "note": "Tâches de fond et adaptateurs de fournisseurs"
     },
     {
@@ -649,6 +649,16 @@
         "Scans automatiques faits : aucun des interdits du CLAUDE.md, 34 tables sur 34 avec RLS, aucune fonction `security definer` sans `search_path`, rien d'exécutable par `anon`, aucun secret dans les fichiers, la base ni les journaux, un seul puits XSS (palette validée), aucune vulnérabilité connue des dépendances."
       ],
       "proof": "Scans rejouables (commandes dans le pack) ; Semgrep, CodeQL, gitleaks et test d'intrusion non faits",
+      "review": false
+    },
+    {
+      "day": "Sécurité",
+      "title": "S-02 : comptes fournisseur par entreprise (ADR 018)",
+      "items": [
+        "Un compte fournisseur (numéro WhatsApp, domaine e-mail) n'est plus réservé entre entreprises : l'unicité devient par entreprise, la déconnexion libère le compte et la réponse 409 ne révèle plus qu'un compte est pris.",
+        "Les webhooks retrouvent jusqu'à cinq intégrations candidates du compte et c'est la signature (le secret propre à chaque intégration) qui désigne l'entreprise : un attaquant ne reçoit que ses propres événements."
+      ],
+      "proof": "5 tests d'adaptateur dédiés, pgTAP 210, 220 et 330 et tests RLS et d'acceptation adaptés ; retour arrière fourni ; suites de base et RLS à rejouer sur une base propre sans worker (CI)",
       "review": false
     }
   ],

@@ -3,6 +3,10 @@
 Format : Keep a Changelog. Une entrée par jour de travail.
 
 ## [Non publié]
+### S-02 : comptes fournisseur par entreprise, webhooks résolus par signature (24 novembre)
+- Correction (revue de sécurité S-02, ADR 018) : l'index unique global `integrations_provider_account_global` est supprimé ; l'unicité reste par entreprise. Deux entreprises peuvent déclarer le même compte (plus de blocage entre entreprises, plus de réponse 409 qui révèle qu'un compte est pris, la déconnexion libère le compte).
+- Ajout : migration `20261220100000_integration_account_per_org.sql` (+ retour arrière) : `webhook_resolve_candidates` remplace `webhook_resolve_integration` (jusqu'à 5 candidates, actives d'abord) ; `ingestWebhook` essaie le secret de chaque candidate, la signature désigne l'entreprise ; refus tracé pour chaque candidate.
+- Tests : adaptateurs (5 tests S-02 : événement de la victime, de l'attaquante, signature inconnue, candidate sans secret, aucune candidate), pgTAP 210, 220, 330, RLS et acceptation adaptés.
 ### Pack de revue de sécurité de la Phase 3 (24 novembre)
 - Ajout : `docs/security/phase3-review-pack.md` : périmètre (J38 à J40, durcissement `reply`, passerelles Kapso et Resend, webhooks), ordre de lecture, checklist par menace, résultats de scans automatiques (interdits du CLAUDE.md, 34 tables sur 34 avec RLS, fonctions `security definer`, droits de `anon`, secrets, puits XSS, `pnpm audit` sans vulnérabilité), points d'attention et fiche de constats à remplir. Non fait : Semgrep, CodeQL, gitleaks, test d'intrusion.
 - Modification : `docs/checkpoints/C3.md`, écart n° 6 : pack prêt, revue par la responsable technique à faire.

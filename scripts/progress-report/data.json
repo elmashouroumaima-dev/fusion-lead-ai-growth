@@ -30,7 +30,7 @@
     },
     {
       "label": "Worker et adaptateurs",
-      "value": 455,
+      "value": 461,
       "note": "Tâches de fond et adaptateurs de fournisseurs"
     },
     {
@@ -718,6 +718,16 @@
         "Le résultat d'une vérification n'est enregistré que pour le jeton réellement essayé : un ancien jeton valide ne peut plus activer un jeton remplacé entre-temps."
       ],
       "proof": "8 tests de base (pgTAP 390), test unitaire, pgTAP 270, 320, 210 et 330 verts ; retour arrière fourni ; effet : les envois s'arrêtent jusqu'à la revérification",
+      "review": false
+    },
+    {
+      "day": "Sécurité",
+      "title": "S-09 : les fichiers d'import sont purgés",
+      "items": [
+        "Les fichiers CSV importés (données personnelles de contacts) sont retirés du stockage une fois l'import terminé, annulé ou échoué (purge toutes les 15 minutes par le worker), ainsi que les envois sans lot.",
+        "Un lot d'import abandonné au stade « envoyé » est annulé au bout de 24 heures : il ne bloque plus les imports de l'entreprise."
+      ],
+      "proof": "12 tests de base (pgTAP 400), 6 tests du worker ; pgTAP 180 et 900 verts ; retour arrière fourni",
       "review": false
     }
   ],

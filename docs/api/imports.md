@@ -80,3 +80,5 @@ Page `/[locale]/imports` (menu « CSV import »), **owner et admin seulement** :
 - Le fichier est lu par le navigateur et envoyé tel quel (10 Mo au plus) ; l'aperçu est calculé par le serveur.
 - Rôles : owner et admin seulement, plus restrictif que l'ADR 014 (marketing et commercial peuvent « créer par import CSV ») ; écart déjà documenté, décision de la responsable technique.
 
+## Purge des fichiers (S-09)
+Le fichier CSV contient des données personnelles : il n'est conservé que le temps de l'import. Le worker lance une purge au démarrage puis toutes les 15 minutes (`apps/worker/src/imports-purge.ts`) : lots `uploaded` de plus de 24 h annulés (place libérée) ; fichier des lots terminés (`done`, `failed`, `cancelled`, depuis plus de 10 minutes) retiré du Storage puis `import_batches.file_purged_at` renseigné ; objets du bucket sans lot depuis plus de 24 h retirés. Les lots `queued` et `running` ne sont jamais touchés. Fonctions SQL réservées à `service_role` : `import_expire_stale`, `import_files_due`, `import_file_purged`, `import_orphan_files`. Le rapport d'un lot (lignes sans donnée de contact) reste lisible après la purge du fichier.

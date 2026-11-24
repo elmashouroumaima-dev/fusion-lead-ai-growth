@@ -54,14 +54,21 @@ describe("arrêt d'urgence", () => {
     expect(paused(ORG.alpha)).toBe("false");
   });
 
-  it("marketing, admin et propriétaire arrêtent et relancent ; seule l'entreprise active est touchée", async () => {
+  it("marketing, admin et propriétaire arrêtent ; admin et propriétaire relancent (S-05 : le marketing ne reprend pas) ; seule l'entreprise active est touchée", async () => {
     for (const who of ["alpha-marketing", "alpha-admin", "shared"]) {
       const stop = await post(who, "/api/send/emergency-stop", { paused: true });
       expect(stop.status, who).toBe(200);
       expect(stop.json).toEqual({ paused: true });
       expect(paused(ORG.alpha), who).toBe("true");
       expect(paused(ORG.beta), who).not.toBe("true");
-      expect((await post(who, "/api/send/emergency-stop", { paused: false })).status, who).toBe(200);
+      if (who === "alpha-marketing") {
+        // le marketing ne peut pas reprendre : 403, l'arrêt reste actif ; un administrateur reprend
+        expect((await post(who, "/api/send/emergency-stop", { paused: false })).status, who).toBe(403);
+        expect(paused(ORG.alpha), who).toBe("true");
+        expect((await post("alpha-admin", "/api/send/emergency-stop", { paused: false })).status).toBe(200);
+      } else {
+        expect((await post(who, "/api/send/emergency-stop", { paused: false })).status, who).toBe(200);
+      }
       expect(paused(ORG.alpha), who).toBe("false");
     }
   });

@@ -928,7 +928,7 @@
       "label": "Nouveau jeton",
       "hint": "Le nouveau jeton remplace l'ancien immédiatement. Il n'est jamais affiché ensuite.",
       "submit": "Remplacer",
-      "done": "Jeton remplacé.",
+      "done": "Jeton remplacé. Vérifiez la connexion pour reprendre les envois.",
       "failed": "Le jeton n'a pas pu être remplacé.",
       "unavailable": "Le chiffrement des secrets n'est pas configuré sur ce serveur.",
       "invalid": "Le jeton est invalide (8 à 4096 caractères, sans caractère de contrôle).",

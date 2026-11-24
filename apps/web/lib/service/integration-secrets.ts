@@ -10,7 +10,15 @@ import { getKeyRing } from "../smtp/secrets";
  * journalisé, renvoyé au navigateur ni stocké ; toute erreur est opaque (aucun détail du chiffrement).
  */
 export async function readIntegrationSecret(organizationId: string, integrationId: string): Promise<string | null> {
-  return readSealedSecret("get_integration_secret", organizationId, integrationId);
+  return (await readSealed("get_integration_secret", organizationId, integrationId))?.token ?? null;
+}
+
+/**
+ * Comme `readIntegrationSecret`, avec l'identifiant du secret lu : la vérification d'une connexion le transmet à `integration_set_validation` pour qu'un résultat obtenu
+ * avec un ancien jeton ne puisse pas activer un jeton remplacé entre-temps (S-08). L'identifiant n'est pas un secret.
+ */
+export async function readIntegrationSecretWithId(organizationId: string, integrationId: string): Promise<{ token: string; secretId: string } | null> {
+  return readSealed("get_integration_secret", organizationId, integrationId);
 }
 
 /**
@@ -22,6 +30,10 @@ export async function readIntegrationWebhookSecret(organizationId: string, integ
 }
 
 async function readSealedSecret(rpcName: "get_integration_secret" | "get_integration_webhook_secret", organizationId: string, integrationId: string): Promise<string | null> {
+  return (await readSealed(rpcName, organizationId, integrationId))?.token ?? null;
+}
+
+async function readSealed(rpcName: "get_integration_secret" | "get_integration_webhook_secret", organizationId: string, integrationId: string): Promise<{ token: string; secretId: string } | null> {
   const keyRing = getKeyRing();
   if (!keyRing) throw new Error("secrets_unavailable");
   const { data, error } = await createAdminClient().rpc(rpcName, { p_org: organizationId, p_integration: integrationId });
@@ -32,11 +44,12 @@ async function readSealedSecret(rpcName: "get_integration_secret" | "get_integra
     throw new Error("secret_unreadable");
   }
   try {
-    return openOrganizationSecret({
+    const token = openOrganizationSecret({
       organizationId,
       stored: { secretId: row.secret_id, ciphertext: row.ciphertext, nonce: row.nonce, keyVersion: row.key_version },
       keyRing,
     });
+    return { token, secretId: row.secret_id };
   } catch {
     throw new Error("secret_unreadable");
   }

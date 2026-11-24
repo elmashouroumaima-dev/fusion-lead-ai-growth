@@ -928,7 +928,7 @@
       "label": "New token",
       "hint": "The new token replaces the old one immediately. It is never displayed afterwards.",
       "submit": "Replace",
-      "done": "Token replaced.",
+      "done": "Token replaced. Verify the connection to resume sending.",
       "failed": "The token could not be replaced.",
       "unavailable": "Secret encryption is not configured on this server.",
       "invalid": "The token is invalid (8 to 4096 characters, no control characters).",

@@ -113,3 +113,15 @@ describe("htmlToText : entrées hostiles (revue de sécurité, constat ReDoS)", 
     expect(f).not.toHaveBeenCalled();
   });
 });
+
+describe("S-07 : un « From » à plusieurs adresses est refusé (usurpation de contact)", () => {
+  it("liste d'adresses, nom contenant une adresse, commentaire : refus définitif invalid_sender, jamais un message entrant", async () => {
+    for (const from of ["A <a@pirate.test>, V <victime@client.test>", "a@pirate.test <victime@client.test>", "A (a@pirate.test) <victime@client.test>"]) {
+      expect(await run(200, full({ from }))).toEqual({ kind: "rejected", code: "invalid_sender" });
+    }
+  });
+  it("un destinataire (received_for) à plusieurs adresses n'est pas retenu", async () => {
+    const out = await run(200, full({ received_for: ["ventes@acme.test, autre@acme.test", "ventes@acme.test"] }));
+    expect(out.kind === "received" && out.event.recipients).toEqual(["ventes@acme.test"]);
+  });
+});

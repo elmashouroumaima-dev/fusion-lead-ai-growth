@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from "vitest";
 import { ingestWebhook } from "../webhooks/ingest";
 import type { WebhookStore } from "../webhooks/types";
 import { readEmailEvent } from "./events";
-import { normalizeResendPayload, resendAccountId, resendWebhookAdapter } from "./resend-webhook";
+import { normalizeResendPayload, resendAccountId, resendAddressOf, resendWebhookAdapter } from "./resend-webhook";
 
 const KEY = Buffer.from("0123456789abcdef0123456789abcdef");
 const SECRET = `whsec_${KEY.toString("base64")}`;
@@ -171,5 +171,42 @@ describe("résolution par la passerelle et pipeline complet", () => {
     const st = store(true);
     expect(await run(st, {}, `whsec_${Buffer.from("un-autre-secret-un-autre-secret-0").toString("base64")}`)).toEqual({ kind: "invalid_signature" });
     expect(st.record).not.toHaveBeenCalled();
+  });
+});
+
+describe("S-07 : resendAddressOf n'accepte qu'UNE adresse", () => {
+  it.each([
+    ["a@b.test", "a@b.test"],
+    ["  A@B.test  ", "a@b.test"],
+    ["Acme <ventes@exemple.test>", "ventes@exemple.test"],
+    ["<ventes@exemple.test>", "ventes@exemple.test"],
+    ['"Dupont, Jean" <jean@exemple.test>', "jean@exemple.test"],
+    ['"Nom \\"cité\\"" <x@exemple.test>', "x@exemple.test"],
+  ])("accepte %s", (input, expected) => {
+    expect(resendAddressOf(input)).toBe(expected);
+  });
+  it.each([
+    "A <a@pirate.test>, V <v@client.test>",
+    "a@pirate.test, v@client.test",
+    "a@pirate.test; v@client.test",
+    "a@pirate.test v@client.test",
+    "a@evil.test <v@client.test>",
+    "Acme (a@evil.test) <v@client.test>",
+    "Acme <v@client.test> extra",
+    "Acme <v@client.test><w@client.test>",
+    "<a@b.test",
+    "",
+    "pas une adresse",
+  ])("refuse %s", (input) => {
+    expect(resendAddressOf(input)).toBeNull();
+  });
+  it("refuse tout ce qui n'est pas du texte ou dépasse 400 caractères", () => {
+    for (const bad of [null, undefined, 12, ["a@b.test"], { a: 1 }, `${"a".repeat(401)}@b.test`]) expect(resendAddressOf(bad)).toBeNull();
+  });
+  it("dans un événement : un « from » à plusieurs adresses ne donne aucun compte (ignoré), un destinataire multiple est refusé", () => {
+    const multi = resendWebhookAdapter.parse(body("email.delivered", { from: "A <a@pirate.test>, V <ventes@exemple.test>" }));
+    expect(resendWebhookAdapter.extractAccount(multi, {})).toBeNull();
+    expect(resendWebhookAdapter.isIrrelevant?.(multi, {})).toBe(true);
+    expect(resendWebhookAdapter.parse(body("email.delivered", { to: ["a@x.test, b@y.test"] }))).toBeNull();
   });
 });

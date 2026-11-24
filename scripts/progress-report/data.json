@@ -709,6 +709,16 @@
       ],
       "proof": "tests d'adaptateur (formes acceptées et refusées, réception) ; lint, typecheck et tests verts ; reste à confirmer sur un compte réel la forme du résultat d'authentification",
       "review": false
+    },
+    {
+      "day": "Sécurité",
+      "title": "S-08 : un jeton remplacé doit être revérifié",
+      "items": [
+        "Remplacer le jeton d'une intégration active la repasse en attente (canaux compris) jusqu'à une nouvelle vérification de la connexion : plus d'envoi avec un jeton jamais essayé.",
+        "Le résultat d'une vérification n'est enregistré que pour le jeton réellement essayé : un ancien jeton valide ne peut plus activer un jeton remplacé entre-temps."
+      ],
+      "proof": "8 tests de base (pgTAP 390), test unitaire, pgTAP 270, 320, 210 et 330 verts ; retour arrière fourni ; effet : les envois s'arrêtent jusqu'à la revérification",
+      "review": false
     }
   ],
   "capabilities": {

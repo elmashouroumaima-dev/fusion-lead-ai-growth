@@ -3,6 +3,10 @@
 Format : Keep a Changelog. Une entrée par jour de travail.
 
 ## [Non publié]
+### S-08 : un jeton remplacé doit être revérifié (25 novembre)
+- Correction S-08 : remplacer le jeton d'une intégration **active** la repasse en `pending` et ses canaux actifs aussi, jusqu'à une nouvelle validation réussie (« Vérifier la connexion ») ; avant, l'envoi partait avec un jeton jamais essayé (faute de frappe, jeton d'un autre compte). Une intégration désactivée reste désactivée. Message après remplacement : « Vérifiez la connexion pour reprendre les envois ».
+- Correction S-08 (course) : `integration_set_validation` reçoit le secret réellement essayé (`p_secret_id`) et refuse un résultat obtenu avec un ancien jeton (`stale_validation`, 409 côté serveur : relancer la vérification). Le serveur lit désormais le jeton avec l'identifiant de son secret.
+- Ajout : migration `20261223100000_s08_token_rotation_revalidation.sql` (+ retour arrière), pgTAP `390` (8 tests), test unitaire ; pgTAP `270` adapté (signature à six arguments). **Effet à connaître** : après un remplacement de jeton, les envois de cette intégration sont refusés tant que la connexion n'est pas revérifiée.
 ### S-07 : un « From » Resend à plusieurs adresses est refusé (25 novembre)
 - Correction S-07 : `resendAddressOf` n'accepte plus qu'UNE adresse (« a@b.test », « Nom <a@b.test> », nom guillemeté avec virgule). Une liste d'adresses, un nom non guillemeté contenant « @ », un commentaire ou du texte après « > » donnent `null` : le message reçu est refusé (`invalid_sender`), un événement sortant sans expéditeur lisible est ignoré (S-06), un destinataire multiple n'est pas retenu. Raison : DMARC est évalué sur UNE adresse ; la liste « A <a@pirate.test>, V <v@client.test> » pouvait faire retenir l'adresse de la victime avec le « pass » de l'autre. Tests d'adaptateur (accepté / refusé, réception). Reste **à confirmer sur un compte réel** : la forme exacte de `authentication` et le comportement de Resend avec plusieurs adresses.
 ### S-06 : les événements sans rien d'exploitable sont acquittés, pas refusés (24 novembre)

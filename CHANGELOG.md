@@ -3,6 +3,9 @@
 Format : Keep a Changelog. Une entrée par jour de travail.
 
 ## [Non publié]
+### Remplacer le secret de webhook depuis l'écran Intégrations (24 novembre)
+- Documentation : `docs/runbooks/whatsapp-kapso-pas-a-pas.md` : procédure ordonnée de l'essai réel WhatsApp Kapso en local (tunnel, `SITE_URL`, clé d'API, canal, secret de webhook identique des deux côtés, contact de test, test, diagnostic dans la base). Essai du 24 novembre : message reçu, réponse envoyée puis lue, événements signés `processed`.
+- Ajout : sur chaque intégration e-mail ou WhatsApp non déconnectée, un champ « Secret de webhook » (écriture seule, jamais relu, vidé dès l'envoi) avec « Générer » (Kapso, Postmark, Meta : le secret est choisi par nous) ou à coller (Resend : donné par le fournisseur) et l'adresse du webhook à donner au fournisseur. Utile quand le secret chez le fournisseur et celui de l'application ne correspondent plus (événements refusés « signature invalide ») sans avoir à déconnecter l'intégration. Aucune route nouvelle : `POST /api/integrations/webhook-secret` existait ; composant `webhook-secret-form.tsx`, textes fr/ar/en.
 ### S-02 : comptes fournisseur par entreprise, webhooks résolus par signature (24 novembre)
 - Correction (revue de sécurité S-02, ADR 018) : l'index unique global `integrations_provider_account_global` est supprimé ; l'unicité reste par entreprise. Deux entreprises peuvent déclarer le même compte (plus de blocage entre entreprises, plus de réponse 409 qui révèle qu'un compte est pris, la déconnexion libère le compte).
 - Ajout : migration `20261220100000_integration_account_per_org.sql` (+ retour arrière) : `webhook_resolve_candidates` remplace `webhook_resolve_integration` (jusqu'à 5 candidates, actives d'abord) ; `ingestWebhook` essaie le secret de chaque candidate, la signature désigne l'entreprise ; refus tracé pour chaque candidate.

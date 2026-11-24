@@ -85,6 +85,39 @@ Remplacer `<TUNNEL>` par votre adresse. Aucune de ces commandes ne contient de v
 
 ---
 
+## Résultats de l'essai du 23 et 24 novembre 2026
+
+Essai fait en local (base locale, application et worker lancés, tunnel `cloudflared`, compte Resend gratuit, expéditeur `onboarding@resend.dev`, destinataire = adresse du compte Resend). Les cas notés **OK** ont été constatés ; **non testé** n'est pas un échec.
+
+| Cas | Résultat | Constat |
+|---|---|---|
+| R1, R2 | OK | Liste Fournisseur (Postmark par défaut) ; champs Resend et adresse du webhook affichés. |
+| R3 | OK | Webhook créé chez Resend (adresse du tunnel + secret `whsec_`). |
+| R4 | OK | « Connexion vérifiée », canal **actif**, intégration à la passerelle `resend`. Le type de la clé (envoi seul ou accès complet) n'a pas été relevé : l'hypothèse « une clé d'envoi seul est reconnue valide » reste **À CONFIRMER**. |
+| R5, R6 | non testé | |
+| R7 | OK (constaté autrement) | « Cette adresse ou ce compte est déjà connecté. » vu sur un reliquat d'essai déconnecté (les adresses restent réservées après déconnexion : voir plus bas). |
+| S1 | OK | Réponse envoyée depuis l'Inbox : en file, approuvée, acceptée en moins de 2 secondes. |
+| S2 | OK | E-mail reçu dans la boîte du destinataire. Pied de page de désabonnement et en-têtes `List-Unsubscribe` : non relevés. |
+| S3 | OK | Statut **délivré** en 3 secondes par webhook signé (2 messages ; événements `processed`, signature valide). |
+| S4 | OK | Événement rejoué chez Resend : réponse 200 `duplicate` (visible dans le journal de l'application), aucune ligne en plus, statut du message inchangé. |
+| S5 | OK | Message vers une autre adresse : `failed` / **`sender_not_allowed`**, une seule tentative (pas de nouvel essai). |
+| S6 | non testé | Rebond « Permanent » : **À CONFIRMER**. |
+| T1, T2 | OK | Sans signature, fausse signature, horodatage ancien : **401** et ligne `rejected` / `signature_invalid` sans contenu. Compte inconnu : 401 identique, rien d'enregistré. Corps illisible ou événement de domaine : 400. |
+| T3 | OK (en partie) | Aucune clé `re_…` ni secret `whsec_…` dans `audit_logs`, `jobs`, `idempotency_keys`, `webhook_events`, `messages`, `integrations`, `notifications`, ni dans le journal du serveur de développement, ni dans les journaux des conteneurs de la base. Le terminal du worker n'a pas été relu. |
+| T4 | OK (en partie) | Tests de Postmark (adaptateur, aiguillage, envoi du worker) et parcours d'acceptation en HTTP réel verts ; pas d'essai avec un vrai jeton Postmark. |
+| T5 | OK | Après déconnexion, l'adresse du webhook ne retrouve plus l'intégration (vérifié dans une transaction annulée) : réponse 401 identique à un compte inconnu. |
+| T6 | non testé | À faire chez Resend (désactiver le webhook). |
+| U1 à U5 | non testé | Demande un domaine privé avec réception activée. |
+
+**Constats de l'essai (corrigés depuis)**
+- Le service enregistrait toute intégration e-mail à la passerelle `meta` (Postmark), même en choisissant Resend : corrigé (PR 75), test ajouté.
+- La page Intégrations passe en deux onglets (E-mail, WhatsApp) : deux tests d'acceptation ont dû être adaptés (PR 76).
+- Les webhooks exigent HTTPS : en local, une requête `curl` doit porter `x-forwarded-proto: https`, comme le fait le tunnel.
+- À noter : une adresse déconnectée reste réservée, on ne peut pas la reconnecter telle quelle (comportement existant, à décider avec la responsable technique).
+- L'adresse du tunnel change à chaque lancement : mettre à jour le webhook chez Resend.
+
+---
+
 ## Ce que ce guide ne couvre pas (à connaître)
 
 - **Domaine vérifié et envoi à des clients** : demande un domaine privé (SPF, DKIM, DMARC) ; hors de ce guide.

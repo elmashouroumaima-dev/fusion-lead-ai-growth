@@ -226,6 +226,7 @@ Tous les e-mails sont capturés dans la boîte Mailtrap, rien n'est envoyé à d
 ---
 
 ## 9 bis. Tunnel public cloudflared (webhooks, tests réels)
+`cloudflared tunnel --url http://localhost:3000`
 
 Facultatif. Les fournisseurs (Resend, Postmark, Kapso, Meta) envoient leurs webhooks par Internet : ils ne peuvent pas joindre `localhost`. Pour les tests réels (guides `docs/testing/parts/07-c3-test-reel.html` et `08-email-resend.md`), on ouvre un tunnel public vers l'application.
 

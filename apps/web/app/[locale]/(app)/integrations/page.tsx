@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { AddChannel, ChannelPause, ConnectEmail } from "../../../../components/integrations/channel-actions";
 import { IntegrationActions } from "../../../../components/integrations/integration-actions";
+import { WebhookSecretForm } from "../../../../components/integrations/webhook-secret-form";
 import { ConnectKapso, VerifyConnection } from "../../../../components/integrations/whatsapp-connect";
 import { requireLocale } from "../../../../i18n/require-locale";
 import { requireClaims } from "../../../../lib/auth/require-claims";
@@ -19,6 +20,9 @@ import { requireTenantContext } from "../../../../lib/tenant/context";
 export const dynamic = "force-dynamic";
 
 const STATUS_VARIANT = { pending: "secondary", active: "success", error: "destructive", disconnected: "outline", disabled: "outline" } as const;
+/** Route de webhook d'une intégration : Kapso, Meta (WhatsApp direct), Resend, Postmark (e-mail par défaut). */
+const webhookRouteOf = (provider: string, gateway: string): string =>
+  provider === "whatsapp" ? (gateway === "kapso" ? "kapso" : "whatsapp") : gateway === "resend" ? "resend" : "email";
 const isProvider = (value: string): value is (typeof INTEGRATION_PROVIDERS)[number] => (INTEGRATION_PROVIDERS as readonly string[]).includes(value);
 
 /**
@@ -112,6 +116,14 @@ export default async function IntegrationsPage({ params, searchParams }: { param
                 </div>
                 {integration.status !== "disconnected" && integration.has_secret ? <VerifyConnection integrationId={integration.id} gateway={integration.gateway === "kapso" ? "kapso" : "meta"} /> : null}
                 {integration.status !== "disconnected" && (integration.provider === "email" || integration.provider === "whatsapp") ? <AddChannel integrationId={integration.id} type={integration.provider} /> : null}
+                {integration.status !== "disconnected" && (integration.provider === "email" || integration.provider === "whatsapp") ? (
+                  <WebhookSecretForm
+                    integrationId={integration.id}
+                    encryptionConfigured={encryptionConfigured}
+                    webhookUrl={`${getServerEnv().SITE_URL}/api/webhooks/${webhookRouteOf(integration.provider, integration.gateway)}`}
+                    canGenerate={!(integration.provider === "email" && integration.gateway === "resend")}
+                  />
+                ) : null}
                 <IntegrationActions integrationId={integration.id} encryptionConfigured={encryptionConfigured} disconnected={integration.status === "disconnected"} />
               </>
             ) : (

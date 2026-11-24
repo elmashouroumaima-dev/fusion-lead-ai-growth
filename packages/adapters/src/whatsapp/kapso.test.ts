@@ -111,7 +111,7 @@ describe("analyse des événements Kapso", () => {
 
 describe("pipeline d'ingestion Kapso : intégration retrouvée par numéro ET passerelle", () => {
   function store() {
-    const resolve = vi.fn(async (_provider: string, account: string, gateway?: string) => (account === PHONE && gateway === "kapso" ? { organizationId: "org-1", integrationId: "int-1" } : null));
+    const resolve = vi.fn(async (_provider: string, account: string, gateway?: string) => (account === PHONE && gateway === "kapso" ? [{ organizationId: "org-1", integrationId: "int-1" }] : []));
     // eslint-disable-next-line @typescript-eslint/no-unused-vars -- le paramètre type les appels relus par les assertions
     const record = vi.fn(async (_input: { provider: string; externalEventId: string }) => ({ eventId: "ev-1", duplicate: false }));
     const recordRejection = vi.fn(async () => undefined);

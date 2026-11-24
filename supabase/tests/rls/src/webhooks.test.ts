@@ -36,16 +36,16 @@ beforeAll(async () => {
 afterAll(cleanup);
 
 describe("fonctions : service_role seulement", () => {
-  it("résolution par le compte fournisseur : Alpha pour son compte, null pour un compte inconnu", async () => {
-    const found = await rpc("service", "webhook_resolve_integration", { p_provider: "whatsapp", p_account: ACCOUNT });
+  it("résolution par le compte fournisseur : Alpha pour son compte, liste vide pour un compte inconnu", async () => {
+    const found = await rpc("service", "webhook_resolve_candidates", { p_provider: "whatsapp", p_account: ACCOUNT });
     expect(found.status).toBe(200);
-    expect(found.body).toEqual({ organization_id: ORG.alpha, integration_id: integration });
-    expect((await rpc("service", "webhook_resolve_integration", { p_provider: "whatsapp", p_account: `${ACCOUNT}-inconnu` })).body).toBeNull();
+    expect(found.body).toEqual([{ organization_id: ORG.alpha, integration_id: integration }]);
+    expect((await rpc("service", "webhook_resolve_candidates", { p_provider: "whatsapp", p_account: `${ACCOUNT}-inconnu` })).body).toEqual([]);
   });
 
   it("owner, admin, commercial, Beta, anonyme : aucune des cinq fonctions n'est exécutable", async () => {
     const calls: Array<[string, Record<string, unknown>]> = [
-      ["webhook_resolve_integration", { p_provider: "whatsapp", p_account: ACCOUNT }],
+      ["webhook_resolve_candidates", { p_provider: "whatsapp", p_account: ACCOUNT }],
       ["webhook_record", { p_org: ORG.alpha, p_integration: integration, p_provider: "whatsapp", p_event_id: "x", p_payload: {} }],
       ["webhook_record_rejection", { p_org: ORG.alpha, p_integration: integration, p_provider: "whatsapp" }],
       ["webhook_start", { p_org: ORG.alpha, p_event: randomUUID() }],

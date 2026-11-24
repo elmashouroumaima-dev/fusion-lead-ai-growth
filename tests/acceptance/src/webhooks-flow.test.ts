@@ -53,9 +53,8 @@ const adapter: WebhookAdapter = {
 const rpc = <T = unknown>(fn: string, args: Record<string, unknown>) => api<T>("service", "POST", `rpc/${fn}`, args);
 const store: WebhookStore = {
   async resolve(provider, account) {
-    const result = await rpc<{ organization_id: string; integration_id: string } | null>("webhook_resolve_integration", { p_provider: provider, p_account: account });
-    const row = result.body;
-    return row ? { organizationId: row.organization_id, integrationId: row.integration_id } : null;
+    const result = await rpc<Array<{ organization_id: string; integration_id: string }>>("webhook_resolve_candidates", { p_provider: provider, p_account: account });
+    return (result.body ?? []).map((row) => ({ organizationId: row.organization_id, integrationId: row.integration_id }));
   },
   async record(input) {
     const result = await rpc<{ event_id: string; duplicate: boolean }>("webhook_record", {

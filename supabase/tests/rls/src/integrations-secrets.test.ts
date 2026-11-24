@@ -57,11 +57,13 @@ describe("création : owner et admin seulement", () => {
     expect(psql(`select count(*) from private.secrets where id = '${secret1}' and organization_id = '${ORG.alpha}'`)).toBe("1");
   });
 
-  it("compte déjà connecté chez Alpha : refusé chez Beta (unicité globale), et deux fois chez Alpha", async () => {
+  it("S-02 : un compte déjà connecté chez Alpha peut l'être chez Beta (aucune réservation entre entreprises, aucun oracle), mais pas deux fois chez la même entreprise", async () => {
     const other = await create("betaOwner", ACCOUNT, randomUUID(), ORG.beta);
-    expect(other.status).toBe(409);
+    expect(other.status).toBe(200);
     expect((await create("shared", ACCOUNT, randomUUID())).status).toBe(409);
-    expect(psql(`select count(*) from public.integrations where external_account_id = '${ACCOUNT}'`)).toBe("1");
+    expect((await create("betaOwner", ACCOUNT, randomUUID(), ORG.beta)).status).toBe(409);
+    expect(psql(`select count(*) from public.integrations where external_account_id = '${ACCOUNT}'`)).toBe("2");
+    expect(psql(`select count(*) from public.integrations where external_account_id = '${ACCOUNT}' and organization_id = '${ORG.beta}'`)).toBe("1");
   });
 
   it("valeurs invalides refusées : fournisseur csv, compte mal formé, chiffré mal formé", async () => {

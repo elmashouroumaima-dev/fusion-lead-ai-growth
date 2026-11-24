@@ -113,7 +113,7 @@ Essai fait en local (base locale, application et worker lancés, tunnel `cloudfl
 - Le service enregistrait toute intégration e-mail à la passerelle `meta` (Postmark), même en choisissant Resend : corrigé (PR 75), test ajouté.
 - La page Intégrations passe en deux onglets (E-mail, WhatsApp) : deux tests d'acceptation ont dû être adaptés (PR 76).
 - Les webhooks exigent HTTPS : en local, une requête `curl` doit porter `x-forwarded-proto: https`, comme le fait le tunnel.
-- À noter : une adresse déconnectée reste réservée, on ne peut pas la reconnecter telle quelle (comportement existant, à décider avec la responsable technique).
+- Une adresse déconnectée restait réservée et ne pouvait pas être reconnectée telle quelle : corrigé ensuite par S-02 (ADR 018 : plus de réservation entre entreprises ; dans une même entreprise, « Reconnecter » réutilise la ligne).
 - L'adresse du tunnel change à chaque lancement : mettre à jour le webhook chez Resend.
 
 ---

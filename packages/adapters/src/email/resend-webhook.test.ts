@@ -131,7 +131,7 @@ describe("resendAccountId", () => {
 describe("résolution par la passerelle et pipeline complet", () => {
   const raw = body("email.delivered");
   const store = (found: boolean): WebhookStore => ({
-    resolve: vi.fn(async () => (found ? { organizationId: "org-1", integrationId: "int-1" } : null)),
+    resolve: vi.fn(async () => (found ? [{ organizationId: "org-1", integrationId: "int-1" }] : [])),
     record: vi.fn(async () => ({ eventId: "e1", duplicate: false })),
     recordRejection: vi.fn(async () => undefined),
   });

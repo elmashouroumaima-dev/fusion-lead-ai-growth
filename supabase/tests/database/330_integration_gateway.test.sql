@@ -73,10 +73,10 @@ select throws_ok($$update public.integrations set gateway = 'kapso' where extern
 -- Résolution d'un webhook : filtrée par passerelle
 -- ---------------------------------------------------------------------------
 select pg_temp.as_service();
-select is((select public.webhook_resolve_integration('whatsapp', '700000000000001', 'kapso') ->> 'organization_id'), 'eb500000-0000-4000-8000-00000000000a', 'un webhook Kapso retrouve une intégration Kapso');
-select is((select public.webhook_resolve_integration('whatsapp', '700000000000001', 'meta')), null, 'un webhook Meta ne retrouve pas une intégration Kapso');
-select is((select public.webhook_resolve_integration('whatsapp', '700000000000002', 'kapso')), null, 'un webhook Kapso ne retrouve pas une intégration Meta');
-select is((select public.webhook_resolve_integration('whatsapp', '700000000000002') ->> 'organization_id'), 'eb500000-0000-4000-8000-00000000000a', 'sans filtre (anciens appelants) : retrouvée');
+select is((select public.webhook_resolve_candidates('whatsapp', '700000000000001', 'kapso') -> 0 ->> 'organization_id'), 'eb500000-0000-4000-8000-00000000000a', 'un webhook Kapso retrouve une intégration Kapso');
+select is((select public.webhook_resolve_candidates('whatsapp', '700000000000001', 'meta')), '[]'::jsonb, 'un webhook Meta ne retrouve pas une intégration Kapso');
+select is((select public.webhook_resolve_candidates('whatsapp', '700000000000002', 'kapso')), '[]'::jsonb, 'un webhook Kapso ne retrouve pas une intégration Meta');
+select is((select public.webhook_resolve_candidates('whatsapp', '700000000000002') -> 0 ->> 'organization_id'), 'eb500000-0000-4000-8000-00000000000a', 'sans filtre (anciens appelants) : retrouvée');
 reset role;
 
 -- ---------------------------------------------------------------------------

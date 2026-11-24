@@ -3,7 +3,7 @@
 -- des comptes email et whatsapp, canaux, isolation entre entreprises, audit sans secret. Tout est annulé en fin de test.
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(119);
+select plan(121);
 
 -- U1 owner A · U2 admin A · U3 marketing A · U4 sales A · U5 analyste A · U6 owner B
 insert into auth.users (id, instance_id, aud, role, email, email_confirmed_at)
@@ -100,12 +100,9 @@ reset role;
 select pg_temp.as_user('ca000000-0000-4000-8000-000000000006');
 select throws_ok($$select public.create_provider_integration('cb000000-0000-4000-8000-00000000000a', 'email', 'cz-mail-b', '{}',
   'cd000000-0000-4000-8000-000000000003', 'QUJDREVGR0hJSktMTU5PUFFSU1RVVldYWVo=', 'QUJDREVGR0hJSktM', 1)$$, '42501', null, 'owner de B ne crée rien chez A');
-select throws_ok($$select public.create_provider_integration('cb000000-0000-4000-8000-00000000000b', 'whatsapp', 'cz-wa-a', '{}',
-  'cd000000-0000-4000-8000-000000000004', 'QUJDREVGR0hJSktMTU5PUFFSU1RVVldYWVo=', 'QUJDREVGR0hJSktM', 1)$$, '23505', null, 'compte whatsapp déjà connecté chez A : refusé chez B (unicité globale)');
 select lives_ok($$select public.create_provider_integration('cb000000-0000-4000-8000-00000000000b', 'whatsapp', 'cz-wa-b', '{}',
   'cd000000-0000-4000-8000-000000000005', 'QUJDREVGR0hJSktMTU5PUFFSU1RVVldYWVo=', 'QUJDREVGR0hJSktM', 1)$$, 'owner B connecte son propre compte');
 reset role;
-select is((select count(*)::int from private.secrets where id = 'cd000000-0000-4000-8000-000000000004'), 0, 'le secret du refus n''est pas conservé (transaction annulée)');
 
 select pg_temp.as_user('ca000000-0000-4000-8000-000000000001');
 select throws_ok($$select public.create_provider_integration('cb000000-0000-4000-8000-00000000000a', 'whatsapp', 'cz-wa-a', '{}',
@@ -312,6 +309,16 @@ select ok(exists (select 1 from public.audit_logs where organization_id = 'cb000
 select is((select count(*)::int from public.audit_logs a where a.organization_id = 'cb000000-0000-4000-8000-00000000000a'
   and (a.action like 'integration.%' or a.action like 'channel.%')
   and to_jsonb(a)::text ~* '(QUJDREVG|QkJCQkJC|ciphertext|nonce|\+2126000000|ventes@cz)'), 0, 'aucun chiffré, nonce, expéditeur ni numéro dans l''audit');
+
+-- S-02 (revue de sécurité) : plus de réservation de compte entre entreprises. Placé en dernier : à partir d'ici deux intégrations portent le même compte.
+select pg_temp.as_user('ca000000-0000-4000-8000-000000000006');
+select lives_ok($$select public.create_provider_integration('cb000000-0000-4000-8000-00000000000b', 'whatsapp', 'cz-wa-a', '{}',
+  'cd000000-0000-4000-8000-000000000004', 'QUJDREVGR0hJSktMTU5PUFFSU1RVVldYWVo=', 'QUJDREVGR0hJSktM', 1)$$, 'S-02 : un compte déjà connecté chez A peut l''être aussi chez B (aucune réservation, donc aucun oracle 409)');
+select is((select count(*)::int from public.integrations where external_account_id = 'cz-wa-a'), 1, 'S-02 : B ne voit que sa propre ligne pour ce compte, jamais celle d''Alpha');
+select throws_ok($$select public.create_provider_integration('cb000000-0000-4000-8000-00000000000b', 'whatsapp', 'cz-wa-a', '{}',
+  'cd000000-0000-4000-8000-000000000007', 'QUJDREVGR0hJSktMTU5PUFFSU1RVVldYWVo=', 'QUJDREVGR0hJSktM', 1)$$, '23505', null, 'S-02 : au sein d''UNE entreprise, le compte reste unique');
+reset role;
+select is((select count(*)::int from private.secrets where id = 'cd000000-0000-4000-8000-000000000004' and organization_id = 'cb000000-0000-4000-8000-00000000000b'), 1, 'S-02 : le secret est conservé sous l''entreprise B (chiffré pour B)');
 
 select * from finish();
 rollback;

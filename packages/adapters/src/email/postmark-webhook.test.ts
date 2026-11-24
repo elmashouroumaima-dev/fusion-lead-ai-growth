@@ -18,7 +18,7 @@ function fakeStore() {
   const store: WebhookStore = {
     async resolve(_provider, account) {
       resolved.push(account);
-      return account === ACCOUNT ? { organizationId: ORG, integrationId: INT } : null;
+      return account === ACCOUNT ? [{ organizationId: ORG, integrationId: INT }] : [];
     },
     async record(input) {
       const key = `${input.organizationId}:${input.externalEventId}`;

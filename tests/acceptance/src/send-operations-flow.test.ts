@@ -23,7 +23,9 @@ const post = (who: string | null, path: string, payload: unknown, opts: { org?: 
   });
 const first = (sql: string): string => psql(sql).trim().split("\n").filter((l) => l.length > 0)[0] ?? "";
 const paused = (org: string) => first(`select coalesce(settings ->> 'send_paused', 'false') from public.organizations where id = '${org}'`);
-const resume = (org: string) => psql(`update public.organizations set settings = settings - 'send_paused' where id = '${org}'`);
+// remise à zéro hors API : S-05 interdit d'écrire settings.send_paused hors de set_send_emergency_stop ; ce nettoyage de test lève le levier local à la transaction (comme la fonction)
+const resume = (org: string) =>
+  psql(`begin; select set_config('fusion.send_pause_via_function', 'on', true); update public.organizations set settings = settings - 'send_paused' where id = '${org}'; commit;`);
 const deadLetter = (org: string, k: string): string => {
   const id = first(`insert into public.jobs (organization_id, kind, payload, idempotency_key, status) values ('${org}', 'noop', '{}', '${KEY_PREFIX}-job-${k}', 'queued') returning id`);
   psql(`update public.jobs set status = 'dead_letter', finished_at = now(), last_error = 'provider_error' where id = '${id}'`);
@@ -54,14 +56,21 @@ describe("arrêt d'urgence", () => {
     expect(paused(ORG.alpha)).toBe("false");
   });
 
-  it("marketing, admin et propriétaire arrêtent et relancent ; seule l'entreprise active est touchée", async () => {
+  it("marketing, admin et propriétaire arrêtent ; admin et propriétaire relancent (S-05 : le marketing ne reprend pas) ; seule l'entreprise active est touchée", async () => {
     for (const who of ["alpha-marketing", "alpha-admin", "shared"]) {
       const stop = await post(who, "/api/send/emergency-stop", { paused: true });
       expect(stop.status, who).toBe(200);
       expect(stop.json).toEqual({ paused: true });
       expect(paused(ORG.alpha), who).toBe("true");
       expect(paused(ORG.beta), who).not.toBe("true");
-      expect((await post(who, "/api/send/emergency-stop", { paused: false })).status, who).toBe(200);
+      if (who === "alpha-marketing") {
+        // le marketing ne peut pas reprendre : 403, l'arrêt reste actif ; un administrateur reprend
+        expect((await post(who, "/api/send/emergency-stop", { paused: false })).status, who).toBe(403);
+        expect(paused(ORG.alpha), who).toBe("true");
+        expect((await post("alpha-admin", "/api/send/emergency-stop", { paused: false })).status).toBe(200);
+      } else {
+        expect((await post(who, "/api/send/emergency-stop", { paused: false })).status, who).toBe(200);
+      }
       expect(paused(ORG.alpha), who).toBe("false");
     }
   });

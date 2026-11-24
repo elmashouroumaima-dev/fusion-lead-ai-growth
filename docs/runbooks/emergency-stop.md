@@ -4,10 +4,10 @@
 Un envoi part en boucle, un compte fournisseur est compromis, un message erroné a été approuvé, ou une plainte arrive : on arrête **tout** l'envoi de l'entreprise, puis on enquête. Rien d'autre n'est modifié (les conversations, les contacts et les jobs restent en place).
 
 ## Qui peut le faire (ADR 014 ligne 9)
-Owner, admin, marketing manager. Pas le commercial ni l'analyste.
+**Arrêter** : owner, admin, marketing manager. **Reprendre** : owner et admin seulement (la reprise est le sens risqué ; le marketing ne peut pas lever un arrêt posé par un owner). Pas le commercial ni l'analyste.
 
 ## Comment
-1. **Interface** : menu **Operations** (Exploitation) → carte « Emergency stop » → **Stop all sending** → confirmer. Pour reprendre : **Resume sending** (sans confirmation).
+1. **Interface** : menu **Operations** (Exploitation) → carte « Emergency stop » → **Stop all sending** → confirmer. Pour reprendre (owner ou admin) : **Resume sending** (sans confirmation) ; un responsable marketing voit un message l'indiquant.
 2. **API** : `POST /api/send/emergency-stop` avec `{ "paused": true }` (ou `false`) et l'en-tête `Idempotency-Key`. Voir `docs/api/send-operations.md`.
 3. **Par canal seulement** : page Intégrations (pause d'un canal), inchangée depuis le J28.
 

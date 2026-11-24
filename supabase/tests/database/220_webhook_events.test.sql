@@ -3,7 +3,7 @@
 -- démarrage et fin côté worker), unicité par entreprise, plafond de la file, isolation entre entreprises. Tout est annulé en fin de test.
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(78);
+select plan(82);
 
 -- U1 owner A · U2 admin A · U3 marketing A · U4 sales A · U5 analyste A · U6 owner B
 insert into auth.users (id, instance_id, aud, role, email, email_confirmed_at)
@@ -61,28 +61,37 @@ select ok(not has_table_privilege('authenticated', 'public.webhook_events', 'ins
 select ok(not has_table_privilege('service_role', 'public.webhook_events', 'update') and not has_table_privilege('service_role', 'public.webhook_events', 'delete'), 'aucune modification directe, même service_role');
 select ok(not has_table_privilege('anon', 'public.webhook_events', 'select'), 'anon ne lit rien');
 select ok((select bool_and(has_function_privilege('service_role', s, 'execute')) from unnest(array[
-  'public.webhook_resolve_integration(text,text,text)', 'public.webhook_record(uuid,uuid,text,text,jsonb)', 'public.webhook_record_rejection(uuid,uuid,text)',
+  'public.webhook_resolve_candidates(text,text,text)', 'public.webhook_record(uuid,uuid,text,text,jsonb)', 'public.webhook_record_rejection(uuid,uuid,text)',
   'public.webhook_start(uuid,uuid)', 'public.webhook_finish(uuid,uuid,text,text)']) s), 'service_role exécute les 5 fonctions');
 select ok((select bool_and(not has_function_privilege('authenticated', s, 'execute') and not has_function_privilege('anon', s, 'execute')) from unnest(array[
-  'public.webhook_resolve_integration(text,text,text)', 'public.webhook_record(uuid,uuid,text,text,jsonb)', 'public.webhook_record_rejection(uuid,uuid,text)',
+  'public.webhook_resolve_candidates(text,text,text)', 'public.webhook_record(uuid,uuid,text,text,jsonb)', 'public.webhook_record_rejection(uuid,uuid,text)',
   'public.webhook_start(uuid,uuid)', 'public.webhook_finish(uuid,uuid,text,text)']) s), 'ni authenticated ni anon n''exécutent aucune des 5');
 
 -- ---------------------------------------------------------------------------
 -- Résolution du tenant par le compte fournisseur
 -- ---------------------------------------------------------------------------
-select is((select private.webhook_resolve_integration('whatsapp', 'wh-wa-a') ->> 'organization_id'), 'db000000-0000-4000-8000-00000000000a', 'compte whatsapp d''Alpha : entreprise Alpha (intégration pending)');
-select is((select private.webhook_resolve_integration('whatsapp', 'wh-wa-b') ->> 'organization_id'), 'db000000-0000-4000-8000-00000000000b', 'compte whatsapp de Beta : entreprise Beta');
-select is((select private.webhook_resolve_integration('whatsapp', 'inconnu')), null, 'compte inconnu : null');
-select is((select private.webhook_resolve_integration('email', 'wh-wa-a')), null, 'mauvais fournisseur pour ce compte : null');
-select is((select private.webhook_resolve_integration('csv', 'wh-csv')), null, 'une intégration csv n''est jamais résolue');
+select is((select private.webhook_resolve_candidates('whatsapp', 'wh-wa-a') -> 0 ->> 'organization_id'), 'db000000-0000-4000-8000-00000000000a', 'compte whatsapp d''Alpha : entreprise Alpha (intégration pending)');
+select is((select private.webhook_resolve_candidates('whatsapp', 'wh-wa-b') -> 0 ->> 'organization_id'), 'db000000-0000-4000-8000-00000000000b', 'compte whatsapp de Beta : entreprise Beta');
+select is((select private.webhook_resolve_candidates('whatsapp', 'inconnu')), '[]'::jsonb, 'compte inconnu : liste vide');
+select is((select private.webhook_resolve_candidates('email', 'wh-wa-a')), '[]'::jsonb, 'mauvais fournisseur pour ce compte : liste vide');
+select is((select private.webhook_resolve_candidates('csv', 'wh-csv')), '[]'::jsonb, 'une intégration csv n''est jamais résolue');
 update public.integrations set status = 'error' where external_account_id = 'wh-wa-a';
-select isnt((select private.webhook_resolve_integration('whatsapp', 'wh-wa-a')), null, 'statut error : encore résolue (pour retenter)');
+select isnt((select private.webhook_resolve_candidates('whatsapp', 'wh-wa-a')), '[]'::jsonb, 'statut error : encore résolue (pour retenter)');
 update public.integrations set status = 'disabled' where external_account_id = 'wh-wa-a';
-select is((select private.webhook_resolve_integration('whatsapp', 'wh-wa-a')), null, 'désactivée : comme un compte inconnu');
+select is((select private.webhook_resolve_candidates('whatsapp', 'wh-wa-a')), '[]'::jsonb, 'désactivée : comme un compte inconnu');
 update public.integrations set status = 'disconnected', secret_ref = null where external_account_id = 'wh-wa-a';
-select is((select private.webhook_resolve_integration('whatsapp', 'wh-wa-a')), null, 'déconnectée : comme un compte inconnu');
+select is((select private.webhook_resolve_candidates('whatsapp', 'wh-wa-a')), '[]'::jsonb, 'déconnectée : comme un compte inconnu');
 update public.integrations set status = 'active' where external_account_id = 'wh-wa-a';
-select is((select private.webhook_resolve_integration('whatsapp', 'wh-wa-a') ->> 'integration_id'), (select id::text from public.integrations where external_account_id = 'wh-wa-a'), 'active : résolue avec son identifiant d''intégration');
+select is((select private.webhook_resolve_candidates('whatsapp', 'wh-wa-a') -> 0 ->> 'integration_id'), (select id::text from public.integrations where external_account_id = 'wh-wa-a'), 'active : résolue avec son identifiant d''intégration');
+
+-- S-02 : deux entreprises peuvent déclarer le même compte ; les deux sont candidates (actives d'abord), la signature tranche côté application
+insert into public.integrations (organization_id, provider, status, external_account_id, gateway)
+values ('db000000-0000-4000-8000-00000000000b', 'whatsapp', 'pending', 'wh-wa-a', 'meta');
+select is((select pg_catalog.jsonb_array_length(private.webhook_resolve_candidates('whatsapp', 'wh-wa-a'))), 2, 'S-02 : le même compte déclaré par deux entreprises : deux candidates');
+select is((select private.webhook_resolve_candidates('whatsapp', 'wh-wa-a') -> 0 ->> 'organization_id'), 'db000000-0000-4000-8000-00000000000a', 'S-02 : l''intégration active passe avant la pending');
+select throws_ok($$insert into public.integrations (organization_id, provider, status, external_account_id, gateway) values ('db000000-0000-4000-8000-00000000000b', 'whatsapp', 'pending', 'wh-wa-a', 'meta')$$, '23505', null, 'S-02 : au sein d''UNE entreprise, le compte reste unique');
+select is((select pg_catalog.jsonb_array_length(private.webhook_resolve_candidates('whatsapp', 'wh-wa-a', 'kapso'))), 0, 'S-02 : le filtre de passerelle s''applique à chaque candidate');
+delete from public.integrations where organization_id = 'db000000-0000-4000-8000-00000000000b' and external_account_id = 'wh-wa-a';
 
 -- ---------------------------------------------------------------------------
 -- Enregistrement idempotent + job

@@ -150,8 +150,14 @@ describe.runIf(Boolean(keyRing))("parcours complet avec chiffrement configuré",
     expect(visibleText(await getPage(as("beta-owner"), "/fr/integrations", ORG.beta))).not.toContain(ACCOUNT);
   });
 
-  it("isolation : Beta ne connecte pas le même compte (409) et ne remplace ni ne déconnecte l'intégration d'Alpha (404)", async () => {
+  it("isolation (S-02) : Beta peut déclarer le même compte (aucune réservation entre entreprises, donc aucun oracle 409) mais ne remplace ni ne déconnecte l'intégration d'Alpha (404) ; sa ligne reste la sienne", async () => {
+    const theirs = await post("beta-owner", "/api/integrations", body, { org: ORG.beta });
+    expect(theirs.status).toBe(201);
+    const betaId = (theirs.json as { integration: { id: string } }).integration.id;
+    expect(betaId).not.toBe(integration);
+    // au sein d'UNE entreprise, le compte reste unique
     expect((await post("beta-owner", "/api/integrations", body, { org: ORG.beta })).status).toBe(409);
+    expect((await post("beta-owner", "/api/integrations/disconnect", { integration_id: betaId }, { org: ORG.beta })).status).toBe(200);
     expect((await post("beta-owner", "/api/integrations/secret", { integration_id: integration, secret: TOKEN_2 }, { org: ORG.beta })).status).toBe(404);
     expect((await post("beta-owner", "/api/integrations/disconnect", { integration_id: integration }, { org: ORG.beta })).status).toBe(404);
     expect(openOrganizationSecret({ organizationId: ORG.alpha, stored: (await stored())!, keyRing: ring() })).toBe(TOKEN_1);

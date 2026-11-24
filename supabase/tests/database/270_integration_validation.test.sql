@@ -56,10 +56,10 @@ end $f$;
 grant execute on function pg_temp.as_user(text), pg_temp.as_service(), pg_temp.as_anon() to public;
 
 -- droits
-select is(has_function_privilege('service_role', 'public.integration_set_validation(uuid, uuid, boolean, text, uuid)', 'execute'), true, 'service_role peut exécuter');
-select is(has_function_privilege('authenticated', 'public.integration_set_validation(uuid, uuid, boolean, text, uuid)', 'execute'), false, 'authenticated ne peut pas');
-select is(has_function_privilege('anon', 'public.integration_set_validation(uuid, uuid, boolean, text, uuid)', 'execute'), false, 'anon ne peut pas');
-select is((select prosecdef from pg_proc where oid = 'private.integration_set_validation(uuid, uuid, boolean, text, uuid)'::regprocedure), true, 'fonction privée SECURITY DEFINER');
+select is(has_function_privilege('service_role', 'public.integration_set_validation(uuid, uuid, boolean, text, uuid, uuid)', 'execute'), true, 'service_role peut exécuter');
+select is(has_function_privilege('authenticated', 'public.integration_set_validation(uuid, uuid, boolean, text, uuid, uuid)', 'execute'), false, 'authenticated ne peut pas');
+select is(has_function_privilege('anon', 'public.integration_set_validation(uuid, uuid, boolean, text, uuid, uuid)', 'execute'), false, 'anon ne peut pas');
+select is((select prosecdef from pg_proc where oid = 'private.integration_set_validation(uuid, uuid, boolean, text, uuid, uuid)'::regprocedure), true, 'fonction privée SECURITY DEFINER');
 select pg_temp.as_user('ea400000-0000-4000-8000-000000000001');
 select throws_ok($$select public.integration_set_validation('eb400000-0000-4000-8000-00000000000a', 'ee400000-0000-4000-8000-000000000001', true, null, 'ea400000-0000-4000-8000-000000000001')$$, '42501', null, 'un owner connecté ne peut pas se déclarer « actif »');
 reset role;

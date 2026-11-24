@@ -5,7 +5,7 @@
   "tests": [
     {
       "label": "Web (application)",
-      "value": 2789,
+      "value": 2795,
       "note": "Écrans, routes HTTP et services de l'application"
     },
     {
@@ -30,7 +30,7 @@
     },
     {
       "label": "Worker et adaptateurs",
-      "value": 428,
+      "value": 434,
       "note": "Tâches de fond et adaptateurs de fournisseurs"
     },
     {
@@ -689,6 +689,16 @@
         "Pas d'e-mail de confirmation automatique (la spec interdit tout envoi externe sans utilisateur habilité) ; règle unique réutilisable par les segments de campagne."
       ],
       "proof": "8 tests de base (pgTAP 380) ; fichiers voisins verts ; retour arrière fourni ; reste : appliquer la règle aux segments (J43) et l'afficher sur l'écran du contact",
+      "review": false
+    },
+    {
+      "day": "Sécurité",
+      "title": "S-06 : événements sans rien d'exploitable acquittés",
+      "items": [
+        "Un webhook lisible mais sans rien à traiter (événement de domaine ou de contact chez Resend, notification de compte WhatsApp, objet inconnu chez Postmark) est acquitté sans rien écrire au lieu d'être refusé : le fournisseur ne réessaie plus et ne désactive plus le webhook.",
+        "Les corps invalides et les lots de plusieurs numéros restent refusés : aucune perte silencieuse."
+      ],
+      "proof": "tests d'adaptateur pour Resend, Postmark, Meta et Kapso, test de la route ; lint, typecheck et tests verts ; aucun changement de base",
       "review": false
     }
   ],

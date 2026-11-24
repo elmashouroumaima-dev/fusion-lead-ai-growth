@@ -68,6 +68,7 @@ export async function handleWebhookRequest(request: Request, providerParam: stri
     switch (outcome.kind) {
       case "accepted":
       case "duplicate":
+      case "ignored":
         return Response.json({ status: outcome.kind }, { status: 200, headers: noStore(requestId) });
       case "too_large":
         throw new ServiceError("payload_too_large");

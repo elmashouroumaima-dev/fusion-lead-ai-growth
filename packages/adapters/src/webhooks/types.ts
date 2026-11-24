@@ -27,6 +27,12 @@ export interface WebhookAdapter {
    */
   extractAccount(payload: unknown, headers: WebhookHeaders): string | null;
   /**
+   * Corps lisible (JSON valide, déjà passé par `parse`) mais SANS rien d'exploitable pour nous : événement d'un autre type, notification sans compte (état du compte
+   * WhatsApp, événement de domaine Resend...). Le pipeline l'ACQUITTE (200 « ignored ») sans rien écrire ni authentifier : un refus (400) ferait réessayer puis désactiver le
+   * webhook chez le fournisseur (S-06). Ne jamais renvoyer vrai pour un corps qui porte des données de client non traitées (lot de plusieurs numéros : refus 400).
+   */
+  isIrrelevant?(payload: unknown, headers: WebhookHeaders): boolean;
+  /**
    * Identifiant d'événement stable du fournisseur (déduplication) ; `null` si absent ou invalide. CONTRAT : il doit être tiré de contenu
    * COUVERT par la signature (le corps signé), jamais d'un en-tête non signé : sinon changer l'en-tête d'une capture valide contournerait
    * la déduplication (revue J29). Un adaptateur dont le fournisseur ne signe pas l'identifiant doit le dériver du corps.

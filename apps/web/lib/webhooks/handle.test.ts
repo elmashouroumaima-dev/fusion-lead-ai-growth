@@ -209,3 +209,24 @@ describe("journaux", () => {
     for (const forbidden of ["contenu-sensible", SECRET, "mauvais-secret", "sha256=", '"acc"', "x-signature"]) expect(text).not.toContain(forbidden);
   });
 });
+
+describe("S-06 : un corps lisible sans rien d'exploitable est acquitté (200 « ignored »), sans écriture ni trace", () => {
+  const ignoring: WebhookAdapter = { ...adapter, isIrrelevant: (payload) => (payload as { kind?: string }).kind === "autre" };
+
+  it("200 ignored ; aucun enregistrement, aucun rejet ; la journalisation ne porte que l'événement et le fournisseur", async () => {
+    const t = setup({ getAdapter: (provider) => (provider === "whatsapp" ? ignoring : null) });
+    const response = await handleWebhookRequest(post(JSON.stringify({ kind: "autre", secret: "NE-DOIT-PAS-SORTIR" })), "whatsapp", "req-s06", t.deps);
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({ status: "ignored" });
+    expect(t.records).toEqual([]);
+    expect(t.rejections).toEqual([]);
+    expect(JSON.stringify(t.logs)).not.toContain("NE-DOIT-PAS-SORTIR");
+    expect(t.logs.map((l) => l.event)).toEqual(["webhook.ignored"]);
+  });
+
+  it("un corps illisible ou sans compte (non ignorable) reste refusé 400", async () => {
+    const t = setup({ getAdapter: (provider) => (provider === "whatsapp" ? ignoring : null) });
+    expect((await handleWebhookRequest(post("pas du json"), "whatsapp", "req-s06b", t.deps)).status).toBe(400);
+    expect((await handleWebhookRequest(post(JSON.stringify({ event: "e1" })), "whatsapp", "req-s06c", t.deps)).status).toBe(400);
+  });
+});

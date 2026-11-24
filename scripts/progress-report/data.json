@@ -529,7 +529,7 @@
   "nextSteps": [
     {
       "when": "Maintenant",
-      "action": "E-mail réel : essai de Resend avec l'adresse du compte (guide du test), puis domaine privé et jeton Postmark ; réception des réponses Resend ; tests de base de la migration (Docker) ; pack de revue de sécurité ; décision G3 dans C3.md."
+      "action": "Revue de sécurité de la Phase 3 par la responsable technique avec le pack prêt (docs/security/phase3-review-pack.md) ; domaine privé et jeton Postmark ou Resend pour l'e-mail réel (envoi à de vrais clients, réception) ; décision G3 dans C3.md."
     },
     {
       "when": "Ensuite",
@@ -639,6 +639,16 @@
         "Réception Resend (`email.received`) : le webhook ne porte que l'identifiant ; le worker relit le message par l'API de réception avec la clé de l'intégration puis l'applique comme un message entrant (mêmes règles que Postmark : expéditeur connu, destinataire = adresse atteinte, expéditeur authentifié par DMARC, file des cas ambigus). Demande un domaine privé avec réception activée."
       ],
       "proof": "57 tests d'adaptateur (envoi, validation, aiguillage, signature, pipeline complet), 1 test de domaine ; typecheck, lint et tests verts ; tests de base non relancés (Docker indisponible) ; aucun appel réel vers Resend à ce jour",
+      "review": false
+    },
+    {
+      "day": "Sécurité",
+      "title": "Pack de revue de sécurité de la Phase 3",
+      "items": [
+        "Périmètre, ordre de lecture des 12 fichiers à plus fort risque, checklist par menace et fiche de constats à remplir (décision C5 : revue par la responsable technique avant G3, par un tiers avant le premier client réel).",
+        "Scans automatiques faits : aucun des interdits du CLAUDE.md, 34 tables sur 34 avec RLS, aucune fonction `security definer` sans `search_path`, rien d'exécutable par `anon`, aucun secret dans les fichiers, la base ni les journaux, un seul puits XSS (palette validée), aucune vulnérabilité connue des dépendances."
+      ],
+      "proof": "Scans rejouables (commandes dans le pack) ; Semgrep, CodeQL, gitleaks et test d'intrusion non faits",
       "review": false
     }
   ],

@@ -3,6 +3,9 @@
 Format : Keep a Changelog. Une entrée par jour de travail.
 
 ## [Non publié]
+### Pack de revue de sécurité de la Phase 3 (24 novembre)
+- Ajout : `docs/security/phase3-review-pack.md` : périmètre (J38 à J40, durcissement `reply`, passerelles Kapso et Resend, webhooks), ordre de lecture, checklist par menace, résultats de scans automatiques (interdits du CLAUDE.md, 34 tables sur 34 avec RLS, fonctions `security definer`, droits de `anon`, secrets, puits XSS, `pnpm audit` sans vulnérabilité), points d'attention et fiche de constats à remplir. Non fait : Semgrep, CodeQL, gitleaks, test d'intrusion.
+- Modification : `docs/checkpoints/C3.md`, écart n° 6 : pack prêt, revue par la responsable technique à faire.
 ### E-mail : Resend à côté de Postmark (23 novembre)
 - Ajout : réception Resend (`email.received`) : `resend-receive.ts` relit le message par l'API (clé de l'intégration), événement conservé `inbound_fetch` (identifiant seulement), traitement dans le worker comme un entrant Postmark ; tests d'adaptateur et de worker. Demande un domaine privé avec MX ; forme de la réponse à confirmer.
 - Correction : `createProviderIntegration` forçait `p_gateway = meta` pour l'e-mail : une intégration Resend était enregistrée comme Postmark. Test ajouté.

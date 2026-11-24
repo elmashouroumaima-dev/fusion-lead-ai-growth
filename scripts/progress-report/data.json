@@ -680,6 +680,16 @@
       ],
       "proof": "typecheck, lint et 2 793 tests web verts ; essai réel sur le sandbox Kapso ; aucun envoi à un client",
       "review": false
+    },
+    {
+      "day": "Sécurité",
+      "title": "S-03 : consentement du formulaire public prouvé avant envoi",
+      "items": [
+        "Un tiers qui connaît la clé du formulaire ne peut plus donner un consentement marketing utilisable pour l'adresse d'un autre : le consentement du formulaire est enregistré mais n'est effectif pour un envoi que prouvé par une réponse du contact ou par un consentement enregistré par un humain.",
+        "Pas d'e-mail de confirmation automatique (la spec interdit tout envoi externe sans utilisateur habilité) ; règle unique réutilisable par les segments de campagne."
+      ],
+      "proof": "8 tests de base (pgTAP 380) ; fichiers voisins verts ; retour arrière fourni ; reste : appliquer la règle aux segments (J43) et l'afficher sur l'écran du contact",
+      "review": false
     }
   ],
   "capabilities": {

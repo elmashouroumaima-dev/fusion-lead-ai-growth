@@ -3,6 +3,9 @@
 Format : Keep a Changelog. Une entrée par jour de travail.
 
 ## [Non publié]
+### S-03 : le consentement du formulaire public n'est effectif qu'une fois prouvé (24 novembre)
+- Correction S-03 : un consentement de source `web_form` (adresse non vérifiée) n'est effectif pour un envoi marketing que s'il est prouvé par un message entrant du contact sur ce canal postérieur à la saisie, ou par un consentement enregistré par un humain habilité. Règle `private.consent_is_effective`, appliquée par `message_send_claim`. Pas d'e-mail de confirmation automatique (spec §9.1, §9.2, §85). La capture et l'écran des consentements sont inchangés.
+- Ajout : migration `20261222100000_s03_form_consent_needs_proof.sql` (+ retour arrière), pgTAP `380` (8 tests). ADR 007 amendé (à valider). Reste à faire : appliquer la règle aux segments de campagne (J43) et afficher « non prouvé » sur l'écran du contact.
 ### S-04 et S-05 : consentement révoqué et arrêt d'urgence (24 novembre)
 - Correction S-04 : une réponse (finalité `reply`) n'est plus couverte par un message entrant de moins de 7 jours quand le consentement du contact a été révoqué depuis et qu'aucun consentement actif ne reste sur ce canal (`message_send_claim`) ; `revoke_consent` annule les envois en file, non réclamés, du contact sur ce canal (finalité révoquée, ou tous), avec leurs jobs, audit `message.cancelled` (motif `consent_revoked`).
 - Correction S-05 : l'arrêt d'urgence se **reprend** par owner et admin seulement (le marketing peut toujours arrêter) : route, fonction SQL et écran Exploitation ; `settings.send_paused` ne se modifie plus que par `set_send_emergency_stop` (déclencheur de garde).

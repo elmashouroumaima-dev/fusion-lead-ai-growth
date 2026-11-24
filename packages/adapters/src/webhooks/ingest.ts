@@ -23,6 +23,8 @@ const DUMMY_SECRET = "webhook-dummy-secret-for-unknown-accounts";
 export type WebhookOutcome =
   | { kind: "accepted"; eventId: string }
   | { kind: "duplicate"; eventId: string }
+  /** Corps lisible mais sans rien d'exploitable (autre type d'événement, notification sans compte) : acquitté sans écriture (S-06). */
+  | { kind: "ignored" }
   | { kind: "bad_request" }
   | { kind: "too_large" }
   | { kind: "invalid_signature" };
@@ -47,6 +49,8 @@ export async function ingestWebhook(input: IngestInput): Promise<WebhookOutcome>
   try {
     payload = adapter.parse(rawBody);
     if (payload === null || payload === undefined) return { kind: "bad_request" };
+    // rien d'exploitable : acquitté sans authentification ni écriture (un refus ferait réessayer puis désactiver le webhook chez le fournisseur)
+    if (adapter.isIrrelevant?.(payload, headers) === true) return { kind: "ignored" };
     account = adapter.extractAccount(payload, headers);
   } catch {
     return { kind: "bad_request" };

@@ -78,13 +78,29 @@ describe("resendWebhookAdapter : lecture", () => {
     expect(readEmailEvent(parsed)).toMatchObject({ kind: "ignored", recordType: "emailopened" });
     expect(resendWebhookAdapter.extractAccount(parsed, {})).toBe("resend-exemple.test");
   });
-  it.each([["pas du JSON", "x{"], ["événement de domaine", JSON.stringify({ type: "domain.created", data: {} })], ["delivered sans identifiant", JSON.stringify({ type: "email.delivered", data: { from: "a@b.test", to: ["c@d.test"] } })], ["delivered sans destinataire valide", JSON.stringify({ type: "email.delivered", data: { email_id: MSG, from: "a@b.test", to: ["pas une adresse"] } })], ["tableau", "[]"]])(
+  it.each([["pas du JSON", "x{"], ["delivered sans identifiant", JSON.stringify({ type: "email.delivered", data: { from: "a@b.test", to: ["c@d.test"] } })], ["delivered sans destinataire valide", JSON.stringify({ type: "email.delivered", data: { email_id: MSG, from: "a@b.test", to: ["pas une adresse"] } })], ["tableau", "[]"]])(
     "illisible : %s",
     (_l, text) => {
       expect(resendWebhookAdapter.parse(new TextEncoder().encode(text))).toBeNull();
     },
   );
-  it("sans expéditeur lisible : pas de compte (le pipeline répond 400)", () => {
+  it("S-06 : événement qui n'est pas d'e-mail (domaine, contact) : ignoré et acquitté, jamais refusé", async () => {
+    const parsed = resendWebhookAdapter.parse(new TextEncoder().encode(JSON.stringify({ type: "domain.updated", created_at: "2026-11-24T10:00:00Z", data: { id: "d" } })));
+    expect(parsed).toMatchObject({ kind: "ignored", account: null });
+    expect(resendWebhookAdapter.isIrrelevant?.(parsed, {})).toBe(true);
+    const store: WebhookStore = { resolve: vi.fn(async () => []), record: vi.fn(async () => { throw new Error("jamais"); }), recordRejection: vi.fn(async () => undefined) };
+    const raw = new TextEncoder().encode(JSON.stringify({ type: "contact.created", data: {} }));
+    expect(await ingestWebhook({ adapter: resendWebhookAdapter, rawBody: raw, headers: {}, store, readSecret: async () => null })).toEqual({ kind: "ignored" });
+    expect(store.resolve).not.toHaveBeenCalled();
+    expect(store.record).not.toHaveBeenCalled();
+  });
+  it("S-06 : événement d'e-mail sans expéditeur lisible : ignoré aussi (rien à résoudre) ; corps qui n'est pas du JSON : toujours 400", async () => {
+    const raw = body("email.delivered", { from: undefined });
+    const store: WebhookStore = { resolve: vi.fn(async () => []), record: vi.fn(), recordRejection: vi.fn() };
+    expect(await ingestWebhook({ adapter: resendWebhookAdapter, rawBody: raw, headers: {}, store, readSecret: async () => null })).toEqual({ kind: "ignored" });
+    expect(await ingestWebhook({ adapter: resendWebhookAdapter, rawBody: new TextEncoder().encode("x{"), headers: {}, store, readSecret: async () => null })).toEqual({ kind: "bad_request" });
+  });
+  it("sans expéditeur lisible : pas de compte (le pipeline acquitte sans écriture, S-06)", () => {
     const parsed = resendWebhookAdapter.parse(body("email.delivered", { from: undefined }));
     expect(resendWebhookAdapter.extractAccount(parsed, {})).toBeNull();
   });

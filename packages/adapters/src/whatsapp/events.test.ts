@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { normalizeWhatsAppPayload as normalize, readWhatsAppPayload as read, WHATSAPP_TEXT_MAX } from "./events";
+import { isWhatsAppNoAccountPayload, normalizeWhatsAppPayload as normalize, readWhatsAppPayload as read, WHATSAPP_TEXT_MAX } from "./events";
 
 const PHONE = "106540352242922";
 const wrap = (value: Record<string, unknown>, field = "messages") => ({
@@ -111,5 +111,27 @@ describe("relecture de la forme conservée", () => {
     ]) {
       expect(read(bad)).toBeNull();
     }
+  });
+});
+
+describe("S-06 : notifications sans numéro (acquittées) et lots de plusieurs numéros (refusés)", () => {
+  const noNumber = { object: "whatsapp_business_account", entry: [{ id: "1", changes: [{ field: "account_update", value: { event: "VERIFIED_ACCOUNT" } }] }] };
+  it("une notification d'état du compte sans numéro est normalisée sans compte ni événement : ignorable", () => {
+    const out = normalize(noNumber);
+    expect(out).toEqual({ object: "whatsapp_business_account", phoneNumberIds: [], events: [], skipped: 0 });
+    expect(isWhatsAppNoAccountPayload(out)).toBe(true);
+  });
+  it("un corps avec un numéro, des événements ou plusieurs numéros n'est PAS ignorable (pas de perte silencieuse : refus 400)", () => {
+    expect(isWhatsAppNoAccountPayload(normalize(wrap({ messages: [message()] })))).toBe(false);
+    const two = { object: "whatsapp_business_account", entry: [{ id: "1", changes: [
+      { field: "messages", value: { metadata: { phone_number_id: PHONE }, messages: [message()] } },
+      { field: "messages", value: { metadata: { phone_number_id: "206540352242933" }, messages: [message({ id: "wamid.AUTRE" })] } },
+    ] }] };
+    const parsed = normalize(two);
+    expect(parsed?.phoneNumberIds).toHaveLength(2);
+    expect(isWhatsAppNoAccountPayload(parsed)).toBe(false);
+    expect(read(parsed)).toBeNull();
+    expect(isWhatsAppNoAccountPayload(null)).toBe(false);
+    expect(isWhatsAppNoAccountPayload({ object: "autre", phoneNumberIds: [], events: [], skipped: 0 })).toBe(false);
   });
 });

@@ -187,6 +187,8 @@ export function normalizePostmarkPayload(raw: unknown): EmailEvent | null {
 
   // autre type d'événement (ouverture, clic, changement d'abonnement...) : acquitté, jamais traité
   if (recordType !== null && /^[A-Za-z]{1,40}$/.test(recordType)) return { kind: "ignored", eventId: `ignored:${recordType}`, recordType };
+  // objet JSON valide sans type reconnaissable (ni événement ni message) : ignoré plutôt que refusé (un 400 ferait réessayer puis désactiver le webhook) (S-06)
+  if (recordType === null && raw.FromFull === undefined && raw.MessageID === undefined) return { kind: "ignored", eventId: `ignored:other:${short(Object.keys(raw).sort().join(","))}`, recordType: "other" };
   return null;
 }
 

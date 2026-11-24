@@ -2,7 +2,7 @@ import { createHash } from "node:crypto";
 import { verifyHmacSha256Hex } from "../webhooks/hmac";
 import type { WebhookAdapter, WebhookHeaders } from "../webhooks/types";
 import { createWhatsAppCloudClient, type WhatsAppCloudOptions } from "./cloud";
-import { readWhatsAppPayload, WHATSAPP_EVENTS_MAX, WHATSAPP_TEXT_MAX, type WhatsAppEvent, type WhatsAppPayload, type WhatsAppStatus } from "./events";
+import { isWhatsAppNoAccountPayload, readWhatsAppPayload, WHATSAPP_EVENTS_MAX, WHATSAPP_TEXT_MAX, type WhatsAppEvent, type WhatsAppPayload, type WhatsAppStatus } from "./events";
 import { createWhatsAppSender, type WhatsAppGateway, type WhatsAppSender, type WhatsAppSenderOptions, type WhatsAppSendInput, type WhatsAppSendOutcome } from "./send";
 
 /**
@@ -112,6 +112,11 @@ export function normalizeKapsoPayload(raw: unknown): WhatsAppPayload | null {
   for (const item of items) {
     if (!isRecord(item)) return null;
     const id = item.phone_number_id;
+    // élément sans numéro (autre type d'événement de la passerelle) : écarté et compté (S-06) ; un numéro présent mais mal formé reste un corps invalide
+    if (id === undefined || id === null) {
+      skipped += 1;
+      continue;
+    }
     if (typeof id !== "string" || !PHONE_NUMBER_ID.test(id)) return null;
     phoneNumberIds.add(id);
     // préférence marketing d'un contact (STOP annoncé par WhatsApp) : événement SANS message, reconnu d'après son contenu
@@ -161,7 +166,8 @@ export function normalizeKapsoPayload(raw: unknown): WhatsAppPayload | null {
     }
     if (events.length > WHATSAPP_EVENTS_MAX) return null;
   }
-  if (phoneNumberIds.size !== 1) return null;
+  // plusieurs numéros dans un même corps : refusé (pas de perte silencieuse) ; aucun numéro : corps ignorable (S-06)
+  if (phoneNumberIds.size > 1) return null;
   return { object: "whatsapp_business_account", phoneNumberIds: [...phoneNumberIds], events, skipped };
 }
 
@@ -183,6 +189,7 @@ export const kapsoWebhookAdapter: WebhookAdapter = {
       return null;
     }
   },
+  isIrrelevant: (payload) => isWhatsAppNoAccountPayload(payload),
   extractAccount(payload) {
     const parsed = readWhatsAppPayload(payload);
     return parsed ? (parsed.phoneNumberIds[0] ?? null) : null;

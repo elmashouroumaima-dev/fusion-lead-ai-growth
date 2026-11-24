@@ -110,6 +110,15 @@ export function normalizeWhatsAppPayload(raw: unknown): WhatsAppPayload | null {
 }
 
 /** Relit la forme conservée (celle que NOUS avons écrite) ; `null` si elle a été altérée. */
+/**
+ * Corps normalisé SANS aucun numéro ni événement (notification d'état du compte, de qualité, de modèle ; élément de passerelle sans numéro) : rien à traiter pour une
+ * intégration. Acquitté (S-06). Un corps qui porte des événements sans numéro ou plusieurs numéros n'est PAS ignorable (refus 400 : pas de perte silencieuse).
+ */
+export function isWhatsAppNoAccountPayload(value: unknown): boolean {
+  return isRecord(value) && value.object === "whatsapp_business_account" && Array.isArray(value.phoneNumberIds) && value.phoneNumberIds.length === 0 &&
+    Array.isArray(value.events) && value.events.length === 0 && typeof value.skipped === "number";
+}
+
 export function readWhatsAppPayload(value: unknown): WhatsAppPayload | null {
   if (!isRecord(value) || value.object !== "whatsapp_business_account" || !Array.isArray(value.phoneNumberIds) || !Array.isArray(value.events) || typeof value.skipped !== "number") return null;
   const ids = value.phoneNumberIds;

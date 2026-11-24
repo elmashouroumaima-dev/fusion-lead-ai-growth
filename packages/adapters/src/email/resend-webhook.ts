@@ -58,7 +58,9 @@ export function normalizeResendPayload(raw: unknown): ResendNormalized | null {
   if (!isRecord(raw) || typeof raw.type !== "string" || !isRecord(raw.data)) return null;
   const type = raw.type;
   const data = raw.data;
-  if (!/^[a-z_.]{3,60}$/.test(type) || !type.startsWith("email.")) return null;
+  if (!/^[a-z_.]{3,60}$/.test(type)) return null;
+  // événement qui n'est pas d'e-mail (domaine, contact, suppression...) : acquitté et ignoré, jamais refusé (un 400 ferait réessayer puis désactiver le webhook) (S-06)
+  if (!type.startsWith("email.")) return { kind: "ignored", eventId: `ignored:${short(`${type}|${String(raw.created_at)}`)}`, recordType: type.replace(/[^A-Za-z]/g, "").slice(0, 40) || "other", account: null };
   // `email.received` : le « From » est le CLIENT ; le compte de l'intégration est le domaine de l'adresse qui a REÇU le message
   if (type === "email.received") {
     const received = Array.isArray(data.received_for) && data.received_for.length > 0 ? data.received_for : Array.isArray(data.to) ? data.to : [];
@@ -111,6 +113,8 @@ export const resendWebhookAdapter: WebhookAdapter = {
       return null;
     }
   },
+  // sans compte lisible (autre type d'événement, expéditeur introuvable) : rien d'exploitable, acquitté sans écriture (S-06)
+  isIrrelevant: (payload) => isRecord(payload) && payload.account === null,
   extractAccount(payload) {
     return isRecord(payload) && typeof payload.account === "string" ? payload.account : null;
   },

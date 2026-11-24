@@ -1,7 +1,7 @@
 import { createHash, timingSafeEqual } from "node:crypto";
 import { verifyHmacSha256Hex } from "../webhooks/hmac";
 import type { WebhookAdapter, WebhookHeaders } from "../webhooks/types";
-import { normalizeWhatsAppPayload, readWhatsAppPayload } from "./events";
+import { isWhatsAppNoAccountPayload, normalizeWhatsAppPayload, readWhatsAppPayload } from "./events";
 
 /**
  * Webhooks WhatsApp Business Platform Cloud API (J34 et J35, spec §9.3 et §11). Meta signe le corps BRUT avec le « secret de l'app » (HMAC-SHA256,
@@ -25,6 +25,7 @@ export const whatsappWebhookAdapter: WebhookAdapter = {
       return null;
     }
   },
+  isIrrelevant: (payload) => isWhatsAppNoAccountPayload(payload),
   extractAccount(payload) {
     const parsed = readWhatsAppPayload(payload);
     return parsed ? (parsed.phoneNumberIds[0] ?? null) : null;

@@ -97,7 +97,7 @@ describe("analyse des événements Kapso", () => {
   });
 
   it("structure inattendue : null (jamais d'exception) ; numéro absent ou invalide : null", () => {
-    for (const bad of [null, 42, "x", [], {}, { phone_number_id: 12345 }, { phone_number_id: "abc", message: {} }]) expect(normalizeKapsoPayload(bad), JSON.stringify(bad)).toBeNull();
+    for (const bad of [null, 42, "x", [], { phone_number_id: 12345 }, { phone_number_id: "abc", message: {} }]) expect(normalizeKapsoPayload(bad), JSON.stringify(bad)).toBeNull();
   });
 
   it("aucun profil, nom, média ni corps brut n'est conservé", () => {
@@ -273,5 +273,19 @@ describe("STOP chez Kapso : boutons, listes et préférence marketing (ADR 017)"
     const noSequence = preference("stopped");
     delete (noSequence.marketing_preference as Record<string, unknown>).sequence;
     expect(normalizeKapsoPayload(noSequence)?.events[0]).toMatchObject({ id: "mp.212600000001.stopped.0" });
+  });
+});
+
+describe("S-06 : élément Kapso sans numéro (acquitté) et lot de plusieurs numéros (refusé)", () => {
+  it("un événement sans phone_number_id (autre type d'événement de la passerelle) est écarté et compté : ignorable", () => {
+    const parsed = normalizeKapsoPayload({ conversation: { id: "conv_1" } });
+    expect(parsed).toEqual({ object: "whatsapp_business_account", phoneNumberIds: [], events: [], skipped: 1 });
+    expect(kapsoWebhookAdapter.isIrrelevant?.(parsed, {})).toBe(true);
+    expect(normalizeKapsoPayload({})).toMatchObject({ phoneNumberIds: [] });
+  });
+  it("un numéro présent mais mal formé reste un corps invalide ; un lot de deux numéros n'est pas ignorable", () => {
+    expect(normalizeKapsoPayload({ phone_number_id: "abc", message: {} })).toBeNull();
+    const two = normalizeKapsoPayload({ batch: true, data: [received(), { ...received(), phone_number_id: "111111111111111" }] });
+    expect(two === null || kapsoWebhookAdapter.isIrrelevant?.(two, {}) === false).toBe(true);
   });
 });

@@ -199,7 +199,7 @@ describe("normalizePostmarkPayload : exemples officiels", () => {
 
   it("formes invalides : refusées (null)", () => {
     for (const bad of [
-      null, "texte", 12, [], {}, { RecordType: "Delivery" },
+      null, "texte", 12, [], { RecordType: "Delivery" },
       { ...DELIVERY, MessageID: "id avec espace" }, { ...DELIVERY, MessageID: undefined }, { ...DELIVERY, Recipient: "pas-une-adresse" }, { ...DELIVERY, DeliveredAt: undefined },
       { ...BOUNCE, ID: undefined }, { ...BOUNCE, ID: -3 }, { ...BOUNCE, ID: 1.5 }, { ...BOUNCE, Email: "x" },
       { ...COMPLAINT, MessageID: "" }, { RecordType: "Bad Type!" },
@@ -207,6 +207,10 @@ describe("normalizePostmarkPayload : exemples officiels", () => {
     ]) {
       expect(normalizePostmarkPayload(bad)).toBeNull();
     }
+  });
+  it("S-06 : un objet JSON valide sans type reconnaissable est IGNORÉ (acquitté), pas refusé", () => {
+    expect(normalizePostmarkPayload({})).toMatchObject({ kind: "ignored", recordType: "other" });
+    expect(normalizePostmarkPayload({ Foo: 1, Bar: 2 })).toMatchObject({ kind: "ignored", recordType: "other" });
   });
 });
 

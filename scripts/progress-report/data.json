@@ -660,6 +660,16 @@
       ],
       "proof": "5 tests d'adaptateur dédiés, pgTAP 210, 220 et 330 et tests RLS et d'acceptation adaptés ; retour arrière fourni ; suites de base et RLS à rejouer sur une base propre sans worker (CI)",
       "review": false
+    },
+    {
+      "day": "WhatsApp",
+      "title": "Essai réel WhatsApp Kapso rejoué et secret de webhook remplaçable",
+      "items": [
+        "Essai réel rejoué en local : message reçu depuis un téléphone de test, réponse depuis l'Inbox envoyée puis lue, statuts reçus par webhook signé.",
+        "Le secret de webhook d'une intégration existante se remplace depuis l'écran Intégrations (écriture seule, « Générer » ou à coller), sans déconnecter l'intégration ; procédure pas à pas dans le dossier des runbooks."
+      ],
+      "proof": "typecheck, lint et 2 793 tests web verts ; essai réel sur le sandbox Kapso ; aucun envoi à un client",
+      "review": false
     }
   ],
   "capabilities": {

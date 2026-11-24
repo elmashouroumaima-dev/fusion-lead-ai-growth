@@ -40,7 +40,8 @@ export interface WebhookAdapter {
 
 /** Accès à la base, réservé au serveur (fonctions service_role). */
 export interface WebhookStore {
-  resolve(provider: WebhookStoreProvider, account: string, gateway?: "meta" | "kapso" | "resend"): Promise<{ organizationId: string; integrationId: string } | null>;
+  /** Intégrations candidates du compte (5 au plus, actives d'abord) : plusieurs entreprises peuvent déclarer le même compte (S-02), la SIGNATURE désigne la bonne. Liste vide = compte inconnu. */
+  resolve(provider: WebhookStoreProvider, account: string, gateway?: "meta" | "kapso" | "resend"): Promise<Array<{ organizationId: string; integrationId: string }>>;
   record(input: { organizationId: string; integrationId: string; provider: WebhookStoreProvider; externalEventId: string; payload: unknown }): Promise<{ eventId: string; duplicate: boolean }>;
   recordRejection(input: { organizationId: string; integrationId: string; provider: WebhookStoreProvider }): Promise<void>;
 }

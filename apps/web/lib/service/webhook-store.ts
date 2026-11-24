@@ -11,12 +11,15 @@ export function createWebhookStore(): WebhookStore {
   const client = () => createAdminClient();
   return {
     async resolve(provider, account, gateway) {
-      const { data, error } = await client().rpc("webhook_resolve_integration", { p_provider: provider, p_account: account, ...(gateway ? { p_gateway: gateway } : {}) });
+      const { data, error } = await client().rpc("webhook_resolve_candidates", { p_provider: provider, p_account: account, ...(gateway ? { p_gateway: gateway } : {}) });
       if (error) throw new ServiceError("service_unavailable");
-      if (data === null || data === undefined) return null;
-      const row = data as { organization_id?: unknown; integration_id?: unknown };
-      if (typeof row.organization_id !== "string" || typeof row.integration_id !== "string") throw new ServiceError("internal_error");
-      return { organizationId: row.organization_id, integrationId: row.integration_id };
+      if (data === null || data === undefined) return [];
+      if (!Array.isArray(data)) throw new ServiceError("internal_error");
+      return data.map((entry) => {
+        const row = entry as { organization_id?: unknown; integration_id?: unknown };
+        if (typeof row.organization_id !== "string" || typeof row.integration_id !== "string") throw new ServiceError("internal_error");
+        return { organizationId: row.organization_id, integrationId: row.integration_id };
+      });
     },
     async record(input) {
       const { data, error } = await client().rpc("webhook_record", {

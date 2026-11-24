@@ -44,7 +44,8 @@ function fakeStore() {
   const store: WebhookStore = {
     async resolve(provider, account) {
       resolved.push({ provider, account });
-      return accounts.get(account) ?? null;
+      const found = accounts.get(account);
+      return found ? [found] : [];
     },
     async record(input) {
       const key = `${input.organizationId}:${input.provider}:${input.externalEventId}`;
@@ -264,5 +265,71 @@ describe("ingestWebhook : défense en profondeur (revue J29)", () => {
     const raw = bytes('{"account":{"x":1},"event":"e1"}');
     const outcome = await ingestWebhook({ adapter: adapter({ extractAccount: (p) => (typeof (p as { account: unknown }).account === "string" ? (p as { account: string }).account : null) }), rawBody: raw, headers: {}, store: f.store, readSecret: secrets, now: () => NOW });
     expect(outcome).toEqual({ kind: "bad_request" });
+  });
+});
+
+describe("S-02 : plusieurs entreprises déclarent le même compte, la signature désigne l'entreprise", () => {
+  const SECRET_VICTIME = "secret-de-la-victime";
+  const SECRET_ATTAQUANT = "secret-choisi-par-l-attaquant";
+  const readSecret = async (organizationId: string): Promise<string | null> => (organizationId === ORG_A ? SECRET_VICTIME : organizationId === ORG_B ? SECRET_ATTAQUANT : null);
+
+  /** Les deux entreprises ont une intégration sur « acc-x » ; l'attaquante (B) est listée la première (ordre non garanti). */
+  function sharedStore(order: Array<"a" | "b"> = ["b", "a"]) {
+    const events: Array<{ organizationId: string }> = [];
+    const rejections: Array<{ organizationId: string }> = [];
+    const byKey = { a: { organizationId: ORG_A, integrationId: INT_A }, b: { organizationId: ORG_B, integrationId: INT_B } };
+    const store: WebhookStore = {
+      async resolve() {
+        return order.map((k) => byKey[k]);
+      },
+      async record(input) {
+        events.push({ organizationId: input.organizationId });
+        return { eventId: `evt-${events.length}`, duplicate: false };
+      },
+      async recordRejection({ organizationId }) {
+        rejections.push({ organizationId });
+      },
+    };
+    return { store, events, rejections };
+  }
+  const run = (s: WebhookStore, secret: string, body: Body = { account: "acc-x", event: "e1", ts: NOW }) => {
+    const { raw, headers } = signed(body, secret);
+    return ingestWebhook({ adapter: adapter(), rawBody: raw, headers, store: s, readSecret, now: () => NOW });
+  };
+
+  it("un événement authentique de la victime (signé avec SON secret) va chez la victime, même si l'attaquant est listé en premier", async () => {
+    for (const order of [["b", "a"], ["a", "b"]] as Array<Array<"a" | "b">>) {
+      const f = sharedStore(order);
+      expect((await run(f.store, SECRET_VICTIME)).kind).toBe("accepted");
+      expect(f.events).toEqual([{ organizationId: ORG_A }]);
+      expect(f.rejections).toEqual([]);
+    }
+  });
+
+  it("l'attaquante ne reçoit que ses propres événements (signés avec son secret), jamais ceux de la victime", async () => {
+    const f = sharedStore();
+    expect((await run(f.store, SECRET_ATTAQUANT)).kind).toBe("accepted");
+    expect(f.events).toEqual([{ organizationId: ORG_B }]);
+  });
+
+  it("signature qui ne correspond à aucun candidat : refus 401 identique, trace du refus pour chaque candidat, rien d'enregistré", async () => {
+    const f = sharedStore();
+    expect(await run(f.store, "secret-d-un-inconnu")).toEqual({ kind: "invalid_signature" });
+    expect(f.events).toEqual([]);
+    expect(f.rejections.map((r) => r.organizationId).sort()).toEqual([ORG_A, ORG_B].sort());
+  });
+
+  it("un candidat sans secret est ignoré (jamais authentifié) ; les autres restent essayés", async () => {
+    const f = sharedStore();
+    const noSecretForB = async (organizationId: string): Promise<string | null> => (organizationId === ORG_A ? SECRET_VICTIME : null);
+    const { raw, headers } = signed({ account: "acc-x", event: "e1", ts: NOW }, SECRET_VICTIME);
+    const outcome = await ingestWebhook({ adapter: adapter(), rawBody: raw, headers, store: f.store, readSecret: noSecretForB, now: () => NOW });
+    expect(outcome.kind).toBe("accepted");
+    expect(f.events).toEqual([{ organizationId: ORG_A }]);
+  });
+
+  it("aucun candidat : même réponse qu'une signature invalide, sans écriture", async () => {
+    const store: WebhookStore = { resolve: async () => [], record: async () => { throw new Error("jamais"); }, recordRejection: async () => { throw new Error("jamais"); } };
+    expect(await run(store, SECRET_VICTIME)).toEqual({ kind: "invalid_signature" });
   });
 });

@@ -16,18 +16,22 @@ beforeEach(() => {
 });
 
 describe("magasin des webhooks (service_role)", () => {
-  it("resolve : appelle la fonction avec fournisseur et compte seulement ; renvoie l'entreprise et l'intégration, ou null", async () => {
-    rpc.mockResolvedValue({ data: { organization_id: ORG, integration_id: INT }, error: null });
-    expect(await store.resolve("whatsapp", "compte")).toEqual({ organizationId: ORG, integrationId: INT });
-    expect(rpc).toHaveBeenCalledWith("webhook_resolve_integration", { p_provider: "whatsapp", p_account: "compte" });
+  it("resolve : appelle la fonction avec fournisseur et compte seulement ; renvoie la liste des candidats (entreprise et intégration), vide si le compte est inconnu", async () => {
+    rpc.mockResolvedValue({ data: [{ organization_id: ORG, integration_id: INT }], error: null });
+    expect(await store.resolve("whatsapp", "compte")).toEqual([{ organizationId: ORG, integrationId: INT }]);
+    expect(rpc).toHaveBeenCalledWith("webhook_resolve_candidates", { p_provider: "whatsapp", p_account: "compte" });
+    rpc.mockResolvedValue({ data: [], error: null });
+    expect(await store.resolve("whatsapp", "inconnu")).toEqual([]);
     rpc.mockResolvedValue({ data: null, error: null });
-    expect(await store.resolve("whatsapp", "inconnu")).toBeNull();
+    expect(await store.resolve("whatsapp", "inconnu")).toEqual([]);
   });
 
   it("resolve : erreur de la base = 503 opaque ; réponse inattendue = 500", async () => {
     rpc.mockResolvedValue({ data: null, error: { code: "XX000", message: "détail SQL secret" } });
     await expect(store.resolve("whatsapp", "c")).rejects.toMatchObject({ code: "service_unavailable" });
-    rpc.mockResolvedValue({ data: { organization_id: 12 }, error: null });
+    rpc.mockResolvedValue({ data: [{ organization_id: 12 }], error: null });
+    await expect(store.resolve("whatsapp", "c")).rejects.toMatchObject({ code: "internal_error" });
+    rpc.mockResolvedValue({ data: { organization_id: ORG, integration_id: INT }, error: null });
     await expect(store.resolve("whatsapp", "c")).rejects.toMatchObject({ code: "internal_error" });
   });
 

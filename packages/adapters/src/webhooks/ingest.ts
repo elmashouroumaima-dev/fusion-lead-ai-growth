@@ -62,25 +62,37 @@ export async function ingestWebhook(input: IngestInput): Promise<WebhookOutcome>
   };
 
   const storeProvider = adapter.storeProvider ?? adapter.provider;
-  const target = await store.resolve(storeProvider as WebhookStoreProvider, account, adapter.gateway);
-  if (!target) {
+  const candidates = await store.resolve(storeProvider as WebhookStoreProvider, account, adapter.gateway);
+  if (candidates.length === 0) {
     // même travail et même réponse qu'une signature invalide : un inconnu ne distingue pas un compte inexistant d'un compte existant
     verify(DUMMY_SECRET);
     return { kind: "invalid_signature" };
   }
 
+  // Plusieurs entreprises peuvent déclarer le même compte (S-02) : la signature (le secret de webhook propre à chaque intégration) désigne l'entreprise.
+  // Chaque candidat est essayé ; un événement authentique du fournisseur n'est signé que pour son vrai propriétaire. Une intégration sans secret ne peut rien
+  // authentifier (défense en profondeur) : même travail factice.
+  let target: { organizationId: string; integrationId: string } | null = null;
+  for (const candidate of candidates) {
+    const secret = await readSecret(candidate.organizationId, candidate.integrationId);
+    if (!secret) {
+      verify(DUMMY_SECRET);
+      continue;
+    }
+    if (verify(secret)) {
+      target = candidate;
+      break;
+    }
+  }
+
   const reject = async (): Promise<WebhookOutcome> => {
-    await store.recordRejection({ organizationId: target.organizationId, integrationId: target.integrationId, provider: storeProvider as WebhookStoreProvider });
+    // trace du refus pour CHAQUE candidat du compte (métadonnées seules, sans contenu)
+    for (const candidate of candidates) {
+      await store.recordRejection({ organizationId: candidate.organizationId, integrationId: candidate.integrationId, provider: storeProvider as WebhookStoreProvider });
+    }
     return { kind: "invalid_signature" };
   };
-
-  const secret = await readSecret(target.organizationId, target.integrationId);
-  // une intégration sans secret ne peut rien authentifier : refus, quel que soit l'adaptateur (défense en profondeur)
-  if (!secret) {
-    verify(DUMMY_SECRET);
-    return reject();
-  }
-  if (!verify(secret)) return reject();
+  if (target === null) return reject();
 
   if (adapter.extractTimestamp) {
     let timestamp: number | null;

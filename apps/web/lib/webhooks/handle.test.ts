@@ -36,7 +36,7 @@ function setup(over: Partial<WebhookRouteDeps> = {}) {
   const logs: Array<{ event: string; fields: Record<string, unknown> }> = [];
   const store: WebhookStore = {
     async resolve(_provider, account) {
-      return account === "acc" ? { organizationId: ORG, integrationId: INT } : null;
+      return account === "acc" ? [{ organizationId: ORG, integrationId: INT }] : [];
     },
     async record(input) {
       records.push(input);

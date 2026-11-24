@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 
 vi.mock("server-only", () => ({}));
 vi.mock("../supabase/admin", () => ({ createAdminClient: () => ({ rpc: vi.fn() }) }));
-vi.mock("./integration-secrets", () => ({ readIntegrationSecret: vi.fn() }));
+vi.mock("./integration-secrets", () => ({ readIntegrationSecret: vi.fn(), readIntegrationSecretWithId: vi.fn() }));
 
 import { validateIntegrationConnection, type ValidationDeps } from "./integration-validation";
 
@@ -25,22 +25,26 @@ function supabase(row: Record<string, unknown> | null, error: unknown = null) {
 }
 const whatsapp = { provider: "whatsapp", status: "pending", external_account_id: PHONE, has_secret: true };
 
+const SECRET_ID = "5ec12e71-aaaa-4bbb-8ccc-000000000001";
+
 function deps(overrides: Partial<ValidationDeps> = {}) {
   const written: Array<{ ok: boolean; code: string | null }> = [];
+  const secretIds: string[] = [];
   const actors: string[] = [];
   const value: ValidationDeps = {
-    readSecret: async () => TOKEN,
+    readSecret: async () => ({ token: TOKEN, secretId: SECRET_ID }),
     validate: async () => ({ kind: "valid" }),
     validateEmail: async () => ({ kind: "valid" }),
     validateResend: async () => ({ kind: "valid" }),
     validateKapso: async () => ({ kind: "valid" }),
     setValidation: async (input) => {
       written.push({ ok: input.ok, code: input.code });
+      secretIds.push(input.secretId);
       actors.push(input.actorId);
     },
     ...overrides,
   };
-  return { deps: value, written, actors };
+  return { deps: value, written, actors, secretIds };
 }
 
 describe("vérification d'une connexion WhatsApp (J34)", () => {
@@ -167,5 +171,13 @@ describe("vérification d'une intégration WhatsApp de passerelle Kapso", () => 
     const down = deps({ validateKapso: async () => ({ kind: "invalid", code: "provider_unavailable" }) });
     await expect(validateIntegrationConnection(supabase(kapso).client, ORG, INT, USER, down.deps)).rejects.toMatchObject({ code: "service_unavailable" });
     expect(down.written).toEqual([]);
+  });
+});
+
+describe("S-08 : le résultat est lié au secret réellement essayé", () => {
+  it("le secret lu est transmis à l'enregistrement du résultat (la base refuse un résultat obtenu avec un ancien jeton)", async () => {
+    const d = deps();
+    expect(await validateIntegrationConnection(supabase(whatsapp).client, ORG, INT, USER, d.deps)).toEqual({ status: "active" });
+    expect(d.secretIds).toEqual([SECRET_ID]);
   });
 });

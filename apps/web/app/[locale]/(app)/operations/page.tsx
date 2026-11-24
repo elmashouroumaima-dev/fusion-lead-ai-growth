@@ -64,7 +64,7 @@ export default async function OperationsPage({ params }: { params: Promise<{ loc
                 <AlertDescription>{t("stop.failed")}</AlertDescription>
               </Alert>
             ) : (
-              <EmergencyStop paused={paused} />
+              <EmergencyStop paused={paused} canResume={ctx.role === "company_owner" || ctx.role === "company_admin"} />
             )}
           </CardContent>
         </Card>

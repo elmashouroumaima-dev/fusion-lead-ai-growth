@@ -7,13 +7,13 @@ import { toast } from "sonner";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 
-type Props = { paused: boolean };
+type Props = { paused: boolean; /** Seuls owner et admin reprennent les envois (S-05) ; le serveur et la base le revérifient. */ canResume: boolean };
 
 /**
  * Arrêt d'urgence d'envoi (J39). Arrêter demande une confirmation en deux temps ; reprendre est immédiat. Chaque envoi porte une clé
  * d'idempotence neuve. L'état affiché vient du serveur (rechargé après l'action) : le navigateur ne décide de rien.
  */
-export function EmergencyStop({ paused }: Props) {
+export function EmergencyStop({ paused, canResume }: Props) {
   const t = useTranslations("Operations.stop");
   const router = useRouter();
   const [busy, setBusy] = useState(false);
@@ -54,9 +54,13 @@ export function EmergencyStop({ paused }: Props) {
       </Alert>
       <div className="flex flex-wrap items-center gap-2">
         {paused ? (
-          <Button type="button" disabled={busy} onClick={() => void apply(false)}>
-            {t("resumeButton")}
-          </Button>
+          canResume ? (
+            <Button type="button" disabled={busy} onClick={() => void apply(false)}>
+              {t("resumeButton")}
+            </Button>
+          ) : (
+            <p className="text-muted-foreground text-sm">{t("resumeRestricted")}</p>
+          )
         ) : confirming ? (
           <>
             <Button type="button" variant="destructive" disabled={busy} onClick={() => void apply(true)}>

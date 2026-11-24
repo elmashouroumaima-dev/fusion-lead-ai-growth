@@ -1484,7 +1484,8 @@
       "stopped": "Envois arrêtés.",
       "resumed": "Envois repris.",
       "failed": "L'action a échoué. Réessayez.",
-      "forbidden": "Vous n'avez pas le droit de faire cela."
+      "forbidden": "Vous n'avez pas le droit de faire cela.",
+      "resumeRestricted": "Seul un propriétaire ou un administrateur peut reprendre les envois."
     },
     "dead": {
       "title": "Jobs en échec (dead letters)",

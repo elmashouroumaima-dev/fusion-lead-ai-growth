@@ -1033,6 +1033,18 @@
     "tabs": {
       "label": "Integration types",
       "other": "Other"
+    },
+    "webhookSecret": {
+      "label": "Webhook secret",
+      "generate": "Generate",
+      "submit": "Replace secret",
+      "hintOwn": "Pick or generate a secret, replace it here, then copy the SAME secret into the provider's webhook (its \"secret key\" field). Write-only: it is never shown again.",
+      "hintProvider": "Paste the signing secret shown by the provider when you created the webhook. Write-only: it is never shown again.",
+      "urlLabel": "Webhook address:",
+      "done": "Webhook secret replaced.",
+      "invalid": "Invalid secret (32 to 200 characters, no spaces, different from the sending key).",
+      "unavailable": "Secrets are not available on this server.",
+      "failed": "The replacement failed. Try again."
     }
   },
   "Unsubscribe": {

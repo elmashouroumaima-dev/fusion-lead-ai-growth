@@ -4,7 +4,8 @@ Toutes les routes : session + entreprise active vérifiée (jamais d'`organizati
 
 ## `POST /api/send/emergency-stop`
 Corps : `{ "paused": boolean }`. Réponse 200 : `{ "paused": boolean }`.
-- Rôles : owner, admin, marketing manager (permission `sending:emergency_stop`). Commercial, analyste : 403. Anonyme : 401.
+- Rôles : **arrêter** : owner, admin, marketing manager (permission `sending:emergency_stop`) ; **reprendre** (`paused: false`) : owner et admin seulement, le marketing reçoit 403 (S-05, vérifié par la route et par la fonction SQL). Commercial, analyste : 403. Anonyme : 401.
+- `settings.send_paused` ne se modifie que par `set_send_emergency_stop` : une écriture directe sur `organizations.settings` est refusée (42501) par le déclencheur `organizations_guard_send_paused`.
 - Effet : `organizations.settings.send_paused` ; audit `send.emergency_stop`. Rejouable (même clé = même réponse, un seul audit).
 - Runbook : `docs/runbooks/emergency-stop.md`.
 

@@ -660,6 +660,16 @@
       ],
       "proof": "5 tests d'adaptateur dédiés, pgTAP 210, 220 et 330 et tests RLS et d'acceptation adaptés ; retour arrière fourni ; suites de base et RLS à rejouer sur une base propre sans worker (CI)",
       "review": false
+    },
+    {
+      "day": "Sécurité",
+      "title": "S-04 et S-05 : consentement révoqué et arrêt d'urgence",
+      "items": [
+        "Une réponse ne passe plus sur un consentement révoqué (le contact qui écrit « arrêtez » puis dont on révoque le consentement ne reçoit plus de réponse) ; la révocation annule aussi les envois en file de ce contact.",
+        "L'arrêt d'urgence ne peut être levé que par un propriétaire ou un administrateur (le marketing peut l'activer, pas le lever) et son état ne se modifie plus que par la fonction auditée."
+      ],
+      "proof": "13 tests de base (pgTAP 370), test d'acceptation adapté, retour arrière fourni ; restent : mots d'arrêt et réponses automatiques pour l'e-mail, lecture du secret après le claim, mise en attente pendant un arrêt",
+      "review": false
     }
   ],
   "capabilities": {

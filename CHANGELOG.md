@@ -3,6 +3,10 @@
 Format : Keep a Changelog. Une entrée par jour de travail.
 
 ## [Non publié]
+### S-04 et S-05 : consentement révoqué et arrêt d'urgence (24 novembre)
+- Correction S-04 : une réponse (finalité `reply`) n'est plus couverte par un message entrant de moins de 7 jours quand le consentement du contact a été révoqué depuis et qu'aucun consentement actif ne reste sur ce canal (`message_send_claim`) ; `revoke_consent` annule les envois en file, non réclamés, du contact sur ce canal (finalité révoquée, ou tous), avec leurs jobs, audit `message.cancelled` (motif `consent_revoked`).
+- Correction S-05 : l'arrêt d'urgence se **reprend** par owner et admin seulement (le marketing peut toujours arrêter) : route, fonction SQL et écran Exploitation ; `settings.send_paused` ne se modifie plus que par `set_send_emergency_stop` (déclencheur de garde).
+- Ajout : migration `20261221100000_s04_s05_revocation_and_emergency_stop.sql` (+ retour arrière), pgTAP `370` (13 tests), tests d'acceptation adaptés. Non traités (dans le pack de revue) : mots d'arrêt et réponses automatiques pour l'e-mail, lecture du secret après le claim, mise en attente des envois pendant un arrêt.
 ### S-02 : comptes fournisseur par entreprise, webhooks résolus par signature (24 novembre)
 - Correction (revue de sécurité S-02, ADR 018) : l'index unique global `integrations_provider_account_global` est supprimé ; l'unicité reste par entreprise. Deux entreprises peuvent déclarer le même compte (plus de blocage entre entreprises, plus de réponse 409 qui révèle qu'un compte est pris, la déconnexion libère le compte).
 - Ajout : migration `20261220100000_integration_account_per_org.sql` (+ retour arrière) : `webhook_resolve_candidates` remplace `webhook_resolve_integration` (jusqu'à 5 candidates, actives d'abord) ; `ingestWebhook` essaie le secret de chaque candidate, la signature désigne l'entreprise ; refus tracé pour chaque candidate.

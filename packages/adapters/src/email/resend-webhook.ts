@@ -63,7 +63,7 @@ export function normalizeResendPayload(raw: unknown): ResendNormalized | null {
   if (type === "email.received") {
     const received = Array.isArray(data.received_for) && data.received_for.length > 0 ? data.received_for : Array.isArray(data.to) ? data.to : [];
     const target = resendAddressOf(received[0]);
-    const receivedId = typeof data.email_id === "string" && /^[A-Za-z0-9._-]{1,100}$/.test(data.email_id) ? data.email_id : null;
+    const receivedId = typeof data.email_id === "string" && /^[A-Za-z0-9][A-Za-z0-9._-]{0,99}$/.test(data.email_id) ? data.email_id : null;
     if (target === null || receivedId === null) return null;
     return { kind: "inbound_fetch", eventId: `rs-rcv:${receivedId}`, emailId: receivedId, at: isoOrNull(raw.created_at), account: resendAccountId(target) };
   }

@@ -17,7 +17,8 @@ import { resendAddressOf } from "./resend-webhook";
 export const RESEND_RECEIVING_BASE = "https://api.resend.com/emails/receiving/";
 const TIMEOUT_MS = 15_000;
 const MAX_RESPONSE_BYTES = 2 * 1024 * 1024;
-const EMAIL_ID = /^[A-Za-z0-9._-]{1,100}$/;
+/** Identifiant de message : commence par un caractère alphanumérique (jamais « . » ni « .. », qui seraient des segments d'adresse) et sert d'élément d'adresse après `encodeURIComponent`. */
+const EMAIL_ID = /^[A-Za-z0-9][A-Za-z0-9._-]{0,99}$/;
 const PROVIDER_ID = /^[A-Za-z0-9._:=+/@<>$%-]{1,998}$/;
 const SUBJECT_MAX = 300;
 const RECIPIENTS_MAX = 20;
@@ -34,12 +35,49 @@ export type ResendReceiverOptions = { fetch?: typeof fetch; timeoutMs?: number }
 
 const isRecord = (value: unknown): value is Record<string, unknown> => typeof value === "object" && value !== null && !Array.isArray(value);
 
-/** Texte d'un message HTML sans texte brut : balises retirées, entités courantes décodées, espaces repliés (jamais interprété ni exécuté). */
+/** Plafond de l'entrée de `htmlToText` : le HTML d'un e-mail est contrôlé par l'expéditeur ; au-delà, le reste est ignoré (le texte est de toute façon coupé à `EMAIL_BODY_MAX`). */
+const HTML_INPUT_MAX = 200_000;
+const BLOCK_TAGS = new Set(["br", "p", "div", "li", "tr"]);
+
+/**
+ * Texte d'un message HTML sans texte brut : balises retirées, `script` et `style` supprimés avec leur contenu, fins de bloc en retour à la ligne, entités
+ * courantes décodées, espaces repliés (jamais interprété ni exécuté). Parcours LINÉAIRE (aucune expression régulière à retour arrière : une entrée avec des millions
+ * de « < » sans « > » figeait le worker) : si aucun « > » ne suit, il n'y en aura plus, le reste est du texte.
+ */
 export function htmlToText(html: string): string {
-  return html
-    .replace(/<(script|style)\b[^>]*>[\s\S]*?<\/\1>/gi, " ")
-    .replace(/<br\s*\/?>|<\/p>|<\/div>|<\/li>|<\/tr>/gi, "\n")
-    .replace(/<[^>]*>/g, "")
+  const src = html.length > HTML_INPUT_MAX ? html.slice(0, HTML_INPUT_MAX) : html;
+  const lower = src.toLowerCase();
+  let out = "";
+  let i = 0;
+  while (i < src.length) {
+    const open = src.indexOf("<", i);
+    if (open === -1) {
+      out += src.slice(i);
+      break;
+    }
+    out += src.slice(i, open);
+    const close = src.indexOf(">", open + 1);
+    if (close === -1) {
+      // plus aucun « > » : le reste est du texte
+      out += src.slice(open);
+      break;
+    }
+    const tag = /^\/?\s*([a-z][a-z0-9]*)/.exec(lower.slice(open + 1, Math.min(close, open + 40)));
+    const name = tag?.[1] ?? "";
+    const closing = lower[open + 1] === "/";
+    if (!closing && (name === "script" || name === "style")) {
+      const end = lower.indexOf(`</${name}`, close + 1);
+      if (end === -1) break; // jamais refermé : tout le reste est du contenu de script
+      const endClose = src.indexOf(">", end);
+      if (endClose === -1) break;
+      out += " ";
+      i = endClose + 1;
+      continue;
+    }
+    if (BLOCK_TAGS.has(name) && (name === "br" || closing)) out += "\n";
+    i = close + 1;
+  }
+  return out
     .replace(/&nbsp;/g, " ")
     .replace(/&lt;/g, "<")
     .replace(/&gt;/g, ">")
@@ -113,7 +151,7 @@ export function createResendReceiver(options: ResendReceiverOptions = {}) {
       if (apiKey.length === 0 || apiKey.length > 4096 || /[^ -~]/.test(apiKey)) return { kind: "rejected", code: "provider_auth" };
       let response: Response;
       try {
-        response = await doFetch(`${RESEND_RECEIVING_BASE}${emailId}?html_format=cid`, {
+        response = await doFetch(`${RESEND_RECEIVING_BASE}${encodeURIComponent(emailId)}?html_format=cid`, {
           method: "GET",
           redirect: "error",
           headers: { Accept: "application/json", Authorization: `Bearer ${apiKey}` },

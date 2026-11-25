@@ -5,7 +5,7 @@
   "tests": [
     {
       "label": "Web (application)",
-      "value": 2796,
+      "value": 2812,
       "note": "Écrans, routes HTTP et services de l'application"
     },
     {
@@ -20,7 +20,7 @@
     },
     {
       "label": "Domaine (règles métier)",
-      "value": 662,
+      "value": 663,
       "note": "Règles métier pures (contrôles d'envoi, consentement...)"
     },
     {
@@ -739,6 +739,16 @@
       ],
       "proof": "8 tests de base (pgTAP 410), 3 tests d'empreinte ; pgTAP 210 et 250 verts ; retour arrière fourni",
       "review": false
+    },
+    {
+      "day": "Sécurité",
+      "title": "S-10 : la capture publique est protégée contre les robots",
+      "items": [
+        "Le formulaire public peut exiger un défi anti-robot Cloudflare Turnstile, vérifié par le serveur (activable quand les sites des clients auront le widget).",
+        "Chaque clé de formulaire est plafonnée à 1000 soumissions par jour, et la réponse ne révèle plus l'état du quota de l'entreprise."
+      ],
+      "proof": "18 nouveaux tests (Turnstile, route, environnement), aucun échec ; décision à valider : ADR 019",
+      "review": true
     }
   ],
   "capabilities": {

@@ -17,7 +17,8 @@ X-Form-Key: flk_<64 caractères hexadécimaux>
   "utm": { "utm_source": "newsletter", "utm_campaign": "ete", "landing_page_id": "lp-ete" },
   "consent": { "channel": "email", "purpose": "marketing" | "newsletter", "text": "J'accepte de recevoir des offres…", "version": "v2" },
   "page_url": "https://exemple.ma/inscription",
-  "website": ""                         (champ piège : à laisser VIDE, invisible pour un humain)
+  "website": "",                        (champ piège : à laisser VIDE, invisible pour un humain)
+  "turnstile_token": "…"                (jeton du widget Cloudflare Turnstile ; exigé quand TURNSTILE_ENFORCE=true, ADR 019)
 }
 → 202 { "status": "received" }
 ```
@@ -30,11 +31,10 @@ X-Form-Key: flk_<64 caractères hexadécimaux>
 |---|---|
 | `202 { status: "received" }` | soumission acceptée ; **identique** pour un nouveau contact et un doublon (aucun identifiant, aucune indication « déjà connu ») ; champ piège rempli : même réponse, rien n'est écrit |
 | `400 validation_failed` | corps invalide, champ inconnu, entreprise ou projet nommés |
-| `403 forbidden` | clé absente, mal formée, inconnue, révoquée ; origine absente ou qui n'est pas celle **de cette clé** ; projet archivé (**un seul refus**, sans indiquer la cause, sans en-tête CORS) |
+| `403 forbidden` | défi Turnstile absent (si exigé) ou refusé ; clé absente, mal formée, inconnue, révoquée ; origine absente ou qui n'est pas celle **de cette clé** ; projet archivé (**un seul refus**, sans indiquer la cause, sans en-tête CORS) |
 | `413 payload_too_large` | corps de plus de 16 Kio |
-| `429 rate_limited` + `Retry-After` | limitation de débit (par adresse : 20 en rafale puis 20 par minute ; par clé : 200 en rafale puis 2 par seconde) |
-| `429 quota_exceeded` | quota « contacts » ou abonnement inactif |
-| `503 service_unavailable` | limiteur indisponible (échec fermé) |
+| `429 rate_limited` + `Retry-After` | limitation de débit (par adresse : 20 en rafale puis 20 par minute ; par clé : 200 en rafale puis 2 par seconde ; plafond de 1000 par jour et par clé) **ou** quota « contacts » / abonnement inactif (S-10 : un seul 429, l'état du quota n'est pas révélé) |
+| `503 service_unavailable` | limiteur indisponible (échec fermé) ; Cloudflare injoignable quand le défi est exigé (échec fermé) |
 
 Erreurs normalisées `{ code, message, request_id }`. **CORS** : `OPTIONS /api/leads` (préflight, limité à 60 en rafale puis 1 par seconde et par adresse, AVANT toute lecture de la base) répond 204 pour une origine autorisée par au moins une clé active d'un projet actif (`Access-Control-Allow-Origin` = cette origine, `Vary: Origin`, jamais d'identifiants) ; origine inconnue ou absente : 403 sans en-tête CORS. Pour un `POST`, les en-têtes CORS ne sont posés qu'une fois la clé reconnue ET son origine vérifiée.
 
@@ -55,9 +55,12 @@ Ordre de la route : origine présente → limitation par **adresse** → forme d
 ## Audit et journaux
 `form_key.created / revoked / activated / updated` (préfixe et noms de champs) ; `contact.created`, `lead.created`, `consent.recorded` avec l'acteur « système ». **Jamais** de clé, d'e-mail, de nom, de téléphone, de texte de consentement ni d'IP dans l'audit ni dans les journaux de la route (seuls des booléens et l'identifiant de requête).
 
+## Défi Turnstile (S-10, ADR 019)
+Le site affiche le widget Cloudflare Turnstile (clé de site) et envoie le jeton dans `turnstile_token`. Le serveur le vérifie auprès de Cloudflare juste avant l'écriture (après le champ piège) : jeton refusé ou émis pour un autre site = 403 `forbidden`. Seuls le secret, le jeton, l'adresse du visiteur et une clé d'idempotence quittent le serveur. `TURNSTILE_ENFORCE=false` (défaut) : le jeton est vérifié s'il est présent mais pas exigé ; `true` : exigé, Cloudflare injoignable = 503. La clé secrète (`TURNSTILE_SECRET_KEY`) est serveur uniquement.
+
 ## Limites connues
 - **Pas de double opt-in automatique** : la spec §9.1 enregistre le consentement dans la transaction de capture et §9.2 / §85 interdisent tout envoi externe automatique (pas d'e-mail de confirmation). Quiconque connaît la clé peut soumettre l'adresse d'un tiers avec une case cochée ; le consentement est donc enregistré (texte, version, IP, page) mais **n'est EFFECTIF pour un envoi marketing qu'une fois prouvé** (S-03, ADR 007 amendement) : par un message entrant du contact sur ce canal, postérieur à la saisie, ou par un consentement enregistré par un humain habilité (source manuelle). Règle : `private.consent_is_effective`, utilisée par `message_send_claim` ; les segments de campagne (J43) devront l'appliquer aussi.
-- **`Origin` est forgeable hors navigateur** : la vérification d'origine protège contre l'usage de la clé par un autre SITE (navigateur), pas contre un script qui forge l'en-tête ; la limitation de débit et la révocation limitent ce risque. Le préflight révèle si une origine est cliente de la plateforme (204 / 403), comme tout CORS.
+- **`Origin` est forgeable hors navigateur** (le défi Turnstile et le plafond journalier par clé, S-10, limitent cet abus ; Turnstile est exigé seulement avec `TURNSTILE_ENFORCE=true`) : la vérification d'origine protège contre l'usage de la clé par un autre SITE (navigateur), pas contre un script qui forge l'en-tête ; la limitation de débit et la révocation limitent ce risque. Le préflight révèle si une origine est cliente de la plateforme (204 / 403), comme tout CORS.
 - **Adresse du visiteur** : `TRUSTED_PROXY_HOPS` (1 par défaut ; 0 = ignorer l'en-tête) doit correspondre au nombre réel de reverse proxys qui AJOUTENT l'adresse à `x-forwarded-for` (ADR 010) ; une adresse absente ou illisible partage le seau « unknown ». À régler et tester à l'hébergement.
 - **Déni de service du quota « contacts »** : la clé est publique ; le seau par adresse (20 puis 20 par minute) et par clé (200 puis 2 par seconde) ralentit sans empêcher un attaquant disposant de plusieurs adresses de remplir le quota d'une entreprise ou d'épuiser le seau de sa clé. Mitigations à décider (nouvelle dépendance ou nouveau quota) : défi anti-robot côté serveur, quota de captures publiques par clé et par jour, contacts « en attente de confirmation » comptés après confirmation. La clé se révoque immédiatement (`set_form_key_active`).
 - **Oracle résiduel au quota plein** : quand le quota « contacts » est atteint, un contact existant continue de passer (202) alors qu'un nouveau reçoit 429 `quota_exceeded` (idem 409 à 50 leads pour un contact) : un attaquant qui remplit lui-même le quota pourrait tester si une adresse est déjà dans le CRM. Décision de produit à confirmer : répondre 202 aussi (et alerter l'entreprise, J22) ou garder le 429 honnête.

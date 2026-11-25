@@ -16,7 +16,10 @@ vi.mock("../../../lib/service/capture-lead", async (importOriginal) => {
   };
 });
 vi.mock("../../../lib/supabase/admin", () => ({ createAdminClient: () => ({ rpc: vi.fn() }), deriveServerSecret: () => "derive-de-test" }));
-vi.mock("../../../lib/env/server", () => ({ getServerEnv: () => ({ TRUSTED_PROXY_HOPS: 1 }) }));
+const serverEnv: { TRUSTED_PROXY_HOPS: number; TURNSTILE_SECRET_KEY?: string; TURNSTILE_ENFORCE: boolean } = { TRUSTED_PROXY_HOPS: 1, TURNSTILE_ENFORCE: false };
+vi.mock("../../../lib/env/server", () => ({ getServerEnv: () => serverEnv }));
+const verifyTurnstile = vi.fn();
+vi.mock("../../../lib/service/turnstile", () => ({ verifyTurnstile: (...a: unknown[]) => verifyTurnstile(...a) }));
 vi.mock("../../../lib/service/rate-limit", () => ({ takePublicToken: (...a: unknown[]) => takePublicToken(...a) }));
 
 import { ServiceError } from "../../../lib/service/errors";
@@ -37,6 +40,9 @@ const valid = { email: "Nadia@Exemple.ma", name: "Nadia", utm: { utm_source: "ne
 
 beforeEach(() => {
   vi.clearAllMocks();
+  delete serverEnv.TURNSTILE_SECRET_KEY;
+  serverEnv.TURNSTILE_ENFORCE = false;
+  verifyTurnstile.mockResolvedValue("ok");
   isOriginAllowed.mockResolvedValue(true);
   isFormKeyOriginOk.mockResolvedValue(true);
   takePublicToken.mockResolvedValue({ allowed: true, retryAfterSeconds: 0 });
@@ -170,11 +176,21 @@ describe("POST /api/leads : refus", () => {
     expect(captureLead).not.toHaveBeenCalled();
   });
 
-  it("quota « contacts » ou abonnement : 429 quota_exceeded", async () => {
+  it("quota « contacts » ou abonnement : le même 429 rate_limited que la limitation de débit (S-10 : l'état du quota n'est pas révélé)", async () => {
     captureLead.mockRejectedValue(new ServiceError("quota_exceeded"));
     const response = await POST(request(valid));
     expect(response.status).toBe(429);
-    expect(await code(response)).toBe("quota_exceeded");
+    expect(await code(response)).toBe("rate_limited");
+    expect(response.headers.get("retry-after")).toBe("3600");
+  });
+
+  it("plafond journalier par clé atteint : 429 rate_limited avec Retry-After, rien n'est écrit (S-10)", async () => {
+    takePublicToken.mockImplementation(async ({ scope }: { scope: string }) => (scope === "capture_key_day" ? { allowed: false, retryAfterSeconds: 77 } : { allowed: true, retryAfterSeconds: 0 }));
+    const response = await POST(request(valid));
+    expect(response.status).toBe(429);
+    expect(await code(response)).toBe("rate_limited");
+    expect(response.headers.get("retry-after")).toBe("77");
+    expect(captureLead).not.toHaveBeenCalled();
   });
 
   it("erreur inattendue : 500 internal_error normalisée, sans détail", async () => {
@@ -242,5 +258,72 @@ describe("OPTIONS /api/leads : préflight CORS", () => {
     expect(down.status).toBe(503);
     expect(down.headers.get("access-control-allow-origin")).toBeNull();
     expect(isOriginAllowed).not.toHaveBeenCalled();
+  });
+});
+
+describe("POST /api/leads : défi Turnstile (S-10, ADR 019)", () => {
+  const code = async (response: Response) => ((await response.json()) as { code: string }).code;
+  const enable = (enforce: boolean) => {
+    serverEnv.TURNSTILE_SECRET_KEY = "secret-de-test-turnstile";
+    serverEnv.TURNSTILE_ENFORCE = enforce;
+  };
+
+  it("sans clé secrète : aucune vérification, la soumission passe", async () => {
+    const response = await POST(request({ ...valid, turnstile_token: "tok" }));
+    expect(response.status).toBe(202);
+    expect(verifyTurnstile).not.toHaveBeenCalled();
+  });
+
+  it("exigé et jeton valide : vérifié avec l'adresse et l'origine de la clé, soumission acceptée ; le jeton n'est jamais transmis à la base", async () => {
+    enable(true);
+    const response = await POST(request({ ...valid, turnstile_token: "tok-valide" }));
+    expect(response.status).toBe(202);
+    expect(verifyTurnstile).toHaveBeenCalledWith(expect.objectContaining({ secret: "secret-de-test-turnstile", token: "tok-valide", ip: "203.0.113.7", origin: ORIGIN }));
+    expect(captureLead).toHaveBeenCalledTimes(1);
+  });
+
+  it("exigé et jeton absent : 403 forbidden, rien n'est écrit, Cloudflare n'est pas appelé", async () => {
+    enable(true);
+    const response = await POST(request(valid));
+    expect(response.status).toBe(403);
+    expect(await code(response)).toBe("forbidden");
+    expect(verifyTurnstile).not.toHaveBeenCalled();
+    expect(captureLead).not.toHaveBeenCalled();
+  });
+
+  it("jeton refusé : 403 forbidden (exigé ou non), rien n'est écrit", async () => {
+    verifyTurnstile.mockResolvedValue("failed");
+    for (const enforce of [true, false]) {
+      enable(enforce);
+      const response = await POST(request({ ...valid, turnstile_token: "tok-faux" }));
+      expect(response.status).toBe(403);
+      expect(await code(response)).toBe("forbidden");
+    }
+    expect(captureLead).not.toHaveBeenCalled();
+  });
+
+  it("non exigé et jeton absent : la soumission passe (déploiement progressif)", async () => {
+    enable(false);
+    const response = await POST(request(valid));
+    expect(response.status).toBe(202);
+    expect(verifyTurnstile).not.toHaveBeenCalled();
+  });
+
+  it("Cloudflare injoignable : échec fermé (503) si exigé, soumission acceptée sinon", async () => {
+    verifyTurnstile.mockResolvedValue("unavailable");
+    enable(true);
+    const closed = await POST(request({ ...valid, turnstile_token: "tok" }));
+    expect(closed.status).toBe(503);
+    expect(captureLead).not.toHaveBeenCalled();
+    enable(false);
+    const open = await POST(request({ ...valid, turnstile_token: "tok" }));
+    expect(open.status).toBe(202);
+  });
+
+  it("champ piège rempli : même réponse, Cloudflare n'est pas appelé", async () => {
+    enable(true);
+    const response = await POST(request({ ...valid, website: "http://spam.example", turnstile_token: "tok" }));
+    expect(response.status).toBe(202);
+    expect(verifyTurnstile).not.toHaveBeenCalled();
   });
 });

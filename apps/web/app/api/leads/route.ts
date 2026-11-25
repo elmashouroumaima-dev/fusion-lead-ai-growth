@@ -3,6 +3,8 @@ import { captureLead, clientIp, hashFormKey, ipBucketKey, isFormKeyOriginOk, isO
 import { errorResponse, ServiceError } from "../../../lib/service/errors";
 import { logger } from "../../../lib/service/logger";
 import { takePublicToken } from "../../../lib/service/rate-limit";
+import { getServerEnv } from "../../../lib/env/server";
+import { verifyTurnstile } from "../../../lib/service/turnstile";
 import { REQUEST_ID_HEADER, resolveRequestIds } from "../../../lib/service/request-id";
 import { runWithRequestContext } from "../../../lib/service/request-context";
 import { readJsonBody } from "../../../lib/service/with-service";
@@ -21,11 +23,32 @@ export const dynamic = "force-dynamic";
  *  - Réponse IDENTIQUE pour un nouveau contact et un doublon (`202 { status: "received" }`), sans identifiant : la route ne
  *    révèle jamais si une adresse est déjà dans le CRM. Champ piège rempli : même réponse, rien n'est écrit.
  *  - Clé invalide, inactive, origine refusée, projet archivé : un seul refus (403 `forbidden`), sans indication de la cause.
- *  - Quota « contacts » ou abonnement : 429 `quota_exceeded` ; limitation de débit : 429 `rate_limited` + `Retry-After`.
+ *  - Quota « contacts » ou abonnement, ou limitation de débit (adresse, clé, plafond journalier par clé) : un seul 429 `rate_limited` + `Retry-After`
+ *    (S-10 : l'état du quota n'est pas révélé). Défi Cloudflare Turnstile : voir `checkTurnstile` (ADR 019).
  *  - Aucune donnée personnelle dans les journaux. Pas de cookie : CORS sans identifiants, uniquement pour une origine autorisée.
  *  - Pas d'Idempotency-Key (formulaire public) : le modèle de données dédoublonne (un contact, un lead ouvert par projet).
  */
 const received = { status: "received" } as const;
+const QUOTA_RETRY_SECONDS = 3600;
+
+/**
+ * Défi Cloudflare Turnstile (S-10, ADR 019). Sans clé secrète configurée : non vérifié. Jeton absent : refusé seulement si le défi est exigé
+ * (`TURNSTILE_ENFORCE`). Jeton présent : vérifié ; refusé = 403 `forbidden` (un seul refus, sans cause) ; Cloudflare injoignable = 503 si le défi est
+ * exigé (échec fermé), sinon la soumission continue.
+ */
+async function checkTurnstile(input: { token: string | null; ip: string | null; origin: string }): Promise<void> {
+  const env = getServerEnv();
+  const secret = env.TURNSTILE_SECRET_KEY;
+  if (secret === undefined) return;
+  if (input.token === null) {
+    if (env.TURNSTILE_ENFORCE) throw new ServiceError("forbidden");
+    return;
+  }
+  const outcome = await verifyTurnstile({ secret, token: input.token, ip: input.ip, origin: input.origin });
+  if (outcome === "ok") return;
+  if (outcome === "failed") throw new ServiceError("forbidden");
+  if (env.TURNSTILE_ENFORCE) throw new ServiceError("service_unavailable");
+}
 
 const corsHeaders = (origin: string): Record<string, string> => ({ "access-control-allow-origin": origin, vary: "Origin" });
 
@@ -75,6 +98,8 @@ export async function POST(request: Request): Promise<Response> {
       cors = corsHeaders(origin);
       const byKey = await takePublicToken({ scope: "capture_key", bucketKey: keyHash.slice(0, 32) });
       if (!byKey.allowed) throw new ServiceError("rate_limited", { retryAfterSeconds: byKey.retryAfterSeconds });
+      const byDay = await takePublicToken({ scope: "capture_key_day", bucketKey: keyHash.slice(0, 32) });
+      if (!byDay.allowed) throw new ServiceError("rate_limited", { retryAfterSeconds: byDay.retryAfterSeconds });
 
       const parsed = capturePayloadSchema.safeParse(await readJsonBody(request, CAPTURE_BODY_MAX_BYTES));
       if (!parsed.success) throw new ServiceError("validation_failed");
@@ -83,7 +108,16 @@ export async function POST(request: Request): Promise<Response> {
         return Response.json(received, { status: 202, headers: { ...cors, [REQUEST_ID_HEADER]: requestId, "cache-control": "no-store" } });
       }
 
-      const result = await captureLead({ keyHash, origin, ip, payload: parsed.data });
+      await checkTurnstile({ token: parsed.data.turnstile_token, ip, origin });
+
+      let result;
+      try {
+        result = await captureLead({ keyHash, origin, ip, payload: parsed.data });
+      } catch (error) {
+        // Quota « contacts » ou abonnement : même 429 que la limitation de débit (S-10), pour ne pas révéler l'état du quota à un visiteur anonyme.
+        if (error instanceof ServiceError && error.code === "quota_exceeded") throw new ServiceError("rate_limited", { retryAfterSeconds: QUOTA_RETRY_SECONDS });
+        throw error;
+      }
       logger.info("capture.accepted", {
         request_id: requestId,
         ...(clientRequestId ? { client_request_id: clientRequestId } : {}),

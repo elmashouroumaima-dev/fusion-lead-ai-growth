@@ -25,7 +25,7 @@ describe("capturePayloadSchema", () => {
   it("normalise e-mail et téléphone (marocain et saoudien), conserve l'e-mail saisi", () => {
     const parsed = capturePayloadSchema.safeParse({ name: "Nadia", email: " Nadia@Exemple.MA ", phone: "0612345678", default_country: "MA", language: "fr", country: "MA" });
     expect(parsed.success && parsed.data).toMatchObject({
-      honeypot: false, name: "Nadia", email_raw: "Nadia@Exemple.MA", email_normalized: "nadia@exemple.ma", phone_e164: "+212612345678", language: "fr", country: "MA", utm: {}, consent: null,
+      honeypot: false, turnstile_token: null, name: "Nadia", email_raw: "Nadia@Exemple.MA", email_normalized: "nadia@exemple.ma", phone_e164: "+212612345678", language: "fr", country: "MA", utm: {}, consent: null,
     });
     const saudi = capturePayloadSchema.safeParse({ phone: "050 123 4567", country: "SA" });
     expect(saudi.success && saudi.data.phone_e164).toBe("+966501234567");

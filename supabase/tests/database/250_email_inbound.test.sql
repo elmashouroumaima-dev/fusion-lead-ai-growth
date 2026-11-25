@@ -101,7 +101,7 @@ select ok(has_function_privilege('service_role', 'public.email_inbound_apply(uui
   and not has_function_privilege('authenticated', 'public.email_inbound_apply(uuid, uuid, text, text[], text, text, text, timestamptz, boolean, boolean)', 'execute'), 'email_inbound_apply : service_role seulement');
 select ok(has_function_privilege('service_role', 'public.get_integration_webhook_secret(uuid, uuid)', 'execute') and not has_function_privilege('authenticated', 'public.get_integration_webhook_secret(uuid, uuid)', 'execute'),
   'get_integration_webhook_secret : service_role seulement');
-select ok(has_function_privilege('authenticated', 'public.set_integration_webhook_secret(uuid, uuid, uuid, text, text, integer)', 'execute') and not has_function_privilege('service_role', 'public.set_integration_webhook_secret(uuid, uuid, uuid, text, text, integer)', 'execute'),
+select ok(has_function_privilege('authenticated', 'public.set_integration_webhook_secret(uuid, uuid, uuid, text, text, integer, text)', 'execute') and not has_function_privilege('service_role', 'public.set_integration_webhook_secret(uuid, uuid, uuid, text, text, integer, text)', 'execute'),
   'set_integration_webhook_secret : utilisateurs seulement (owner et admin)');
 
 -- ---------------------------------------------------------------------------

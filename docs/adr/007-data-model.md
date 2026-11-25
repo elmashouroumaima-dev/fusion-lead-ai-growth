@@ -1,6 +1,6 @@
 # ADR 007 — Modèle de données réconcilié
 
-- **Statut :** Accepted (2026-11-09, décision de la responsable technique par délégation) **pour les entités mises en œuvre et auditées (Phases 1 et 2, C1 et C2)** ; les entités des Phases 3 à 5 (conversations, messages, modèles, campagnes, agents) restent **Proposées** et sont confirmées le jour de leur mise en œuvre
+- **Statut :** Accepted (2026-11-09, décision de la responsable technique par délégation) **pour les entités mises en œuvre et auditées (Phases 1 et 2, C1 et C2)** ; les entités des Phases 3 à 5 (conversations, messages, modèles, campagnes, agents) restent **Proposées** et sont confirmées le jour de leur mise en œuvre. **Mise à jour (2026-11-25, décision de la responsable technique par délégation) : les entités de la Phase 3 (conversations, messages, modèles, consentements, clés de formulaire, secrets, jobs d'envoi), mises en œuvre et revues (C3, revue de sécurité S-01 à S-12), sont confirmées, ainsi que l'amendement S-03 ci-dessous ; les entités des Phases 4 et 5 (campagnes, agents) restent Proposées.**
 - **Date :** 2026-11-10
 - **Section de spec :** §7, §7.1, §7.2, §9, §10, §11 ; analyses : `docs/analysis/gaps-and-questions.md`
 - **ERD :** `docs/architecture/erd.md`

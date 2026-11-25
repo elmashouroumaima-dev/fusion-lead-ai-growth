@@ -1,6 +1,6 @@
 # ADR 019 — Défi Cloudflare Turnstile sur la capture publique de leads
 
-- **Statut :** Proposed (approche choisie le 2026-11-25 sur décision de la responsable technique après la revue de sécurité S-10 ; fournisseur nouveau, à valider)
+- **Statut :** Accepted (2026-11-25, décision de la responsable technique par délégation) ; fournisseur nouveau (Cloudflare Turnstile) accepté. L'exigence du défi (`TURNSTILE_ENFORCE=true`) reste à activer plus tard : clé Turnstile de la plateforme et widget sur les sites clients d'abord
 - **Date :** 2026-11-25
 - **Section de spec :** §9.1 (capture), §13-3 ; ADR 007 (`form_keys`, J21), ADR 010 (adresse du visiteur) ; `docs/security/phase3-review-pack.md` (S-10)
 

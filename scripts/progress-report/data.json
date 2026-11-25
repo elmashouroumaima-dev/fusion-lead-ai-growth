@@ -759,6 +759,16 @@
       ],
       "proof": "28 nouveaux tests (trousseau, tâche, environnement, base) ; pgTAP 420 écrit mais pas encore exécuté localement (Docker arrêté) ; retour arrière fourni",
       "review": false
+    },
+    {
+      "day": "Décisions",
+      "title": "Décisions sur les ADR en attente",
+      "items": [
+        "Cinq décisions d'architecture sont enregistrées comme acceptées ou confirmées (boîte de réception, comptes par entreprise, Turnstile, entités de la Phase 3, arrêt d'urgence).",
+        "L'hébergement et le fournisseur IA sont reportés avec une date limite ; seul le fournisseur e-mail reste en attente, avec le choix du domaine."
+      ],
+      "proof": "documentation seulement : statuts des ADR et écart 5 du checkpoint C3 mis à jour",
+      "review": false
     }
   ],
   "capabilities": {

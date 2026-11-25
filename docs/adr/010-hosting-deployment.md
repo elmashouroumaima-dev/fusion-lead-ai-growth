@@ -1,6 +1,6 @@
 # ADR 010 — Hébergement et déploiement
 
-- **Statut :** Proposed — **hors stack imposée : accord explicite requis** ; **dépend de Q5** (marché, protection des données), sans réponse à ce jour
+- **Statut :** Proposed — **hors stack imposée : accord explicite requis** ; **dépend de Q5** (marché, protection des données), sans réponse à ce jour. **Reporté (2026-11-25, décision de la responsable technique par délégation) : à trancher avant le J58 (staging) ; ne bloque pas G3.**
 - **Date :** 2026-11-11
 - **Section de spec :** §6 (environnements dev/staging/production séparés), §11 (région des données, accords juridiques), §12 phase 5, §14 Q5
 

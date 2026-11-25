@@ -1,6 +1,6 @@
 # ADR 012 — Fournisseur IA et politique de données
 
-- **Statut :** Proposed — **hors stack imposée : accord explicite requis**
+- **Statut :** Proposed — **hors stack imposée : accord explicite requis**. **Reporté (2026-11-25, décision de la responsable technique par délégation) : fournisseur à choisir avant le J47 ; ne bloque pas G3 (Phase 5).**
 - **Date :** 2026-11-11
 - **Section de spec :** §9.5, §6 (adapter AI), §11, §13-8
 

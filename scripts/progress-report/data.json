@@ -10,7 +10,7 @@
     },
     {
       "label": "Base de données (pgTAP)",
-      "value": 3361,
+      "value": 3376,
       "note": "Tables, droits et règles de la base de données"
     },
     {
@@ -20,7 +20,7 @@
     },
     {
       "label": "Domaine (règles métier)",
-      "value": 663,
+      "value": 664,
       "note": "Règles métier pures (contrôles d'envoi, consentement...)"
     },
     {
@@ -30,7 +30,7 @@
     },
     {
       "label": "Worker et adaptateurs",
-      "value": 464,
+      "value": 475,
       "note": "Tâches de fond et adaptateurs de fournisseurs"
     },
     {
@@ -749,6 +749,16 @@
       ],
       "proof": "18 nouveaux tests (Turnstile, route, environnement), aucun échec ; décision à valider : ADR 019",
       "review": true
+    },
+    {
+      "day": "Sécurité",
+      "title": "S-11 : changer la clé maître ne casse plus les secrets",
+      "items": [
+        "On peut maintenant renouveler la clé de chiffrement des secrets sans rendre illisibles les jetons, secrets de webhook et mots de passe déjà enregistrés.",
+        "Une tâche automatique rechiffre les anciens secrets avec la nouvelle clé, sans jamais écraser un jeton modifié entre-temps ; la procédure complète est écrite dans le runbook."
+      ],
+      "proof": "28 nouveaux tests (trousseau, tâche, environnement, base) ; pgTAP 420 écrit mais pas encore exécuté localement (Docker arrêté) ; retour arrière fourni",
+      "review": false
     }
   ],
   "capabilities": {

@@ -1,6 +1,6 @@
 # ADR 013 — Actualisation de la boîte de réception : polling, sans Realtime
 
-- **Statut :** Proposed (2026-11-14, à valider par la responsable technique). Cité par le plan (J37) et le modèle de menaces (A5) mais jamais rédigé jusqu'ici.
+- **Statut :** Accepted (2026-11-25, décision de la responsable technique par délégation) ; proposé le 2026-11-14, mis en œuvre au J37. Cité par le plan (J37) et le modèle de menaces (A5) mais jamais rédigé jusqu'ici.
 - Date : 2026-11-14
 - Sources : spec §5.5 (boîte de réception), §11 (isolation) ; ADR 005 (multi-entreprise, décision 13), ADR 007 (E4 `conversations`, `messages`), ADR 014 (RBAC) ; modèle de menaces A5 (« fuite par … temps réel »).
 

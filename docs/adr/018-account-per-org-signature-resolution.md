@@ -1,6 +1,6 @@
 # ADR 018 — Comptes fournisseur par entreprise et résolution des webhooks par signature
 
-- **Statut :** Proposed (approche choisie le 2026-11-24 sur délégation de la responsable technique après la revue de sécurité S-02 ; à valider)
+- **Statut :** Accepted (2026-11-25, décision de la responsable technique par délégation) ; approche choisie le 2026-11-24 après la revue de sécurité S-02
 - **Date :** 2026-11-24
 - **Section de spec :** §8 (webhooks), §11 ; ADR 007 (E4), ADR 008, ADR 017 ; menaces C (webhooks) ; `docs/security/phase3-review-pack.md` (S-02)
 

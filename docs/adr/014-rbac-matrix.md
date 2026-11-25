@@ -1,6 +1,6 @@
 # ADR 014 — Matrice des rôles (RBAC)
 
-- **Statut :** Accepted (2026-11-09, décision de la responsable technique par délégation, après les audits de conformité C1 et C2)
+- **Statut :** Accepted (2026-11-09, décision de la responsable technique par délégation, après les audits de conformité C1 et C2) ; amendement S-05 (arrêt d'urgence) accepté le 2026-11-25, décision de la responsable technique par délégation
 - **Date :** 2026-11-10
 - **Section de spec :** §2 (rôles), §5.7, §10, §11, §13-2
 

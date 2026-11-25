@@ -1,4 +1,4 @@
-import { sealOrganizationSecret } from "@fusion-leap/adapters";
+import { fingerprintSecret, sealOrganizationSecret } from "@fusion-leap/adapters";
 import {
   channelRowSchema,
   integrationRowSchema,
@@ -70,8 +70,10 @@ export async function createProviderIntegration(
   const keyRing = getKeyRing();
   if (!keyRing) return fail("service_unavailable");
   let sealed;
+  let fingerprint: string;
   try {
     sealed = sealOrganizationSecret({ organizationId, plaintext: input.secret, keyRing });
+    fingerprint = fingerprintSecret({ plaintext: input.secret, keyRing });
   } catch {
     return fail("internal_error");
   }
@@ -86,6 +88,7 @@ export async function createProviderIntegration(
     p_key_version: sealed.keyVersion,
     // la passerelle choisie : WhatsApp `meta` ou `kapso`, e-mail `meta` (= Postmark, défaut) ou `resend` ; le schéma et la base refusent les autres combinaisons
     p_gateway: input.gateway ?? "meta",
+    p_fingerprint: fingerprint,
   });
   if (error) return fail(mapLeadsDbError(error));
   return typeof data === "string" ? { ok: true, value: { id: data } } : fail("internal_error");
@@ -100,8 +103,10 @@ export async function replaceIntegrationSecret(
   const keyRing = getKeyRing();
   if (!keyRing) return fail("service_unavailable");
   let sealed;
+  let fingerprint: string;
   try {
     sealed = sealOrganizationSecret({ organizationId, plaintext: input.secret, keyRing });
+    fingerprint = fingerprintSecret({ plaintext: input.secret, keyRing });
   } catch {
     return fail("internal_error");
   }
@@ -112,6 +117,7 @@ export async function replaceIntegrationSecret(
     p_ciphertext: sealed.ciphertext,
     p_nonce: sealed.nonce,
     p_key_version: sealed.keyVersion,
+    p_fingerprint: fingerprint,
   });
   return error ? fail(mapLeadsDbError(error)) : { ok: true, value: true };
 }
@@ -128,8 +134,10 @@ export async function replaceWebhookSecret(
   const keyRing = getKeyRing();
   if (!keyRing) return fail("service_unavailable");
   let sealed;
+  let fingerprint: string;
   try {
     sealed = sealOrganizationSecret({ organizationId, plaintext: input.secret, keyRing });
+    fingerprint = fingerprintSecret({ plaintext: input.secret, keyRing });
   } catch {
     return fail("internal_error");
   }
@@ -140,6 +148,7 @@ export async function replaceWebhookSecret(
     p_ciphertext: sealed.ciphertext,
     p_nonce: sealed.nonce,
     p_key_version: sealed.keyVersion,
+    p_fingerprint: fingerprint,
   });
   return error ? fail(mapLeadsDbError(error)) : { ok: true, value: true };
 }

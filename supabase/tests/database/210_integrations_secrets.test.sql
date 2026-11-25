@@ -57,8 +57,8 @@ select ok(not has_column_privilege('anon', 'public.integrations', 'id', 'select'
 select ok(not has_table_privilege('authenticated', 'private.secrets', 'select'), 'authenticated n''a aucun droit sur private.secrets');
 select ok(not has_table_privilege('service_role', 'private.secrets', 'select'), 'service_role n''a aucun droit direct sur private.secrets');
 select ok(not has_table_privilege('authenticated', 'public.channels', 'insert') and not has_table_privilege('service_role', 'public.channels', 'insert'), 'aucune écriture directe sur channels');
-select ok(has_function_privilege('authenticated', 'public.create_provider_integration(uuid,text,text,text[],uuid,text,text,integer,text)', 'execute'), 'authenticated exécute create_provider_integration');
-select ok(not has_function_privilege('anon', 'public.create_provider_integration(uuid,text,text,text[],uuid,text,text,integer,text)', 'execute'), 'anon n''exécute pas create_provider_integration');
+select ok(has_function_privilege('authenticated', 'public.create_provider_integration(uuid,text,text,text[],uuid,text,text,integer,text,text)', 'execute'), 'authenticated exécute create_provider_integration');
+select ok(not has_function_privilege('anon', 'public.create_provider_integration(uuid,text,text,text[],uuid,text,text,integer,text,text)', 'execute'), 'anon n''exécute pas create_provider_integration');
 select ok(has_function_privilege('service_role', 'public.get_integration_secret(uuid,uuid)', 'execute'), 'service_role exécute get_integration_secret');
 select ok(not has_function_privilege('authenticated', 'public.get_integration_secret(uuid,uuid)', 'execute'), 'authenticated n''exécute PAS get_integration_secret');
 select ok(not has_function_privilege('anon', 'public.get_integration_secret(uuid,uuid)', 'execute'), 'anon n''exécute pas get_integration_secret');

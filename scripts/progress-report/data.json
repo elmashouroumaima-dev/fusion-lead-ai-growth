@@ -5,12 +5,12 @@
   "tests": [
     {
       "label": "Web (application)",
-      "value": 2795,
+      "value": 2796,
       "note": "Écrans, routes HTTP et services de l'application"
     },
     {
       "label": "Base de données (pgTAP)",
-      "value": 3353,
+      "value": 3361,
       "note": "Tables, droits et règles de la base de données"
     },
     {
@@ -30,7 +30,7 @@
     },
     {
       "label": "Worker et adaptateurs",
-      "value": 461,
+      "value": 464,
       "note": "Tâches de fond et adaptateurs de fournisseurs"
     },
     {
@@ -728,6 +728,16 @@
         "Un lot d'import abandonné au stade « envoyé » est annulé au bout de 24 heures : il ne bloque plus les imports de l'entreprise."
       ],
       "proof": "12 tests de base (pgTAP 400), 6 tests du worker ; pgTAP 180 et 900 verts ; retour arrière fourni",
+      "review": false
+    },
+    {
+      "day": "Sécurité",
+      "title": "S-12 : le secret de webhook est vraiment distinct du jeton",
+      "items": [
+        "La règle « le secret de webhook ne doit pas être le jeton d'envoi » est désormais garantie par la base de données elle-même, même si deux demandes arrivent en même temps.",
+        "La base ne voit jamais les secrets : elle compare seulement des empreintes non réversibles calculées par le serveur."
+      ],
+      "proof": "8 tests de base (pgTAP 410), 3 tests d'empreinte ; pgTAP 210 et 250 verts ; retour arrière fourni",
       "review": false
     }
   ],

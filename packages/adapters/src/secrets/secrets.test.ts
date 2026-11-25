@@ -1,10 +1,11 @@
-import { randomBytes } from "node:crypto";
+import { createHmac, randomBytes } from "node:crypto";
 import { describe, expect, it } from "vitest";
 import {
   SecretCryptoError,
   createKeyRing,
   decryptSecret,
   encryptSecret,
+  fingerprintSecret,
   organizationSecretAad,
   parseMasterKey,
   platformSecretAad,
@@ -25,6 +26,26 @@ describe("parseMasterKey / createKeyRing", () => {
   });
   it("le trousseau doit contenir la version courante", () => {
     expect(() => createKeyRing(2, { 1: key() })).toThrow(SecretCryptoError);
+  });
+});
+
+describe("fingerprintSecret (S-12)", () => {
+  it("64 caractères hexadécimaux, stable pour une même clé, sans rapport avec le texte clair", () => {
+    const r = ring();
+    const a = fingerprintSecret({ plaintext: "whsec_abcdef", keyRing: r });
+    expect(a).toMatch(/^[0-9a-f]{64}$/);
+    expect(fingerprintSecret({ plaintext: "whsec_abcdef", keyRing: r })).toBe(a);
+    expect(a).not.toContain("abcdef");
+  });
+  it("deux secrets différents ont des empreintes différentes, deux clés maîtres aussi", () => {
+    const r = ring();
+    expect(fingerprintSecret({ plaintext: "un", keyRing: r })).not.toBe(fingerprintSecret({ plaintext: "deux", keyRing: r }));
+    expect(fingerprintSecret({ plaintext: "un", keyRing: r })).not.toBe(fingerprintSecret({ plaintext: "un", keyRing: ring() }));
+  });
+  it("l'empreinte n'est pas le HMAC brut de la clé maître (clé dérivée)", () => {
+    const k = key();
+    const r = createKeyRing(1, { 1: k });
+    expect(fingerprintSecret({ plaintext: "x", keyRing: r })).not.toBe(createHmac("sha256", Buffer.from(k, "base64")).update("x").digest("hex"));
   });
 });
 

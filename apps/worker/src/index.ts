@@ -1,4 +1,4 @@
-import { createKapsoSender, createEmailGatewayProvider, createKeyRing, createPostmarkProvider, createResendProvider, createResendReceiver, createWhatsAppGatewaySender, createWhatsAppSender } from "@fusion-leap/adapters";
+import { buildKeyRing, createKapsoSender, createEmailGatewayProvider, createPostmarkProvider, createResendProvider, createResendReceiver, createWhatsAppGatewaySender, createWhatsAppSender } from "@fusion-leap/adapters";
 import { EnvValidationError } from "@fusion-leap/domain";
 import { hostname } from "node:os";
 import { randomBytes } from "node:crypto";
@@ -14,6 +14,7 @@ import { createSupabaseWebhookGateway, type WebhookProcessors } from "./webhooks
 import { createDefaultRegistry } from "./handlers";
 import { WORKER_NAME } from "./info";
 import { Runner, type WorkerLogger } from "./runner";
+import { createSupabaseSecretsReencryptGateway, startSecretsReencrypt } from "./secrets-reencrypt";
 import { installShutdown } from "./shutdown";
 import { createSupabaseJobStore } from "./store";
 
@@ -22,7 +23,7 @@ import { createSupabaseJobStore } from "./store";
 function unsubscribeKeyRing(env: ReturnType<typeof loadWorkerEnv>) {
   if (!env.SECRETS_MASTER_KEY) return null;
   try {
-    return createKeyRing(env.SECRETS_KEY_VERSION, { [env.SECRETS_KEY_VERSION]: env.SECRETS_MASTER_KEY });
+    return buildKeyRing({ current: env.SECRETS_KEY_VERSION, masterKey: env.SECRETS_MASTER_KEY, previousKeys: env.SECRETS_PREVIOUS_KEYS });
   } catch {
     return null;
   }
@@ -50,6 +51,9 @@ try {
   runner.start();
   // purge des fichiers d'import (S-09) : au démarrage puis toutes les 15 minutes
   startImportPurge(createSupabaseImportPurgeGateway(env), logger);
+  // rechiffrement des secrets après une rotation de la clé maître (S-11) : seulement si la clé maître est configurée
+  const reencryptKeyRing = unsubscribeKeyRing(env);
+  if (reencryptKeyRing) startSecretsReencrypt(createSupabaseSecretsReencryptGateway(env), reencryptKeyRing, logger);
 } catch (error) {
   if (error instanceof EnvValidationError) {
     console.error(`[${WORKER_NAME}] démarrage refusé.\n${error.message}`);

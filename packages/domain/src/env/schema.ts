@@ -66,6 +66,28 @@ export const serverEnvSchema = z
   /** Version de la clé maître courante (rotation, ADR 004). */
   SECRETS_KEY_VERSION: z.coerce.number().int().min(1).max(1000).default(1),
   /**
+   * Anciennes clés maîtres (S-11) : `version:base64,version:base64` (32 octets chacune). Elles servent seulement à DÉCHIFFRER les secrets pas encore
+   * rechiffrés ; le web et le worker doivent recevoir la même valeur. À retirer quand le job de rechiffrement n'a plus rien à faire. Chaîne vide = aucune.
+   */
+  SECRETS_PREVIOUS_KEYS: z.preprocess(
+    (value) => (value === "" ? undefined : value),
+    z
+      .string()
+      .max(4096)
+      .refine(
+        (list) =>
+          list.split(",").every((entry) => {
+            const match = /^([0-9]{1,4}):([A-Za-z0-9+/]+={0,2})$/.exec(entry.trim());
+            if (!match) return false;
+            const version = Number(match[1]);
+            const key = Buffer.from(match[2] as string, "base64");
+            return version >= 1 && version <= 1000 && key.length === 32 && new Set(key).size >= 16;
+          }) && new Set(list.split(",").map((entry) => Number(entry.trim().split(":")[0]))).size === list.split(",").length,
+        { message: "version:base64 (32 octets, versions 1 à 1000 distinctes) requis" },
+      )
+      .optional(),
+  ),
+  /**
    * Nombre de reverse proxys de confiance devant l'application (ADR 010) : l'adresse du visiteur est l'élément `x-forwarded-for`
    * situé à ce rang en partant de la DROITE (chaque proxy y AJOUTE l'adresse qu'il voit). 0 = aucun proxy de confiance :
    * l'en-tête est ignoré. Chaîne vide = valeur par défaut (1).
@@ -82,6 +104,9 @@ export const serverEnvSchema = z
   AI_ALLOW_REAL_DATA: z.stringbool().default(false),
   })
   .superRefine((env, ctx) => {
+    if (env.SECRETS_PREVIOUS_KEYS?.split(",").some((entry) => Number(entry.trim().split(":")[0]) === env.SECRETS_KEY_VERSION)) {
+      ctx.addIssue({ code: "custom", path: ["SECRETS_PREVIOUS_KEYS"], message: "ne doit pas contenir la version courante" });
+    }
     if (env.TURNSTILE_ENFORCE && env.TURNSTILE_SECRET_KEY === undefined) ctx.addIssue({ code: "custom", path: ["TURNSTILE_SECRET_KEY"], message: "requise avec TURNSTILE_ENFORCE" });
     if (env.APP_ENV !== "staging" && env.APP_ENV !== "production") return;
     if (env.SITE_URL === undefined) {

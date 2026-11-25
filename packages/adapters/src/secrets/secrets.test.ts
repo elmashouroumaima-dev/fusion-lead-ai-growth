@@ -2,6 +2,7 @@ import { createHmac, randomBytes } from "node:crypto";
 import { describe, expect, it } from "vitest";
 import {
   SecretCryptoError,
+  buildKeyRing,
   createKeyRing,
   decryptSecret,
   encryptSecret,
@@ -26,6 +27,34 @@ describe("parseMasterKey / createKeyRing", () => {
   });
   it("le trousseau doit contenir la version courante", () => {
     expect(() => createKeyRing(2, { 1: key() })).toThrow(SecretCryptoError);
+  });
+});
+
+describe("buildKeyRing (S-11)", () => {
+  const aad = platformSecretAad("smtp", ID);
+  it("sans anciennes clés : un trousseau à une clé (comportement d'avant)", () => {
+    const r = buildKeyRing({ current: 2, masterKey: key() });
+    expect(r.current).toBe(2);
+    expect([...r.keys.keys()]).toEqual([2]);
+    expect(buildKeyRing({ current: 2, masterKey: key(), previousKeys: "  " }).keys.size).toBe(1);
+  });
+  it("la clé courante chiffre, une ancienne clé listée déchiffre encore (rotation sans perte)", () => {
+    const k1 = key();
+    const old = createKeyRing(1, { 1: k1 });
+    const sealed = encryptSecret({ plaintext: "jeton", keyRing: old, aad });
+    const next = buildKeyRing({ current: 2, masterKey: key(), previousKeys: `1:${k1}` });
+    expect(decryptSecret({ secret: sealed, keyRing: next, aad })).toBe("jeton");
+    expect(encryptSecret({ plaintext: "x", keyRing: next, aad }).keyVersion).toBe(2);
+    expect(() => decryptSecret({ secret: sealed, keyRing: buildKeyRing({ current: 2, masterKey: key() }), aad })).toThrow(SecretCryptoError);
+  });
+  it("plusieurs anciennes clés", () => {
+    const r = buildKeyRing({ current: 3, masterKey: key(), previousKeys: `1:${key()}, 2:${key()}` });
+    expect([...r.keys.keys()].sort()).toEqual([1, 2, 3]);
+  });
+  it("refuse : entrée mal formée, version hors plage, doublon, version courante, clé de mauvaise taille", () => {
+    for (const bad of ["pas-une-liste", `0:${key()}`, `1001:${key()}`, `2:${key()}`, `1:${key()},1:${key()}`, `1:${randomBytes(16).toString("base64")}`, `1:${key()},`, `x:${key()}`]) {
+      expect(() => buildKeyRing({ current: 2, masterKey: key(), previousKeys: bad }), bad).toThrow(SecretCryptoError);
+    }
   });
 });
 

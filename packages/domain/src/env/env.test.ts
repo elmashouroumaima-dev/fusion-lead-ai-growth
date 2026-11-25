@@ -34,6 +34,17 @@ describe("parseServerEnv", () => {
     expect(env.RESEND_API_KEY).toBeUndefined();
   });
 
+  it("SECRETS_PREVIOUS_KEYS (S-11) : absente par défaut, liste version:base64 validée, jamais la version courante", () => {
+    const k = (n: number) => Buffer.from(Array.from({ length: 32 }, (_, i) => (i * 7 + n) % 251)).toString("base64");
+    expect(parseServerEnv(validServer).SECRETS_PREVIOUS_KEYS).toBeUndefined();
+    expect(parseServerEnv({ ...validServer, SECRETS_PREVIOUS_KEYS: "" }).SECRETS_PREVIOUS_KEYS).toBeUndefined();
+    expect(parseServerEnv({ ...validServer, SECRETS_KEY_VERSION: "3", SECRETS_PREVIOUS_KEYS: `1:${k(1)},2:${k(2)}` }).SECRETS_PREVIOUS_KEYS).toBe(`1:${k(1)},2:${k(2)}`);
+    for (const bad of ["abc", `0:${k(1)}`, `1:${k(1)},1:${k(2)}`, `1:${Buffer.alloc(32, 7).toString("base64")}`, `1:${Buffer.alloc(16, 1).toString("base64")}`, `1:${k(1)},`]) {
+      expect(() => parseServerEnv({ ...validServer, SECRETS_KEY_VERSION: "3", SECRETS_PREVIOUS_KEYS: bad }), bad).toThrow();
+    }
+    expect(() => parseServerEnv({ ...validServer, SECRETS_KEY_VERSION: "2", SECRETS_PREVIOUS_KEYS: `2:${k(1)}` })).toThrow();
+  });
+
   it("Turnstile (S-10) : désactivé et sans clé par défaut ; l'exiger demande la clé secrète ; chaîne vide = absente", () => {
     const env = parseServerEnv(validServer);
     expect(env.TURNSTILE_ENFORCE).toBe(false);

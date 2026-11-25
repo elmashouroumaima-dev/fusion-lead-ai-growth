@@ -71,10 +71,18 @@ export const serverEnvSchema = z
    * l'en-tête est ignoré. Chaîne vide = valeur par défaut (1).
    */
   TRUSTED_PROXY_HOPS: z.preprocess((value) => (value === "" ? undefined : value), z.coerce.number().int().min(0).max(5).default(1)),
+  /**
+   * Cloudflare Turnstile (ADR 019, S-10) : clé SECRÈTE de la plateforme, serveur uniquement (jamais NEXT_PUBLIC). Optionnelle ; chaîne vide = absente.
+   * Sans elle, le défi n'est pas vérifié.
+   */
+  TURNSTILE_SECRET_KEY: z.preprocess((value) => (value === "" ? undefined : value), z.string().min(8).max(200).regex(/^[!-~]+$/).optional()),
+  /** Exige un jeton Turnstile valide sur la capture publique (désactivé par défaut : déploiement progressif). Exige `TURNSTILE_SECRET_KEY`. */
+  TURNSTILE_ENFORCE: z.stringbool().default(false),
   /** ADR 012 : données réelles interdites aux modèles externes tant que non activé. */
   AI_ALLOW_REAL_DATA: z.stringbool().default(false),
   })
   .superRefine((env, ctx) => {
+    if (env.TURNSTILE_ENFORCE && env.TURNSTILE_SECRET_KEY === undefined) ctx.addIssue({ code: "custom", path: ["TURNSTILE_SECRET_KEY"], message: "requise avec TURNSTILE_ENFORCE" });
     if (env.APP_ENV !== "staging" && env.APP_ENV !== "production") return;
     if (env.SITE_URL === undefined) {
       ctx.addIssue({ code: "custom", path: ["SITE_URL"], message: "requise" });

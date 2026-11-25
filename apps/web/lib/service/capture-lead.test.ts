@@ -11,7 +11,7 @@ import { ServiceError } from "./errors";
 
 const KEY = `flk_${"a1".repeat(32)}`;
 const payload = (over: Partial<CapturePayload> = {}): CapturePayload => ({
-  honeypot: false, name: "Nadia", email_raw: "Nadia@Exemple.ma", email_normalized: "nadia@exemple.ma", phone_e164: "+212611111111", language: "fr", country: "MA",
+  honeypot: false, turnstile_token: null, name: "Nadia", email_raw: "Nadia@Exemple.ma", email_normalized: "nadia@exemple.ma", phone_e164: "+212611111111", language: "fr", country: "MA",
   utm: { utm_source: "newsletter" }, consent: null, ...over,
 });
 

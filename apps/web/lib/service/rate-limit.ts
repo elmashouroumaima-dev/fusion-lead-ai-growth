@@ -91,7 +91,8 @@ export async function takeToken({ organizationId, userId, scope }: TakeTokenInpu
  *  - `capture_ip`  : capacité 20, recharge 1/3 jeton/s (20 en rafale, puis 20 par minute) ;
  *  - `capture_preflight` : capacité 60, recharge 1 jeton/s (préflight CORS, par adresse) ;
  *  - `capture_key` : capacité 200, recharge 2 jetons/s (une clé de formulaire ne peut pas saturer la base) ; ce seau n'est ouvert
- *    que pour une clé qui EXISTE (aucune ligne pour une clé inventée).
+ *    que pour une clé qui EXISTE (aucune ligne pour une clé inventée) ;
+ *  - `capture_key_day` : capacité 1000, recharge 1000 par jour, par clé (S-10).
  * La clé de seau est opaque (empreinte, jamais d'adresse IP ni d'e-mail en clair). Défaillance du backend : FERMÉE (503).
  */
 export const PUBLIC_CAPTURE_PROVIDER = "public_capture";
@@ -100,6 +101,8 @@ export const PUBLIC_LIMITS = {
   /** Préflight CORS : un par envoi de formulaire, donc un seau à part (il ne consomme pas le budget des envois). */
   capture_preflight: { capacity: 60, refillPerSecond: 1 },
   capture_key: { capacity: 200, refillPerSecond: 2 },
+  /** Plafond JOURNALIER par clé de formulaire (S-10) : 1000 soumissions par jour ; une clé publique ne peut pas vider le quota de contacts de l'entreprise en une journée. */
+  capture_key_day: { capacity: 1000, refillPerSecond: 1000 / 86400 },
   /** Webhooks entrants (J29), par fournisseur et adresse source : les fournisseurs envoient en rafale depuis peu d'adresses. */
   webhook_ip: { capacity: 300, refillPerSecond: 10 },
   /** Désabonnement public (J33) : un jeton signé est exigé, la limite protège seulement la base ; les messageries envoient le un-clic depuis peu d'adresses. */

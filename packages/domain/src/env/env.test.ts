@@ -34,6 +34,17 @@ describe("parseServerEnv", () => {
     expect(env.RESEND_API_KEY).toBeUndefined();
   });
 
+  it("Turnstile (S-10) : désactivé et sans clé par défaut ; l'exiger demande la clé secrète ; chaîne vide = absente", () => {
+    const env = parseServerEnv(validServer);
+    expect(env.TURNSTILE_ENFORCE).toBe(false);
+    expect(env.TURNSTILE_SECRET_KEY).toBeUndefined();
+    expect(parseServerEnv({ ...validServer, TURNSTILE_SECRET_KEY: "" }).TURNSTILE_SECRET_KEY).toBeUndefined();
+    expect(() => parseServerEnv({ ...validServer, TURNSTILE_ENFORCE: "true" })).toThrow();
+    const ok = parseServerEnv({ ...validServer, TURNSTILE_ENFORCE: "true", TURNSTILE_SECRET_KEY: "1x0000000000000000000000000000000AA" });
+    expect(ok.TURNSTILE_ENFORCE).toBe(true);
+    expect(() => parseServerEnv({ ...validServer, TURNSTILE_SECRET_KEY: "court" })).toThrow();
+  });
+
   it("TRUSTED_PROXY_HOPS : 1 par défaut (chaîne vide comprise), 0 à 5 acceptés, le reste refusé", () => {
     expect(parseServerEnv(validServer).TRUSTED_PROXY_HOPS).toBe(1);
     expect(parseServerEnv({ ...validServer, TRUSTED_PROXY_HOPS: "" }).TRUSTED_PROXY_HOPS).toBe(1);

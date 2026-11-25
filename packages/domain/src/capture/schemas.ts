@@ -45,6 +45,8 @@ const bodySchema = z
     page_url: z.preprocess(blankToUndefined, httpsUrlSchema.optional()),
     /** Champ piège : invisible pour un humain ; rempli, la soumission est acceptée en apparence mais ignorée. */
     website: z.string().max(500).optional(),
+    /** Jeton du défi Cloudflare Turnstile (S-10, ADR 019) : vérifié par le serveur, jamais enregistré. */
+    turnstile_token: z.preprocess(blankToUndefined, z.string().min(1).max(2048).optional()),
   })
   .strict();
 
@@ -59,6 +61,8 @@ export type CaptureConsent = {
 export type CapturePayload = {
   /** Vrai si le champ piège est rempli (soumission à ignorer sans rien écrire). */
   honeypot: boolean;
+  /** Jeton Turnstile du visiteur (S-10) : sert à la vérification, n'est transmis à la base nulle part. */
+  turnstile_token: string | null;
   name: string | null;
   email_raw: string | null;
   email_normalized: string | null;
@@ -93,6 +97,7 @@ export const capturePayloadSchema = bodySchema.transform((value, ctx): CapturePa
   for (const [key, entry] of Object.entries(value.utm ?? {})) if (typeof entry === "string") utm[key] = entry;
   return {
     honeypot: value.website !== undefined && value.website.trim() !== "",
+    turnstile_token: value.turnstile_token ?? null,
     name: value.name ?? null,
     email_raw: emailRaw,
     email_normalized: emailNormalized,

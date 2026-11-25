@@ -42,6 +42,26 @@ export function createKeyRing(current: number, keys: Record<number, string>): Ke
   return { current, keys: map };
 }
 
+/**
+ * Trousseau depuis l'environnement (S-11) : la clé maître COURANTE (version `current`, celle qui chiffre) et les anciennes clés `SECRETS_PREVIOUS_KEYS`
+ * (`version:base64,version:base64`, qui ne servent qu'à déchiffrer). Versions entières de 1 à 1000, sans doublon, différentes de la version courante.
+ * Toute entrée invalide lève `SecretCryptoError` (aucun détail, jamais de clé dans le message).
+ */
+export function buildKeyRing(input: { current: number; masterKey: string; previousKeys?: string | undefined }): KeyRing {
+  const keys: Record<number, string> = { [input.current]: input.masterKey };
+  const list = (input.previousKeys ?? "").trim();
+  if (list !== "") {
+    for (const entry of list.split(",")) {
+      const match = /^([0-9]{1,4}):([A-Za-z0-9+/]+={0,2})$/.exec(entry.trim());
+      if (!match) throw new SecretCryptoError();
+      const version = Number(match[1]);
+      if (version < 1 || version > 1000 || version in keys) throw new SecretCryptoError();
+      keys[version] = match[2] as string;
+    }
+  }
+  return createKeyRing(input.current, keys);
+}
+
 /** AAD d'un secret de la plateforme : usage + identifiant de la ligne (`private.secrets.id`). */
 export const platformSecretAad = (purpose: string, secretId: string): string => `platform:${purpose}:${secretId}`;
 /** AAD d'un secret d'organisation (ADR 004) : `organization_id || secret_id`. */

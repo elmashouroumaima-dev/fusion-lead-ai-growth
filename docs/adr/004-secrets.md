@@ -38,6 +38,9 @@ Première utilisation de l'option B (chiffrement applicatif), avant le J28 :
 - Le mot de passe n'est jamais lisible par l'API : l'administrateur ne reçoit que `has_password` ; le chiffré n'est lu que par `service_role` (`get_smtp_delivery`) et déchiffré dans le serveur Next.js.
 - Reste : module `get / rotate / delete` générique pour les intégrations (J28), re-chiffrement lors d'une rotation de clé maître (tâche worker), runbooks `secret-rotation` et `restore`. L'ADR reste « Proposed » : à relire par la responsable technique.
 
+## Mise en œuvre S-11 (2026-11-25) — rotation de la clé maître
+- `SECRETS_PREVIOUS_KEYS` (`version:base64,...`) : anciennes clés qui déchiffrent ; `buildKeyRing` est le seul constructeur de trousseau (web et worker). Job de rechiffrement du worker (`apps/worker/src/secrets-reencrypt.ts`, 15 minutes) via `secrets_reencrypt_due` / `secret_reencrypted` (service_role, migration `20261226100000`), avec comparaison-échange (aucun écrasement d'une rotation concurrente) et recalcul de l'empreinte S-12. Procédure : `docs/runbooks/secret-rotation.md` §4.
+
 ## Mise en œuvre J28 (2026-11-09) — secrets d'intégration
 - `private.secrets` sert aussi aux secrets des intégrations (`purpose = 'integration'`, `organization_id` renseigné) ; une clé étrangère composite `(organization_id, secret_ref)` lie le secret à l'entreprise de son intégration ; AAD `org:<organization_id>:<secret_id>`.
 - Module `packages/adapters/src/secrets/store.ts` : `sealOrganizationSecret`, `openOrganizationSecret` et `createSecretStore` (`put`, `get`, `rotate`, `delete`) ; lecture côté serveur par `lib/service/integration-secrets.ts` (seul appelant de `get_integration_secret`, réservé à service_role).

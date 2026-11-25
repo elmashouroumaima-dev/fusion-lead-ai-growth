@@ -1,5 +1,5 @@
 import "server-only";
-import { createKeyRing, type KeyRing } from "@fusion-leap/adapters";
+import { buildKeyRing, type KeyRing } from "@fusion-leap/adapters";
 import { getServerEnv } from "../env/server";
 
 /**
@@ -10,7 +10,7 @@ export function getKeyRing(): KeyRing | null {
   try {
     const env = getServerEnv();
     if (!env.SECRETS_MASTER_KEY) return null;
-    return createKeyRing(env.SECRETS_KEY_VERSION, { [env.SECRETS_KEY_VERSION]: env.SECRETS_MASTER_KEY });
+    return buildKeyRing({ current: env.SECRETS_KEY_VERSION, masterKey: env.SECRETS_MASTER_KEY, previousKeys: env.SECRETS_PREVIOUS_KEYS });
   } catch {
     return null;
   }

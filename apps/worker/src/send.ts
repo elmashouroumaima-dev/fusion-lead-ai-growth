@@ -1,5 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
-import { createKeyRing, openOrganizationSecret } from "@fusion-leap/adapters";
+import { buildKeyRing, openOrganizationSecret } from "@fusion-leap/adapters";
 import { z } from "zod";
 
 /**
@@ -70,7 +70,7 @@ const claimSchema = z.discriminatedUnion("status", [
   }),
 ]);
 
-export type SendEnv = { SUPABASE_URL: string; SUPABASE_SECRET_KEY: string; SECRETS_MASTER_KEY?: string | undefined; SECRETS_KEY_VERSION?: number | undefined };
+export type SendEnv = { SUPABASE_URL: string; SUPABASE_SECRET_KEY: string; SECRETS_MASTER_KEY?: string | undefined; SECRETS_KEY_VERSION?: number | undefined; SECRETS_PREVIOUS_KEYS?: string | undefined };
 
 function adminClient(env: SendEnv) {
   return createClient(env.SUPABASE_URL, env.SUPABASE_SECRET_KEY, { auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false } });
@@ -129,7 +129,7 @@ export function createSupabaseSendGateway(env: SendEnv): SendGateway {
 export function createSupabaseSecretReader(env: SendEnv): SecretReader {
   const client = adminClient(env);
   const keyRing = env.SECRETS_MASTER_KEY
-    ? createKeyRing(env.SECRETS_KEY_VERSION ?? 1, { [env.SECRETS_KEY_VERSION ?? 1]: env.SECRETS_MASTER_KEY })
+    ? buildKeyRing({ current: env.SECRETS_KEY_VERSION ?? 1, masterKey: env.SECRETS_MASTER_KEY, previousKeys: env.SECRETS_PREVIOUS_KEYS })
     : null;
   return async (organizationId, integrationId) => {
     if (!keyRing) throw new Error("secrets_unavailable");

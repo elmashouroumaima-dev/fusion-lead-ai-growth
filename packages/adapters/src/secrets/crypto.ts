@@ -1,4 +1,4 @@
-import { createCipheriv, createDecipheriv, randomBytes } from "node:crypto";
+import { createCipheriv, createDecipheriv, createHmac, hkdfSync, randomBytes } from "node:crypto";
 
 /**
  * Chiffrement applicatif des secrets (ADR 004, option B) : AES-256-GCM, nonce unique de 96 bits par chiffrement,
@@ -46,6 +46,22 @@ export function createKeyRing(current: number, keys: Record<number, string>): Ke
 export const platformSecretAad = (purpose: string, secretId: string): string => `platform:${purpose}:${secretId}`;
 /** AAD d'un secret d'organisation (ADR 004) : `organization_id || secret_id`. */
 export const organizationSecretAad = (organizationId: string, secretId: string): string => `org:${organizationId}:${secretId}`;
+
+/**
+ * Empreinte d'un secret (S-12) : HMAC-SHA256 en hexadécimal (64 caractères) avec une clé dérivée (HKDF) de la clé maître courante, distincte de la clé de chiffrement.
+ * Sert à la base à refuser, de façon atomique, qu'un jeton d'envoi et un secret de webhook soient identiques sans jamais voir le secret. Non réversible.
+ * Après une rotation de la clé maître, les empreintes se recalculent à la prochaine écriture du secret (ou au rechiffrement, S-11).
+ */
+export function fingerprintSecret(input: { plaintext: string; keyRing: KeyRing }): string {
+  try {
+    const master = input.keyRing.keys.get(input.keyRing.current);
+    if (!master) throw new SecretCryptoError();
+    const key = Buffer.from(hkdfSync("sha256", master, Buffer.alloc(0), "fusion:secret-fingerprint:v1", KEY_BYTES));
+    return createHmac("sha256", key).update(input.plaintext, "utf8").digest("hex");
+  } catch {
+    throw new SecretCryptoError();
+  }
+}
 
 export function encryptSecret(input: { plaintext: string; keyRing: KeyRing; aad: string }): EncryptedSecret {
   try {
